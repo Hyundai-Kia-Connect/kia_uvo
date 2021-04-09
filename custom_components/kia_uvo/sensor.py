@@ -9,13 +9,19 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
+    _LOGGER.debug(f'Drv Distance 1 {vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"]}')
+
+    _LOGGER.debug(f'Drv Distance 2 {vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]}')
+
+    _LOGGER.debug(f'Drv Distance 2 {vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]}')
+
     sensor_configs = [
         ("odometer", "Odemeter", vehicle.vehicle_data["odometer"]["value"], "km", "mdi:speedometer"),
         ("evBatteryPercentage", "EV Battery Percentage", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryStatus"], "%", "mdi:battery"),
-        ("evDrivingDistance", "EV Driving Distance", vehicle.vehicle_data["vehicleStatus"]["drvDistance"][0]["evModeRange"]["value"], "km", "mdi:road-variant"),
-        ("fuelDrivingDistance", "Fuel Driving Distance", vehicle.vehicle_data["vehicleStatus"]["drvDistance"][0]["rangeByFuel"]["gasModeRange"]["value"], "km", "mdi:road-variant"),
-        ("totalDrivingDistance", "Total Driving Distance", vehicle.vehicle_data["vehicleStatus"]["drvDistance"][0]["totalAvailableRange"]["value"], "km", "mdi:road-variant"),
-        ("carBattery", "Car Battery", vehicle.vehicle_data["vehicleStatus"]["battery"]["batSoc"]["value"], "%", "mdi:car-battery")
+        ("evDrivingDistance", "EV Driving Distance", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["evModeRange"]["value"], "km", "mdi:road-variant"),
+        ("fuelDrivingDistance", "Fuel Driving Distance", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["gasModeRange"]["value"], "km", "mdi:road-variant"),
+        ("totalDrivingDistance", "Total Driving Distance", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["totalAvailableRange"]["value"], "km", "mdi:road-variant"),
+        ("carBattery", "Car Battery", vehicle.vehicle_data["vehicleStatus"]["battery"]["batSoc"], "%", "mdi:car-battery")
     ]
 
     sensors = [
@@ -53,7 +59,7 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} {self._name}'
+        return f'{self._vehicle._token.vehicle_name} {self._description}'
 
     @property
     def unique_id(self):
