@@ -10,4 +10,4 @@ It will not force update between 10PM to 6AM. I am trying to be cautios here.
 
 I have posted an example screenshot from my own car.
 
-![alt text](https://github.com/fuatakgun/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
+![Device Details](https://github.com/fuatakgun/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
