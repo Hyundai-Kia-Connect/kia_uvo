@@ -19,7 +19,7 @@ DATA_VEHICLE_INSTANCE = "vehicle"
 DATA_VEHICLE_LISTENER_SCHEDULE = "vehicle_listener_schedule"
 DATA_FORCED_VEHICLE_LISTENER_SCHEDULE = "forced_vehicle_listener_schedule"
 
-PLATFORMS = ["binary_sensor","device_tracker"]
+PLATFORMS = ["binary_sensor","device_tracker", "sensor"]
 TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)

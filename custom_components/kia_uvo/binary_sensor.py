@@ -1,7 +1,5 @@
 import logging
 
-from homeassistant.core import HomeAssistant
-
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
