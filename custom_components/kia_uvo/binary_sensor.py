@@ -9,10 +9,10 @@ _LOGGER = logging.getLogger(__name__)
 VEHICLE_DOORS = [
     ("hood", "Hood", "mdi:car", False),
     ("trunk", "Trunk", "mdi:car-back", False),
-    ("frontLeft", "Front Driver", "mdi:car-door", True),
-    ("frontRight", "Front Passenger", "mdi:car-door", True),
-    ("backLeft", "Rear Driver", "mdi:car-door", True),
-    ("backRight", "Rear Passenger", "mdi:car-door", True)
+    ("frontLeft", "Door - Front Left", "mdi:car-door", True),
+    ("frontRight", "Door - Front Right", "mdi:car-door", True),
+    ("backLeft", "Door - Rear Left", "mdi:car-door", True),
+    ("backRight", "Door - Rear Right", "mdi:car-door", True)
 ]
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
