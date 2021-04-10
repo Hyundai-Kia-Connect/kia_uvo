@@ -22,11 +22,11 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
 
     @property
     def latitude(self):
-        return self._vehicle.vehicle_data["vehicleLocation"]["coord"]["lat"]
+        return self.vehicle.vehicle_data["vehicleLocation"]["coord"]["lat"]
 
     @property
     def longitude(self):
-        return self._vehicle.vehicle_data["vehicleLocation"]["coord"]["lon"]
+        return self.vehicle.vehicle_data["vehicleLocation"]["coord"]["lon"]
 
     @property
     def icon(self):
@@ -38,15 +38,8 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} Location'
+        return f'{self.vehicle.token.vehicle_name} Location'
 
     @property
     def unique_id(self):
-        return f'kia_uvo-location-{self._vehicle._token.vehicle_id}'
-
-    @property
-    def state_attributes(self):
-        attr = {}
-        attr.update(super().state_attributes)
-        attr["last_updated"] = self._vehicle.last_updated
-        return attr
+        return f'kia_uvo-location-{self.vehicle.token.vehicle_id}'

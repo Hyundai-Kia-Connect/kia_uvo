@@ -19,7 +19,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     sensors = [
-        DoorSensor(hass, config_entry, vehicle, door, name, icon, is_normal_door) for door, name, icon, is_normal_door in VEHICLE_DOORS
+        DoorSensor(hass, config_entry, vehicle, door_id, name, icon, is_normal_door) for door_id, name, icon, is_normal_door in VEHICLE_DOORS
     ]
 
     async_add_entities(sensors, True)
@@ -28,37 +28,32 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
 
 class DoorSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle, door, name, icon, is_normal_door):
+    def __init__(self, hass, config_entry, vehicle: Vehicle, door_id, name, icon, is_normal_door):
         super().__init__(hass, config_entry, vehicle)
-        self._door = door
+        self._door_id = door_id
         self._name = name
         self._icon = icon
         self._is_normal_door = is_normal_door
 
     @property
     def icon(self):
-        return "mdi:door-open" if self.is_on else "mdi:door-closed"
+        if self._is_normal_door:
+            return "mdi:door-open" if self.is_on else "mdi:door-closed"
         return self._icon
 
     @property
     def is_on(self) -> bool:
         if self._is_normal_door:
-            return True if self._vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door] == 1 else False
-        doorName = f'{self._door}Open'
-        return True if self._vehicle.vehicle_data["vehicleStatus"][doorName] else False
+            return True if self.vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door_id] == 1 else False
+        doorName = f'{self._door_id}Open'
+        return True if self.vehicle.vehicle_data["vehicleStatus"][doorName] else False
 
     @property
     def state(self):
         if self._is_normal_door:
-            return "on" if self._vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door] == 1 else "off"
-        doorName = f'{self._door}Open'
-        return "on" if self._vehicle.vehicle_data["vehicleStatus"][doorName] else "off"
-
-    @property
-    def state_attributes(self):
-        return {
-            "last_updated": self._vehicle.last_updated
-        }
+            return "on" if self.vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door_id] == 1 else "off"
+        doorName = f'{self._door_id}Open'
+        return "on" if self.vehicle.vehicle_data["vehicleStatus"][doorName] else "off"
 
     @property
     def device_class(self):
@@ -66,11 +61,11 @@ class DoorSensor(KiaUvoEntity):
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} {self._name}'
+        return f'{self.vehicle.token.vehicle_name} {self._name}'
 
     @property
     def unique_id(self):
-        return f'kia_uvo-{self._door}-{self._vehicle._token.vehicle_id}'
+        return f'kia_uvo-{self._door_id}-{self.vehicle.token.vehicle_id}'
 
 class LockSensor(KiaUvoEntity):
 
@@ -83,17 +78,11 @@ class LockSensor(KiaUvoEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._vehicle.vehicle_data["vehicleStatus"]["doorLock"]
+        return self.vehicle.vehicle_data["vehicleStatus"]["doorLock"]
 
     @property
     def state(self):
-        return "off" if self._vehicle.vehicle_data["vehicleStatus"]["doorLock"] else "on"
-
-    @property
-    def state_attributes(self):
-        return {
-            "last_updated": self._vehicle.last_updated
-        }
+        return "off" if self.vehicle.vehicle_data["vehicleStatus"]["doorLock"] else "on"
 
     @property
     def device_class(self):
@@ -101,11 +90,11 @@ class LockSensor(KiaUvoEntity):
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} Door Lock'
+        return f'{self.vehicle.token.vehicle_name} Door Lock'
 
     @property
     def unique_id(self):
-        return f'kia_uvo-door-lock-{self._vehicle._token.vehicle_id}'
+        return f'kia_uvo-door-lock-{self.vehicle.token.vehicle_id}'
 
 class EngineSensor(KiaUvoEntity):
 
@@ -118,17 +107,11 @@ class EngineSensor(KiaUvoEntity):
 
     @property
     def is_on(self) -> bool:
-        return self._vehicle.vehicle_data["vehicleStatus"]["engine"]
+        return self.vehicle.vehicle_data["vehicleStatus"]["engine"]
 
     @property
     def state(self):
-        return "on" if self._vehicle.vehicle_data["vehicleStatus"]["engine"] else "off"
-
-    @property
-    def state_attributes(self):
-        return {
-            "last_updated": self._vehicle.last_updated
-        }
+        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["engine"] else "off"
 
     @property
     def device_class(self):
@@ -136,11 +119,11 @@ class EngineSensor(KiaUvoEntity):
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} Engine'
+        return f'{self.vehicle.token.vehicle_name} Engine'
 
     @property
     def unique_id(self):
-        return f'kia_uvo-engine-{self._vehicle._token.vehicle_id}'
+        return f'kia_uvo-engine-{self.vehicle.token.vehicle_id}'
 
 class VehicleEntity(KiaUvoEntity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
@@ -157,13 +140,13 @@ class VehicleEntity(KiaUvoEntity):
     @property
     def state_attributes(self):
         return {
-            "vehicle_data": self._vehicle.vehicle_data
+            "vehicle_data": self.vehicle.vehicle_data
         }
 
     @property
     def name(self):
-        return f'{self._vehicle._token.vehicle_name} Data'
+        return f'{self.vehicle.token.vehicle_name} Data'
 
     @property
     def unique_id(self):
-        return f'kia_uvo-all-data-{self._vehicle._token.vehicle_id}'
+        return f'kia_uvo-all-data-{self.vehicle.token.vehicle_id}'

@@ -33,7 +33,7 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
         self._abort_if_unique_id_configured()
 
         if not user_input:
-            return self._show_form()
+            return self.show_form()
 
         username = user_input[CONF_USERNAME]
         password = user_input[CONF_PASSWORD]
@@ -44,7 +44,7 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
             self.token = await self.hass.async_add_executor_job(self.kia_uvo_api.login)
         except Exception as ex:
             _LOGGER.error(f"{DOMAIN} Exception in kia_uvo login : %s", str(ex))
-            return self._show_form({"base": "exception"})
+            return self.show_form({"base": "exception"})
 
         return self.async_create_entry(
             title = user_input[CONF_USERNAME],
@@ -56,7 +56,7 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
         )
 
     @callback
-    def _show_form(self, errors = None):
+    def show_form(self, errors = None):
         return self.async_show_form(
             step_id = "user",
             data_schema = self.schema,
