@@ -14,7 +14,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "odometer",
             "Odometer",
             "odometer.value",
-            "km",
+            None,
             "mdi:speedometer",
             None
         ),
@@ -30,7 +30,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "evDrivingDistance",       
             "Range by EV",      
             "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           
-            "km",   
+            None,   
             "mdi:road-variant", 
             None
         ),
@@ -38,7 +38,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "fuelDrivingDistance",     
             "Range by Fuel",    
             "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value|vehicleStatus.dte.value",          
-            "km",   
+            None,   
             "mdi:road-variant", 
             None
         ),
@@ -46,7 +46,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "totalDrivingDistance",    
             "Range Total",      
             "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   
-            "km",   
+            None,   
             "mdi:road-variant", 
             None
         ),
@@ -84,6 +84,30 @@ class InstrumentSensor(KiaUvoEntity):
         self._icon = icon
         self._device_class = device_class
 
+        _LOGGER.debug(f"{DOMAIN} - Check key for dynamic unit generation {self._key} {self._key.endswith('.value')}")
+
+        for key in self._key.split("|"):
+            if self._unit is None and key.endswith(".value"):
+                key_unit = key.replace(".value",".unit")
+                found_unit = self.getChildValue(self.vehicle.vehicle_data, key_unit)
+                if found_unit == 1:
+                    self._unit = "km"
+                elif found_unit == 3:
+                    self._unit = "mi"
+                if self._unit is not None:
+                    break
+
+    def getChildValue(self, value, key):
+        for x in key.split("."):
+                try:
+                    value = value[x]
+                except:
+                    try:
+                        value = value[int(x)]
+                    except:
+                        value = NOT_APPLICABLE
+        return value
+
     @property
     def state(self):
         if self._id == "lastUpdated":
@@ -92,17 +116,8 @@ class InstrumentSensor(KiaUvoEntity):
         value = self.vehicle.vehicle_data
         
         for key in self._key.split("|"):
-            error = False
-            for x in key.split("."):
-                try:
-                    value = value[x]
-                except:
-                    try:
-                        value = value[int(x)]
-                    except:
-                        value = NOT_APPLICABLE
-                        error = True
-            if not error:
+            value = self.getChildValue(value, key)
+            if value != NOT_APPLICABLE:
                 break
 
         return value
