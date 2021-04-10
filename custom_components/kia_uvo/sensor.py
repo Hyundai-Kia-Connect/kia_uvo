@@ -10,13 +10,62 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     sensor_configs = [
-        ("odometer",                "Odometer",         "odometer.value",                                                               "km",   "mdi:speedometer",  None),
-        ("evBatteryPercentage",     "EV Battery",       "vehicleStatus.evStatus.batteryStatus",                                         "%",    "mdi:battery",      "battery"),
-        ("evDrivingDistance",       "Range by EV",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           "km",   "mdi:road-variant", None),
-        ("fuelDrivingDistance",     "Range by Fuel",    "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value",          "km",   "mdi:road-variant", None),
-        ("totalDrivingDistance",    "Range Total",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   "km",   "mdi:road-variant", None),
-        ("carBattery",              "Car Battery",      "vehicleStatus.battery.batSoc",                                                 "%",    "mdi:car-battery",  "battery"),
-        ("lastUpdated",             "Last Update",      "last_updated",                                                                 "%",    "mdi:update",       "timestamp")
+        (
+            "odometer",
+            "Odometer",
+            "odometer.value",
+            "km",
+            "mdi:speedometer",
+            None
+        ),
+        (
+            "evBatteryPercentage",     
+            "EV Battery",       
+            "vehicleStatus.evStatus.batteryStatus",                                         
+            "%",    
+            "mdi:battery",      
+            "battery"
+        ),
+        (
+            "evDrivingDistance",       
+            "Range by EV",      
+            "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           
+            "km",   
+            "mdi:road-variant", 
+            None
+        ),
+        (
+            "fuelDrivingDistance",     
+            "Range by Fuel",    
+            "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value|vehicleStatus.dte.value",          
+            "km",   
+            "mdi:road-variant", 
+            None
+        ),
+        (
+            "totalDrivingDistance",    
+            "Range Total",      
+            "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   
+            "km",   
+            "mdi:road-variant", 
+            None
+        ),
+        (
+            "carBattery",              
+            "Car Battery",      
+            "vehicleStatus.battery.batSoc",                                                 
+            "%",    
+            "mdi:car-battery",  
+            "battery"
+        ),
+        (
+            "lastUpdated",             
+            "Last Update",      
+            "last_updated",                                                                 
+            "%",    
+            "mdi:update",       
+            "timestamp"
+        )
     ]
 
     sensors = [
@@ -41,14 +90,20 @@ class InstrumentSensor(KiaUvoEntity):
             return self.vehicle.last_updated
         
         value = self.vehicle.vehicle_data
-        for x in self._key.split("."):
-            try:
-                value = value[x]
-            except:
+        
+        for key in self._key.split("|"):
+            error = False
+            for x in key.split("."):
                 try:
-                    value = value[int(x)]
+                    value = value[x]
                 except:
-                    value = NOT_APPLICABLE
+                    try:
+                        value = value[int(x)]
+                    except:
+                        value = NOT_APPLICABLE
+                        error = True
+            if not error:
+                break
 
         return value
 
