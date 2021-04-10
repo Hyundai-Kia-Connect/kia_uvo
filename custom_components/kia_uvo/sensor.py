@@ -10,28 +10,30 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     sensor_configs = [
-        ("odometer", "Odemeter", vehicle.vehicle_data["odometer"]["value"], "km", "mdi:speedometer"),
-        ("evBatteryPercentage", "EV Battery", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryStatus"], "%", "mdi:battery"),
-        ("evDrivingDistance", "Range by EV", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["evModeRange"]["value"], "km", "mdi:road-variant"),
-        ("fuelDrivingDistance", "Range by Fuel", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["gasModeRange"]["value"], "km", "mdi:road-variant"),
-        ("totalDrivingDistance", "Range Total", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["totalAvailableRange"]["value"], "km", "mdi:road-variant"),
-        ("carBattery", "Car Battery", vehicle.vehicle_data["vehicleStatus"]["battery"]["batSoc"], "%", "mdi:car-battery")
+        ("odometer", "Odemeter", vehicle.vehicle_data["odometer"]["value"], "km", "mdi:speedometer", None),
+        ("evBatteryPercentage", "EV Battery", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryStatus"], "%", "mdi:battery", "battery"),
+        ("evDrivingDistance", "Range by EV", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["evModeRange"]["value"], "km", "mdi:road-variant", None),
+        ("fuelDrivingDistance", "Range by Fuel", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["gasModeRange"]["value"], "km", "mdi:road-variant", None),
+        ("totalDrivingDistance", "Range Total", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["totalAvailableRange"]["value"], "km", "mdi:road-variant", None),
+        ("carBattery", "Car Battery", vehicle.vehicle_data["vehicleStatus"]["battery"]["batSoc"], "%", "mdi:car-battery", "battery"),
+        ("lastUpdated", "Last Update", vehicle.last_updated, "%", "mdi:update", "timestamp")
     ]
 
     sensors = [
-        InstrumentSensor(hass, config_entry, vehicle, name, description, value, unit, icon) for name, description, value, unit, icon in sensor_configs
+        InstrumentSensor(hass, config_entry, vehicle, name, description, value, unit, icon, device_class) for name, description, value, unit, icon, device_class in sensor_configs
     ]
 
     async_add_entities(sensors, True)
 
 class InstrumentSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle, name, description, value, unit, icon):
+    def __init__(self, hass, config_entry, vehicle: Vehicle, name, description, value, unit, icon, device_class):
         super().__init__(hass, config_entry, vehicle)
         self._name = name
         self._description = description
         self._value = value
         self._unit = unit
         self._icon = icon
+        self._device_class = device_class
 
     @property
     def state(self):
@@ -44,6 +46,10 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def icon(self):
         return self._icon
+
+    @property
+    def device_class(self):
+        return self._device_class
 
     @property
     def state_attributes(self):
