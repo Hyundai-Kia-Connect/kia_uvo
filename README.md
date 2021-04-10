@@ -19,6 +19,9 @@ Supported entities;
 - EV Range, Fuel Range, Total Range
 - Last Update
 
+Supported service;
+- force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
+
 I have posted an example screenshot from my own car.
 
 ![Device Details](https://github.com/fuatakgun/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
