@@ -10,7 +10,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     sensor_configs = [
-        ("odometer", "Odemeter", vehicle.vehicle_data["odometer"]["value"], "km", "mdi:speedometer", None),
+        ("odometer", "Odometer", vehicle.vehicle_data["odometer"]["value"], "km", "mdi:speedometer", None),
         ("evBatteryPercentage", "EV Battery", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryStatus"], "%", "mdi:battery", "battery"),
         ("evDrivingDistance", "Range by EV", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["evModeRange"]["value"], "km", "mdi:road-variant", None),
         ("fuelDrivingDistance", "Range by Fuel", vehicle.vehicle_data["vehicleStatus"]["evStatus"]["drvDistance"][0]["rangeByFuel"]["gasModeRange"]["value"], "km", "mdi:road-variant", None),
