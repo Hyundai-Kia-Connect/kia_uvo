@@ -1,4 +1,4 @@
-I have baked a custom integration for EU Kia Uvo, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo)
+I have baked a custom integration for EU Kia Uvo, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo)
 
 Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time.
 
