@@ -27,4 +27,6 @@ FORCE_SCAN_INTERVAL = timedelta(minutes=240)
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
 
+NOT_APPLICABLE = "Not Applicable"
+
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"

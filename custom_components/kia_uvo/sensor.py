@@ -2,7 +2,7 @@ import logging
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, NOT_APPLICABLE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +45,10 @@ class InstrumentSensor(KiaUvoEntity):
             try:
                 value = value[x]
             except:
-                value = value[int(x)]
+                try:
+                    value = value[int(x)]
+                except:
+                    value = NOT_APPLICABLE
 
         return value
 
