@@ -1,7 +1,7 @@
 import logging
 
-import requests
 import re
+import requests
 from datetime import datetime, timezone
 
 from homeassistant.helpers.dispatcher import (
@@ -9,8 +9,9 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 
-from .const import SPA_API_URL, BASE_URL, USER_AGENT_OK_HTTP, TOPIC_UPDATE
+from .const import *
 from .Token import Token
+from .KiaUvoApi import KiaUvoApi
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,57 +20,35 @@ class Vehicle(object):
         self._hass = hass
         self._config_entry = config_entry
         self._token = token
+        self._kiaUvoApi = KiaUvoApi()
+
+        self.name = token.vehicle_name
+        self.model = token.vehicle_model
+        self.id = token.vehicle_id
+        self.registration_date = token.vehicle_registration_date
         self.vehicle_data = {}
-        self.topic_update = TOPIC_UPDATE.format(token.vehicle_id)
+
         self.last_updated = datetime.min
-        _LOGGER.debug(f"Received token {vars(token)}")
+
+        self.topic_update = TOPIC_UPDATE.format(token.vehicle_id)
+        _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
     async def async_update(self):
-        self.vehicle_data = await self._hass.async_add_executor_job(self.get_cached_vehicle_status)
+        self.vehicle_data = self._kiaUvoApi.get_cached_vehicle_status(self._token)
+        self.set_last_updated(self.vehicle_data["vehicleStatus"]["time"])
         async_dispatcher_send(self._hass, self.topic_update)
-
-    def get_cached_vehicle_status(self):
-        url = SPA_API_URL + 'vehicles/' + self._token.vehicle_id + '/status/latest'
-        headers = {
-            'Authorization': self._token.access_token,
-            'Stamp': '9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=',
-            'ccsp-device-id': self._token.device_id,
-            'Host': BASE_URL,
-            'Connection': 'Keep-Alive',
-            'Accept-Encoding': 'gzip',
-            'User-Agent': USER_AGENT_OK_HTTP
-        }
-
-        response = requests.get(url, headers = headers)
-        response = response.json()
-        _LOGGER.debug(f"Received cached vehicle data {response}")
-        self.set_latest_updated(response["resMsg"]["vehicleStatusInfo"]["vehicleStatus"]["time"])
-        return response["resMsg"]["vehicleStatusInfo"]
 
     async def async_force_update(self):
-        await self._hass.async_add_executor_job(self.get_vehicle_status)
-        self.vehicle_data = await self._hass.async_add_executor_job(self.get_cached_vehicle_status)
-        async_dispatcher_send(self._hass, self.topic_update)
+        self._kiaUvoApi.update_vehicle_status(self._token)
+        self.async_update()
 
-    def get_vehicle_status(self):
-        url = SPA_API_URL + 'vehicles/' + self._token.vehicle_id + '/status'
-        headers = {
-            'Authorization': self._token.refresh_token,
-            'Stamp': '9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=',
-            'ccsp-device-id': self._token.device_id,
-            'Host': BASE_URL,
-            'Connection': 'Keep-Alive',
-            'Accept-Encoding': 'gzip',
-            'User-Agent': USER_AGENT_OK_HTTP
-        }
+    def refresh_token(self, email, password):
+        _LOGGER.debug(f"{DOMAIN} - Refresh token started {self._token.valid_until} {datetime.now()}")
+        if self._token.valid_until <= datetime.now():
+            _LOGGER.debug(f"{DOMAIN} - Refresh token expired")
+            self._token = self._kiaUvoApi.login(email, password)
 
-        response = requests.get(url, headers = headers)
-        response = response.json()
-        _LOGGER.debug(f"Received forced vehicle data {response}")
-        #self.set_latest_updated(response["resMsg"]["vehicleStatusInfo"]["vehicleStatus"]["time"])
-        #return response["resMsg"]["vehicleStatusInfo"]
-
-    def set_latest_updated(self, update_time):
+    def set_last_updated(self, update_time):
         m = re.match(r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})", update_time)
         time = datetime(
             year=int(m.group(1)),

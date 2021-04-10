@@ -16,6 +16,7 @@ from homeassistant.helpers.event import async_track_time_interval
 from .const import *
 from .Token import Token
 from .Vehicle import Vehicle
+import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         vehicle_name = credentials.get('vehicle_name'),
         vehicle_id = credentials.get('vehicle_id'),
         vehicle_model = credentials.get('vehicle_model'),
-        vehicle_registration_date = credentials.get('vehicle_registration_date')
+        vehicle_registration_date = credentials.get('vehicle_registration_date'),
+        valid_until = credentials.get('valid_until')
     )
 
     _LOGGER.debug(f"Token had generated {vars(token)}")
@@ -54,15 +56,20 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         DATA_FORCED_VEHICLE_LISTENER_SCHEDULE: {}
     }
 
+    data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
     await data[DATA_VEHICLE_INSTANCE].async_update()
 
     for component in PLATFORMS:
         hass.async_create_task(hass.config_entries.async_forward_entry_setup(config_entry, component))
 
     async def update(event_time):
+        data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
+
         await data[DATA_VEHICLE_INSTANCE].async_update()
 
     async def force_update(event_time):
+        data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
+
         if not (event_time.hour >= NO_FORCE_SCAN_HOUR_START or event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH):
             await data[DATA_VEHICLE_INSTANCE].async_force_update()
             
