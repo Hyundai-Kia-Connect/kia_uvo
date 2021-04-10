@@ -66,20 +66,22 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
     async def update(event_time):
         await refresh_token()
-        _LOGGER.debug(f"{DOMAIN}Decide to make a force call {event_time.hour} {NO_FORCE_SCAN_HOUR_START} {NO_FORCE_SCAN_HOUR_FINISH}")
+        _LOGGER.debug(f"{DOMAIN} - Decide to make a force call {event_time.hour} {NO_FORCE_SCAN_HOUR_START} {NO_FORCE_SCAN_HOUR_FINISH}")
 
         await vehicle.async_update()
         if (event_time.hour < NO_FORCE_SCAN_HOUR_START and event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH):
 
-            _LOGGER.debug(f"{DOMAIN}We are in force hour zone {event_time}")
-            _LOGGER.debug(f"{DOMAIN}Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL}")
+            _LOGGER.debug(f"{DOMAIN} - We are in force hour zone {event_time}")
+            _LOGGER.debug(f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL}")
 
             if (datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL):
                 try:
                     await vehicle.async_force_update()
                     await vehicle.async_update()
                 except Exception as ex:
-                    _LOGGER.error(f"{DOMAIN} Exception in force update : %s", str(ex))
+                    _LOGGER.error(f"{DOMAIN} - Exception in force update : %s", str(ex))
+        else:
+            _LOGGER.debug(f"{DOMAIN} - We are in silent hour zone / no automatic force updates {event_time}")
 
 
     await update(datetime.now())
