@@ -16,7 +16,8 @@ from homeassistant.helpers.event import async_track_time_interval
 from .const import *
 from .Token import Token
 from .Vehicle import Vehicle
-import datetime
+from .KiaUvoApi import KiaUvoApi
+from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,50 +38,46 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     email = config_entry.data.get(CONF_USERNAME)
     password = config_entry.data.get(CONF_PASSWORD)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
-    token = Token(
-        access_token = credentials.get('access_token'),
-        refresh_token = credentials.get('refresh_token'),
-        device_id = credentials.get('device_id'),
-        vehicle_name = credentials.get('vehicle_name'),
-        vehicle_id = credentials.get('vehicle_id'),
-        vehicle_model = credentials.get('vehicle_model'),
-        vehicle_registration_date = credentials.get('vehicle_registration_date'),
-        valid_until = credentials.get('valid_until')
-    )
+    token = Token(credentials)
+    kia_uvo_api = KiaUvoApi(email, password)
 
-    _LOGGER.debug(f"Token had generated {vars(token)}")
+    _LOGGER.debug(f"{DOMAIN} - Token had generated {vars(token)}")
 
     data = {
-        DATA_VEHICLE_INSTANCE: Vehicle(hass, config_entry, token),
+        DATA_VEHICLE_INSTANCE: Vehicle(hass, config_entry, token, kia_uvo_api),
         DATA_VEHICLE_LISTENER_SCHEDULE: {},
         DATA_FORCED_VEHICLE_LISTENER_SCHEDULE: {}
     }
 
-    data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
-    await data[DATA_VEHICLE_INSTANCE].async_update()
+    async def refresh_token():
+        is_token_updated = data[DATA_VEHICLE_INSTANCE].refresh_token()
+        if is_token_updated:
+            new_data = config_entry.data.copy()
+            new_data[CONF_STORED_CREDENTIALS] = vars(data[DATA_VEHICLE_INSTANCE]._token)
+            hass.config_entries.async_update_entry(config_entry, data=new_data, options=config_entry.options)
+
+    async def update(event_time):
+        await refresh_token()
+        _LOGGER.debug(f"{DOMAIN}Decide to make a force call {event_time.hour} {NO_FORCE_SCAN_HOUR_START} {NO_FORCE_SCAN_HOUR_FINISH}")
+        await data[DATA_VEHICLE_INSTANCE].async_update()
+        if not (event_time.hour >= NO_FORCE_SCAN_HOUR_START and event_time.hour < NO_FORCE_SCAN_HOUR_FINISH):
+            _LOGGER.debug(f"{DOMAIN}We are in force hour zone {event_time}")
+            _LOGGER.debug(f"{DOMAIN}Check last update of vehicle {data[DATA_VEHICLE_INSTANCE].last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL}")
+            if (datetime.now() - data[DATA_VEHICLE_INSTANCE].last_updated > FORCE_SCAN_INTERVAL):
+                try:
+                    await data[DATA_VEHICLE_INSTANCE].async_force_update()    
+                    await data[DATA_VEHICLE_INSTANCE].async_update() 
+                except Exception as ex:
+                    _LOGGER.error(f"{DOMAIN} Exception in force update : %s", str(ex))
+
+
+    await update(datetime.now())
 
     for component in PLATFORMS:
         hass.async_create_task(hass.config_entries.async_forward_entry_setup(config_entry, component))
 
-    async def update(event_time):
-        data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
-
-        await data[DATA_VEHICLE_INSTANCE].async_update()
-
-    async def force_update(event_time):
-        data[DATA_VEHICLE_INSTANCE].refresh_token(email, password)
-
-        if not (event_time.hour >= NO_FORCE_SCAN_HOUR_START or event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH):
-            await data[DATA_VEHICLE_INSTANCE].async_force_update()
-            
-        await data[DATA_VEHICLE_INSTANCE].async_update()
-
     data[DATA_VEHICLE_LISTENER_SCHEDULE] = async_track_time_interval(
         hass, update, DEFAULT_SCAN_INTERVAL
-    )
-
-    data[DATA_FORCED_VEHICLE_LISTENER_SCHEDULE] = async_track_time_interval(
-        hass, force_update, FORCE_SCAN_INTERVAL
     )
 
     hass.data[DOMAIN] = data

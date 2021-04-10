@@ -25,6 +25,8 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
             vol.Required(CONF_USERNAME): str,
             vol.Required(CONF_PASSWORD): str
         })
+        self.kia_uvo_api = None
+        self.token = None
 
     async def async_step_user(self, user_input = None):
         await self.async_set_unique_id(DOMAIN)
@@ -36,11 +38,12 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
         username = user_input[CONF_USERNAME]
         password = user_input[CONF_PASSWORD]
 
+        self.kia_uvo_api = KiaUvoApi(username, password)
+
         try:
-            kiaUvoApi = KiaUvoApi()
-            token = kiaUvoApi.login(username, password)
+            self.token = await self.hass.async_add_executor_job(self.kia_uvo_api.login)
         except Exception as ex:
-            _LOGGER.error("Exception in kia_uvo login : %s", str(ex))
+            _LOGGER.error(f"{DOMAIN} Exception in kia_uvo login : %s", str(ex))
             return self._show_form({"base": "exception"})
 
         return self.async_create_entry(
@@ -48,15 +51,7 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
             data = {
                 CONF_USERNAME: username,
                 CONF_PASSWORD: password,
-                CONF_STORED_CREDENTIALS: {
-                    'access_token': token.access_token,
-                    'refresh_token': token.refresh_token,
-                    'vehicle_name': token.vehicle_name,
-                    'vehicle_id': token.vehicle_id,
-                    'device_id': token.device_id,
-                    'vehicle_model': token.vehicle_model, 
-                    'vehicle_registration_date': token.vehicle_registration_date
-                }
+                CONF_STORED_CREDENTIALS: vars(self.token)
             }
         )
 

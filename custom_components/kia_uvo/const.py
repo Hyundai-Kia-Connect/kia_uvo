@@ -23,6 +23,8 @@ PLATFORMS = ["binary_sensor","device_tracker", "sensor"]
 TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
-FORCE_SCAN_INTERVAL = timedelta(minutes=120)
+FORCE_SCAN_INTERVAL = timedelta(minutes=240)
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
+
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"

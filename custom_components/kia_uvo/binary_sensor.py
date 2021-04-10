@@ -27,8 +27,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities([EngineSensor(hass, config_entry, vehicle)], True)
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
 
-
-
 class DoorSensor(KiaUvoEntity):
     def __init__(self, hass, config_entry, vehicle: Vehicle, door, name, icon, is_normal_door):
         super().__init__(hass, config_entry, vehicle)

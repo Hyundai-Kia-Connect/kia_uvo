@@ -11,7 +11,13 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 class KiaUvoApi:
-    def login(self, username: str, password: str) -> Token:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+    def login(self) -> Token:
+        username = self.username
+        password = self.password
         ### Get Device Id ###
 
         url = SPA_API_URL + "notifications/register"
@@ -69,7 +75,7 @@ class KiaUvoApi:
         headers = {'Content-type': 'application/json'}
         data = {"email": username,"password": password}
         response = requests.post(url, json = data, headers = headers, cookies = cookies)
-        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.json}")
+        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.json()}")
         parsed_url = urlparse(response.json()['redirectUrl'])
         authorization_code = ''.join(parse_qs(parsed_url.query)['code'])
 
@@ -135,9 +141,12 @@ class KiaUvoApi:
         vehicle_model = response["vehicles"][0]["vehicleName"]
         vehicle_registration_date = response["vehicles"][0]["regDate"]
 
-        valid_until = datetime.now() + timedelta(hours=23)
+        valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
-        return Token(access_token, refresh_token, device_id, vehicle_name, vehicle_id, vehicle_model, vehicle_registration_date, valid_until)
+        token = Token({})
+        token.set(access_token, refresh_token, device_id, vehicle_name, vehicle_id, vehicle_model, vehicle_registration_date, valid_until)
+
+        return token
 
     def get_cached_vehicle_status(self, token: Token):
         url = SPA_API_URL + 'vehicles/' + token.vehicle_id + '/status/latest'
