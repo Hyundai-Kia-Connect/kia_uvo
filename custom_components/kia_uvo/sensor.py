@@ -1,20 +1,24 @@
 import logging
 
+from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
+
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, NOT_APPLICABLE
 
 _LOGGER = logging.getLogger(__name__)
 
+DISTANCE_UNITS = {1: LENGTH_KILOMETERS, 3: LENGTH_MILES}
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     sensor_configs = [
-        ("odometer",                "Odometer",         "odometer.value",                                                               "km",   "mdi:speedometer",  None),
+        ("odometer",                "Odometer",         "odometer.value",                                                               "odometer.unit",   "mdi:speedometer",  None),
         ("evBatteryPercentage",     "EV Battery",       "vehicleStatus.evStatus.batteryStatus",                                         "%",    "mdi:battery",      "battery"),
-        ("evDrivingDistance",       "Range by EV",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           "km",   "mdi:road-variant", None),
-        ("fuelDrivingDistance",     "Range by Fuel",    "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value",          "km",   "mdi:road-variant", None),
-        ("totalDrivingDistance",    "Range Total",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   "km",   "mdi:road-variant", None),
+        ("evDrivingDistance",       "Range by EV",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.unit",   "mdi:road-variant", None),
+        ("fuelDrivingDistance",     "Range by Fuel",    "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value",          "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.unit",   "mdi:road-variant", None),
+        ("totalDrivingDistance",    "Range Total",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.unit",   "mdi:road-variant", None),
         ("carBattery",              "Car Battery",      "vehicleStatus.battery.batSoc",                                                 "%",    "mdi:car-battery",  "battery"),
         ("lastUpdated",             "Last Update",      "last_updated",                                                                 "%",    "mdi:update",       "timestamp")
     ]
@@ -54,7 +58,24 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def unit_of_measurement(self):
-        return self._unit
+        if self._id in ("odometer", "evDrivingDistance", "fuelDrivingDistance", "totalDrivingDistance"):
+            value = self.vehicle.vehicle_data
+            for x in self._unit.split("."):
+                try:
+                    value = value[x]
+                except:
+                    try:
+                        value = value[int(x)]
+                    except:
+                        value = NOT_APPLICABLE
+
+            if value != NOT_APPLICABLE:
+                unit = DISTANCE_UNITS[value]
+                return unit
+            else:
+                return value
+        else:   
+            return self._unit
 
     @property
     def icon(self):
