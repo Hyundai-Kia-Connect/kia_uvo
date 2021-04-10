@@ -15,7 +15,7 @@ Supported entities;
 - Door Lock
 - Engine Status
 - Location (over GPS)
-- Odemeter
+- Odometer
 - EV Range, Fuel Range, Total Range
 - Last Update
 
