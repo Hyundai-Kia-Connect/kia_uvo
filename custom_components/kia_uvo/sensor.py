@@ -12,7 +12,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     sensor_configs = [
         ("odometer",                "Odometer",         "odometer.value",                                                               "km",   "mdi:speedometer",  None),
         ("evBatteryPercentage",     "EV Battery",       "vehicleStatus.evStatus.batteryStatus",                                         "%",    "mdi:battery",      "battery"),
-        ("evDrivingDistance",       "Range by EV",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",             "km",   "mdi:road-variant", None),
+        ("evDrivingDistance",       "Range by EV",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",           "km",   "mdi:road-variant", None),
         ("fuelDrivingDistance",     "Range by Fuel",    "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value",          "km",   "mdi:road-variant", None),
         ("totalDrivingDistance",    "Range Total",      "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",   "km",   "mdi:road-variant", None),
         ("carBattery",              "Car Battery",      "vehicleStatus.battery.batSoc",                                                 "%",    "mdi:car-battery",  "battery"),
