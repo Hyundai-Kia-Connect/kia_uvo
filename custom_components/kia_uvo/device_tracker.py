@@ -11,7 +11,6 @@ from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
     async_add_entities([LocationTracker(hass, config_entry, vehicle)], True)

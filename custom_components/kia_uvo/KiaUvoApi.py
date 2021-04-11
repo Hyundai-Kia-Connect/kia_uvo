@@ -19,6 +19,7 @@ class KiaUvoApi:
     def login(self) -> Token:
         username = self.username
         password = self.password
+        
         ### Get Device Id ###
 
         url = SPA_API_URL + "notifications/register"
@@ -203,3 +204,9 @@ class KiaUvoApi:
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
+
+    def lock(self):
+        return None
+
+    def unlock(self):
+        return None
