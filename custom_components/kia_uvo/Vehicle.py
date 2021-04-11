@@ -28,10 +28,10 @@ class Vehicle(object):
         self.id = token.vehicle_id
         self.registration_date = token.vehicle_registration_date
         self.vehicle_data = {}
-
+        self.engine_type = None
         self.last_updated: datetime = datetime.min
 
-        self.topic_update = TOPIC_UPDATE.format(token.vehicle_id)
+        self.topic_update = TOPIC_UPDATE.format(self.id)
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
     async def async_update(self):
@@ -39,6 +39,8 @@ class Vehicle(object):
             self.kia_uvo_api.get_cached_vehicle_status, self.token
         )
         await self.set_last_updated()
+        await self.set_engine_type()
+
         async_dispatcher_send(self.hass, self.topic_update)
 
     async def async_force_update(self):
@@ -48,9 +50,7 @@ class Vehicle(object):
         await self.async_update()
 
     def refresh_token(self):
-        _LOGGER.debug(
-            f"{DOMAIN} - Refresh token started {self.token.valid_until} {datetime.now()}"
-        )
+        _LOGGER.debug(f"{DOMAIN} - Refresh token startd {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
         if self.token.valid_until <= datetime.now().strftime(DATE_FORMAT):
             _LOGGER.debug(f"{DOMAIN} - Refresh token expired")
             self.token = self.kia_uvo_api.login()
@@ -63,11 +63,20 @@ class Vehicle(object):
             self.vehicle_data["vehicleStatus"]["time"],
         )
         self.last_updated = datetime(
-            year=int(m.group(1)),
-            month=int(m.group(2)),
-            day=int(m.group(3)),
-            hour=int(m.group(4)),
-            minute=int(m.group(5)),
-            second=int(m.group(6)),
+            year = int(m.group(1)),
+            month = int(m.group(2)),
+            day = int(m.group(3)),
+            hour = int(m.group(4)),
+            minute = int(m.group(5)),
+            second = int(m.group(6)),
         )
-        async_dispatcher_send(self.hass, self.topic_update)
+    
+    async def set_engine_type(self):
+        if "dte" in self.vehicle_data["vehicleStatus"]:
+            self.engine_type = VEHICLE_ENGINE_TYPE.IC
+        else:
+            if "lowFuelLight" in self.vehicle_data["vehicleStatus"]:
+                self.engine_type = VEHICLE_ENGINE_TYPE.PHEV
+            else:
+                self.engine_type = VEHICLE_ENGINE_TYPE.EV
+        _LOGGER.debug(f"{DOMAIN} - Engine type set {self.engine_type}")

@@ -38,8 +38,8 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
 
     @property
     def name(self):
-        return f"{self.vehicle.token.vehicle_name} Location"
+        return f"{self.vehicle.name} Location"
 
     @property
     def unique_id(self):
-        return f"kia_uvo-location-{self.vehicle.token.vehicle_id}"
+        return f"kia_uvo-location-{self.vehicle.id}"

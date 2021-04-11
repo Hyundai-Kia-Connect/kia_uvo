@@ -43,7 +43,12 @@ async def async_setup(hass: HomeAssistant, config):
         await vehicle.async_force_update()
         await vehicle.async_update()
 
+    async def async_handle_update(call):
+        vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        await vehicle.async_update()
+
     hass.services.async_register(DOMAIN, "force_update", async_handle_force_update)
+    hass.services.async_register(DOMAIN, "update", async_handle_update)
 
     return True
 
@@ -86,9 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         ):
 
             _LOGGER.debug(f"{DOMAIN} - We are in force hour zone {event_time}")
-            _LOGGER.debug(
-                f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL}"
-            )
+            _LOGGER.debug(f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL} {datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL}")
 
             if datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL:
                 try:

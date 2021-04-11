@@ -1,152 +1,93 @@
 import logging
 
-from homeassistant.components.binary_sensor import DEVICE_CLASS_BATTERY_CHARGING, DEVICE_CLASS_CONNECTIVITY
+from homeassistant.components.binary_sensor import (
+    DEVICE_CLASS_BATTERY_CHARGING,
+    DEVICE_CLASS_PLUG,
+    DEVICE_CLASS_PROBLEM,
+    DEVICE_CLASS_LOCK,
+    DEVICE_CLASS_DOOR,
+    DEVICE_CLASS_POWER,
+    DEVICE_CLASS_HEAT
+)
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, VEHICLE_ENGINE_TYPE
 
 _LOGGER = logging.getLogger(__name__)
 
-VEHICLE_DOORS = [
-    ("hood", "Hood", "mdi:car", False),
-    ("trunk", "Trunk", "mdi:car-back", False),
-    ("frontLeft", "Door - Front Left", "mdi:car-door", True),
-    ("frontRight", "Door - Front Right", "mdi:car-door", True),
-    ("backLeft", "Door - Rear Left", "mdi:car-door", True),
-    ("backRight", "Door - Rear Right", "mdi:car-door", True),
+BINARY_INSTRUMENTS = [
+    ("hood", "Hood", "vehicleStatus.hoodOpen", "mdi:car", "mdi:car", DEVICE_CLASS_DOOR),
+    ("trunk", "Trunk", "vehicleStatus.trunkOpen", "mdi:car-back", "mdi:car-back", DEVICE_CLASS_DOOR),
+    ("frontLeft", "Door - Front Left", "vehicleStatus.doorOpen.frontLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+    ("frontRight", "Door - Front Right", "vehicleStatus.doorOpen.frontRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+    ("backLeft", "Door - Rear Left", "vehicleStatus.doorOpen.backLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+    ("backRight", "Door - Rear Right", "vehicleStatus.doorOpen.backRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+    ("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
+    ("engine", "Engine", "!vehicleStatus.engine", "mdi:engine", "mdi:engine-off", DEVICE_CLASS_POWER),
+    ("tirePressureLampAll", "Tire Pressure - All", "vehicleStatus.tirePressureLamp.tirePressureLampAll", "mdi:car-tire-alert", None, DEVICE_CLASS_PROBLEM),
+    ("tirePressureLampFL", "Tire Pressure - Front Left", "vehicleStatus.tirePressureLamp.tirePressureLampFL", "mdi:car-tire-alert", None, DEVICE_CLASS_PROBLEM),
+    ("tirePressureLampFR", "Tire Pressure - Front Right", "vehicleStatus.tirePressureLamp.tirePressureLampFR", "mdi:car-tire-alert", None, DEVICE_CLASS_PROBLEM),
+    ("tirePressureLampRL", "Tire Pressure - Rear Left", "vehicleStatus.tirePressureLamp.tirePressureLampRL", "mdi:car-tire-alert", None, DEVICE_CLASS_PROBLEM),
+    ("tirePressureLampRR", "Tire Pressure - Rear Right", "vehicleStatus.tirePressureLamp.tirePressureLampRR", "mdi:car-tire-alert", None, DEVICE_CLASS_PROBLEM),
+    ("airConditioner", "Air Conditioner", "vehicleStatus.acc", "mdi:air-conditioner", "mdi:air-conditioner", DEVICE_CLASS_POWER),
+    ("defrost", "Defroster", "vehicleStatus.defrost", "mdi:car-defrost-front", "mdi:car-defrost-front", None),
 ]
-
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
-    sensors = [
-        DoorSensor(hass, config_entry, vehicle, door_id, name, icon, is_normal_door)
-        for door_id, name, icon, is_normal_door in VEHICLE_DOORS
+    if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
+        BINARY_INSTRUMENTS.append(("charging", "Charging", "vehicleStatus.evStatus.batteryCharge", None, None, DEVICE_CLASS_BATTERY_CHARGING))
+        BINARY_INSTRUMENTS.append(("pluggedIn", "Plugged In", "vehicleStatus.evStatus.batteryPlugin", None, None, DEVICE_CLASS_PLUG))
+    if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
+        BINARY_INSTRUMENTS.append(("lowFuelLight", "Low Fuel Light", "vehicleStatus.evStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None))
+
+    binary_sensors = [
+        InstrumentSensor(hass, config_entry, vehicle, id, description, key, on_icon, off_icon, device_class)
+        for id, description, key, on_icon, off_icon, device_class in BINARY_INSTRUMENTS
     ]
 
-    async_add_entities(sensors, True)
-    async_add_entities([LockSensor(hass, config_entry, vehicle)], True)
-    async_add_entities([EngineSensor(hass, config_entry, vehicle)], True)
+    async_add_entities(binary_sensors, True)
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
-    if "evStatus" in vehicle.vehicle_data["vehicleStatus"]:
-        async_add_entities([ChargingSensor(hass, config_entry, vehicle)], True)
-        async_add_entities([PluggedInSensor(hass, config_entry, vehicle)], True)
-    if "lowFuelLight" in vehicle.vehicle_data["vehicleStatus"]:
-        async_add_entities([FuelLightSensor(hass, config_entry, vehicle)], True)
 
-
-class DoorSensor(KiaUvoEntity):
+class InstrumentSensor(KiaUvoEntity):
     def __init__(
-        self, hass, config_entry, vehicle: Vehicle, door_id, name, icon, is_normal_door
+        self, hass, config_entry, vehicle: Vehicle, id, description, key, on_icon, off_icon, device_class
     ):
         super().__init__(hass, config_entry, vehicle)
-        self._door_id = door_id
-        self._name = name
-        self._icon = icon
-        self._is_normal_door = is_normal_door
+        self.id = id
+        self.description = description
+        self.key = key
+        self.on_icon = on_icon
+        self.off_icon = off_icon
+        self._device_class = device_class
 
     @property
     def icon(self):
-        if self._is_normal_door:
-            return "mdi:door-open" if self.is_on else "mdi:door-closed"
-        return self._icon
+        return self.on_icon if self.is_on else self.off_icon
 
     @property
     def is_on(self) -> bool:
-        if self._is_normal_door:
-            return (
-                True
-                if self.vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door_id]
-                == 1
-                else False
-            )
-        doorName = f"{self._door_id}Open"
-        return True if self.vehicle.vehicle_data["vehicleStatus"][doorName] else False
+        return bool(self.getChildValue(self.vehicle.vehicle_data, self.key))
 
     @property
     def state(self):
-        if self._is_normal_door:
-            return (
-                "on"
-                if self.vehicle.vehicle_data["vehicleStatus"]["doorOpen"][self._door_id]
-                == 1
-                else "off"
-            )
-        doorName = f"{self._door_id}Open"
-        return "on" if self.vehicle.vehicle_data["vehicleStatus"][doorName] else "off"
+        if self._device_class == DEVICE_CLASS_LOCK:
+            return "off" if self.is_on else "on"
+        return "on" if self.is_on else "off"
 
     @property
     def device_class(self):
-        return "door"
+        return self._device_class
 
     @property
     def name(self):
-        return f"{self.vehicle.token.vehicle_name} {self._name}"
+        return f"{self.vehicle.name} {self.description}"
 
     @property
     def unique_id(self):
-        return f"kia_uvo-{self._door_id}-{self.vehicle.token.vehicle_id}"
-
-
-class LockSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def icon(self):
-        return "mdi:lock" if self.is_on else "mdi:lock-open-variant"
-
-    @property
-    def is_on(self) -> bool:
-        return self.vehicle.vehicle_data["vehicleStatus"]["doorLock"]
-
-    @property
-    def state(self):
-        return "off" if self.vehicle.vehicle_data["vehicleStatus"]["doorLock"] else "on"
-
-    @property
-    def device_class(self):
-        return "lock"
-
-    @property
-    def name(self):
-        return f"{self.vehicle.token.vehicle_name} Door Lock"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-door-lock-{self.vehicle.token.vehicle_id}"
-
-
-class EngineSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def icon(self):
-        return "mdi:engine" if self.is_on else "mdi:engine-off"
-
-    @property
-    def is_on(self) -> bool:
-        return self.vehicle.vehicle_data["vehicleStatus"]["engine"]
-
-    @property
-    def state(self):
-        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["engine"] else "off"
-
-    @property
-    def device_class(self):
-        return "power"
-
-    @property
-    def name(self):
-        return f"{self.vehicle.token.vehicle_name} Engine"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-engine-{self.vehicle.token.vehicle_id}"
-
+        return f"{DOMAIN}-{self.id}-{self.vehicle.id}"
 
 class VehicleEntity(KiaUvoEntity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
@@ -166,87 +107,8 @@ class VehicleEntity(KiaUvoEntity):
 
     @property
     def name(self):
-        return f"{self.vehicle.token.vehicle_name} Data"
+        return f"{self.vehicle.name} Data"
 
     @property
     def unique_id(self):
-        return f"kia_uvo-all-data-{self.vehicle.token.vehicle_id}"
-
-
-class ChargingSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def is_on(self) -> bool:
-        return self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryCharge"]
-
-    @property
-    def state(self):
-        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryCharge"] else "off"
-
-    @property
-    def device_class(self):
-        return DEVICE_CLASS_BATTERY_CHARGING
-
-    @property
-    def name(self):
-        return f"{self.vehicle.token.vehicle_name} Charging"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-charging-{self.vehicle.token.vehicle_id}"
-
-
-class PluggedInSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def icon(self):
-        return "mdi:power-plug" if self.is_on else "mdi:power-plug-off"
-
-    @property
-    def is_on(self) -> bool:
-        return bool(self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryPlugin"])
-
-    @property
-    def state(self):
-        return "off" if self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryPlugin"] == 0 else "on"
-
-    @property
-    def device_class(self):
-        return DEVICE_CLASS_CONNECTIVITY
-
-    @property
-    def name(self):
-        return f"{self.vehicle.token.vehicle_name} Plugged In"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-plugged-in-{self.vehicle.token.vehicle_id}"
-
-
-class FuelLightSensor(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def icon(self):
-        return "mdi:gas-station-off" if self.is_on else "mdi:gas-station"
-
-    @property
-    def is_on(self) -> bool:
-        return self.vehicle.vehicle_data["vehicleStatus"]["lowFuelLight"]
-
-    @property
-    def state(self):
-        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["lowFuelLight"] else "off"
-
-    @property
-    def name(self):
-        return f"{self.vehicle.token.vehicle_name} Fuel Light"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-fuel-light-{self.vehicle.token.vehicle_id}"
+        return f"{DOMAIN}-all-data-{self.vehicle.id}"

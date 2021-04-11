@@ -1,5 +1,6 @@
 import logging
 
+from enum import Enum
 from datetime import timedelta
 
 from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
@@ -31,4 +32,11 @@ NO_FORCE_SCAN_HOUR_FINISH = 6
 
 NOT_APPLICABLE = "Not Applicable"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+UNIT_IS_DYNAMIC = "unit_is_dynamic"
 DISTANCE_UNITS = {1: LENGTH_KILOMETERS, 3: LENGTH_MILES}
+
+
+class VEHICLE_ENGINE_TYPE(Enum):
+    EV = 1
+    PHEV = 2
+    IC = 3

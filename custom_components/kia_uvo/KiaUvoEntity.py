@@ -11,7 +11,7 @@ class KiaUvoEntity(Entity):
         self.hass = hass
         self.config_entry = config_entry
         self.vehicle = vehicle
-        self.topic_update = TOPIC_UPDATE.format(vehicle.token.vehicle_id)
+        self.topic_update = TOPIC_UPDATE.format(vehicle.id)
 
     async def async_added_to_hass(self):
         @callback
@@ -32,13 +32,25 @@ class KiaUvoEntity(Entity):
     @property
     def device_info(self):
         return {
-            "identifiers": {(DOMAIN, self.vehicle.token.vehicle_id)},
-            "name": self.vehicle.token.vehicle_name,
+            "identifiers": {(DOMAIN, self.vehicle.id)},
+            "name": self.vehicle.name,
             "manufacturer": "Kia",
-            "model": self.vehicle.token.vehicle_model,
-            "sw_version": self.vehicle.token.vehicle_registration_date,
-            "via_device": (DOMAIN, self.vehicle.token.vehicle_id),
+            "model": self.vehicle.model,
+            "engine_type": self.vehicle.engine_type,
+            "sw_version": self.vehicle.registration_date,
+            "via_device": (DOMAIN, self.vehicle.id),
         }
+    
+    def getChildValue(self, value, key):
+        for x in key.split("."):
+            try:
+                value = value[x]
+            except:
+                try:
+                    value = value[int(x)]
+                except:
+                    value = None
+        return value
 
     @callback
     def update_from_latest_data(self):
