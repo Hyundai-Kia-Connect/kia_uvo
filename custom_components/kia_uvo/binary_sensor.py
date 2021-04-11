@@ -1,5 +1,7 @@
 import logging
 
+from homeassistant.components.binary_sensor import DEVICE_CLASS_BATTERY_CHARGING, DEVICE_CLASS_CONNECTIVITY
+
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
@@ -28,6 +30,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities([LockSensor(hass, config_entry, vehicle)], True)
     async_add_entities([EngineSensor(hass, config_entry, vehicle)], True)
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
+    if "evStatus" in vehicle.vehicle_data["vehicleStatus"]:
+        async_add_entities([ChargingSensor(hass, config_entry, vehicle)], True)
+        async_add_entities([PluggedInSensor(hass, config_entry, vehicle)], True)
+    if "lowFuelLight" in vehicle.vehicle_data["vehicleStatus"]:
+        async_add_entities([FuelLightSensor(hass, config_entry, vehicle)], True)
 
 
 class DoorSensor(KiaUvoEntity):
@@ -164,3 +171,82 @@ class VehicleEntity(KiaUvoEntity):
     @property
     def unique_id(self):
         return f"kia_uvo-all-data-{self.vehicle.token.vehicle_id}"
+
+
+class ChargingSensor(KiaUvoEntity):
+    def __init__(self, hass, config_entry, vehicle: Vehicle):
+        super().__init__(hass, config_entry, vehicle)
+
+    @property
+    def is_on(self) -> bool:
+        return self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryCharge"]
+
+    @property
+    def state(self):
+        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryCharge"] else "off"
+
+    @property
+    def device_class(self):
+        return DEVICE_CLASS_BATTERY_CHARGING
+
+    @property
+    def name(self):
+        return f"{self.vehicle.token.vehicle_name} Charging"
+
+    @property
+    def unique_id(self):
+        return f"kia_uvo-charging-{self.vehicle.token.vehicle_id}"
+
+
+class PluggedInSensor(KiaUvoEntity):
+    def __init__(self, hass, config_entry, vehicle: Vehicle):
+        super().__init__(hass, config_entry, vehicle)
+
+    @property
+    def icon(self):
+        return "mdi:power-plug" if self.is_on else "mdi:power-plug-off"
+
+    @property
+    def is_on(self) -> bool:
+        return bool(self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryPlugin"])
+
+    @property
+    def state(self):
+        return "off" if self.vehicle.vehicle_data["vehicleStatus"]["evStatus"]["batteryPlugin"] == 0 else "on"
+
+    @property
+    def device_class(self):
+        return DEVICE_CLASS_CONNECTIVITY
+
+    @property
+    def name(self):
+        return f"{self.vehicle.token.vehicle_name} Plugged In"
+
+    @property
+    def unique_id(self):
+        return f"kia_uvo-plugged-in-{self.vehicle.token.vehicle_id}"
+
+
+class FuelLightSensor(KiaUvoEntity):
+    def __init__(self, hass, config_entry, vehicle: Vehicle):
+        super().__init__(hass, config_entry, vehicle)
+
+    @property
+    def icon(self):
+        return "mdi:gas-station-off" if self.is_on else "mdi:gas-station"
+
+    @property
+    def is_on(self) -> bool:
+        return self.vehicle.vehicle_data["vehicleStatus"]["lowFuelLight"]
+
+    @property
+    def state(self):
+        return "on" if self.vehicle.vehicle_data["vehicleStatus"]["lowFuelLight"] else "off"
+
+    @property
+    def name(self):
+        return f"{self.vehicle.token.vehicle_name} Fuel Light"
+
+    @property
+    def unique_id(self):
+        return f"kia_uvo-fuel-light-{self.vehicle.token.vehicle_id}"
