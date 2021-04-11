@@ -10,13 +10,17 @@ You can install this either manually copying files or using HACS. Configuration 
 - It will not force update between 10PM to 6AM. I am trying to be cautios here.
 
 Supported entities;
+- Air Conditioner, Defroster
 - Car Battery Level (12v), EV Battery Level
+- Tire Pressure Warnings (individual and all)
+- Charge Status and Plugged In Status
+- Low Fuel Light (for PHEV and IC)
 - Doors, Trunk and Hood Open/Close Status
 - Door Lock
 - Engine Status
 - Location (over GPS)
 - Odometer
-- EV Range, Fuel Range, Total Range
+- EV Range (for PHEV and EV), Fuel Range, Total Range (for PHEV and EV)
 - Last Update
 
 Supported service;
