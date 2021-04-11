@@ -5,6 +5,7 @@ from homeassistant.helpers.entity import Entity
 from .Vehicle import Vehicle
 from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
 
+
 class KiaUvoEntity(Entity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
         self.hass = hass
@@ -31,9 +32,7 @@ class KiaUvoEntity(Entity):
     @property
     def device_info(self):
         return {
-            "identifiers": {
-                (DOMAIN, self.vehicle.token.vehicle_id)
-            },
+            "identifiers": {(DOMAIN, self.vehicle.token.vehicle_id)},
             "name": self.vehicle.token.vehicle_name,
             "manufacturer": "Kia",
             "model": self.vehicle.token.vehicle_model,

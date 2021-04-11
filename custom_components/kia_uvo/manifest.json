@@ -1,9 +1,10 @@
-
 {
   "domain": "kia_uvo",
   "name": "Kia Uvo",
   "documentation": "https://www.home-assistant.io/components/kia_uvo",
-  "codeowners": ["@fuatakgun"],
+  "codeowners": [
+    "@fuatakgun"
+  ],
   "version": "0.0.1",
   "config_flow": true
 }

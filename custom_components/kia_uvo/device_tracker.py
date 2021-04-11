@@ -11,8 +11,9 @@ from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
+
 async def async_setup_entry(hass, config_entry, async_add_entities):
-    vehicle:Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+    vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
     async_add_entities([LocationTracker(hass, config_entry, vehicle)], True)
 
 
@@ -38,8 +39,8 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
 
     @property
     def name(self):
-        return f'{self.vehicle.token.vehicle_name} Location'
+        return f"{self.vehicle.token.vehicle_name} Location"
 
     @property
     def unique_id(self):
-        return f'kia_uvo-location-{self.vehicle.token.vehicle_id}'
+        return f"kia_uvo-location-{self.vehicle.token.vehicle_id}"

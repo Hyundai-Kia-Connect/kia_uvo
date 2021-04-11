@@ -2,8 +2,10 @@ import logging
 
 from datetime import timedelta
 
-DOMAIN = 'kia_uvo'
-CONF_STORED_CREDENTIALS = 'stored_credentials'
+from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
+
+DOMAIN = "kia_uvo"
+CONF_STORED_CREDENTIALS = "stored_credentials"
 PARALLEL_UPDATES = 1
 
 BASE_URL = "prd.eu-ccapi.kia.com:8080"
@@ -19,7 +21,7 @@ DATA_VEHICLE_INSTANCE = "vehicle"
 DATA_VEHICLE_LISTENER_SCHEDULE = "vehicle_listener_schedule"
 DATA_FORCED_VEHICLE_LISTENER_SCHEDULE = "forced_vehicle_listener_schedule"
 
-PLATFORMS = ["binary_sensor","device_tracker", "sensor"]
+PLATFORMS = ["binary_sensor", "device_tracker", "sensor"]
 TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
@@ -28,5 +30,5 @@ NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
 
 NOT_APPLICABLE = "Not Applicable"
-
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+DISTANCE_UNITS = {1: LENGTH_KILOMETERS, 3: LENGTH_MILES}

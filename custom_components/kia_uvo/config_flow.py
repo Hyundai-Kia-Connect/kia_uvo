@@ -15,20 +15,20 @@ from .KiaUvoApi import KiaUvoApi
 
 _LOGGER = logging.getLogger(__name__)
 
-class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
+
+class KiaUvoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
     CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
     def __init__(self):
-        self.schema = vol.Schema({
-            vol.Required(CONF_USERNAME): str,
-            vol.Required(CONF_PASSWORD): str
-        })
+        self.schema = vol.Schema(
+            {vol.Required(CONF_USERNAME): str, vol.Required(CONF_PASSWORD): str}
+        )
         self.kia_uvo_api = None
         self.token = None
 
-    async def async_step_user(self, user_input = None):
+    async def async_step_user(self, user_input=None):
         await self.async_set_unique_id(DOMAIN)
         self._abort_if_unique_id_configured()
 
@@ -47,18 +47,18 @@ class KiaUvoFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
             return self.show_form({"base": "exception"})
 
         return self.async_create_entry(
-            title = user_input[CONF_USERNAME],
-            data = {
+            title=user_input[CONF_USERNAME],
+            data={
                 CONF_USERNAME: username,
                 CONF_PASSWORD: password,
-                CONF_STORED_CREDENTIALS: vars(self.token)
-            }
+                CONF_STORED_CREDENTIALS: vars(self.token),
+            },
         )
 
     @callback
-    def show_form(self, errors = None):
+    def show_form(self, errors=None):
         return self.async_show_form(
-            step_id = "user",
-            data_schema = self.schema,
-            errors = errors if errors else {},
+            step_id="user",
+            data_schema=self.schema,
+            errors=errors if errors else {},
         )

@@ -1,15 +1,15 @@
 {
-    "title": "Kia Uvo",
-    "config": {
-      "step": {
-        "user": {
-          "description": "Set up your Kia Uvo to integrate with Home Assistant.",
-          "data": {
-            "username": "Username",
-            "password": "Password"
-          },
-          "title": "Kia Uvo: Authentication"
-        }
+  "title": "Kia Uvo",
+  "config": {
+    "step": {
+      "user": {
+        "description": "Set up your Kia Uvo to integrate with Home Assistant.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "title": "Kia Uvo: Authentication"
       }
     }
   }
+}
