@@ -22,7 +22,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "odometer", 
             "Odometer", 
-            {"odometer.value"},
+            ["odometer.value"],
             None,
             "mdi:speedometer",
             None
@@ -30,15 +30,15 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "evBatteryPercentage",
             "EV Battery",
-            {"vehicleStatus.evStatus.batteryStatus"},
+            ["vehicleStatus.evStatus.batteryStatus"],
             PERCENTAGE,
-            "mdi:battery",
+            "mdi:car-electric",
             "battery"
         ),
         (
             "evDrivingDistance",
             "Range by EV",
-            {"vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value"},
+            ["vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value"],
             None,
             "mdi:road-variant",
             None
@@ -46,7 +46,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "fuelDrivingDistance",
             "Range by Fuel",
-            {"vehicleStatus.dte.value","vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value"},
+            ["vehicleStatus.dte.value","vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value"],
             None,
             "mdi:road-variant",
             None
@@ -54,7 +54,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "totalDrivingDistance",
             "Range Total",
-            {"vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value"},
+            ["vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value"],
             None,
             "mdi:road-variant",
             None
@@ -62,7 +62,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "carBattery",
             "Car Battery",
-            {"vehicleStatus.battery.batSoc"},
+            ["vehicleStatus.battery.batSoc"],
             PERCENTAGE,
             "mdi:car-battery",
             "battery"
@@ -70,7 +70,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "lastUpdated", 
             "Last Update", 
-            {"last_updated"}, 
+            ["last_updated"], 
             None, 
             "mdi:update", 
             "timestamp"
@@ -125,7 +125,7 @@ class InstrumentSensor(KiaUvoEntity):
                 try:
                     value = value[int(x)]
                 except:
-                    value = NOT_APPLICABLE
+                    value = None
         return value
 
     @property
@@ -133,12 +133,15 @@ class InstrumentSensor(KiaUvoEntity):
         if self._id == "lastUpdated":
             return self.vehicle.last_updated
 
-        value = self.vehicle.vehicle_data
-
         for key in self._key:
-            value = self.getChildValue(value, key)
-            if value != NOT_APPLICABLE:
+            value = self.getChildValue(self.vehicle.vehicle_data, key)
+            _LOGGER.debug(f"{DOMAIN} - Check key for dynamic value generation {key} {value}")
+            if value is not None:
                 break
+
+        _LOGGER.debug(f"{DOMAIN} - Found key for dynamic value generation {key} {value}")
+        if value is None:
+            value = NOT_APPLICABLE
 
         return value
 
