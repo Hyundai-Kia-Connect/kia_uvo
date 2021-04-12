@@ -10,21 +10,21 @@ You can install this either manually copying files or using HACS. Configuration 
 - It will not force update between 10PM to 6AM. I am trying to be cautios here.
 
 Supported entities;
-- Air Conditioner, Defroster
+- Air Conditioner Status, Defroster Status
 - Car Battery Level (12v), EV Battery Level
 - Tire Pressure Warnings (individual and all)
 - Charge Status and Plugged In Status
-- Low Fuel Light (for PHEV and IC)
+- Low Fuel Light Status (for PHEV and IC)
 - Doors, Trunk and Hood Open/Close Status
-- Door Lock
+- Locking and Unlocking
 - Engine Status
 - Location (over GPS)
-- Odometer
-- EV Range (for PHEV and EV), Fuel Range, Total Range (for PHEV and EV)
+- Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
 - Last Update
 
 Supported service;
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
+- update: get latest **cached** vehicle data
 
 I have posted an example screenshot from my own car.
 
