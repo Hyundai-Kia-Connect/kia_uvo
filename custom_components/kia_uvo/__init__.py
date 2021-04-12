@@ -41,7 +41,6 @@ async def async_setup(hass: HomeAssistant, config):
     async def async_handle_force_update(call):
         vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.async_force_update()
-        await vehicle.async_update()
 
     async def async_handle_update(call):
         vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]

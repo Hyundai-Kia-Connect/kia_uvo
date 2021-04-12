@@ -37,6 +37,10 @@ class Lock(KiaUvoEntity, LockEntity):
     def is_locked(self):
         return self.vehicle.vehicle_data["vehicleStatus"]["doorLock"]
 
+    @property
+    def icon(self):
+        return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
+
     async def async_lock(self):
         await self.vehicle.lock_action("close")
 
