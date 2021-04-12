@@ -85,11 +85,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         )
 
         await vehicle.async_update()
-        if (
-            event_time.hour < NO_FORCE_SCAN_HOUR_START
-            and event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH
-        ):
-
+        if (event_time.hour < NO_FORCE_SCAN_HOUR_START and event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH):
             _LOGGER.debug(f"{DOMAIN} - We are in force hour zone {event_time}")
             _LOGGER.debug(f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL} {datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL}")
 

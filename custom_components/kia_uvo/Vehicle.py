@@ -9,12 +9,13 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 
+from homeassistant.helpers.event import async_call_later
+
 from .const import *
 from .Token import Token
 from .KiaUvoApi import KiaUvoApi
 
 _LOGGER = logging.getLogger(__name__)
-
 
 class Vehicle(object):
     def __init__(self, hass, config_entry, token: Token, kia_uvo_api: KiaUvoApi):
@@ -48,6 +49,12 @@ class Vehicle(object):
             self.kia_uvo_api.update_vehicle_status, self.token
         )
         await self.async_update()
+
+    async def lock_action(self, action):
+        await self.hass.async_add_executor_job(
+            self.kia_uvo_api.lock_action, self.token, action
+        )
+        async_call_later(self.hass, 10, self.async_force_update)
 
     def refresh_token(self):
         _LOGGER.debug(f"{DOMAIN} - Refresh token startd {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
