@@ -1,5 +1,7 @@
 import logging
 
+from homeassistant.components.lock import LockEntity
+
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import (
@@ -24,11 +26,19 @@ class Lock(KiaUvoEntity, LockEntity):
         super().__init__(hass, config_entry, vehicle)
 
     @property
+    def name(self):
+        return f"{self.vehicle.name} Door Lock"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-doorLock-{self.vehicle.id}"
+
+    @property
     def is_locked(self):
         return self.vehicle.vehicle_data["vehicleStatus"]["doorLock"]
 
     async def async_lock(self):
-        await self.vehicle.lock()
+        await self.vehicle.lock_action("close")
 
     async def async_unlock(self):
-        await self.vehicle.unlock()
+        await self.vehicle.lock_action("open")

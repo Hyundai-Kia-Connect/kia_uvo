@@ -205,8 +205,18 @@ class KiaUvoApi:
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
-    def lock(self):
-        return None
+    def lock_action(self, token:Token, action):
+        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "ccsp-device-id": token.device_id,
+            "Host": BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
 
-    def unlock(self):
-        return None
+        payload = {"action": action, "deviceId": token.device_id}
+        response = requests.post(url, json=payload, headers=headers).json()
+        _LOGGER.debug(f"{DOMAIN} - Lock Action {response}")

@@ -22,18 +22,25 @@ DATA_VEHICLE_INSTANCE = "vehicle"
 DATA_VEHICLE_LISTENER_SCHEDULE = "vehicle_listener_schedule"
 DATA_FORCED_VEHICLE_LISTENER_SCHEDULE = "forced_vehicle_listener_schedule"
 
-PLATFORMS = ["binary_sensor", "device_tracker", "sensor"]
+PLATFORMS = ["binary_sensor", "device_tracker", "sensor", "lock"]
 TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
+
+# I have seen that many people can survice with receiving updates in every 10 minutes. Let's see how KIA will responde
+DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
+# When vehicle is running/active, it will update its status regularly, so no need to force it. If it has not been running, we will force it every 240 minutes
 FORCE_SCAN_INTERVAL = timedelta(minutes=240)
+SCAN_AFTER_LOCK_INTERVAL = timedelta(seconds=3)
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
 
 NOT_APPLICABLE = "Not Applicable"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
 UNIT_IS_DYNAMIC = "unit_is_dynamic"
-DISTANCE_UNITS = {1: LENGTH_KILOMETERS, 3: LENGTH_MILES}
+DISTANCE_UNITS = {
+    1: LENGTH_KILOMETERS, 
+    3: LENGTH_MILES
+    }
 
 
 class VEHICLE_ENGINE_TYPE(Enum):
