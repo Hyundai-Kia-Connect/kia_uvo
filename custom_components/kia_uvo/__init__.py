@@ -70,9 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         if is_token_updated:
             new_data = config_entry.data.copy()
             new_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
-            hass.config_entries.async_update_entry(
-                config_entry, data=new_data, options=config_entry.options
-            )
+            hass.config_entries.async_update_entry(config_entry, data=new_data, options=config_entry.options)
 
     async def update(event_time):
         await refresh_config_entry()

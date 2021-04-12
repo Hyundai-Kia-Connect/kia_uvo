@@ -72,12 +72,15 @@ class Vehicle(object):
         self.lock_action_loop = async_call_later(self.hass, 1, self.force_update_loop)
 
     async def refresh_token(self):
-        _LOGGER.debug(f"{DOMAIN} - Refresh token startd {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
+        _LOGGER.debug(f"{DOMAIN} - Refresh token started {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
         if self.token.valid_until <= datetime.now().strftime(DATE_FORMAT):
             _LOGGER.debug(f"{DOMAIN} - Refresh token expired")
-            self.token = await self.hass.async_add_executor_job(self.kia_uvo_api.login())            
+            await self.hass.async_add_executor_job(self.login)
             return True
         return False
+
+    def login(self):
+        self.token = self.kia_uvo_api.login()
 
     def set_last_updated(self):
         m = re.match(
