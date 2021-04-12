@@ -30,7 +30,7 @@ TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
 # When vehicle is running/active, it will update its status regularly, so no need to force it. If it has not been running, we will force it every 240 minutes
 FORCE_SCAN_INTERVAL = timedelta(minutes=240)
-SCAN_AFTER_LOCK_INTERVAL = timedelta(seconds=3)
+SCAN_AFTER_LOCK_INTERVAL = 5
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
 

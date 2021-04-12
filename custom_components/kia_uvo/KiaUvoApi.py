@@ -218,5 +218,6 @@ class KiaUvoApi:
         }
 
         payload = {"action": action, "deviceId": token.device_id}
+        _LOGGER.debug(f"{DOMAIN} - Lock Action Request {payload}")
         response = requests.post(url, json=payload, headers=headers).json()
-        _LOGGER.debug(f"{DOMAIN} - Lock Action {response}")
+        _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")

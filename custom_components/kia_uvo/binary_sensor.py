@@ -23,7 +23,7 @@ BINARY_INSTRUMENTS = [
     ("frontRight", "Door - Front Right", "vehicleStatus.doorOpen.frontRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
     ("backLeft", "Door - Rear Left", "vehicleStatus.doorOpen.backLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
     ("backRight", "Door - Rear Right", "vehicleStatus.doorOpen.backRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-    ("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
+    #("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
     ("engine", "Engine", "vehicleStatus.engine", "mdi:engine", "mdi:engine-off", DEVICE_CLASS_POWER),
     ("tirePressureLampAll", "Tire Pressure - All", "vehicleStatus.tirePressureLamp.tirePressureLampAll", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
     ("tirePressureLampFL", "Tire Pressure - Front Left", "vehicleStatus.tirePressureLamp.tirePressureLampFL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),

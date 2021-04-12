@@ -32,6 +32,8 @@ class Vehicle(object):
         self.engine_type = None
         self.last_updated: datetime = datetime.min
 
+        self.lock_action_tracker = None
+
         self.topic_update = TOPIC_UPDATE.format(self.id)
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
@@ -50,11 +52,17 @@ class Vehicle(object):
         )
         await self.async_update()
 
+    async def async_force_update_scheduled(self, _):
+        await self.async_force_update()
+
     async def lock_action(self, action):
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.lock_action, self.token, action
         )
-        async_call_later(self.hass, 10, self.async_force_update)
+        self.lock_action_tracker = async_call_later(
+            self.hass, SCAN_AFTER_LOCK_INTERVAL, self.async_force_update_scheduled
+        )
+
 
     def refresh_token(self):
         _LOGGER.debug(f"{DOMAIN} - Refresh token startd {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
