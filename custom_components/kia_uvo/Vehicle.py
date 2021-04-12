@@ -32,47 +32,54 @@ class Vehicle(object):
         self.engine_type = None
         self.last_updated: datetime = datetime.min
 
-        self.lock_action_tracker = None
+        self.lock_action_loop = None
 
         self.topic_update = TOPIC_UPDATE.format(self.id)
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
-    async def async_update(self):
-        self.vehicle_data = await self.hass.async_add_executor_job(
-            self.kia_uvo_api.get_cached_vehicle_status, self.token
-        )
-        await self.set_last_updated()
-        await self.set_engine_type()
+    async def update(self):
+        self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
+        self.set_last_updated()
+        self.set_engine_type()
 
         async_dispatcher_send(self.hass, self.topic_update)
 
-    async def async_force_update(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.update_vehicle_status, self.token
-        )
-        await self.async_update()
+    async def force_update(self):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.update_vehicle_status, self.token)
+        await self.update()
 
-    async def async_force_update_scheduled(self, _):
-        await self.async_force_update()
+    async def force_update_loop(self, _):
+        _LOGGER.debug(f"{DOMAIN} - force_update_loop start {self.lock_action_loop_count} {SCAN_AFTER_LOCK_COUNT}")
+        if self.lock_action_loop_count == SCAN_AFTER_LOCK_COUNT:
+            self.lock_action_loop_count = 0
+            if self.lock_action_loop is not None:
+                self.lock_action_loop.remove()
+                self.lock_action_loop = None
+            return
+
+        last_updated = self.last_updated
+        _LOGGER.debug(f"{DOMAIN} - force_update_loop last_updated {last_updated}")
+
+        await self.force_update()
+        _LOGGER.debug(f"{DOMAIN} - force_update_loop force_update_finished {last_updated} {self.last_updated}")
+        if last_updated == self.last_updated:
+            self.lock_action_loop_count = self.lock_action_loop_count + 1
+            self.lock_action_loop = async_call_later(self.hass, SCAN_AFTER_LOCK_INTERVAL, self.force_update_loop)        
 
     async def lock_action(self, action):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.lock_action, self.token, action
-        )
-        self.lock_action_tracker = async_call_later(
-            self.hass, SCAN_AFTER_LOCK_INTERVAL, self.async_force_update_scheduled
-        )
+        await self.hass.async_add_executor_job(self.kia_uvo_api.lock_action, self.token, action)
+        self.lock_action_loop_count = 0
+        self.lock_action_loop = async_call_later(self.hass, 1, self.force_update_loop)
 
-
-    def refresh_token(self):
+    async def refresh_token(self):
         _LOGGER.debug(f"{DOMAIN} - Refresh token startd {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
         if self.token.valid_until <= datetime.now().strftime(DATE_FORMAT):
             _LOGGER.debug(f"{DOMAIN} - Refresh token expired")
-            self.token = self.kia_uvo_api.login()
+            self.token = await self.hass.async_add_executor_job(self.kia_uvo_api.login())            
             return True
         return False
 
-    async def set_last_updated(self):
+    def set_last_updated(self):
         m = re.match(
             r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})",
             self.vehicle_data["vehicleStatus"]["time"],
@@ -86,7 +93,7 @@ class Vehicle(object):
             second = int(m.group(6)),
         )
     
-    async def set_engine_type(self):
+    def set_engine_type(self):
         if "dte" in self.vehicle_data["vehicleStatus"]:
             self.engine_type = VEHICLE_ENGINE_TYPE.IC
         else:
