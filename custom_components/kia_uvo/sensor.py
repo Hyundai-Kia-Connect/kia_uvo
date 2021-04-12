@@ -33,8 +33,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(("evBatteryPercentage", "EV Battery", "vehicleStatus.evStatus.batteryStatus", PERCENTAGE, "mdi:car-electric", DEVICE_CLASS_BATTERY))
         INSTRUMENTS.append(("evDrivingDistance", "Range by EV", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
-        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
         INSTRUMENTS.append(("totalDrivingDistance", "Range Total", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
+    if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
+        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
         INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
 
