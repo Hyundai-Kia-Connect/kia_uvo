@@ -2,12 +2,14 @@ import logging
 
 import re
 import requests
-from datetime import datetime, timezone
+from datetime import datetime
+import pytz
 
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
 )
+import homeassistant.util.dt as dt_util
 
 from homeassistant.helpers.event import async_call_later
 
@@ -53,7 +55,6 @@ class Vehicle(object):
         if self.lock_action_loop_count == SCAN_AFTER_LOCK_COUNT:
             self.lock_action_loop_count = 0
             if self.lock_action_loop is not None:
-                self.lock_action_loop.remove()
                 self.lock_action_loop = None
             return
 
@@ -69,7 +70,7 @@ class Vehicle(object):
     async def lock_action(self, action):
         await self.hass.async_add_executor_job(self.kia_uvo_api.lock_action, self.token, action)
         self.lock_action_loop_count = 0
-        self.lock_action_loop = async_call_later(self.hass, 1, self.force_update_loop)
+        self.lock_action_loop = async_call_later(self.hass, 5, self.force_update_loop)
 
     async def refresh_token(self):
         _LOGGER.debug(f"{DOMAIN} - Refresh token started {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
@@ -94,6 +95,7 @@ class Vehicle(object):
             hour = int(m.group(4)),
             minute = int(m.group(5)),
             second = int(m.group(6)),
+            tzinfo = TIME_ZONE_EUROPE
         )
     
     def set_engine_type(self):

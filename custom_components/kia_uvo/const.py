@@ -2,6 +2,7 @@ import logging
 
 from enum import Enum
 from datetime import timedelta
+from dateutil import tz
 
 from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
 
@@ -25,6 +26,7 @@ DATA_FORCED_VEHICLE_LISTENER_SCHEDULE = "forced_vehicle_listener_schedule"
 PLATFORMS = ["binary_sensor", "device_tracker", "sensor", "lock"]
 TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
+TIME_ZONE_EUROPE = tz.gettz('Europe/Berlin')  
 
 # I have seen that many people can survice with receiving updates in every 10 minutes. Let's see how KIA will responde
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)

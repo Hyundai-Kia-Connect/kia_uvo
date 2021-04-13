@@ -5,6 +5,7 @@ from homeassistant.const import (
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TIMESTAMP,
 )
+import homeassistant.util.dt as dt_util
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
@@ -80,7 +81,7 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def state(self):
         if self._id == "lastUpdated":
-            return self.vehicle.last_updated
+            return dt_util.as_local(self.vehicle.last_updated)
 
         value = self.getChildValue(self.vehicle.vehicle_data, self._key)
 
