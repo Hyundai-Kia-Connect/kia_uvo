@@ -17,7 +17,7 @@ from .const import *
 from .Token import Token
 from .Vehicle import Vehicle
 from .KiaUvoApi import KiaUvoApi
-from datetime import datetime
+from datetime import datetime, timezone
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,9 +80,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         await vehicle.update()
         if (event_time.hour < NO_FORCE_SCAN_HOUR_START and event_time.hour >= NO_FORCE_SCAN_HOUR_FINISH):
             _LOGGER.debug(f"{DOMAIN} - We are in force hour zone {event_time}")
-            _LOGGER.debug(f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now()} {FORCE_SCAN_INTERVAL} {datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL}")
+            _LOGGER.debug(f"{DOMAIN} - Check last update of vehicle {vehicle.last_updated} {datetime.now(timezone.utc)} {FORCE_SCAN_INTERVAL} {datetime.now(timezone.utc) - vehicle.last_updated > FORCE_SCAN_INTERVAL}")
 
-            if datetime.now() - vehicle.last_updated > FORCE_SCAN_INTERVAL:
+            if datetime.now(timezone.utc) - vehicle.last_updated > FORCE_SCAN_INTERVAL:
                 try:
                     await vehicle.force_update()
                 except Exception as ex:
