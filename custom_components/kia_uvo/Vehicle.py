@@ -1,17 +1,14 @@
 import logging
 
-import pytz
+from datetime import datetime
 import re
 import requests
-from datetime import datetime
-import pytz
 
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
 )
 import homeassistant.util.dt as dt_util
-
 from homeassistant.helpers.event import async_call_later
 
 from .const import *
@@ -89,7 +86,7 @@ class Vehicle(object):
             r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})",
             self.vehicle_data["vehicleStatus"]["time"],
         )
-        _last_updated = datetime(
+        last_updated = datetime(
             year = int(m.group(1)),
             month = int(m.group(2)),
             day = int(m.group(3)),
@@ -98,7 +95,10 @@ class Vehicle(object):
             second = int(m.group(6)),
             tzinfo = TIME_ZONE_EUROPE
         )
-        self.last_updated = KIA_TZ.localize(_last_updated)
+
+        _LOGGER.debug(f"{DOMAIN} - LastUpdated {last_updated} - Timezone {TIME_ZONE_EUROPE}")
+
+        self.last_updated = last_updated
     
     def set_engine_type(self):
         if "dte" in self.vehicle_data["vehicleStatus"]:
