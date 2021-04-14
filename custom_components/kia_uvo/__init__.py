@@ -17,7 +17,7 @@ from .const import *
 from .Token import Token
 from .Vehicle import Vehicle
 from .KiaUvoApi import KiaUvoApi
-from datetime import datetime
+from datetime import datetime, timezone
 
 _LOGGER = logging.getLogger(__name__)
 
