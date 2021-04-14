@@ -1,5 +1,6 @@
 import logging
 
+import pytz
 import re
 import requests
 from datetime import datetime, timezone
@@ -87,7 +88,7 @@ class Vehicle(object):
             r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})",
             self.vehicle_data["vehicleStatus"]["time"],
         )
-        self.last_updated = datetime(
+        _last_updated = datetime(
             year = int(m.group(1)),
             month = int(m.group(2)),
             day = int(m.group(3)),
@@ -95,6 +96,7 @@ class Vehicle(object):
             minute = int(m.group(5)),
             second = int(m.group(6)),
         )
+        self.last_updated = KIA_TZ.localize(_last_updated)
     
     def set_engine_type(self):
         if "dte" in self.vehicle_data["vehicleStatus"]:

@@ -2,6 +2,7 @@ import logging
 
 from enum import Enum
 from datetime import timedelta
+import pytz
 
 from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
 
@@ -34,6 +35,9 @@ SCAN_AFTER_LOCK_INTERVAL = 30
 SCAN_AFTER_LOCK_COUNT = 5
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
+
+KIA_TZ = pytz.timezone('CET')
+UTC_TZ = pytz.timezone('UTC')
 
 NOT_APPLICABLE = "Not Applicable"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
