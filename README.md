@@ -37,7 +37,7 @@ If you receive an error while trying to login, please go through these steps;
 2. If you are in EU, please log out from UVO app and login again. While logging in, if your account was created in legacy UVO servers, they will be migrated to new Kia servers. Related Issue: https://github.com/fuatakgun/kia_uvo/issues/22
 3. If you have migrated recently, you might need to wait one day to try again. Related Issue: https://community.home-assistant.io/t/kia-uvo-integration-pre-alpha/297927/12?u=fuatakgun
 4. As a last resort, please double check your account credentials.
-5. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging, pdate your `configuration.yaml` like this, we can get more information in Configuration -> Logs page
+5. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging, update your `configuration.yaml` like this, we can get more information in Configuration -> Logs page
 ```
 logger:
   default: warning
