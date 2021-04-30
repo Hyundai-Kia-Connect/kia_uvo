@@ -70,14 +70,6 @@ class InstrumentSensor(KiaUvoEntity):
         self._icon = icon
         self._device_class = device_class
 
-        if self._unit == UNIT_IS_DYNAMIC:
-            key_unit = key.replace(".value", ".unit")
-            found_unit = self.getChildValue(self.vehicle.vehicle_data, key_unit)
-            if found_unit in DISTANCE_UNITS:
-                self._unit = DISTANCE_UNITS[found_unit]
-            else:
-                self._unit = NOT_APPLICABLE
-
     @property
     def state(self):
         if self._id == "lastUpdated":
@@ -92,6 +84,14 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def unit_of_measurement(self):
+        if self._unit == UNIT_IS_DYNAMIC:
+            key_unit = self._key.replace(".value", ".unit")
+            found_unit = self.getChildValue(self.vehicle.vehicle_data, key_unit)
+            if found_unit in DISTANCE_UNITS:
+                self._unit = DISTANCE_UNITS[found_unit]
+            else:
+                self._unit = NOT_APPLICABLE
+
         return self._unit
 
     @property
