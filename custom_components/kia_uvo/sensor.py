@@ -74,7 +74,7 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def state(self):
         if self._id == "lastUpdated":
-            return dt_util.as_local(self.vehicle.last_updated)
+            return dt_util.as_local(self.vehicle.last_updated).isoformat()
 
         value = self.getChildValue(self.vehicle.vehicle_data, self._key)
 
