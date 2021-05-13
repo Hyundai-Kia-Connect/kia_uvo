@@ -6,8 +6,9 @@ You can install this either manually copying files or using HACS. Configuration 
 
 - it will only fetch values for the first car, I am not sure if there are people outside using Kia Uvo with multiple cars :)
 - update - It will fetch the cached information every 30 minutes from Kia Servers.
-- force update - It will ask your car for the latest data every 2 hours. 
+- force update - It will ask your car for the latest data every 4 hours. 
 - It will not force update between 10PM to 6AM. I am trying to be cautios here.
+- By default, distance unit is kilometers, you need to configure the integration if you want to switch to miles.
 
 Supported entities;
 - Air Conditioner Status, Defroster Status
@@ -26,6 +27,8 @@ Supported entities;
 Supported service;
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
 - update: get latest **cached** vehicle data
+- start_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
+- stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
 
 I have posted an example screenshot from my own car.
 
