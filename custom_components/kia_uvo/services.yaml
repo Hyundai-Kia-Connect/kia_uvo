@@ -1,2 +1,8 @@
 force_update:
   description: Force your vehicle to update its data
+update:
+  description: Update vehicle data from cache
+start_climate:
+  description: TEST - Please use cautiously
+stop_climate:
+  description: TEST - Please use cautiously

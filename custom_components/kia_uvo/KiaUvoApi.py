@@ -221,3 +221,55 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Lock Action Request {payload}")
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
+
+    def start_climate(self, token:Token):
+        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "ccsp-device-id": token.device_id,
+            "Host": BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
+
+        payload = {
+            "action": "start", 
+            "hvacType": 0,
+            "options": {
+              "defrost": True,
+              "heating1": 1,
+            },
+            "tempCode": "10H",
+            "unit": "C", 
+            }
+        _LOGGER.debug(f"{DOMAIN} - Start Climate Action Request {payload}")
+        response = requests.post(url, json=payload, headers=headers).json()
+        _LOGGER.debug(f"{DOMAIN} - Start Climate Action Response {response}")
+
+    def stop_climate(self, token:Token):
+        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "ccsp-device-id": token.device_id,
+            "Host": BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
+
+        payload = {
+            "action": "stop", 
+            "hvacType": 0,
+            "options": {
+              "defrost": True,
+              "heating1": 1,
+            },
+            "tempCode": "10H",
+            "unit": "C", 
+            }
+        _LOGGER.debug(f"{DOMAIN} - Stop Climate Action Request {payload}")
+        response = requests.post(url, json=payload, headers=headers).json()
+        _LOGGER.debug(f"{DOMAIN} - Stop Climate Action Response {response}")

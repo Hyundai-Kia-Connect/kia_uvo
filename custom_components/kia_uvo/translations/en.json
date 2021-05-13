@@ -11,5 +11,14 @@
           "title": "Kia Uvo: Authentication"
         }
       }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "data": {
+            "unit_of_measurement": "Distance Unit"
+          }
+        }
+      }
     }
   }

@@ -18,11 +18,12 @@ from .KiaUvoApi import KiaUvoApi
 _LOGGER = logging.getLogger(__name__)
 
 class Vehicle(object):
-    def __init__(self, hass, config_entry, token: Token, kia_uvo_api: KiaUvoApi):
+    def __init__(self, hass, config_entry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement):
         self.hass = hass
         self.config_entry = config_entry
         self.token = token
         self.kia_uvo_api = kia_uvo_api
+        self.unit_of_measurement = unit_of_measurement
 
         self.name = token.vehicle_name
         self.model = token.vehicle_model
@@ -32,7 +33,7 @@ class Vehicle(object):
         self.engine_type = None
         self.last_updated: datetime = datetime.min
 
-        self.lock_action_loop = None
+        self.force_update_try_caller = None
 
         self.topic_update = TOPIC_UPDATE.format(self.id)
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
@@ -49,11 +50,11 @@ class Vehicle(object):
         await self.update()
 
     async def force_update_loop(self, _):
-        _LOGGER.debug(f"{DOMAIN} - force_update_loop start {self.lock_action_loop_count} {SCAN_AFTER_LOCK_COUNT}")
-        if self.lock_action_loop_count == SCAN_AFTER_LOCK_COUNT:
-            self.lock_action_loop_count = 0
-            if self.lock_action_loop is not None:
-                self.lock_action_loop = None
+        _LOGGER.debug(f"{DOMAIN} - force_update_loop start {self.force_update_try_count} {COUNT_FORCE_UPDATE_AFTER_COMMAND}")
+        if self.force_update_try_count == COUNT_FORCE_UPDATE_AFTER_COMMAND:
+            self.force_update_try_count = 0
+            if self.force_update_try_count is not None:
+                self.force_update_try_count = None
             return
 
         last_updated = self.last_updated
@@ -62,13 +63,13 @@ class Vehicle(object):
         await self.force_update()
         _LOGGER.debug(f"{DOMAIN} - force_update_loop force_update_finished {last_updated} {self.last_updated}")
         if last_updated == self.last_updated:
-            self.lock_action_loop_count = self.lock_action_loop_count + 1
-            self.lock_action_loop = async_call_later(self.hass, SCAN_AFTER_LOCK_INTERVAL, self.force_update_loop)        
+            self.force_update_try_count = self.force_update_try_count + 1
+            self.force_update_try_caller = async_call_later(self.hass, INTERVAL_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)        
 
     async def lock_action(self, action):
         await self.hass.async_add_executor_job(self.kia_uvo_api.lock_action, self.token, action)
-        self.lock_action_loop_count = 0
-        self.lock_action_loop = async_call_later(self.hass, 5, self.force_update_loop)
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
 
     async def refresh_token(self):
         _LOGGER.debug(f"{DOMAIN} - Refresh token started {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}")
@@ -77,6 +78,16 @@ class Vehicle(object):
             await self.hass.async_add_executor_job(self.login)
             return True
         return False
+
+    async def start_climate(self):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.start_climate, self.token)
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
+
+    async def stop_climate(self):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.stop_climate, self.token)
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
 
     def login(self):
         self.token = self.kia_uvo_api.login()

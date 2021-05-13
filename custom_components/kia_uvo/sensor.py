@@ -5,8 +5,8 @@ from homeassistant.const import (
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TIMESTAMP,
 )
+from homeassistant.util import distance as distance_util
 import homeassistant.util.dt as dt_util
-
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import (
@@ -16,13 +16,13 @@ from .const import (
     NOT_APPLICABLE,
     DISTANCE_UNITS,
     VEHICLE_ENGINE_TYPE,
-    UNIT_IS_DYNAMIC
+    DYNAMIC_DISTANCE_UNIT
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 INSTRUMENTS = [
-    ("odometer", "Odometer", "odometer.value", UNIT_IS_DYNAMIC, "mdi:speedometer", None),
+    ("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None),
     ("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY),
     ("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP),
 ]
@@ -33,12 +33,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(("evBatteryPercentage", "EV Battery", "vehicleStatus.evStatus.batteryStatus", PERCENTAGE, "mdi:car-electric", DEVICE_CLASS_BATTERY))
-        INSTRUMENTS.append(("evDrivingDistance", "Range by EV", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
-        INSTRUMENTS.append(("totalDrivingDistance", "Range Total", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
+        INSTRUMENTS.append(("evDrivingDistance", "Range by EV", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
+        INSTRUMENTS.append(("totalDrivingDistance", "Range Total", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
-        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
+        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
-        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", UNIT_IS_DYNAMIC, "mdi:road-variant", None))
+        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
 
     sensors = [
         InstrumentSensor(
@@ -67,16 +67,19 @@ class InstrumentSensor(KiaUvoEntity):
         self._description = description
         self._key = key
         self._unit = unit
+        self._source_unit = unit
         self._icon = icon
         self._device_class = device_class
 
-        if self._unit == UNIT_IS_DYNAMIC:
+        if self._unit == DYNAMIC_DISTANCE_UNIT:
             key_unit = key.replace(".value", ".unit")
             found_unit = self.getChildValue(self.vehicle.vehicle_data, key_unit)
             if found_unit in DISTANCE_UNITS:
-                self._unit = DISTANCE_UNITS[found_unit]
+                self._unit = vehicle.unit_of_measurement
+                self._source_unit = DISTANCE_UNITS[found_unit]                   
             else:
                 self._unit = NOT_APPLICABLE
+                self._source_unit = NOT_APPLICABLE
 
     @property
     def state(self):
@@ -88,6 +91,8 @@ class InstrumentSensor(KiaUvoEntity):
         if value is None:
             value = NOT_APPLICABLE
 
+        if self._source_unit != self._unit:
+            value = int(distance_util.convert(value, self._source_unit, self._unit))
         return value
 
     @property

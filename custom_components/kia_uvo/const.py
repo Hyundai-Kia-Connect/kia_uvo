@@ -9,6 +9,7 @@ from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
 DOMAIN = "kia_uvo"
 CONF_STORED_CREDENTIALS = "stored_credentials"
 PARALLEL_UPDATES = 1
+CONFIG_FLOW_VERSION = 1
 
 BASE_URL = "prd.eu-ccapi.kia.com:8080"
 USER_API_URL = "https://" + BASE_URL + "/api/v1/user/"
@@ -28,25 +29,30 @@ TOPIC_UPDATE = f"{DOMAIN}_update_{0}"
 
 TIME_ZONE_EUROPE = tz.gettz('Europe/Berlin')
 
-# I have seen that many people can survice with receiving updates in every 10 minutes. Let's see how KIA will responde
-DEFAULT_SCAN_INTERVAL = timedelta(minutes=10)
+# I have seen that many people can survice with receiving updates in every 30 minutes. Let's see how KIA will responde
+DEFAULT_SCAN_INTERVAL = timedelta(minutes=30)
 # When vehicle is running/active, it will update its status regularly, so no need to force it. If it has not been running, we will force it every 240 minutes
 FORCE_SCAN_INTERVAL = timedelta(minutes=240)
-SCAN_AFTER_LOCK_INTERVAL = 30
-SCAN_AFTER_LOCK_COUNT = 5
 NO_FORCE_SCAN_HOUR_START = 22
 NO_FORCE_SCAN_HOUR_FINISH = 6
 
+START_FORCE_UPDATE_AFTER_COMMAND = 10
+INTERVAL_FORCE_UPDATE_AFTER_COMMAND = 30
+COUNT_FORCE_UPDATE_AFTER_COMMAND = 5
+
 NOT_APPLICABLE = "Not Applicable"
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
-UNIT_IS_DYNAMIC = "unit_is_dynamic"
+DYNAMIC_DISTANCE_UNIT = "dynamic_distance_unit"
 DISTANCE_UNITS = {
     1: LENGTH_KILOMETERS, 
     3: LENGTH_MILES
     }
+DEFAULT_DISTANCE_UNIT = DISTANCE_UNITS[1]
+UPDATE_LISTENER = "update_listener"
 
 
 class VEHICLE_ENGINE_TYPE(Enum):
     EV = 1
     PHEV = 2
     IC = 3
+
