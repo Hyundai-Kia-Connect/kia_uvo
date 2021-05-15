@@ -7,7 +7,7 @@ from homeassistant.helpers.entity import Entity
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -12,7 +12,6 @@ from .KiaUvoEntity import KiaUvoEntity
 from .const import (
     DOMAIN,
     DATA_VEHICLE_INSTANCE,
-    TOPIC_UPDATE,
     NOT_APPLICABLE,
     DISTANCE_UNITS,
     VEHICLE_ENGINE_TYPE,
@@ -21,15 +20,17 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-INSTRUMENTS = [
-    ("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None),
-    ("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY),
-    ("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP),
-]
+
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+
+    INSTRUMENTS = [
+        ("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None),
+        ("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY),
+        ("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP),
+    ]
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(("evBatteryPercentage", "EV Battery", "vehicleStatus.evStatus.batteryStatus", PERCENTAGE, "mdi:car-electric", DEVICE_CLASS_BATTERY))

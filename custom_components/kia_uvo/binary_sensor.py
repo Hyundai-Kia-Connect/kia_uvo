@@ -12,32 +12,32 @@ from homeassistant.components.binary_sensor import (
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, VEHICLE_ENGINE_TYPE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_ENGINE_TYPE
 
 _LOGGER = logging.getLogger(__name__)
 
-BINARY_INSTRUMENTS = [
-    ("hood", "Hood", "vehicleStatus.hoodOpen", "mdi:car", "mdi:car", DEVICE_CLASS_DOOR),
-    ("trunk", "Trunk", "vehicleStatus.trunkOpen", "mdi:car-back", "mdi:car-back", DEVICE_CLASS_DOOR),
-    ("frontLeft", "Door - Front Left", "vehicleStatus.doorOpen.frontLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-    ("frontRight", "Door - Front Right", "vehicleStatus.doorOpen.frontRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-    ("backLeft", "Door - Rear Left", "vehicleStatus.doorOpen.backLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-    ("backRight", "Door - Rear Right", "vehicleStatus.doorOpen.backRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-    #("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
-    ("engine", "Engine", "vehicleStatus.engine", "mdi:engine", "mdi:engine-off", DEVICE_CLASS_POWER),
-    ("tirePressureLampAll", "Tire Pressure - All", "vehicleStatus.tirePressureLamp.tirePressureLampAll", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
-    ("tirePressureLampFL", "Tire Pressure - Front Left", "vehicleStatus.tirePressureLamp.tirePressureLampFL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
-    ("tirePressureLampFR", "Tire Pressure - Front Right", "vehicleStatus.tirePressureLamp.tirePressureLampFR", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
-    ("tirePressureLampRL", "Tire Pressure - Rear Left", "vehicleStatus.tirePressureLamp.tirePressureLampRL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
-    ("tirePressureLampRR", "Tire Pressure - Rear Right", "vehicleStatus.tirePressureLamp.tirePressureLampRR", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
-    ("airConditioner", "Air Conditioner", "vehicleStatus.airCtrlOn", "mdi:air-conditioner", "mdi:air-conditioner", DEVICE_CLASS_POWER),
-    ("defrost", "Defroster", "vehicleStatus.defrost", "mdi:car-defrost-front", "mdi:car-defrost-front", None),
-    ("backwindowheater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
-    ("steeringwheelheater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
-]
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+
+    BINARY_INSTRUMENTS = [
+        ("hood", "Hood", "vehicleStatus.hoodOpen", "mdi:car", "mdi:car", DEVICE_CLASS_DOOR),
+        ("trunk", "Trunk", "vehicleStatus.trunkOpen", "mdi:car-back", "mdi:car-back", DEVICE_CLASS_DOOR),
+        ("frontLeft", "Door - Front Left", "vehicleStatus.doorOpen.frontLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+        ("frontRight", "Door - Front Right", "vehicleStatus.doorOpen.frontRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+        ("backLeft", "Door - Rear Left", "vehicleStatus.doorOpen.backLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+        ("backRight", "Door - Rear Right", "vehicleStatus.doorOpen.backRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
+        #("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
+        ("engine", "Engine", "vehicleStatus.engine", "mdi:engine", "mdi:engine-off", DEVICE_CLASS_POWER),
+        ("tirePressureLampAll", "Tire Pressure - All", "vehicleStatus.tirePressureLamp.tirePressureLampAll", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
+        ("tirePressureLampFL", "Tire Pressure - Front Left", "vehicleStatus.tirePressureLamp.tirePressureLampFL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
+        ("tirePressureLampFR", "Tire Pressure - Front Right", "vehicleStatus.tirePressureLamp.tirePressureLampFR", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
+        ("tirePressureLampRL", "Tire Pressure - Rear Left", "vehicleStatus.tirePressureLamp.tirePressureLampRL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
+        ("tirePressureLampRR", "Tire Pressure - Rear Right", "vehicleStatus.tirePressureLamp.tirePressureLampRR", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
+        ("airConditioner", "Air Conditioner", "vehicleStatus.airCtrlOn", "mdi:air-conditioner", "mdi:air-conditioner", DEVICE_CLASS_POWER),
+        ("defrost", "Defroster", "vehicleStatus.defrost", "mdi:car-defrost-front", "mdi:car-defrost-front", None),
+        ("backwindowheater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
+        ("steeringwheelheater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
+    ]
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         BINARY_INSTRUMENTS.append(("charging", "Charging", "vehicleStatus.evStatus.batteryCharge", None, None, DEVICE_CLASS_BATTERY_CHARGING))

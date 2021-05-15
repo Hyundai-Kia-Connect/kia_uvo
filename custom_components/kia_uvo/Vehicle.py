@@ -39,9 +39,12 @@ class Vehicle(object):
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
     async def update(self):
-        self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
-        self.set_last_updated()
-        self.set_engine_type()
+        try:
+            self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
+            self.set_last_updated()
+            self.set_engine_type()
+        except Exception as ex:
+            _LOGGER.error(f"{DOMAIN} - Exception in update : %s", str(ex))
 
         async_dispatcher_send(self.hass, self.topic_update)
 
