@@ -5,9 +5,9 @@ Warning ahead; this is pre-alpha phase, please do not expect something fully fun
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
 
 - it will only fetch values for the first car, I am not sure if there are people outside using Kia Uvo with multiple cars :)
-- update - It will fetch the cached information every 30 minutes from Kia Servers.
-- force update - It will ask your car for the latest data every 4 hours. 
-- It will not force update between 10PM to 6AM. I am trying to be cautios here.
+- update - It will fetch the cached information every 30 minutes from Kia Servers. **Now Configurable**
+- force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
+- It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
 - By default, distance unit is kilometers, you need to configure the integration if you want to switch to miles.
 
 Supported entities;
@@ -22,7 +22,8 @@ Supported entities;
 - Engine Status
 - Location (over GPS)
 - Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
-- Last Update
+- Latest Update
+- Configurable distance units, cache update interval, force update interval, blackout start and finish hours
 
 Supported service;
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
@@ -33,6 +34,7 @@ Supported service;
 I have posted an example screenshot from my own car.
 
 ![Device Details](https://github.com/fuatakgun/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
+![Device Details](https://github.com/fuatakgun/kia_uvo/blob/master/Configuration.PNG?raw=true)
 
 **Troubleshooting**
 If you receive an error while trying to login, please go through these steps;
