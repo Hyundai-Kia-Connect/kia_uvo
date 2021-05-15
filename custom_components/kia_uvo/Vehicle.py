@@ -40,13 +40,25 @@ class Vehicle(object):
 
     async def update(self):
         try:
+            current_lat = self.get_child_value("vehicleLocation.coord.lat")
+            current_lon = self.get_child_value("vehicleLocation.coord.lon")
+            current_geocode = self.get_child_value("vehicleLocation.geocodedLocation")
+            
             self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
             self.set_last_updated()
             self.set_engine_type()
+
+            new_lat = self.get_child_value("vehicleLocation.coord.lat")
+            new_lon = self.get_child_value("vehicleLocation.coord.lon")
+
+            if (current_lat != new_lat or current_lon != new_lon) or current_geocode is None:
+                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(self.kia_uvo_api.get_geocoded_location, new_lat, new_lon)
+            else:
+                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
+
+            async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:
             _LOGGER.error(f"{DOMAIN} - Exception in update : %s", str(ex))
-
-        async_dispatcher_send(self.hass, self.topic_update)
 
     async def force_update(self):
         await self.hass.async_add_executor_job(self.kia_uvo_api.update_vehicle_status, self.token)
@@ -123,3 +135,16 @@ class Vehicle(object):
             else:
                 self.engine_type = VEHICLE_ENGINE_TYPE.EV
         _LOGGER.debug(f"{DOMAIN} - Engine type set {self.engine_type}")
+
+    def get_child_value(self, key):
+        value = self.vehicle_data
+        for x in key.split("."):
+            try:
+                value = value[x]
+            except:
+                try:
+                    value = value[int(x)]
+                except:
+                    value = None
+        return value
+

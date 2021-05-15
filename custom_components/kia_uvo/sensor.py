@@ -20,9 +20,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-
-
-
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
@@ -30,6 +27,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None),
         ("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY),
         ("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP),
+        ("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None),
     ]
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
@@ -80,7 +78,7 @@ class InstrumentSensor(KiaUvoEntity):
         if self._id == "lastUpdated":
             return dt_util.as_local(self.vehicle.last_updated).isoformat()
 
-        value = self.getChildValue(self.vehicle.vehicle_data, self._key)
+        value = self.vehicle.get_child_value(self._key)
 
         if value is None:
             value = NOT_APPLICABLE
@@ -95,7 +93,7 @@ class InstrumentSensor(KiaUvoEntity):
             return self._unit
 
         key_unit = self._key.replace(".value", ".unit")
-        found_unit = self.getChildValue(self.vehicle.vehicle_data, key_unit)
+        found_unit = self.vehicle.get_child_value(key_unit)
         if found_unit in DISTANCE_UNITS:
             self._unit = self.vehicle.unit_of_measurement
             self._source_unit = DISTANCE_UNITS[found_unit]                   
@@ -104,6 +102,12 @@ class InstrumentSensor(KiaUvoEntity):
             self._source_unit = NOT_APPLICABLE
 
         return self._unit
+
+    @property
+    def state_attributes(self):
+        if self._id == "geocodedLocation":
+            return {"address": self.vehicle.get_child_value("vehicleStatus.geocodedLocation.address")}
+        return None;
 
     @property
     def icon(self):

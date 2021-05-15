@@ -22,11 +22,11 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
 
     @property
     def latitude(self):
-        return self.vehicle.vehicle_data["vehicleLocation"]["coord"]["lat"]
+        return self.vehicle.get_child_value("vehicleLocation.coord.lat")
 
     @property
     def longitude(self):
-        return self.vehicle.vehicle_data["vehicleLocation"]["coord"]["lon"]
+        return self.vehicle.get_child_value("vehicleLocation.coord.lon")
 
     @property
     def icon(self):

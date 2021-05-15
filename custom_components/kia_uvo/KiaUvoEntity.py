@@ -45,17 +45,6 @@ class KiaUvoEntity(Entity):
             "via_device": (DOMAIN, self.vehicle.id),
         }
     
-    def getChildValue(self, value, key):
-        for x in key.split("."):
-            try:
-                value = value[x]
-            except:
-                try:
-                    value = value[int(x)]
-                except:
-                    value = None
-        return value
-
     @callback
     def update_from_latest_data(self):
         self.vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]

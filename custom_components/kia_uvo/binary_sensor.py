@@ -71,7 +71,7 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def is_on(self) -> bool:
-        return bool(self.getChildValue(self.vehicle.vehicle_data, self.key))
+        return bool(self.vehicle.get_child_value(self.key))
 
     @property
     def state(self):

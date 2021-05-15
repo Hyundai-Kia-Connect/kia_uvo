@@ -189,6 +189,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
         return response["resMsg"]["vehicleStatusInfo"]
 
+    def get_geocoded_location(self, lat, lon):
+        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=17&email=" + self.username
+        response = requests.get(url)
+        response = response.json()
+        return response
+
     def update_vehicle_status(self, token: Token):
         url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {

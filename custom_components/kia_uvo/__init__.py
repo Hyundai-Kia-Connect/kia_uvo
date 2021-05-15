@@ -63,7 +63,6 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
 
     return True
 
-
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     _LOGGER.debug(f"{DOMAIN} - async_setup_entry started - {config_entry}")
     email = config_entry.data.get(CONF_USERNAME)
@@ -107,6 +106,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
                     _LOGGER.error(f"{DOMAIN} - Exception in force update : %s", str(ex))
         else:
             _LOGGER.debug(f"{DOMAIN} - We are in silent hour zone / no automatic force updates {event_time_local}")
+        
 
     await update(dt_util.utcnow())
 
