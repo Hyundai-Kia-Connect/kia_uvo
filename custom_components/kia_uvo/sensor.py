@@ -106,7 +106,7 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def state_attributes(self):
         if self._id == "geocodedLocation":
-            return {"address": self.vehicle.get_child_value("vehicleStatus.geocodedLocation.address")}
+            return {"address": self.vehicle.get_child_value("vehicleLocation.geocodedLocation.address")}
         return None;
 
     @property
