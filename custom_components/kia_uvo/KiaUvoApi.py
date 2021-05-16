@@ -12,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class KiaUvoApi:
-    def __init__(self, username: str, password: str, use_email_with_geocode_api: bool):
+    def __init__(self, username: str, password: str, use_email_with_geocode_api: bool = False):
         self.username = username
         self.password = password
         self.use_email_with_geocode_api = use_email_with_geocode_api
