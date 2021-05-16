@@ -26,6 +26,7 @@ class KiaUvoOptionFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(CONF_FORCE_SCAN_INTERVAL, default = self.config_entry.options.get(CONF_FORCE_SCAN_INTERVAL, DEFAULT_FORCE_SCAN_INTERVAL)): vol.All(vol.Coerce(int), vol.Range(min=1, max=999)),
                 vol.Optional(CONF_NO_FORCE_SCAN_HOUR_START, default = self.config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START)): vol.All(vol.Coerce(int), vol.Range(min=1, max=23)),
                 vol.Optional(CONF_NO_FORCE_SCAN_HOUR_FINISH, default = self.config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_FINISH, DEFAULT_NO_FORCE_SCAN_HOUR_FINISH)): vol.All(vol.Coerce(int), vol.Range(min=1, max=23)),
+                vol.Optional(CONF_USE_EMAIL_WITH_GEOCODE_API, default = self.config_entry.options.get(CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API)): bool
             }
         )
 

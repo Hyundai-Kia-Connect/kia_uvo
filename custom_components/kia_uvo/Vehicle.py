@@ -4,12 +4,14 @@ from datetime import datetime
 import re
 import requests
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
 )
-import homeassistant.util.dt as dt_util
 from homeassistant.helpers.event import async_call_later
+import homeassistant.util.dt as dt_util
 
 from .const import *
 from .Token import Token
@@ -18,7 +20,7 @@ from .KiaUvoApi import KiaUvoApi
 _LOGGER = logging.getLogger(__name__)
 
 class Vehicle(object):
-    def __init__(self, hass, config_entry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement):
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement: str):
         self.hass = hass
         self.config_entry = config_entry
         self.token = token
@@ -68,11 +70,9 @@ class Vehicle(object):
         _LOGGER.debug(f"{DOMAIN} - force_update_loop start {self.force_update_try_count} {COUNT_FORCE_UPDATE_AFTER_COMMAND}")
         if self.force_update_try_count == COUNT_FORCE_UPDATE_AFTER_COMMAND:
             self.force_update_try_count = 0
-            if self.force_update_try_count is not None:
-                self.force_update_try_count = None
             return
 
-        last_updated = self.last_updated
+        last_updated: datetime = self.last_updated
         _LOGGER.debug(f"{DOMAIN} - force_update_loop last_updated {last_updated}")
 
         await self.force_update()
@@ -81,8 +81,8 @@ class Vehicle(object):
             self.force_update_try_count = self.force_update_try_count + 1
             self.force_update_try_caller = async_call_later(self.hass, INTERVAL_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)        
 
-    async def lock_action(self, action):
-        await self.hass.async_add_executor_job(self.kia_uvo_api.lock_action, self.token, action)
+    async def lock_action(self, action: VEHICLE_LOCK_ACTION):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.lock_action, self.token, action.value)
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
 
@@ -147,4 +147,3 @@ class Vehicle(object):
                 except:
                     value = None
         return value
-

@@ -105,7 +105,7 @@ class VehicleEntity(KiaUvoEntity):
 
     @property
     def state_attributes(self):
-        return {"vehicle_data": self.vehicle.vehicle_data}
+        return {"vehicle_data": self.vehicle.vehicle_data, "vehicle_name": self.vehicle.name}
 
     @property
     def name(self):

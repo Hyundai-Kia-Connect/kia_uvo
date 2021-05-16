@@ -6,7 +6,8 @@ from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import (
     DOMAIN,
-    DATA_VEHICLE_INSTANCE
+    DATA_VEHICLE_INSTANCE,
+    VEHICLE_LOCK_ACTION
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ class Lock(KiaUvoEntity, LockEntity):
         return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
 
     async def async_lock(self):
-        await self.vehicle.lock_action("close")
+        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.LOCK)
 
     async def async_unlock(self):
-        await self.vehicle.lock_action("open")
+        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.UNLOCK)

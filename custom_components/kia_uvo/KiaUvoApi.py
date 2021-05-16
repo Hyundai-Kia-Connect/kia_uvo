@@ -1,9 +1,9 @@
 import logging
 
-import uuid
+from datetime import datetime
 import requests
 from urllib.parse import parse_qs, urlparse
-from datetime import datetime
+import uuid
 
 from .const import *
 from .Token import Token
@@ -12,9 +12,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class KiaUvoApi:
-    def __init__(self, username, password):
+    def __init__(self, username: str, password: str, use_email_with_geocode_api: bool):
         self.username = username
         self.password = password
+        self.use_email_with_geocode_api = use_email_with_geocode_api
 
     def login(self) -> Token:
         username = self.username
@@ -22,16 +23,16 @@ class KiaUvoApi:
         
         ### Get Device Id ###
 
-        url = SPA_API_URL + "notifications/register"
+        url = KIA_UVO_SPA_API_URL + "notifications/register"
         payload = {"pushRegId": "1", "pushType": "GCM", "uuid": str(uuid.uuid1())}
         headers = {
-            "ccsp-service-id": CCSP_SERVICE_ID,
+            "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "Content-Type": "application/json;charset=UTF-8",
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         response = requests.post(url, headers=headers, json=payload)
@@ -43,20 +44,20 @@ class KiaUvoApi:
         ### Get Cookies ###
 
         url = (
-            USER_API_URL
+            KIA_UVO_USER_API_URL
             + "oauth2/authorize?response_type=code&state=test&client_id="
-            + CLIENT_ID
+            + KIA_UVO_CLIENT_ID
             + "&redirect_uri="
-            + USER_API_URL
+            + KIA_UVO_USER_API_URL
             + "oauth2/redirect&lang=en"
         )
         payload = {}
         headers = {
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
-            "User-Agent": USER_AGENT_MOZILLA,
-            "Accept": ACCEPT_HEADER_ALL,
+            "User-Agent": KIA_UVO_USER_AGENT_MOZILLA,
+            "Accept": KIA_UVO_ACCEPT_HEADER_ALL,
             "X-Requested-With": "com.kia.uvo.eu",
             "Sec-Fetch-Site": "none",
             "Sec-Fetch-Mode": "navigate",
@@ -73,14 +74,14 @@ class KiaUvoApi:
 
         ### Set Language for Session ###
 
-        url = USER_API_URL + "language"
+        url = KIA_UVO_USER_API_URL + "language"
         headers = {"Content-type": "application/json"}
         payload = {"lang": "en"}
         response = requests.post(url, json=payload, headers=headers, cookies=cookies)
 
         ### Sign In with Email and Password and Get Authorization Code ###
 
-        url = USER_API_URL + "signin"
+        url = KIA_UVO_USER_API_URL + "signin"
         headers = {"Content-type": "application/json"}
         data = {"email": username, "password": password}
         response = requests.post(url, json=data, headers=headers, cookies=cookies)
@@ -90,15 +91,15 @@ class KiaUvoApi:
 
         ### Get Access Token ###
 
-        url = USER_API_URL + "oauth2/token"
+        url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "Content-type": "application/x-www-form-urlencoded",
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
             "Accept-Encoding": "gzip, deflate",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         data = (
@@ -115,15 +116,15 @@ class KiaUvoApi:
 
         ### Get Refresh Token ###
 
-        url = USER_API_URL + "oauth2/token"
+        url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "Content-type": "application/x-www-form-urlencoded",
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
             "Accept-Encoding": "gzip, deflate",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         data = (
@@ -137,15 +138,15 @@ class KiaUvoApi:
         refresh_token = token_type + " " + response["access_token"]
 
         ### Get Vehicles ###
-        url = SPA_API_URL + "vehicles"
+        url = KIA_UVO_SPA_API_URL + "vehicles"
         headers = {
             "Authorization": access_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         response = requests.get(url, headers=headers).json()
@@ -173,15 +174,15 @@ class KiaUvoApi:
         return token
 
     def get_cached_vehicle_status(self, token: Token):
-        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": token.device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         response = requests.get(url, headers=headers)
@@ -190,21 +191,25 @@ class KiaUvoApi:
         return response["resMsg"]["vehicleStatusInfo"]
 
     def get_geocoded_location(self, lat, lon):
-        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=18&email=" + self.username
+        email_parameter = ""
+        if self.use_email_with_geocode_api == True:
+            email_parameter = "&email=" + self.username
+
+        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=18" + email_parameter
         response = requests.get(url)
         response = response.json()
         return response
 
     def update_vehicle_status(self, token: Token):
-        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
             "Authorization": token.refresh_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": token.device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         response = requests.get(url, headers=headers)
@@ -212,15 +217,15 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
     def lock_action(self, token:Token, action):
-        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
         headers = {
             "Authorization": token.access_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": token.device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         payload = {"action": action, "deviceId": token.device_id}
@@ -229,15 +234,15 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
     def start_climate(self, token:Token):
-        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": token.device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         payload = {
@@ -255,15 +260,15 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Start Climate Action Response {response}")
 
     def stop_climate(self, token:Token):
-        url = SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
             "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
             "ccsp-device-id": token.device_id,
-            "Host": BASE_URL,
+            "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
-            "User-Agent": USER_AGENT_OK_HTTP,
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
         }
 
         payload = {
