@@ -190,7 +190,7 @@ class KiaUvoApi:
         return response["resMsg"]["vehicleStatusInfo"]
 
     def get_geocoded_location(self, lat, lon):
-        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=17&email=" + self.username
+        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=18&email=" + self.username
         response = requests.get(url)
         response = response.json()
         return response
