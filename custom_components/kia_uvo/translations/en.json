@@ -25,6 +25,7 @@
             "force_scan_interval": "Force Scan Interval in Minutes",
             "no_force_scan_hour_start": "Blackout Start Hour - (No Force Scan)",
             "no_force_scan_hour_finish": "Blackout Finish Hour - (No Force Scan)",
+            "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
             "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
           }
         }

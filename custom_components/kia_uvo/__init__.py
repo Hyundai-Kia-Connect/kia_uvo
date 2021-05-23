@@ -73,10 +73,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     no_force_scan_hour_finish = config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_FINISH, DEFAULT_NO_FORCE_SCAN_HOUR_FINISH)
     scan_interval = timedelta(minutes=config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
     force_scan_interval = timedelta(minutes=config_entry.options.get(CONF_FORCE_SCAN_INTERVAL, DEFAULT_FORCE_SCAN_INTERVAL))
+    enable_geolocation_entity = config_entry.options.get(CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY)
     use_email_with_geocode_api = config_entry.options.get(CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API)
 
     kia_uvo_api = KiaUvoApi(email, password, use_email_with_geocode_api)
-    vehicle = Vehicle(hass, config_entry, Token(credentials), kia_uvo_api, unit_of_measurement)
+    vehicle = Vehicle(hass, config_entry, Token(credentials), kia_uvo_api, unit_of_measurement, enable_geolocation_entity)
 
     data = {
         DATA_VEHICLE_INSTANCE: vehicle,

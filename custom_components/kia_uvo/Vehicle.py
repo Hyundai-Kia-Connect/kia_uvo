@@ -20,12 +20,13 @@ from .KiaUvoApi import KiaUvoApi
 _LOGGER = logging.getLogger(__name__)
 
 class Vehicle(object):
-    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement: str):
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement: str, enable_geolocation_entity):
         self.hass = hass
         self.config_entry = config_entry
         self.token = token
         self.kia_uvo_api = kia_uvo_api
         self.unit_of_measurement = unit_of_measurement
+        self.enable_geolocation_entity = enable_geolocation_entity
 
         self.name = token.vehicle_name
         self.model = token.vehicle_model
@@ -53,10 +54,11 @@ class Vehicle(object):
             new_lat = self.get_child_value("vehicleLocation.coord.lat")
             new_lon = self.get_child_value("vehicleLocation.coord.lon")
 
-            if (current_lat != new_lat or current_lon != new_lon) or current_geocode is None:
-                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(self.kia_uvo_api.get_geocoded_location, new_lat, new_lon)
-            else:
-                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
+            if self.enable_geolocation_entity == True:
+                if (current_lat != new_lat or current_lon != new_lon) or current_geocode is None:
+                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(self.kia_uvo_api.get_geocoded_location, new_lat, new_lon)
+                else:
+                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
 
             async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:

@@ -13,6 +13,7 @@ CONF_SCAN_INTERVAL: str = "scan_interval"
 CONF_FORCE_SCAN_INTERVAL: str = "force_scan_interval"
 CONF_NO_FORCE_SCAN_HOUR_START: str = "no_force_scan_hour_start"
 CONF_NO_FORCE_SCAN_HOUR_FINISH: str = "no_force_scan_hour_finish"
+CONF_ENABLE_GEOLOCATION_ENTITY: str = "enable_geolocation_entity"
 CONF_USE_EMAIL_WITH_GEOCODE_API: str = "use_email_with_geocode_api"
 
 # I have seen that many people can survice with receiving updates in every 30 minutes. Let's see how KIA will responde
@@ -21,6 +22,7 @@ DEFAULT_SCAN_INTERVAL: int = 30
 DEFAULT_FORCE_SCAN_INTERVAL: int = 240
 DEFAULT_NO_FORCE_SCAN_HOUR_START: int = 22
 DEFAULT_NO_FORCE_SCAN_HOUR_FINISH: int = 6
+DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 TIME_ZONE_EUROPE = tz.gettz('Europe/Berlin')
 
