@@ -20,7 +20,7 @@ Supported entities;
 - Doors, Trunk and Hood Open/Close Status
 - Locking and Unlocking
 - Engine Status
-- Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap
+- Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap (optional, disabled by default)
 - Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
 - Latest Update
 - Configurable distance units, cache update interval, force update interval, blackout start and finish hours
