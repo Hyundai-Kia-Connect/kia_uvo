@@ -41,25 +41,35 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
         hass.data[DOMAIN] = {}
 
     async def async_handle_force_update(call):
-        vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.force_update()
 
     async def async_handle_update(call):
-        vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.update()
 
     async def async_handle_start_climate(call):
-        vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.start_climate()
 
     async def async_handle_stop_climate(call):
-        vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.stop_climate()
+
+    async def async_handle_start_charge(call):
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        await vehicle.start_charge()
+
+    async def async_handle_stop_charge(call):
+        vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        await vehicle.stop_charge()
 
     hass.services.async_register(DOMAIN, "force_update", async_handle_force_update)
     hass.services.async_register(DOMAIN, "update", async_handle_update)
     hass.services.async_register(DOMAIN, "start_climate", async_handle_start_climate)
     hass.services.async_register(DOMAIN, "stop_climate", async_handle_stop_climate)
+    hass.services.async_register(DOMAIN, "start_charge", async_handle_start_charge)
+    hass.services.async_register(DOMAIN, "stop_charge", async_handle_stop_charge)
 
     return True
 

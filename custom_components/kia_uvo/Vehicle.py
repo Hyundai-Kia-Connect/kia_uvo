@@ -24,7 +24,7 @@ class Vehicle(object):
         self.hass = hass
         self.config_entry = config_entry
         self.token = token
-        self.kia_uvo_api = kia_uvo_api
+        self.kia_uvo_api: KiaUvoApi = kia_uvo_api
         self.unit_of_measurement = unit_of_measurement
         self.enable_geolocation_entity = enable_geolocation_entity
 
@@ -103,6 +103,16 @@ class Vehicle(object):
 
     async def stop_climate(self):
         await self.hass.async_add_executor_job(self.kia_uvo_api.stop_climate, self.token)
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
+
+    async def start_charge(self):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.start_charge, self.token)
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
+
+    async def stop_charge(self):
+        await self.hass.async_add_executor_job(self.kia_uvo_api.stop_charge, self.token)
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop)
 

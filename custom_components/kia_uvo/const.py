@@ -38,6 +38,7 @@ KIA_UVO_USER_API_URL: str = "https://" + KIA_UVO_BASE_URL + "/api/v1/user/"
 KIA_UVO_SPA_API_URL: str = "https://" + KIA_UVO_BASE_URL + "/api/v1/spa/"
 KIA_UVO_CCSP_SERVICE_ID: str = "fdc85c00-0a2f-4c64-bcb4-2cfb1500730a"
 KIA_UVO_CLIENT_ID: str = KIA_UVO_CCSP_SERVICE_ID
+KIA_UVO_STAMP: str = "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHh5x/DEsTQdk="
 KIA_UVO_USER_AGENT_OK_HTTP: str = "okhttp/3.12.0"
 KIA_UVO_USER_AGENT_MOZILLA: str = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
 KIA_UVO_ACCEPT_HEADER_ALL: str = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"

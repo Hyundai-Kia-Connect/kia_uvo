@@ -10,7 +10,6 @@ from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class KiaUvoApi:
     def __init__(self, username: str, password: str, use_email_with_geocode_api: bool = False):
         self.username = username
@@ -27,7 +26,7 @@ class KiaUvoApi:
         payload = {"pushRegId": "1", "pushType": "GCM", "uuid": str(uuid.uuid1())}
         headers = {
             "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "Content-Type": "application/json;charset=UTF-8",
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -94,7 +93,7 @@ class KiaUvoApi:
         url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
@@ -119,7 +118,7 @@ class KiaUvoApi:
         url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
@@ -141,7 +140,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles"
         headers = {
             "Authorization": access_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -177,7 +176,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -204,7 +203,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
             "Authorization": token.refresh_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -220,7 +219,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -237,7 +236,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -263,7 +262,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": "9o3mpjuu/h4vH6cwbgTzPD70J+JaprZSWlyFNmfNg2qhql7gngJHhJh9D0kRQd/xRvg=",
+            "Stamp": KIA_UVO_STAMP,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -284,3 +283,43 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Stop Climate Action Request {payload}")
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Stop Climate Action Response {response}")
+
+    def start_charge(self, token:Token):
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": KIA_UVO_STAMP,
+            "ccsp-device-id": token.device_id,
+            "Host": KIA_UVO_BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
+        }
+
+        payload = {
+            "action": "start", 
+            "deviceId": token.device_id
+            }
+        _LOGGER.debug(f"{DOMAIN} - Start Charge Action Request {payload}")
+        response = requests.post(url, json=payload, headers=headers).json()
+        _LOGGER.debug(f"{DOMAIN} - Start Charge Action Response {response}")
+
+    def stop_charge(self, token:Token):
+        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": KIA_UVO_STAMP,
+            "ccsp-device-id": token.device_id,
+            "Host": KIA_UVO_BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
+        }
+
+        payload = {
+            "action": "stop", 
+            "deviceId": token.device_id
+            }
+        _LOGGER.debug(f"{DOMAIN} - Stop Charge Action Request {payload}")
+        response = requests.post(url, json=payload, headers=headers).json()
+        _LOGGER.debug(f"{DOMAIN} - Stop Charge Action Response {response}")

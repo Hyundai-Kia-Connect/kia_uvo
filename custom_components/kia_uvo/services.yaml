@@ -3,6 +3,10 @@ force_update:
 update:
   description: Update vehicle data from cache
 start_climate:
-  description: TEST - Please use cautiously
+  description: TEST - Please use cautiously - start car and climate
 stop_climate:
-  description: TEST - Please use cautiously
+  description: TEST - Please use cautiously - stop car and climate
+start_charge:
+  description: Start charging
+stop_charge:
+  description: Stop charging
