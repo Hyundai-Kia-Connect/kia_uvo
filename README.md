@@ -30,6 +30,7 @@ Supported service;
 - update: get latest **cached** vehicle data
 - start_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
 - stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
+- start_charge / stop_charge: You can control your charging using these services
 
 I have posted an example screenshot from my own car.
 
