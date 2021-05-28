@@ -26,7 +26,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("frontRight", "Door - Front Right", "vehicleStatus.doorOpen.frontRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
         ("backLeft", "Door - Rear Left", "vehicleStatus.doorOpen.backLeft", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
         ("backRight", "Door - Rear Right", "vehicleStatus.doorOpen.backRight", "mdi:car-door", "mdi:car-door", DEVICE_CLASS_DOOR),
-        #("doorLock", "Door Lock", "vehicleStatus.doorLock", "mdi:lock", "mdi:lock-open-variant", DEVICE_CLASS_LOCK),
         ("engine", "Engine", "vehicleStatus.engine", "mdi:engine", "mdi:engine-off", DEVICE_CLASS_POWER),
         ("tirePressureLampAll", "Tire Pressure - All", "vehicleStatus.tirePressureLamp.tirePressureLampAll", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
         ("tirePressureLampFL", "Tire Pressure - Front Left", "vehicleStatus.tirePressureLamp.tirePressureLampFL", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
@@ -35,8 +34,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("tirePressureLampRR", "Tire Pressure - Rear Right", "vehicleStatus.tirePressureLamp.tirePressureLampRR", "mdi:car-tire-alert", "mdi:car-tire-alert", DEVICE_CLASS_PROBLEM),
         ("airConditioner", "Air Conditioner", "vehicleStatus.airCtrlOn", "mdi:air-conditioner", "mdi:air-conditioner", DEVICE_CLASS_POWER),
         ("defrost", "Defroster", "vehicleStatus.defrost", "mdi:car-defrost-front", "mdi:car-defrost-front", None),
-        ("backwindowheater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
-        ("steeringwheelheater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
+        ("backWindowHeater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
+        ("steeringWheelHeater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
     ]
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
