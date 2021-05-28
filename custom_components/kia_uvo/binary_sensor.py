@@ -43,7 +43,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         BINARY_INSTRUMENTS.append(("charging", "Charging", "vehicleStatus.evStatus.batteryCharge", None, None, DEVICE_CLASS_BATTERY_CHARGING))
         BINARY_INSTRUMENTS.append(("pluggedIn", "Plugged In", "vehicleStatus.evStatus.batteryPlugin", None, None, DEVICE_CLASS_PLUG))
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
-        BINARY_INSTRUMENTS.append(("lowFuelLight", "Low Fuel Light", "vehicleStatus.evStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None))
+        BINARY_INSTRUMENTS.append(("lowFuelLight", "Low Fuel Light", "vehicleStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None))
 
     binary_sensors = [
         InstrumentSensor(hass, config_entry, vehicle, id, description, key, on_icon, off_icon, device_class)
