@@ -118,7 +118,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         else:
             _LOGGER.debug(f"{DOMAIN} - We are in silent hour zone / no automatic force updates {event_time_local}")
         
-
     await update(dt_util.utcnow())
 
     for platform in PLATFORMS:

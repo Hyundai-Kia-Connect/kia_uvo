@@ -39,6 +39,7 @@ class Vehicle(object):
         self.force_update_try_caller = None
 
         self.topic_update = TOPIC_UPDATE.format(self.id)
+
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
     async def update(self):

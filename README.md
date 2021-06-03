@@ -26,10 +26,9 @@ Supported entities;
 - Configurable distance units, cache update interval, force update interval, blackout start and finish hours
 
 Supported service;
-- force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
 - update: get latest **cached** vehicle data
-- start_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
-- stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
+- force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
+- start_climate / stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
 - start_charge / stop_charge: You can control your charging using these services
 
 I have posted an example screenshot from my own car.

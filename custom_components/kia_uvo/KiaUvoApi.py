@@ -1,6 +1,8 @@
 import logging
 
 from datetime import datetime
+import push_receiver
+import random
 import requests
 from urllib.parse import parse_qs, urlparse
 import uuid
@@ -15,31 +17,54 @@ class KiaUvoApi:
         self.username = username
         self.password = password
         self.use_email_with_geocode_api = use_email_with_geocode_api
+        self.stamps = None
 
+    def get_stamps_from_bluelinky(self) -> list:
+        stamps = []
+        response = requests.get("https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/kia.json")
+        stampsAsText = response.text
+        for stamp in stampsAsText.split("\""):
+            stamp = stamp.strip()
+            if len(stamp) == 64:
+                stamps.append(stamp)
+        return stamps
+    
     def login(self) -> Token:
+        
+        if self.stamps is None:
+            self.stamps = self.get_stamps_from_bluelinky()   
+
         username = self.username
         password = self.password
+
+        ### test url: https://prd.eu-ccapi.kia.com:8080/web/v1/user/intgmain
         
         ### Get Device Id ###
-
+        credentials = push_receiver.register(sender_id=KIA_UVO_GCM_SENDER_ID)
         url = KIA_UVO_SPA_API_URL + "notifications/register"
-        payload = {"pushRegId": "1", "pushType": "GCM", "uuid": str(uuid.uuid1())}
-        headers = {
-            "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID,
-            "Stamp": KIA_UVO_STAMP,
-            "Content-Type": "application/json;charset=UTF-8",
-            "Host": KIA_UVO_BASE_URL,
-            "Connection": "Keep-Alive",
-            "Accept-Encoding": "gzip",
-            "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
-        }
+        payload = {"pushRegId": credentials["gcm"]["token"], "pushType": "GCM", "uuid": str(uuid.uuid4())}
 
-        response = requests.post(url, headers=headers, json=payload)
-        response = response.json()
-        _LOGGER.debug(f"{DOMAIN} - Get Device ID response {response}")
+        for i in [0,KIA_UVO_INVALID_STAMP_RETRY_COUNT]:
+            stamp = random.choice(self.stamps)
+            headers = {
+                "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID,
+                "Stamp": stamp,
+                "Content-Type": "application/json;charset=UTF-8",
+                "Host": KIA_UVO_BASE_URL,
+                "Connection": "Keep-Alive",
+                "Accept-Encoding": "gzip",
+                "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
+            }
+
+            response = requests.post(url, headers=headers, json=payload)
+            response = response.json()
+            _LOGGER.debug(f"{DOMAIN} - Get Device ID request {headers} {payload}")
+            _LOGGER.debug(f"{DOMAIN} - Get Device ID response {response}")
+            if not (response["retCode"] == "F" and response["resCode"] == "4017"):
+                break
+            _LOGGER.debug(f"{DOMAIN} - Retry count {i} - Invalid stamp {stamp}")
 
         device_id = response["resMsg"]["deviceId"]
-
         ### Get Cookies ###
 
         url = (
@@ -93,7 +118,7 @@ class KiaUvoApi:
         url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
@@ -118,7 +143,7 @@ class KiaUvoApi:
         url = KIA_UVO_USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": KIA_UVO_BASE_URL,
             "Connection": "close",
@@ -140,7 +165,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles"
         headers = {
             "Authorization": access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": stamp,
             "ccsp-device-id": device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -168,6 +193,7 @@ class KiaUvoApi:
             vehicle_model,
             vehicle_registration_date,
             valid_until,
+            stamp,
         )
 
         return token
@@ -176,7 +202,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -203,7 +229,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
             "Authorization": token.refresh_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -219,7 +245,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -236,7 +262,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -262,7 +288,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -288,7 +314,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
@@ -308,7 +334,7 @@ class KiaUvoApi:
         url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": KIA_UVO_STAMP,
+            "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": KIA_UVO_BASE_URL,
             "Connection": "Keep-Alive",
