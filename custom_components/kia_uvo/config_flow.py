@@ -3,16 +3,18 @@ import logging
 import voluptuous as vol
 import uuid
 import requests
+import traceback
 from urllib.parse import parse_qs, urlparse
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, CONF_UNIT_OF_MEASUREMENT, CONF_UNIT_SYSTEM
+from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, CONF_UNIT_OF_MEASUREMENT, CONF_UNIT_SYSTEM, CONF_REGION
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
 from .const import *
+from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
-from .KiaUvoApi import KiaUvoApi
+from .utils import getImplByRegion
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +55,8 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
         self.schema = vol.Schema(
             {
                 vol.Required(CONF_USERNAME): str, 
-                vol.Required(CONF_PASSWORD): str
+                vol.Required(CONF_PASSWORD): str,
+                vol.Optional(CONF_REGION, default = DEFAULT_REGION): vol.In(REGIONS)
             }
         )
         self.kia_uvo_api = None
@@ -67,8 +70,9 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
         if user_input is not None:
             username = user_input[CONF_USERNAME]
             password = user_input[CONF_PASSWORD]
+            region = user_input[CONF_REGION]
 
-            self.kia_uvo_api = KiaUvoApi(username, password)
+            self.kia_uvo_api: KiaUvoApiImpl = getImplByRegion(region, username, password)
 
             try:
                 self.token = await self.hass.async_add_executor_job(self.kia_uvo_api.login)
@@ -77,11 +81,12 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain = DOMAIN):
                     data = {
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
+                        CONF_REGION: region,
                         CONF_STORED_CREDENTIALS: vars(self.token),
                     }
                 )
             except Exception as ex:
-                _LOGGER.error(f"{DOMAIN} Exception in kia_uvo login : %s", str(ex))
+                _LOGGER.error(f"{DOMAIN} Exception in kia_uvo login : %s - traceback: %s", ex, traceback.format_exc())
                 errors = {"base": "auth"}
 
         return self.async_show_form(step_id = "user", data_schema = self.schema, errors = errors)

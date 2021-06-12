@@ -1,12 +1,13 @@
 import logging
 
-import voluptuous as vol
 import asyncio
+import voluptuous as vol
+from datetime import datetime, timezone
 
 from homeassistant import bootstrap
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, CONF_UNIT_OF_MEASUREMENT
+from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, CONF_UNIT_OF_MEASUREMENT, CONF_REGION
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
@@ -16,10 +17,10 @@ from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
 from .const import *
+from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
+from .utils import getImplByRegion
 from .Vehicle import Vehicle
-from .KiaUvoApi import KiaUvoApi
-from datetime import datetime, timezone
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,8 +76,9 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     _LOGGER.debug(f"{DOMAIN} - async_setup_entry started - {config_entry}")
-    email = config_entry.data.get(CONF_USERNAME)
+    username = config_entry.data.get(CONF_USERNAME)
     password = config_entry.data.get(CONF_PASSWORD)
+    region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
     unit_of_measurement = DISTANCE_UNITS[config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)]
     no_force_scan_hour_start = config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START)
@@ -86,8 +88,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     enable_geolocation_entity = config_entry.options.get(CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY)
     use_email_with_geocode_api = config_entry.options.get(CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API)
 
-    kia_uvo_api = KiaUvoApi(email, password, use_email_with_geocode_api)
-    vehicle = Vehicle(hass, config_entry, Token(credentials), kia_uvo_api, unit_of_measurement, enable_geolocation_entity)
+    kia_uvo_api: KiaUvoApiImpl = getImplByRegion(region, username, password, use_email_with_geocode_api)
+    vehicle:Vehicle = Vehicle(hass, config_entry, Token(credentials), kia_uvo_api, unit_of_measurement, enable_geolocation_entity)
 
     data = {
         DATA_VEHICLE_INSTANCE: vehicle,

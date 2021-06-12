@@ -8,16 +8,14 @@ from urllib.parse import parse_qs, urlparse
 import uuid
 
 from .const import *
+from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-class KiaUvoApi:
+class KiaUvoApiEU(KiaUvoApiImpl):
     def __init__(self, username: str, password: str, use_email_with_geocode_api: bool = False):
-        self.username = username
-        self.password = password
-        self.use_email_with_geocode_api = use_email_with_geocode_api
-        self.stamps = None
+        super().__init__(username, password, use_email_with_geocode_api)
 
     def get_stamps_from_bluelinky(self) -> list:
         stamps = []
@@ -28,7 +26,7 @@ class KiaUvoApi:
             if len(stamp) == 64:
                 stamps.append(stamp)
         return stamps
-    
+
     def login(self) -> Token:
         
         if self.stamps is None:
@@ -40,25 +38,25 @@ class KiaUvoApi:
         ### test url: https://prd.eu-ccapi.kia.com:8080/web/v1/user/intgmain
         
         ### Get Device Id ###
-        credentials = push_receiver.register(sender_id=KIA_UVO_GCM_SENDER_ID)
-        url = KIA_UVO_SPA_API_URL + "notifications/register"
+        credentials = push_receiver.register(sender_id = KIA_UVO_GCM_SENDER_ID_EU)
+        url = KIA_UVO_SPA_API_URL_EU + "notifications/register"
         payload = {"pushRegId": credentials["gcm"]["token"], "pushType": "GCM", "uuid": str(uuid.uuid4())}
 
         for i in [0,KIA_UVO_INVALID_STAMP_RETRY_COUNT]:
             stamp = random.choice(self.stamps)
             headers = {
-                "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID,
+                "ccsp-service-id": KIA_UVO_CCSP_SERVICE_ID_EU,
                 "Stamp": stamp,
                 "Content-Type": "application/json;charset=UTF-8",
-                "Host": KIA_UVO_BASE_URL,
+                "Host": KIA_UVO_BASE_URL_EU,
                 "Connection": "Keep-Alive",
                 "Accept-Encoding": "gzip",
                 "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
             }
 
+            _LOGGER.debug(f"{DOMAIN} - Get Device ID request {headers} {payload}")
             response = requests.post(url, headers=headers, json=payload)
             response = response.json()
-            _LOGGER.debug(f"{DOMAIN} - Get Device ID request {headers} {payload}")
             _LOGGER.debug(f"{DOMAIN} - Get Device ID response {response}")
             if not (response["retCode"] == "F" and response["resCode"] == "4017"):
                 break
@@ -68,16 +66,16 @@ class KiaUvoApi:
         ### Get Cookies ###
 
         url = (
-            KIA_UVO_USER_API_URL
+            KIA_UVO_USER_API_URL_EU
             + "oauth2/authorize?response_type=code&state=test&client_id="
-            + KIA_UVO_CLIENT_ID
+            + KIA_UVO_CLIENT_ID_EU
             + "&redirect_uri="
-            + KIA_UVO_USER_API_URL
+            + KIA_UVO_USER_API_URL_EU
             + "oauth2/redirect&lang=en"
         )
         payload = {}
         headers = {
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "keep-alive",
             "Upgrade-Insecure-Requests": "1",
             "User-Agent": KIA_UVO_USER_AGENT_MOZILLA,
@@ -98,16 +96,17 @@ class KiaUvoApi:
 
         ### Set Language for Session ###
 
-        url = KIA_UVO_USER_API_URL + "language"
+        url = KIA_UVO_USER_API_URL_EU + "language"
         headers = {"Content-type": "application/json"}
         payload = {"lang": "en"}
         response = requests.post(url, json=payload, headers=headers, cookies=cookies)
 
         ### Sign In with Email and Password and Get Authorization Code ###
 
-        url = KIA_UVO_USER_API_URL + "signin"
+        url = KIA_UVO_USER_API_URL_EU + "signin"
         headers = {"Content-type": "application/json"}
         data = {"email": username, "password": password}
+        _LOGGER.debug(f"{DOMAIN} - Sign In Data {data}")
         response = requests.post(url, json=data, headers=headers, cookies=cookies)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.json()}")
         parsed_url = urlparse(response.json()["redirectUrl"])
@@ -115,12 +114,12 @@ class KiaUvoApi:
 
         ### Get Access Token ###
 
-        url = KIA_UVO_USER_API_URL + "oauth2/token"
+        url = KIA_UVO_USER_API_URL_EU + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
             "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "close",
             "Accept-Encoding": "gzip, deflate",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -140,12 +139,12 @@ class KiaUvoApi:
 
         ### Get Refresh Token ###
 
-        url = KIA_UVO_USER_API_URL + "oauth2/token"
+        url = KIA_UVO_USER_API_URL_EU + "oauth2/token"
         headers = {
             "Authorization": "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==",
             "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "close",
             "Accept-Encoding": "gzip, deflate",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -162,12 +161,12 @@ class KiaUvoApi:
         refresh_token = token_type + " " + response["access_token"]
 
         ### Get Vehicles ###
-        url = KIA_UVO_SPA_API_URL + "vehicles"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles"
         headers = {
             "Authorization": access_token,
             "Stamp": stamp,
             "ccsp-device-id": device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -199,12 +198,12 @@ class KiaUvoApi:
         return token
 
     def get_cached_vehicle_status(self, token: Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -215,23 +214,13 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
         return response["resMsg"]["vehicleStatusInfo"]
 
-    def get_geocoded_location(self, lat, lon):
-        email_parameter = ""
-        if self.use_email_with_geocode_api == True:
-            email_parameter = "&email=" + self.username
-
-        url = "https://nominatim.openstreetmap.org/reverse?lat=" + str(lat) + "&lon=" + str(lon) + "&format=json&addressdetails=1&zoom=18" + email_parameter
-        response = requests.get(url)
-        response = response.json()
-        return response
-
     def update_vehicle_status(self, token: Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/status"
         headers = {
             "Authorization": token.refresh_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -242,12 +231,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
     def lock_action(self, token:Token, action):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/control/door"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -259,12 +248,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
     def start_climate(self, token:Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -285,12 +274,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Start Climate Action Response {response}")
 
     def stop_climate(self, token:Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -311,12 +300,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Stop Climate Action Response {response}")
 
     def start_charge(self, token:Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
@@ -331,12 +320,12 @@ class KiaUvoApi:
         _LOGGER.debug(f"{DOMAIN} - Start Charge Action Response {response}")
 
     def stop_charge(self, token:Token):
-        url = KIA_UVO_SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
+        url = KIA_UVO_SPA_API_URL_EU + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
-            "Host": KIA_UVO_BASE_URL,
+            "Host": KIA_UVO_BASE_URL_EU,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
             "User-Agent": KIA_UVO_USER_AGENT_OK_HTTP,
