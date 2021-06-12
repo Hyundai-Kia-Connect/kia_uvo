@@ -13,11 +13,12 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 class KiaUvoApiImpl:
-    def __init__(self, username: str, password: str, use_email_with_geocode_api: bool = False):
+    def __init__(self, username: str, password: str, region: int, use_email_with_geocode_api: bool = False):
         self.username = username
         self.password = password
         self.use_email_with_geocode_api = use_email_with_geocode_api
         self.stamps = None
+        self.region = region
     
     def login(self) -> Token:
         pass

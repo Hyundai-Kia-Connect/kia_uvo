@@ -1,6 +1,6 @@
 import logging
 
-from datetime import timedelta
+from datetime import timedelta, tzinfo
 from dateutil import tz
 from enum import Enum
 

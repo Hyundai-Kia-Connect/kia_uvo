@@ -19,7 +19,7 @@ from homeassistant.util import dt as dt_util
 from .const import *
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
-from .utils import getImplByRegion
+from .utils import getImplByRegion, getTimezoneByRegion
 from .Vehicle import Vehicle
 
 _LOGGER = logging.getLogger(__name__)
@@ -107,12 +107,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     async def update(event_time_utc: datetime):
         await refresh_config_entry()
         await vehicle.refresh_token()
-        event_time_local = event_time_utc.astimezone(TIME_ZONE_EUROPE)
+        event_time_local = event_time_utc.astimezone(getTimezoneByRegion(vehicle.kia_uvo_api.region))
         _LOGGER.debug(f"{DOMAIN} - Decide to make a force call current hour {event_time_local.hour} blackout start {no_force_scan_hour_start} blackout finish {no_force_scan_hour_finish} force scan interval {force_scan_interval}")
 
         await vehicle.update()
         if (event_time_local.hour < no_force_scan_hour_start and event_time_local.hour >= no_force_scan_hour_finish):
-            if datetime.now(TIME_ZONE_EUROPE) - vehicle.last_updated > force_scan_interval:
+            if datetime.now(getTimezoneByRegion(vehicle.kia_uvo_api.region)) - vehicle.last_updated > force_scan_interval:
                 try:
                     await vehicle.force_update()
                 except Exception as ex:

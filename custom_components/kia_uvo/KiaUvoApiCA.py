@@ -14,8 +14,8 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 class KiaUvoApiCA(KiaUvoApiImpl):
-    def __init__(self, username: str, password: str, use_email_with_geocode_api: bool = False):
-        super().__init__(username, password, use_email_with_geocode_api)
+    def __init__(self, username: str, password: str, region: int, use_email_with_geocode_api: bool = False):
+        super().__init__(username, password, region, use_email_with_geocode_api)
 
     def login(self) -> Token:
         username = self.username
