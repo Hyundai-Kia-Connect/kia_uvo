@@ -14,18 +14,17 @@ from homeassistant.helpers.event import async_call_later
 import homeassistant.util.dt as dt_util
 
 from .const import *
-from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
-from .utils import getTimezoneByRegion
+from .KiaUvoApi import KiaUvoApi
 
 _LOGGER = logging.getLogger(__name__)
 
 class Vehicle(object):
-    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, token: Token, kia_uvo_api: KiaUvoApiImpl, unit_of_measurement: str, enable_geolocation_entity):
+    def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry, token: Token, kia_uvo_api: KiaUvoApi, unit_of_measurement: str, enable_geolocation_entity):
         self.hass = hass
         self.config_entry = config_entry
         self.token = token
-        self.kia_uvo_api: KiaUvoApiImpl = kia_uvo_api
+        self.kia_uvo_api: KiaUvoApi = kia_uvo_api
         self.unit_of_measurement = unit_of_measurement
         self.enable_geolocation_entity = enable_geolocation_entity
 
@@ -133,10 +132,10 @@ class Vehicle(object):
             hour = int(m.group(4)),
             minute = int(m.group(5)),
             second = int(m.group(6)),
-            tzinfo = getTimezoneByRegion(self.kia_uvo_api.region)
+            tzinfo = TIME_ZONE_EUROPE
         )
 
-        _LOGGER.debug(f"{DOMAIN} - LastUpdated {last_updated} - Timezone {getTimezoneByRegion(self.kia_uvo_api.region)}")
+        _LOGGER.debug(f"{DOMAIN} - LastUpdated {last_updated} - Timezone {TIME_ZONE_EUROPE}")
 
         self.last_updated = last_updated
     
