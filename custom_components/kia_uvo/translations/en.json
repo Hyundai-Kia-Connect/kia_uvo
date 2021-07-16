@@ -1,34 +1,36 @@
 {
-    "title": "Kia Uvo",
-    "config": {
-      "step": {
-        "user": {
-          "title": "Kia Uvo: Authentication",
-          "description": "Set up your Kia Uvo to integrate with Home Assistant.",
-          "data": {
-            "username": "Username",
-            "password": "Password"
-          }
+  "title": "Kia Uvo / Hyundai Bluelink",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Kia Uvo / Hyundai Bluelink: Authentication",
+        "description": "Set up your Kia Uvo / Hyundai Bluelink to integrate with Home Assistant.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "region": "Region",
+          "brand": "Brand"
         }
-      },
-      "error": {
-        "auth": "Login failed into Kia Uvo EU Servers. Please use official Kia Uvo app to logout and log back in and try again!"
       }
     },
-    "options": {
-      "step": {
-        "init": {
-          "title": "Kia Uvo: Configuration",
-          "data": {
-            "unit_of_measurement": "Distance Unit",
-            "scan_interval": "Scan Interval in Minutes",
-            "force_scan_interval": "Force Scan Interval in Minutes",
-            "no_force_scan_hour_start": "Blackout Start Hour - (No Force Scan)",
-            "no_force_scan_hour_finish": "Blackout Finish Hour - (No Force Scan)",
-            "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
-            "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-          }
+    "error": {
+      "auth": "Login failed into Kia Uvo / Hyundai Bluelink Servers. Please use official Kia Uvo app to logout and log back in and try again!"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Kia Uvo: Configuration",
+        "data": {
+          "unit_of_measurement": "Distance Unit",
+          "scan_interval": "Scan Interval in Minutes",
+          "force_scan_interval": "Force Scan Interval in Minutes",
+          "no_force_scan_hour_start": "Blackout Start Hour - (No Force Scan)",
+          "no_force_scan_hour_finish": "Blackout Finish Hour - (No Force Scan)",
+          "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
+          "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
         }
       }
     }
   }
+}

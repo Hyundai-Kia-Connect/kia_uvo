@@ -3,7 +3,8 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
 from .Vehicle import Vehicle
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, BRANDS
+
 
 class KiaUvoEntity(Entity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
@@ -20,7 +21,9 @@ class KiaUvoEntity(Entity):
             self.async_write_ha_state()
 
         await super().async_added_to_hass()
-        self.topic_update_listener = async_dispatcher_connect(self.hass, self.topic_update, update)
+        self.topic_update_listener = async_dispatcher_connect(
+            self.hass, self.topic_update, update
+        )
         self.async_on_remove(self.topic_update_listener)
         self.update_from_latest_data()
 
@@ -37,13 +40,13 @@ class KiaUvoEntity(Entity):
         return {
             "identifiers": {(DOMAIN, self.vehicle.id)},
             "name": self.vehicle.name,
-            "manufacturer": "Kia",
+            "manufacturer": BRANDS[self.vehicle.kia_uvo_api.brand],
             "model": self.vehicle.model,
             "engine_type": self.vehicle.engine_type,
             "sw_version": self.vehicle.registration_date,
             "via_device": (DOMAIN, self.vehicle.id),
         }
-    
+
     @callback
     def update_from_latest_data(self):
         self.vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
