@@ -77,7 +77,8 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_name = response["vehicles"][0]["nickName"]
         vehicle_id = response["vehicles"][0]["vehicleId"]
         vehicle_model = response["vehicles"][0]["nickName"]
-        vehicle_registration_date = response["vehicles"][0]["enrollmentDate"]
+        vehicle_registration_date = response["vehicles"][0].get("enrollmentDate",datetime.now())
+
 
         valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
