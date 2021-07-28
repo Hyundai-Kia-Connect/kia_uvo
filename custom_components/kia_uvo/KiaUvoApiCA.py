@@ -74,9 +74,9 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
         response = response["result"]
-        vehicle_name = response["vehicles"][0]["nickname"]
+        vehicle_name = response["vehicles"][0]["nickName"]
         vehicle_id = response["vehicles"][0]["vehicleId"]
-        vehicle_model = response["vehicles"][0]["nickname"]
+        vehicle_model = response["vehicles"][0]["nickName"]
         vehicle_registration_date = response["vehicles"][0]["enrollmentDate"]
 
         valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
