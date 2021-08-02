@@ -174,7 +174,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
             and event_time_local.hour >= no_force_scan_hour_finish
         ):
             if (
-                datetime.now(local_timezone) - vehicle.last_updated
+                datetime.now(local_timezone) - vehicle.last_updated(local_timezone)
                 > force_scan_interval
             ):
                 try:
