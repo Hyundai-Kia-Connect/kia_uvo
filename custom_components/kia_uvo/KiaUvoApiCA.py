@@ -7,7 +7,7 @@ import requests
 from urllib.parse import parse_qs, urlparse
 import uuid
 
-from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT
+from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT, VEHICLE_LOCK_ACTION
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
@@ -122,7 +122,17 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
     def lock_action(self, token: Token, action):
-        pass
+        if action == VEHICLE_LOCK_ACTION.LOCK:
+            url = self.API_URL + "drlck"
+        else:
+            url = self.API_URL + "drulck"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+
+        response = requests.post(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - Received lock_action response {response}")
 
     def start_climate(self, token: Token):
         pass
