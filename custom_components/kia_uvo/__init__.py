@@ -169,14 +169,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
         event_time_local = event_time_utc.astimezone(local_timezone)
         await vehicle.update()
-        if (
-            event_time_local.hour < no_force_scan_hour_start
-            and event_time_local.hour >= no_force_scan_hour_finish
-        ):
-            if (
-                datetime.now(local_timezone) - vehicle.last_updated
-                > force_scan_interval
-            ):
+        if (event_time_local.hour < no_force_scan_hour_start and event_time_local.hour >= no_force_scan_hour_finish):
+            if (datetime.now(local_timezone) - vehicle.last_updated > force_scan_interval):
                 try:
                     await vehicle.force_update()
                 except Exception as ex:

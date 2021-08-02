@@ -77,8 +77,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_name = response["vehicles"][0]["nickName"]
         vehicle_id = response["vehicles"][0]["vehicleId"]
         vehicle_model = response["vehicles"][0]["nickName"]
-        vehicle_registration_date = response["vehicles"][0].get("enrollmentDate",datetime.now())
-
+        vehicle_registration_date = response["vehicles"][0].get("enrollmentDate","missing")
 
         valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
@@ -106,8 +105,11 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = requests.post(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
-        response = response["result"]
-        return response["resMsg"]["vehicleStatusInfo"]
+        response = response["result"]["status"]
+        vehicle_status = {}
+        vehicle_status["vehicleStatus"] = response
+        vehicle_status["vehicleStatus"]["time"] = response["lastStatusDate"]
+        return vehicle_status
 
     def update_vehicle_status(self, token: Token):
         url = self.API_URL + "rltmvhclsts"

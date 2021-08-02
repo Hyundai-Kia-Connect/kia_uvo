@@ -65,15 +65,11 @@ class Vehicle(object):
                 if (
                     current_lat != new_lat or current_lon != new_lon
                 ) or current_geocode is None:
-                    self.vehicle_data["vehicleLocation"][
-                        "geocodedLocation"
-                    ] = await self.hass.async_add_executor_job(
+                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(
                         self.kia_uvo_api.get_geocoded_location, new_lat, new_lon
                     )
                 else:
-                    self.vehicle_data["vehicleLocation"][
-                        "geocodedLocation"
-                    ] = current_geocode
+                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
 
             async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:
