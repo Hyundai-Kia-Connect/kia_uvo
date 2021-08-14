@@ -1,203 +1,195 @@
 import logging
 
-from datetime import datetime
-import re
+from datetime import timedelta, datetime
+import push_receiver
+import random
 import requests
+from urllib.parse import parse_qs, urlparse
+import uuid
+import json
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
-    async_dispatcher_send,
-)
-from homeassistant.helpers.event import async_call_later
-import homeassistant.util.dt as dt_util
-
-from .const import *
+from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT, VEHICLE_LOCK_ACTION
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-class Vehicle(object):
+
+class KiaUvoApiCA(KiaUvoApiImpl):
     def __init__(
         self,
-        hass: HomeAssistant,
-        config_entry: ConfigEntry,
-        token: Token,
-        kia_uvo_api: KiaUvoApiImpl,
-        unit_of_measurement: str,
-        enable_geolocation_entity,
+        username: str,
+        password: str,
+        region: int,
+        brand: int,
+        pin: int,
+        use_email_with_geocode_api: bool = False,
     ):
-        self.hass = hass
-        self.config_entry = config_entry
-        self.token = token
-        self.kia_uvo_api: KiaUvoApiImpl = kia_uvo_api
-        self.unit_of_measurement = unit_of_measurement
-        self.enable_geolocation_entity = enable_geolocation_entity
-        self.name = token.vehicle_name
-        self.model = token.vehicle_model
-        self.id = token.vehicle_id
-        self.registration_date = token.vehicle_registration_date
-        self.vehicle_data = {}
-        self.engine_type = None
-        self.last_updated: datetime = datetime.min
-        self.force_update_try_caller = None
-        self.topic_update = TOPIC_UPDATE.format(self.id)
-        _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
+        super().__init__(username, password, region, brand, pin, use_email_with_geocode_api)
 
-    async def update(self):
-        try:
-            current_lat = self.get_child_value("vehicleLocation.coord.lat")
-            current_lon = self.get_child_value("vehicleLocation.coord.lon")
-            current_geocode = self.get_child_value("vehicleLocation.geocodedLocation")
+        if BRANDS[brand] == BRAND_KIA:
+            self.BASE_URL: str = "www.myuvo.ca"
+        elif BRANDS[brand] == BRAND_HYUNDAI:
+            self.BASE_URL: str = "www.mybluelink.ca"
 
-            self.vehicle_data = await self.hass.async_add_executor_job(
-                self.kia_uvo_api.get_cached_vehicle_status, self.token
-            )
-            self.set_last_updated()
-            self.set_engine_type()
+        self.API_URL: str = "https://" + self.BASE_URL + "/tods/api/"
+        self.API_HEADERS = {
+            "content-type": "application/json;charset=UTF-8",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, deflate, br",
+            "accept-language": "en-US,en;q=0.9",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
+            "host": self.BASE_URL,
+            "origin": "https://" + self.BASE_URL,
+            "referer": "https://" + self.BASE_URL + "/login",
+            "from": "SPA",
+            "language": "0",
+            "offset": "0",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+        }
 
-            new_lat = self.get_child_value("vehicleLocation.coord.lat")
-            new_lon = self.get_child_value("vehicleLocation.coord.lon")
+    def login(self) -> Token:
+        username = self.username
+        password = self.password
+        pin = self.pin
 
-            if self.enable_geolocation_entity == True:
-                if (
-                    current_lat != new_lat or current_lon != new_lon
-                ) or current_geocode is None:
-                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(
-                        self.kia_uvo_api.get_geocoded_location, new_lat, new_lon
-                    )
-                else:
-                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
+        ### Sign In with Email and Password and Get Authorization Code ###
 
-            async_dispatcher_send(self.hass, self.topic_update)
-        except Exception as ex:
-            _LOGGER.error(f"{DOMAIN} - Exception in update : %s", str(ex))
+        url = self.API_URL + "lgn"
+        data = {"loginId": username, "password": password}
+        headers = self.API_HEADERS
+        response = requests.post(url, json=data, headers=headers)
+        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
+        response = response.json()
+        response = response["result"]
+        access_token = response["accessToken"]
+        refresh_token = response["refreshToken"]
+        _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
+        _LOGGER.debug(f"{DOMAIN} - Refresh Token Value {refresh_token}")
 
-    async def force_update(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.update_vehicle_status, self.token
-        )
-        await self.update()
+        ### Get Vehicles ###
+        url = self.API_URL + "vhcllst"
+        headers = self.API_HEADERS
+        headers["accessToken"] = access_token
+        response = requests.post(url, headers=headers)
+        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
+        response = response.json()
+        response = response["result"]
+        vehicle_name = response["vehicles"][0]["nickName"]
+        vehicle_id = response["vehicles"][0]["vehicleId"]
+        vehicle_model = response["vehicles"][0]["nickName"]
+        vehicle_registration_date = response["vehicles"][0].get("enrollmentDate","missing")
 
-    async def force_update_loop(self, _):
-        _LOGGER.debug(
-            f"{DOMAIN} - force_update_loop start {self.force_update_try_count} {COUNT_FORCE_UPDATE_AFTER_COMMAND}"
-        )
-        if self.force_update_try_count == COUNT_FORCE_UPDATE_AFTER_COMMAND:
-            self.force_update_try_count = 0
-            return
+        valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
-        last_updated: datetime = self.last_updated
-        _LOGGER.debug(f"{DOMAIN} - force_update_loop last_updated {last_updated}")
-
-        await self.force_update()
-        _LOGGER.debug(
-            f"{DOMAIN} - force_update_loop force_update_finished {last_updated} {self.last_updated}"
-        )
-        if last_updated == self.last_updated:
-            self.force_update_try_count = self.force_update_try_count + 1
-            self.force_update_try_caller = async_call_later(
-                self.hass, INTERVAL_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-            )
-
-    async def lock_action(self, action: VEHICLE_LOCK_ACTION):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.lock_action, self.token, action.value
-        )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+        token = Token({})
+        token.set(
+            access_token,
+            refresh_token,
+            None,
+            vehicle_name,
+            vehicle_id,
+            vehicle_model,
+            vehicle_registration_date,
+            valid_until,
+            "NoStamp",
         )
 
-    async def refresh_token(self):
-        _LOGGER.debug(
-            f"{DOMAIN} - Refresh token started {self.token.valid_until} {datetime.now()} {self.token.valid_until <= datetime.now().strftime(DATE_FORMAT)}"
-        )
-        if self.token.valid_until <= datetime.now().strftime(DATE_FORMAT):
-            _LOGGER.debug(f"{DOMAIN} - Refresh token expired")
-            await self.hass.async_add_executor_job(self.login)
-            return True
-        return False
+        return token
 
-    async def start_climate(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.start_climate, self.token
-        )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+    def get_cached_vehicle_status(self, token: Token):
+        url = self.API_URL + "lstvhclsts"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
 
-    async def stop_climate(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.stop_climate, self.token
-        )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        response = requests.post(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
+        response = response["result"]["status"]
+        vehicle_status = {}
+        vehicle_status["vehicleStatus"] = response
+        vehicle_status["vehicleStatus"]["time"] = response["lastStatusDate"]
+        service_status = {}
+        service_status = self._get_service_status(token)
+        vehicle_status["vehicleStatus"]["odometer"] = {}
+        vehicle_status["vehicleStatus"]["odometer"]["unit"]= service_status["serviceStatus"]["currentOdometerUnit"]
+        vehicle_status["vehicleStatus"]["odometer"]["value"]= service_status["serviceStatus"]["currentOdometer"]
+        _LOGGER.debug(f"{DOMAIN} - Vehicle Status: {vehicle_status}")
 
-    async def start_charge(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.start_charge, self.token
-        )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        return vehicle_status
 
-    async def stop_charge(self):
-        await self.hass.async_add_executor_job(self.kia_uvo_api.stop_charge, self.token)
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+    def update_vehicle_status(self, token: Token):
+        url = self.API_URL + "rltmvhclsts"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
 
-    def login(self):
-        self.token = self.kia_uvo_api.login()
+        response = requests.post(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
+        
+    def _get_service_status(self, token: Token):
+        url = self.API_URL + "nxtsvc"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
 
-    def set_last_updated(self):
-        m = re.match(
-            r"(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})",
-            self.vehicle_data["vehicleStatus"]["time"],
-        )
-        local_timezone = self.kia_uvo_api.get_timezone_by_region()
-        last_updated = datetime(
-            year=int(m.group(1)),
-            month=int(m.group(2)),
-            day=int(m.group(3)),
-            hour=int(m.group(4)),
-            minute=int(m.group(5)),
-            second=int(m.group(6)),
-            tzinfo=local_timezone,
-        )
+        response = requests.post(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - Get Service status data {response}")
+        response = response["result"]["maintenanceInfo"]
+        service_status = {}
+        service_status["serviceStatus"] = response
+        return service_status
+        
 
-        _LOGGER.debug(
-            f"{DOMAIN} - LastUpdated {last_updated} - Timezone {local_timezone}"
-        )
-
-        self.last_updated = last_updated
-
-    def set_engine_type(self):
-        if "dte" in self.vehicle_data["vehicleStatus"]:
-            self.engine_type = VEHICLE_ENGINE_TYPE.IC
+    def lock_action(self, token: Token, action):
+        pin_auth = self.verify_pin(token)
+        if action == VEHICLE_LOCK_ACTION.LOCK:
+            url = self.API_URL + "drlck"
         else:
-            if "lowFuelLight" in self.vehicle_data["vehicleStatus"]:
-                self.engine_type = VEHICLE_ENGINE_TYPE.PHEV
-            else:
-                self.engine_type = VEHICLE_ENGINE_TYPE.EV
-        _LOGGER.debug(f"{DOMAIN} - Engine type set {self.engine_type}")
+            url = self.API_URL + "drulck"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = pin_auth
+             
+        response = requests.post(url, headers=headers, data=json.dumps({
+            "pin": self.pin
+        }))
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - Received lock_action response {response}")
 
-    def get_child_value(self, key):
-        value = self.vehicle_data
-        for x in key.split("."):
-            try:
-                value = value[x]
-            except:
-                try:
-                    value = value[int(x)]
-                except:
-                    value = None
-        return value
+    def start_climate(self, token: Token):
+        pass
+
+    def stop_climate(self, token: Token):
+        pass
+
+    def start_charge(self, token: Token):
+        pass
+
+    def stop_charge(self, token: Token):
+        pass
+    
+    def verify_pin(self, token: Token):
+
+        # https://www.myuvo.ca/tods/api/vrfypin
+
+        print(token.vehicle_id)
+        url = self.API_URL + "vrfypin"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+       
+
+        response = requests.post(url, headers=headers, data=json.dumps({
+            "pin": self.pin
+        }))
+        _LOGGER.debug(f"{DOMAIN} - Received Pin validation response {response}")
+        result = response.json()['result']
+
+        return result['pAuth']

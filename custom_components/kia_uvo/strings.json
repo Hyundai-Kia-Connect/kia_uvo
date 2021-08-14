@@ -9,6 +9,7 @@
           "username": "Username",
           "password": "Password",
           "region": "Region",
+          "pin": "Pin",
           "brand": "Brand"
         }
       }

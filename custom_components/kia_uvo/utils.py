@@ -10,13 +10,14 @@ def get_implementation_by_region_brand(
     brand: int,
     username: str,
     password: str,
+    pin: int,
     use_email_with_geocode_api: bool = False,
 ) -> KiaUvoApiImpl:  # pylint: disable=too-many-arguments
     if REGIONS[region] == REGION_CANADA:
         return KiaUvoApiCA(
-            username, password, region, brand, use_email_with_geocode_api
+            username, password, region, brand, pin, use_email_with_geocode_api
         )
     elif REGIONS[region] == REGION_EUROPE:
         return KiaUvoApiEU(
-            username, password, region, brand, use_email_with_geocode_api
+            username, password, region, brand, pin, use_email_with_geocode_api
         )

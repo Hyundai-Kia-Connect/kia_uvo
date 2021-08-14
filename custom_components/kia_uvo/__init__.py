@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_REGION,
+    CONF_PIN,
 )
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -112,6 +113,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     brand = config_entry.data.get(CONF_BRAND, DEFAULT_BRAND)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
+    pin = config_entry.data.get(CONF_PIN)
     unit_of_measurement = DISTANCE_UNITS[
         config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)
     ]
@@ -137,7 +139,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     )
 
     kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-        region, brand, username, password, use_email_with_geocode_api
+        region, brand, username, password, pin, use_email_with_geocode_api
     )
     vehicle: Vehicle = Vehicle(
         hass,

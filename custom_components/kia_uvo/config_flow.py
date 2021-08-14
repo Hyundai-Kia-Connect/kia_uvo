@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_UNIT_SYSTEM,
+    CONF_PIN,
     CONF_REGION,
 )
 from homeassistant.core import callback
@@ -124,6 +125,7 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_USERNAME): str,
                 vol.Required(CONF_PASSWORD): str,
+                vol.Optional(CONF_PIN): int,
                 vol.Optional(CONF_REGION, default=DEFAULT_REGION): vol.In(REGIONS),
                 vol.Optional(CONF_BRAND, default=DEFAULT_BRAND): vol.In(BRANDS),
             }
@@ -139,11 +141,12 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             username = user_input[CONF_USERNAME]
             password = user_input[CONF_PASSWORD]
+            pin = user_input[CONF_PIN]
             region = user_input[CONF_REGION]
             brand = user_input[CONF_BRAND]
 
             self.kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-                region, brand, username, password
+                region, brand, username, password, pin
             )
 
             try:
@@ -156,6 +159,7 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
                         CONF_REGION: region,
+                        CONF_PIN: pin,
                         CONF_BRAND: brand,
                         CONF_STORED_CREDENTIALS: vars(self.token),
                     },

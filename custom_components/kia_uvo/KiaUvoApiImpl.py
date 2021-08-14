@@ -23,6 +23,7 @@ class KiaUvoApiImpl:
         password: str,
         region: int,
         brand: int,
+        pin: int,
         use_email_with_geocode_api: bool = False,
     ):
         self.username = username
@@ -31,6 +32,7 @@ class KiaUvoApiImpl:
         self.stamps = None
         self.region = region
         self.brand = brand
+        self.pin = pin
 
     def login(self) -> Token:
         pass
