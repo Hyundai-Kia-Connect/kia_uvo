@@ -22,13 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-
-    INSTRUMENTS = [
-        ("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None),
-        ("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY),
-        ("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP),
-        ("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None),
-    ]
+   INSTRUMENTS = []
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(("evBatteryPercentage", "EV Battery", "vehicleStatus.evStatus.batteryStatus", PERCENTAGE, "mdi:car-electric", DEVICE_CLASS_BATTERY))
@@ -39,6 +33,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
         INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
 
+    INSTRUMENTS.append(("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None))
+    INSTRUMENTS.append(("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP))
+    INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
+    INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
+    
     sensors = [
         InstrumentSensor(
             hass, config_entry, vehicle, id, description, key, unit, icon, device_class
