@@ -10,3 +10,7 @@ start_charge:
   description: Start charging
 stop_charge:
   description: Stop charging
+lock:
+  description: Lock the vehicle
+unlock:
+  description: Unlock the vehicle
