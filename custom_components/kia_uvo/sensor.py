@@ -83,14 +83,11 @@ class InstrumentSensor(KiaUvoEntity):
         if value is None:
             value = NOT_APPLICABLE
         else:
-            if not self._unit is None:
-                if self._source_unit != self._unit:
-                    value = round(distance_util.convert(value, self._source_unit, self._unit),1)
-                else:
-                    if int(value) == float(value):
-                        pass
-                    else:
-                        value = round(value,1)
+            if self._source_unit != self._unit:
+                value = distance_util.convert(value, self._source_unit, self._unit)
+            if isinstance(value, float) == True:
+                value = round(value, 1)
+                
         return value
 
     @property
