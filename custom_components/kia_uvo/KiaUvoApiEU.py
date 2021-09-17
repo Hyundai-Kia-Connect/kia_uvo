@@ -28,9 +28,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         region: int,
         brand: int,
         use_email_with_geocode_api: bool = False,
-        pin: str = "",
     ):
-        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
+        super().__init__(username, password, region, brand, use_email_with_geocode_api)
 
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.kia.com"

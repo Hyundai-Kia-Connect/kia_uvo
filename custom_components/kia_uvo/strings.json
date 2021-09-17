@@ -9,7 +9,6 @@
           "username": "Username",
           "password": "Password",
           "region": "Region",
-          "pin": "Pin (Required for Canada)",
           "brand": "Brand"
         }
       }

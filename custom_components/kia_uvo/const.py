@@ -8,7 +8,6 @@ from homeassistant.const import LENGTH_KILOMETERS, LENGTH_MILES
 
 # Configuration Constants
 DOMAIN: str = "kia_uvo"
-CONF_PIN: str = "pin"
 CONF_STORED_CREDENTIALS: str = "stored_credentials"
 CONF_SCAN_INTERVAL: str = "scan_interval"
 CONF_FORCE_SCAN_INTERVAL: str = "force_scan_interval"
@@ -61,7 +60,6 @@ REGION_EUROPE = "Europe"
 REGION_CANADA = "Canada"
 REGIONS = {1: REGION_EUROPE, 2: REGION_CANADA}
 DEFAULT_REGION = 1
-DEFAULT_PIN = ""
 
 BRAND_KIA = "Kia"
 BRAND_HYUNDAI = "Hyundai"

@@ -22,8 +22,6 @@ from .const import (
     DISTANCE_UNITS,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
-    CONF_PIN,
-    DEFAULT_PIN,
     CONF_FORCE_SCAN_INTERVAL,
     DEFAULT_FORCE_SCAN_INTERVAL,
     CONF_NO_FORCE_SCAN_HOUR_START,
@@ -126,7 +124,6 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_USERNAME): str,
                 vol.Required(CONF_PASSWORD): str,
-                vol.Optional(CONF_PIN): str,
                 vol.Optional(CONF_REGION, default=DEFAULT_REGION): vol.In(REGIONS),
                 vol.Optional(CONF_BRAND, default=DEFAULT_BRAND): vol.In(BRANDS),
             }
@@ -143,7 +140,6 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             username = user_input[CONF_USERNAME]
             password = user_input[CONF_PASSWORD]
             region = user_input[CONF_REGION]
-            pin = user_input[CONF_PIN]
             brand = user_input[CONF_BRAND]
 
             self.kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
@@ -160,7 +156,6 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_USERNAME: username,
                         CONF_PASSWORD: password,
                         CONF_REGION: region,
-                        CONF_PIN: pin,
                         CONF_BRAND: brand,
                         CONF_STORED_CREDENTIALS: vars(self.token),
                     },
