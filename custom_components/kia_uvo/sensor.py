@@ -38,7 +38,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     INSTRUMENTS.append(("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP))
     INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
     INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
-    
+
     sensors = [
         InstrumentSensor(
             hass, config_entry, vehicle, id, description, key, unit, icon, device_class
@@ -82,9 +82,15 @@ class InstrumentSensor(KiaUvoEntity):
 
         if value is None:
             value = NOT_APPLICABLE
-
-        if self._source_unit != self._unit:
-            value = int(distance_util.convert(value, self._source_unit, self._unit))
+        else:
+            if not self._unit is None:
+                if self._source_unit != self._unit:
+                    value = round(distance_util.convert(value, self._source_unit, self._unit),1)
+                else:
+                    if int(value) == float(value):
+                        pass
+                    else:
+                        value = round(value,1)
         return value
 
     @property
@@ -96,7 +102,7 @@ class InstrumentSensor(KiaUvoEntity):
         found_unit = self.vehicle.get_child_value(key_unit)
         if found_unit in DISTANCE_UNITS:
             self._unit = self.vehicle.unit_of_measurement
-            self._source_unit = DISTANCE_UNITS[found_unit]                   
+            self._source_unit = DISTANCE_UNITS[found_unit]
         else:
             self._unit = NOT_APPLICABLE
             self._source_unit = NOT_APPLICABLE
@@ -107,7 +113,7 @@ class InstrumentSensor(KiaUvoEntity):
     def state_attributes(self):
         if self._id == "geocodedLocation":
             return {"address": self.vehicle.get_child_value("vehicleLocation.geocodedLocation.address")}
-        return None;
+        return None
 
     @property
     def icon(self):
