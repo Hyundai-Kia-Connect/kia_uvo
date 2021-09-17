@@ -27,14 +27,14 @@ class Vehicle(object):
         token: Token,
         kia_uvo_api: KiaUvoApiImpl,
         unit_of_measurement: str,
-        enable_geolocation_entity,
+        enable_geolocation_entity: bool,
     ):
         self.hass = hass
         self.config_entry = config_entry
-        self.token = token
+        self.token: Token = token
         self.kia_uvo_api: KiaUvoApiImpl = kia_uvo_api
-        self.unit_of_measurement = unit_of_measurement
-        self.enable_geolocation_entity = enable_geolocation_entity
+        self.unit_of_measurement: str = unit_of_measurement
+        self.enable_geolocation_entity: bool = enable_geolocation_entity
         self.name = token.vehicle_name
         self.model = token.vehicle_model
         self.id = token.vehicle_id
@@ -44,41 +44,30 @@ class Vehicle(object):
         self.last_updated: datetime = datetime.min
         self.force_update_try_caller = None
         self.topic_update = TOPIC_UPDATE.format(self.id)
+        
+        self.current_lan = None
+        self.current_long = None
+        self.current_geocode = None
+
+        self.current_ev_battery = None
         _LOGGER.debug(f"{DOMAIN} - Received token into Vehicle Object {vars(token)}")
 
     async def update(self):
         try:
-            current_lat = self.get_child_value("vehicleLocation.coord.lat")
-            current_lon = self.get_child_value("vehicleLocation.coord.lon")
-            current_geocode = self.get_child_value("vehicleLocation.geocodedLocation")
-
-            self.vehicle_data = await self.hass.async_add_executor_job(
-                self.kia_uvo_api.get_cached_vehicle_status, self.token
-            )
+            self.current_lat = self.get_child_value("vehicleLocation.coord.lat")
+            self.current_lon = self.get_child_value("vehicleLocation.coord.lon")
+            self.current_geocode = self.get_child_value("vehicleLocation.geocodedLocation")
+            self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
             self.set_last_updated()
             self.set_engine_type()
-
-            new_lat = self.get_child_value("vehicleLocation.coord.lat")
-            new_lon = self.get_child_value("vehicleLocation.coord.lon")
-
-            if self.enable_geolocation_entity == True:
-                if (
-                    current_lat != new_lat or current_lon != new_lon
-                ) or current_geocode is None:
-                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = await self.hass.async_add_executor_job(
-                        self.kia_uvo_api.get_geocoded_location, new_lat, new_lon
-                    )
-                else:
-                    self.vehicle_data["vehicleLocation"]["geocodedLocation"] = current_geocode
+            await self.hass.async_add_executor_job(self.kia_uvo_api.set_geocoded_location, current_lat, current_lon, current_geocode)
 
             async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:
             _LOGGER.error(f"{DOMAIN} - Exception in update : %s", str(ex))
 
     async def force_update(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.update_vehicle_status, self.token
-        )
+        await self.hass.async_add_executor_job(self.kia_uvo_api.update_vehicle_status, self.token)
         await self.update()
 
     async def force_update_loop(self, _):
@@ -101,6 +90,16 @@ class Vehicle(object):
             self.force_update_try_caller = async_call_later(
                 self.hass, INTERVAL_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
             )
+
+    def set_geocoded_location(self, old_lat, old_lon, old_geocode):
+        new_lat = self.get_child_value("vehicleLocation.coord.lat")
+        new_lon = self.get_child_value("vehicleLocation.coord.lon")
+
+        if self.enable_geolocation_entity == True:
+            if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
+                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
+            else:
+                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
 
     async def lock_action(self, action: VEHICLE_LOCK_ACTION):
         await self.hass.async_add_executor_job(
