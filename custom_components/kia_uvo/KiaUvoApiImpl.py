@@ -24,9 +24,11 @@ class KiaUvoApiImpl:
         region: int,
         brand: int,
         use_email_with_geocode_api: bool = False,
+        pin: str = "",
     ):
         self.username = username
         self.password = password
+        self.pin = pin
         self.use_email_with_geocode_api = use_email_with_geocode_api
         self.stamps = None
         self.region = region

@@ -28,12 +28,14 @@ from .const import (
     DATA_VEHICLE_LISTENER,
     DEFAULT_BRAND,
     DEFAULT_DISTANCE_UNIT,
+    DEFAULT_PIN,
     DEFAULT_REGION,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_SCAN_INTERVAL,
+    CONF_PIN,
     CONF_NO_FORCE_SCAN_HOUR_FINISH,
     CONF_NO_FORCE_SCAN_HOUR_START,
     CONF_SCAN_INTERVAL,
@@ -109,35 +111,20 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     _LOGGER.debug(f"{DOMAIN} - async_setup_entry started - {config_entry}")
     username = config_entry.data.get(CONF_USERNAME)
     password = config_entry.data.get(CONF_PASSWORD)
+    pin = config_entry.data.get(CONF_PIN, DEFAULT_PIN)
     region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     brand = config_entry.data.get(CONF_BRAND, DEFAULT_BRAND)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
-    unit_of_measurement = DISTANCE_UNITS[
-        config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)
-    ]
-    no_force_scan_hour_start = config_entry.options.get(
-        CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START
-    )
-    no_force_scan_hour_finish = config_entry.options.get(
-        CONF_NO_FORCE_SCAN_HOUR_FINISH, DEFAULT_NO_FORCE_SCAN_HOUR_FINISH
-    )
-    scan_interval = timedelta(
-        minutes=config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-    )
-    force_scan_interval = timedelta(
-        minutes=config_entry.options.get(
-            CONF_FORCE_SCAN_INTERVAL, DEFAULT_FORCE_SCAN_INTERVAL
-        )
-    )
-    enable_geolocation_entity = config_entry.options.get(
-        CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
-    )
-    use_email_with_geocode_api = config_entry.options.get(
-        CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
-    )
+    unit_of_measurement = DISTANCE_UNITS[config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)]
+    no_force_scan_hour_start = config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START)
+    no_force_scan_hour_finish = config_entry.options.get(CONF_NO_FORCE_SCAN_HOUR_FINISH, DEFAULT_NO_FORCE_SCAN_HOUR_FINISH)
+    scan_interval = timedelta(minutes=config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
+    force_scan_interval = timedelta(minutes=config_entry.options.get(CONF_FORCE_SCAN_INTERVAL, DEFAULT_FORCE_SCAN_INTERVAL))
+    enable_geolocation_entity = config_entry.options.get(CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY)
+    use_email_with_geocode_api = config_entry.options.get(CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API)
 
     kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-        region, brand, username, password, use_email_with_geocode_api
+        region, brand, username, password, use_email_with_geocode_api, pin
     )
     vehicle: Vehicle = Vehicle(
         hass,
@@ -159,9 +146,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         if is_token_updated:
             new_data = config_entry.data.copy()
             new_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
-            hass.config_entries.async_update_entry(
-                config_entry, data=new_data, options=config_entry.options
-            )
+            hass.config_entries.async_update_entry(config_entry, data=new_data, options=config_entry.options)
 
     async def update(event_time_utc: datetime):
         await refresh_config_entry()
@@ -169,24 +154,25 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
         event_time_local = event_time_utc.astimezone(local_timezone)
         await vehicle.update()
+        call_force_update = False
+
         if (event_time_local.hour < no_force_scan_hour_start and event_time_local.hour >= no_force_scan_hour_finish):
             if (datetime.now(local_timezone) - vehicle.last_updated > force_scan_interval):
-                try:
-                    await vehicle.force_update()
-                except Exception as ex:
-                    _LOGGER.error(f"{DOMAIN} - Exception in force update : %s", str(ex))
+                call_force_update = True     
+
+        if call_force_update == True:
+            try:
+                await vehicle.force_update()
+            except Exception as ex:
+                _LOGGER.error(f"{DOMAIN} - Exception in force update : %s", str(ex))
 
     await update(dt_util.utcnow())
 
     for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(config_entry, platform)
-        )
+        hass.async_create_task(hass.config_entries.async_forward_entry_setup(config_entry, platform))
 
     data[DATA_VEHICLE_LISTENER] = async_track_time_interval(hass, update, scan_interval)
-    data[DATA_CONFIG_UPDATE_LISTENER] = config_entry.add_update_listener(
-        async_update_options
-    )
+    data[DATA_CONFIG_UPDATE_LISTENER] = config_entry.add_update_listener(async_update_options)
     hass.data[DOMAIN] = data
 
     return True
