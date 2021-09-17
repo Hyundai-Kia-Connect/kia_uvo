@@ -122,10 +122,10 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = response["result"]["maintenanceInfo"]
 
         vehicle_status["odometer"] = {}
-        vehicle_status["odometer"]["unit"]= response["serviceStatus"]["currentOdometerUnit"]
-        vehicle_status["odometer"]["value"]= response["serviceStatus"]["currentOdometer"]
+        vehicle_status["odometer"]["unit"]= response["currentOdometerUnit"]
+        vehicle_status["odometer"]["value"]= response["currentOdometer"]
 
-        vehicle_status["vehicleLocation"] = self.get_location(self, token)
+        vehicle_status["vehicleLocation"] = self.get_location(token)
 
         return vehicle_status
 
