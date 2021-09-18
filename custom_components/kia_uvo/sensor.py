@@ -42,7 +42,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     sensors = []
 
     for id, description, key, unit, icon, device_class in INSTRUMENTS:
-        if vehicle.get_child_value(key) != None:
+        if vehicle.get_child_value(key) != None or key == "last_updated":
             sensors.append(InstrumentSensor(hass, config_entry, vehicle, id, description, key, unit, icon, device_class))
             
     async_add_entities(sensors, True)
