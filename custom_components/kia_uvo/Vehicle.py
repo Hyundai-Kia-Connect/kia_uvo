@@ -173,7 +173,7 @@ class Vehicle(object):
             hour=int(m.group(4)),
             minute=int(m.group(5)),
             second=int(m.group(6)),
-            tzinfo=local_timezone,
+            tzinfo=dt_util.get_time_zone("UTC"),
         )
 
         _LOGGER.debug(
