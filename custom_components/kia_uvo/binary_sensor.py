@@ -1,3 +1,4 @@
+
 import logging
 
 from homeassistant.components.binary_sensor import (
@@ -37,6 +38,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("backWindowHeater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
         ("steeringWheelHeater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
     ]
+    
+
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         BINARY_INSTRUMENTS.append(("charging", "Charging", "vehicleStatus.evStatus.batteryCharge", None, None, DEVICE_CLASS_BATTERY_CHARGING))
@@ -44,10 +47,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
         BINARY_INSTRUMENTS.append(("lowFuelLight", "Low Fuel Light", "vehicleStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None))
 
-    binary_sensors = [
-        InstrumentSensor(hass, config_entry, vehicle, id, description, key, on_icon, off_icon, device_class)
-        for id, description, key, on_icon, off_icon, device_class in BINARY_INSTRUMENTS
-    ]
+    binary_sensors = []
+
+    for id, description, key, on_icon, off_icon, device_class in BINARY_INSTRUMENTS:
+        if vehicle.get_child_value(key) != None:
+            binary_sensors.append(InstrumentSensor(hass, config_entry, vehicle, id, description, key, on_icon, off_icon, device_class))
 
     async_add_entities(binary_sensors, True)
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
