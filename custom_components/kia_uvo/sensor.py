@@ -38,14 +38,13 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     INSTRUMENTS.append(("lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP))
     INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
     INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
+    
+    sensors = []
 
-    sensors = [
-        InstrumentSensor(
-            hass, config_entry, vehicle, id, description, key, unit, icon, device_class
-        )
-        for id, description, key, unit, icon, device_class in INSTRUMENTS
-    ]
-
+    for id, description, key, unit, icon, device_class in INSTRUMENTS:
+        if vehicle.get_child_value(key) != None:
+            sensors.append(InstrumentSensor(hass, config_entry, vehicle, id, description, key, unit, icon, device_class))
+            
     async_add_entities(sensors, True)
 
 class InstrumentSensor(KiaUvoEntity):
