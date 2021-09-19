@@ -1,0 +1,56 @@
+name: Push and PR actions
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: home-assistant/actions/hassfest@master
+
+  style:
+    runs-on: "ubuntu-latest"
+    name: Check style formatting
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "actions/setup-python@v1"
+        with:
+          python-version: "3.8"
+      - run: python3 -m pip install black
+      - run: black .
+
+  pytest:
+    runs-on: "ubuntu-latest"
+    name: Run tests
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "actions/setup-python@v1"
+        with:
+          python-version: "3.8"
+      - run: python3 -m pip install -r tests/requirements_test.txt
+      - run: pytest --cov=custom_components
+
+  pylint:
+    runs-on: "ubuntu-latest"
+    name: Run pylint
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "actions/setup-python@v1"
+        with:
+          python-version: "3.8"
+      - run: python3 -m pip install -r tests/requirements_test.txt
+      - run: pylint custom_components/pyscript/*.py tests/*.py
+
+  mypy:
+    runs-on: "ubuntu-latest"
+    name: Run mypy
+    steps:
+      - uses: "actions/checkout@v2"
+      - uses: "actions/setup-python@v1"
+        with:
+          python-version: "3.8"
+      - run: python3 -m pip install -r tests/requirements_test.txt
+      - run: mypy custom_components/pyscript/*.py tests/*.py
