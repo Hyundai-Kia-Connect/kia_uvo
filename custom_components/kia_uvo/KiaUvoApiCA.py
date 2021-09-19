@@ -124,9 +124,9 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_status["odometer"] = {}
         vehicle_status["odometer"]["unit"]= response["currentOdometerUnit"]
         vehicle_status["odometer"]["value"]= response["currentOdometer"]
-
         vehicle_status["vehicleLocation"] = self.get_location(token)
 
+            
         return vehicle_status
 
     def get_location(self, token: Token):
@@ -138,8 +138,9 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
         response = response.json()
-
+        
         _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
+
         return response["result"]
 
     def get_pin_token(self, token: Token):
@@ -179,10 +180,30 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response {response}")
 
     def start_climate(self, token: Token):
-        pass
+        url = self.API_URL + "rmtstrt"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+
+        response = requests.post(url, headers=headers, data=json.dumps({"setting": {"airCtrl": 0, "defrost": "false", "heating1": 0, "igniOnDuration": 3, "ims": 0}, "pin": self.pin}))
+        response = response.json()
+
+        _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
+
 
     def stop_climate(self, token: Token):
-        pass
+        url = self.API_URL + "rmtstp"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+
+        response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
+        response = response.json()
+
+        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response {response}")
+        
 
     def start_charge(self, token: Token):
         pass
