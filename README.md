@@ -13,9 +13,9 @@ You can install this either manually copying files or using HACS. Configuration 
 - By default, distance unit is kilometers, you need to configure the integration if you want to switch to miles.
 
 ## Supported entities ##
-- Air Conditioner Status, Defroster Status
+- Air Conditioner Status, Defroster Status, Set Temperature
 - Heated Rear Window, Heated Steering Wheel
-- Car Battery Level (12v), EV Battery Level
+- Car Battery Level (12v), EV Battery Level, Remaining Time to Full Charge
 - Tire Pressure Warnings (individual and all)
 - Charge Status and Plugged In Status
 - Low Fuel Light Status (for PHEV and IC)
