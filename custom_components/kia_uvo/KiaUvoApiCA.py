@@ -65,7 +65,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = response["result"]
         access_token = response["accessToken"]
         refresh_token = response["refreshToken"]
-        _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
+        _LOGGER.debug(f"{DOMAIN} - Access Token Value test {access_token}")
         _LOGGER.debug(f"{DOMAIN} - Refresh Token Value {refresh_token}")
 
         ### Get Vehicles ###
