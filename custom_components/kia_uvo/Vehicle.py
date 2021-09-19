@@ -54,7 +54,8 @@ class Vehicle(object):
             self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
             self.set_last_updated()
             self.set_engine_type()
-            await self.hass.async_add_executor_job(self.set_geocoded_location, current_vehicle_location)
+            if self.enable_geolocation_entity == True:
+                await self.hass.async_add_executor_job(self.set_geocoded_location, current_vehicle_location)
 
             async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:
@@ -92,16 +93,15 @@ class Vehicle(object):
         if not old_vehicle_location is None:
             old_lat = old_vehicle_location["coord"]["lat"]
             old_lon = old_vehicle_location["coord"]["lon"]
-            old_geocode = old_vehicle_location["geocodedLocation"]
+            old_geocode = old_vehicle_location.get("geocodedLocation", None)
 
         new_lat = self.get_child_value("vehicleLocation.coord.lat")
         new_lon = self.get_child_value("vehicleLocation.coord.lon")
 
-        if self.enable_geolocation_entity == True:
-            if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
-                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
-            else:
-                self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
+        if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
+            self.vehicle_data["vehicleLocation"]["geocodedLocation"] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
+        else:
+            self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
 
 
     async def lock_action(self, action: VEHICLE_LOCK_ACTION):
