@@ -4,7 +4,6 @@ from .KiaUvoApiImpl import KiaUvoApiImpl
 from .KiaUvoApiCA import KiaUvoApiCA
 from .KiaUvoApiEU import KiaUvoApiEU
 
-
 def get_implementation_by_region_brand(
     region: int,
     brand: int,

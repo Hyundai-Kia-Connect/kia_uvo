@@ -77,6 +77,12 @@ class KiaUvoApiImpl:
 
     def get_timezone_by_region(self) -> tzinfo:
         if REGIONS[self.region] == REGION_CANADA:
-            return dt_util.DEFAULT_TIME_ZONE
+            return dt_util.UTC
         elif REGIONS[self.region] == REGION_EUROPE:
             return TIME_ZONE_EUROPE
+
+    def get_temperature_range_by_region(self):
+        if REGIONS[self.region] == REGION_CANADA:
+            return CA_TEMP_RANGE
+        elif REGIONS[self.region] == REGION_EUROPE:
+            return EU_TEMP_RANGE
