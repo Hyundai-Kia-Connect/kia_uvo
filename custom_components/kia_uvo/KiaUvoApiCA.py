@@ -7,6 +7,7 @@ import random
 import requests
 from urllib.parse import parse_qs, urlparse
 import uuid
+import time
 
 from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT, VEHICLE_LOCK_ACTION
 from .KiaUvoApiImpl import KiaUvoApiImpl
@@ -31,7 +32,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
             self.BASE_URL: str = "www.myuvo.ca"
         elif BRANDS[brand] == BRAND_HYUNDAI:
             self.BASE_URL: str = "www.mybluelink.ca"
-
+        self.old_vehicle_status = {}
         self.API_URL: str = "https://" + self.BASE_URL + "/tods/api/"
         self.API_HEADERS = {
             "content-type": "application/json;charset=UTF-8",
@@ -109,6 +110,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
         response = response["result"]["status"]
+        _LOGGER.debug(f"{DOMAIN} - old vehicle data {self.old_vehicle_status}")
 
         vehicle_status = {}
         vehicle_status["vehicleStatus"] = response
@@ -122,11 +124,26 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = response["result"]["maintenanceInfo"]
 
         vehicle_status["odometer"] = {}
-        vehicle_status["odometer"]["unit"]= response["currentOdometerUnit"]
-        vehicle_status["odometer"]["value"]= response["currentOdometer"]
-        vehicle_status["vehicleLocation"] = self.get_location(token)
+        vehicle_status["odometer"]["unit"] = response["currentOdometerUnit"]
+        vehicle_status["odometer"]["value"] = response["currentOdometer"]
+        
+        vehicle_status["nextService"] = {}
+        vehicle_status["nextService"]["unit"] = response["imatServiceOdometerUnit"]
+        vehicle_status["nextService"]["value"] = response["imatServiceOdometer"]
+        
+        vehicle_status["lastService"] = {}
+        vehicle_status["lastService"]["unit"] = response["msopServiceOdometerUnit"]
+        vehicle_status["lastService"]["value"] = response["msopServiceOdometer"]
 
+        if not self.old_vehicle_status == {}:
+            if (vehicle_status["odometer"]["value"] > self.old_vehicle_status["odometer"]["value"]): 
+                vehicle_status["vehicleLocation"] = self.get_location(token)
+            else: 
+                vehicle_status["vehicleLocation"] = self.old_vehicle_status["vehicleLocation"] 
+        else:
+            vehicle_status["vehicleLocation"] = self.get_location(token)
             
+        self.old_vehicle_status = vehicle_status
         return vehicle_status
 
     def get_location(self, token: Token):
@@ -134,14 +151,21 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
-        headers["pAuth"] = self.get_pin_token(token)
+        try:
+            headers["pAuth"] = self.get_pin_token(token)
 
-        response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
-        response = response.json()
-        
-        _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
-
-        return response["result"]
+            response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
+            response = response.json()
+            _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
+            if response["responseHeader"]["responseCode"] != 0:
+                raise Exception('No Location Located')
+   
+        except: 
+            _LOGGER.warn(f"{DOMAIN} - Get vehicle location failed")
+            response = None
+            return response
+        else:
+            return response["result"]
 
     def get_pin_token(self, token: Token):
         url = self.API_URL + "vrfypin"
@@ -166,10 +190,14 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
     def lock_action(self, token: Token, action):
-        if action == VEHICLE_LOCK_ACTION.LOCK:
+        _LOGGER.debug(f"{DOMAIN} - Action for lock is: {action}")
+
+        if action == "close":
             url = self.API_URL + "drlck"
+            _LOGGER.debug(f"{DOMAIN} - Calling Lock")
         else:
             url = self.API_URL + "drulck"
+            _LOGGER.debug(f"{DOMAIN} - Calling unlock")
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
@@ -177,6 +205,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
         response = response.json()
+        time.sleep(3)
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response {response}")
 
     def start_climate(self, token: Token):
@@ -188,7 +217,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         response = requests.post(url, headers=headers, data=json.dumps({"setting": {"airCtrl": 0, "defrost": "false", "heating1": 0, "igniOnDuration": 3, "ims": 0}, "pin": self.pin}))
         response = response.json()
-
+        time.sleep(3)
         _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
 
 
@@ -198,7 +227,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
         headers["pAuth"] = self.get_pin_token(token)
-
+        time.sleep(3)
         response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
         response = response.json()
 

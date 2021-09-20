@@ -203,3 +203,4 @@ class Vehicle(object):
                 except:
                     value = None
         return value
+        
