@@ -41,8 +41,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
         INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
-
+     
     INSTRUMENTS.append(("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None))
+    INSTRUMENTS.append(("lastService", "Last Service", "lastService.value", DYNAMIC_DISTANCE_UNIT, "mdi:wrench", None))
+    INSTRUMENTS.append(("nextService", "Next Service", "nextService.value", DYNAMIC_DISTANCE_UNIT, "mdi:wrench", None))
     INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
     INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
 
