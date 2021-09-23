@@ -166,7 +166,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
 
     def lock_action(self, token: Token, action):
-        if action == VEHICLE_LOCK_ACTION.LOCK:
+        if action == "close":
             url = self.API_URL + "drlck"
         else:
             url = self.API_URL + "drulck"
