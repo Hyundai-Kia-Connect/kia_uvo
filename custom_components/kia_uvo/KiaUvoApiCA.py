@@ -110,7 +110,6 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
         response = response["result"]["status"]
-        _LOGGER.debug(f"{DOMAIN} - old vehicle data {self.old_vehicle_status}")
 
         vehicle_status = {}
         vehicle_status["vehicleStatus"] = response
@@ -205,7 +204,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
         response = response.json()
-        time.sleep(3)
+        time.sleep(4)
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response {response}")
 
     def start_climate(self, token: Token):
@@ -217,7 +216,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         response = requests.post(url, headers=headers, data=json.dumps({"setting": {"airCtrl": 0, "defrost": "false", "heating1": 0, "igniOnDuration": 3, "ims": 0}, "pin": self.pin}))
         response = response.json()
-        time.sleep(3)
+        time.sleep(4)
         _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
 
 
@@ -227,7 +226,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
         headers["pAuth"] = self.get_pin_token(token)
-        time.sleep(3)
+        time.sleep(4)
         response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
         response = response.json()
 
