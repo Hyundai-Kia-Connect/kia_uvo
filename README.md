@@ -23,6 +23,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - Locking and Unlocking
 - Engine Status
 - Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap (optional, disabled by default)
+- Last Service and Next Service in Canada
 - Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
 - Latest Update
 - Configurable distance units, cache update interval, force update interval, blackout start and finish hours
