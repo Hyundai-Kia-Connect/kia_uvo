@@ -215,6 +215,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
         headers["pAuth"] = self.get_pin_token(token)
+
         set_temp = self.get_temperature_range_by_region().index(set_temp)
         set_temp = hex(set_temp)
         
@@ -232,6 +233,10 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         data=json.dumps(payload)
         _LOGGER.debug(f"{DOMAIN} - Received start_climate data {data}")
         response = requests.post(url, headers=headers, data=json.dumps({"setting": {"airCtrl": int(climate), "defrost": int(defrost), "igniOnDuration": duration, "ims": ims, "airTemp": {"value": "0AH", "unit": 0, "hvacTempType": 0}}, "pin": self.pin}))
+
+
+        response = requests.post(url, headers=headers, data=json.dumps({"setting": {"airCtrl": 0, "defrost": "false", "heating1": 0, "igniOnDuration": 5, "ims": 0}, "pin": self.pin}))
+
         response_headers = response.headers
         response = response.json()
         action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
