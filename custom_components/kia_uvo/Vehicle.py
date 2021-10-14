@@ -124,6 +124,16 @@ class Vehicle(object):
         return False
 
     async def start_climate(self, set_temp, duration, defrost, climate, heating):
+        if (set_temp is None):
+            set_temp = 21
+        if (duration is None):
+            duration = 5
+        if (defrost is None):
+            defrost = False
+        if (climate is None):
+            climate = True
+        if (heating is None):
+            heating = False
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.start_climate, self.token, set_temp, duration, defrost, climate, heating
         )

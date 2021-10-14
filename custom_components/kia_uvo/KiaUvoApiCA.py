@@ -209,7 +209,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
 
-    def start_climate(self, token: Token, set_temp = 21, duration = 5, defrost = False, climate = True, heating = False):
+    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
         url = self.API_URL + "rmtstrt"
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
@@ -224,7 +224,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         payload = {
                 "setting": 
                 {"airCtrl": int(climate), 
-                "defrost": int(defrost), 
+                "defrost": defrost, 
                 "heating1": int(heating),
                 "igniOnDuration": duration, 
                 "ims": 0, 
@@ -238,6 +238,8 @@ class KiaUvoApiCA(KiaUvoApiImpl):
              }
         
         data=json.dumps(payload)
+        #_LOGGER.debug(f"{DOMAIN} - Planned start_climate payload {payload}")
+
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_headers = response.headers
         response = response.json()

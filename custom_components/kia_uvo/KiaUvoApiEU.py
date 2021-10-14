@@ -306,7 +306,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
-    def start_climate(self, token: Token, set_temp = 21, duration = 0, defrost = False, climate = True, heating = False):
+    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
