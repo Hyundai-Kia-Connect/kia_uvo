@@ -81,9 +81,14 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         await vehicle.update()
 
-    async def async_handle_start_climate(call):
+    async def async_handle_start_climate(call):  
+        set_temp = call.data.get("Temperature")
+        duration = call.data.get("Duration")
+        defrost = call.data.get("Defrost")
+        climate = call.data.get("Climate")
+        heating = call.data.get("Heating")
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.start_climate()
+        await vehicle.start_climate(set_temp, duration, defrost, climate, heating)
 
     async def async_handle_stop_climate(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]

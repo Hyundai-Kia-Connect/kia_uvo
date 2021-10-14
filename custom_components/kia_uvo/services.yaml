@@ -4,6 +4,55 @@ update:
   description: Update vehicle data from cache
 start_climate:
   description: TEST - Please use cautiously - start car and climate
+  fields:
+    Duration:
+      name: Duration
+      description: On Duration(In Minutes)
+      required: true
+      example: 5
+      default: 5
+      selector:
+        number:
+            min: 1
+            max: 10
+            step: 1
+            unit_of_measurement: minutes
+    Climate:
+      name: Climate
+      description: Enable the HVAC System
+      required: true
+      example: true
+      default: true  
+      selector:
+        boolean: 
+    Temperature:
+      name: Temperature
+      description: Set temperature of climate control
+      required: true
+      example: 21.5
+      default: 21
+      selector:
+        number:
+            min: 17
+            max: 32
+            step: 0.5  
+            unit of measurement: Degrees C
+    Defrost:
+      name: Defrost
+      description: Front Windshield Defrost
+      required: true
+      example: true
+      default: true
+      selector:
+        boolean:
+    Heating:
+      name: Heating
+      description: Heated features like the steering wheel and rear window
+      required: true
+      example: false
+      default: false  
+      selector:
+        boolean:  
 stop_climate:
   description: TEST - Please use cautiously - stop car and climate
 start_charge:

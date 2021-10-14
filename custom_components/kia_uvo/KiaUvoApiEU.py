@@ -306,7 +306,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
-    def start_climate(self, token: Token):
+    def start_climate(self, token: Token, set_temp = 21, duration = 0, defrost = False, climate = True, heating = False):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
@@ -317,15 +317,20 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "Accept-Encoding": "gzip",
             "User-Agent": USER_AGENT_OK_HTTP,
         }
+        
+        set_temp = self.get_temperature_range_by_region().index(set_temp)
+        set_temp = hex(set_temp).split("x")
+        set_temp = set_temp[1] + "H"
+        set_temp = set_temp.zfill(3).upper()
 
         payload = {
             "action": "start",
             "hvacType": 0,
             "options": {
-                "defrost": True,
-                "heating1": 1,
+                "defrost": defrost,
+                "heating1": int(heating),
             },
-            "tempCode": "10H",
+            "tempCode": set_temp,
             "unit": "C",
         }
         _LOGGER.debug(f"{DOMAIN} - Start Climate Action Request {payload}")
