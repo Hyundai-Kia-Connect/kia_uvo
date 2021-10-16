@@ -1,8 +1,9 @@
-from .const import REGIONS, REGION_CANADA, REGION_EUROPE
+from .const import REGIONS, REGION_CANADA, REGION_EUROPE, REGION_USA
 
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .KiaUvoApiCA import KiaUvoApiCA
 from .KiaUvoApiEU import KiaUvoApiEU
+from .KiaUvoAPIUSA import KiaUvoAPIUSA
 
 def get_implementation_by_region_brand(
     region: int,
@@ -18,5 +19,9 @@ def get_implementation_by_region_brand(
         )
     elif REGIONS[region] == REGION_EUROPE:
         return KiaUvoApiEU(
+            username, password, region, brand, use_email_with_geocode_api, pin
+        )
+    elif REGIONS[region] == REGION_USA:
+        return KiaUvoAPIUSA(
             username, password, region, brand, use_email_with_geocode_api, pin
         )
