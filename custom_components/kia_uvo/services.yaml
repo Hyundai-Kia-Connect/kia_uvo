@@ -8,7 +8,7 @@ start_climate:
     Duration:
       name: Duration
       description: On Duration(In Minutes)
-      required: true
+      required: false
       example: 5
       default: 5
       selector:
@@ -20,7 +20,7 @@ start_climate:
     Climate:
       name: Climate
       description: Enable the HVAC System
-      required: true
+      required: false
       example: true
       default: true  
       selector:
@@ -28,7 +28,7 @@ start_climate:
     Temperature:
       name: Temperature
       description: Set temperature of climate control
-      required: true
+      required: false
       example: 21.5
       default: 21
       selector:
@@ -40,15 +40,15 @@ start_climate:
     Defrost:
       name: Defrost
       description: Front Windshield Defrost
-      required: true
-      example: true
-      default: true
+      required: false
+      example: false
+      default: false
       selector:
         boolean:
     Heating:
       name: Heating
       description: Heated features like the steering wheel and rear window
-      required: true
+      required: false
       example: false
       default: false  
       selector:
