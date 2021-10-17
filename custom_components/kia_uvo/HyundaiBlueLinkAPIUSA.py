@@ -16,7 +16,7 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 
-class KiaUvoAPIUSA(KiaUvoApiImpl):
+class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
     def __init__(
         self,
         username: str,
@@ -28,9 +28,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
     ):
         super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
 
-        self.BASE_URL: str = "owners.kia.com"
-        self.API_URL: str = "https://" + self.BASE_URL + "/apps/services/owners/"
 
+        self.BASE_URL: str = "api.telematics.hyundaiusa.com"
+        self.LOGIN_API: str = "https://" + self.BASE_URL + "/v2/ac/"
+        self.API_URL: str = "https://" + self.BASE_URL + "/ac/v2/"
 
         self.old_vehicle_status = {}
         self.API_HEADERS = {
@@ -41,14 +42,15 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
             "host": self.BASE_URL,
             "origin": "https://" + self.BASE_URL,
-            "referer": "https://" + self.BASE_URL + "/content/owners/en/kia-owner-portal.html",
+            "referer": "https://" + self.BASE_URL + "/login",
             "from": "SPA",
             "language": "0",
             "offset": "0",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin",
-
+            "client_id": "m66129Bb-em93-SPAHYN-bZ91-am4540zp19920",
+            "clientSecret": "v558o935-6nne-423i-baa8"
         }
 
     def login(self) -> Token:
@@ -57,13 +59,12 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
 
         ### Sign In with Email and Password and Get Authorization Code ###
 
-        url = self.API_URL + "apiGateway"
+        url = self.LOGIN_API + "oauth/token"
 
-        data = {"userId": username, "password": password, "userType": 0, "vin": "", "action": "authenticateUser"}
+        data = {"username": username, "password": password}
         headers = self.API_HEADERS
         response = requests.post(url, json=data, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
-
         response = response.json()
         access_token = response["access_token"]
         refresh_token = response["refresh_token"]
