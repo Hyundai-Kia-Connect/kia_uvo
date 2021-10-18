@@ -79,10 +79,10 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
-        vehicle_name = response["vehicles"][0]["nickName"]
-        vehicle_id = response["vehicles"][0]["vin"]
-        vehicle_model = response["vehicles"][0]["name"]
-        vehicle_registration_date = response["vehicles"][0]["regDate"]
+        vehicle_name = response["enrolledVehicleDetails"]["vehicleDetails"]["nickName"]
+        vehicle_id = response["enrolledVehicleDetails"]["vehicleDetails"]["vin"]
+        vehicle_model = response["enrolledVehicleDetails"]["vehicleDetails"]["modelCode"]
+        vehicle_registration_date = response["enrolledVehicleDetails"]["vehicleDetails"]["enrollmentDate"]
 
         valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
@@ -102,7 +102,20 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         return token
 
     def get_cached_vehicle_status(self, token: Token):
-        pass
+        # Vehicle Status Call
+        url = self.API_URL + "rcs/rvs/vehicleStatus"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+
+        response = requests.get(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
+
+        vehicle_status = {}
+        vehicle_status["vehicleStatus"] = response
+
+        return vehicle_status
+        
     def get_location(self, token: Token):
         pass
     def get_pin_token(self, token: Token):
