@@ -79,10 +79,10 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
-        vehicle_name = response["enrolledVehicleDetails"]["vehicleDetails"]["nickName"]
-        vehicle_id = response["enrolledVehicleDetails"]["vehicleDetails"]["vin"]
-        vehicle_model = response["enrolledVehicleDetails"]["vehicleDetails"]["modelCode"]
-        vehicle_registration_date = response["enrolledVehicleDetails"]["vehicleDetails"]["enrollmentDate"]
+        vehicle_name = response["enrolledVehicleDetails"][0]["vehicleDetails"]["nickName"]
+        vehicle_id = response["enrolledVehicleDetails"][0]["vehicleDetails"]["vin"]
+        vehicle_model = response["enrolledVehicleDetails"][0]["vehicleDetails"]["modelCode"]
+        vehicle_registration_date = response["enrolledVehicleDetails"][0]["vehicleDetails"]["enrollmentDate"]
 
         valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
 
