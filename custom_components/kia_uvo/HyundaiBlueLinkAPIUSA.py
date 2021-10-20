@@ -79,12 +79,13 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
-        vehicle_name = response["enrolledVehicleDetails"][0]["vehicleDetails"]["nickName"]
-        vehicle_id = response["enrolledVehicleDetails"][0]["vehicleDetails"]["vin"]
-        vehicle_model = response["enrolledVehicleDetails"][0]["vehicleDetails"]["modelCode"]
-        vehicle_registration_date = response["enrolledVehicleDetails"][0]["vehicleDetails"]["enrollmentDate"]
+        vehicle_details = response["enrolledVehicleDetails"][0]["vehicleDetails"]
+        vehicle_name = vehicle_details["nickName"]
+        vehicle_id = vehicle_details["vin"]
+        vehicle_model = vehicle_details["modelCode"]
+        vehicle_registration_date = vehicle_details["enrollmentDate"]
 
-        valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
+        valid_until = (datetime.now() + timedelta(minutes=29)).strftime(DATE_FORMAT)
 
         token = Token({})
         token.set(
@@ -106,13 +107,20 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         url = self.API_URL + "rcs/rvs/vehicleStatus"
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
+        headers["vin"] = token.vehicle_id
+        headers["refresh"] = "false"
 
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
 
         vehicle_status = {}
-        vehicle_status["vehicleStatus"] = response
+        vehicle_status["vehicleStatus"] = response["vehicleStatus"]
+
+        vehicle_status["vehicleStatus"]["dateTime"] = vehicle_status["vehicleStatus"]["dateTime"].replace("-", "").replace("T", "").replace(":", "").replace("Z", "")
+        vehicle_status["vehicleStatus"]["time"] = vehicle_status["vehicleStatus"]["dateTime"]
+        vehicle_status["vehicleStatus"]["date"] = vehicle_status["vehicleStatus"]["dateTime"]
+        vehicle_status["vehicleStatus"]["doorLock"] = vehicle_status["vehicleStatus"]["doorLockStatus"]
 
         return vehicle_status
         

@@ -6,6 +6,7 @@ from homeassistant.const import (
     DEVICE_CLASS_TIMESTAMP,
     DEVICE_CLASS_TEMPERATURE,
     TIME_MINUTES,
+    CONF_REGION,
     TEMP_CELSIUS
 )
 from homeassistant.util import distance as distance_util
@@ -15,6 +16,8 @@ from .KiaUvoEntity import KiaUvoEntity
 from .const import (
     DOMAIN,
     DATA_VEHICLE_INSTANCE,
+    DEFAULT_REGION,
+    REGION_USA,
     NOT_APPLICABLE,
     DISTANCE_UNITS,
     VEHICLE_ENGINE_TYPE,
@@ -48,7 +51,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
     INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
 
-    INSTRUMENTS.append(("temperatureSetpoint", "Set Temperature", "vehicleStatus.airTemp.value", TEMP_CELSIUS, None, DEVICE_CLASS_TEMPERATURE))
+    if config_entry.data.get(CONF_REGION, DEFAULT_REGION) is not REGION_USA:
+        INSTRUMENTS.append(("temperatureSetpoint", "Set Temperature", "vehicleStatus.airTemp.value", TEMP_CELSIUS, None, DEVICE_CLASS_TEMPERATURE))
 
     sensors = []
 
