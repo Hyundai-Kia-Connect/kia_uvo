@@ -6,7 +6,6 @@ from homeassistant.const import (
     DEVICE_CLASS_TIMESTAMP,
     DEVICE_CLASS_TEMPERATURE,
     TIME_MINUTES,
-    CONF_REGION,
     TEMP_CELSIUS
 )
 from homeassistant.util import distance as distance_util
