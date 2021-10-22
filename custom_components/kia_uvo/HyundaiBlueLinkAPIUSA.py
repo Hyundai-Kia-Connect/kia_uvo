@@ -49,9 +49,12 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin",
+            "refresh": "false",
             "client_id": "m66129Bb-em93-SPAHYN-bZ91-am4540zp19920",
             "clientSecret": "v558o935-6nne-423i-baa8"
         }
+
+        _LOGGER.debug(f"{DOMAIN} - initial API headers: {self.API_HEADERS}")
 
     def login(self) -> Token:
         username = self.username
@@ -68,7 +71,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         response = response.json()
         access_token = response["access_token"]
         refresh_token = response["refresh_token"]
-        expires_in = response["expires_in"]
+        expires_in = float(response["expires_in"])
         _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
         _LOGGER.debug(f"{DOMAIN} - Refresh Token Value {refresh_token}")
 
@@ -85,7 +88,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_model = vehicle_details["modelCode"]
         vehicle_registration_date = vehicle_details["enrollmentDate"]
 
-        valid_until = (datetime.now() + timedelta(minutes=29)).strftime(DATE_FORMAT)
+        valid_until = (datetime.now() + timedelta(seconds=expires_in)).strftime(DATE_FORMAT)
 
         token = Token({})
         token.set(
@@ -100,6 +103,8 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "NoStamp",
         )
 
+        _LOGGER.debug(f"{DOMAIN} - updated API headers: {self.API_HEADERS}")
+
         return token
 
     def get_cached_vehicle_status(self, token: Token):
@@ -108,7 +113,8 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
         headers["vin"] = token.vehicle_id
-        headers["refresh"] = "false"
+
+        _LOGGER.debug(f"{DOMAIN} - using API headers: {self.API_HEADERS}")
 
         response = requests.get(url, headers=headers)
         response = response.json()
