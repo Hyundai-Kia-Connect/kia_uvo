@@ -36,7 +36,7 @@ start_climate:
             min: 17
             max: 32
             step: 0.5  
-            unit of measurement: Degrees C
+            unit_of_measurement: Degrees C
     Defrost:
       name: Defrost
       description: Front Windshield Defrost
