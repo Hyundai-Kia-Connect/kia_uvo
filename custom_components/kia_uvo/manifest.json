@@ -2,7 +2,7 @@
   "domain": "kia_uvo",
   "name": "Kia Uvo / Hyundai Bluelink",
   "documentation": "https://github.com/fuatakgun/kia_uvo",
-  "issue_tracker": "https://github.com/fuatakgun/kia_uvo",
+  "issue_tracker": "https://github.com/fuatakgun/kia_uvo/issues",
   "codeowners": ["@fuatakgun"],
   "requirements": ["push_receiver==0.1.1"],
   "version": "0.0.2",
