@@ -231,6 +231,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             device_id,
             vehicle_name,
             vehicle_id,
+            None,
             vehicle_model,
             vehicle_registration_date,
             valid_until,
