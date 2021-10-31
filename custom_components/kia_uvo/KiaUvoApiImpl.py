@@ -80,6 +80,8 @@ class KiaUvoApiImpl:
             return dt_util.UTC
         elif REGIONS[self.region] == REGION_EUROPE:
             return TIME_ZONE_EUROPE
+        elif REGIONS[self.region] == REGION_USA:
+            return dt_util.UTC
 
     def get_temperature_range_by_region(self):
         if REGIONS[self.region] == REGION_CANADA:

@@ -5,7 +5,7 @@ Warning ahead; this is pre-alpha phase, please do not expect something fully fun
 ## Installation ##
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
 
-- Region support has been added, you can test initial set of functionality for Canada region and share your findings.
+- Region support has been added, you can test initial set of functionality for Canada and USA regions and share your findings.
 - It will only fetch values for the first car, I am not sure if there are people outside using Kia Uvo / Hyundai Bluelink with multiple cars :)
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
@@ -41,7 +41,7 @@ I have posted an example screenshot from my own car.
 
 ## Troubleshooting ##
 If you receive an error while trying to login, please go through these steps;
-1. As of now, integration only supports EU region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage.
+1. As of now, integration only supports USA, EU and CAD region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA coverage isn't complete. 
 2. If you are in EU, please log out from UVO app and login again. While logging in, if your account was created in legacy UVO servers, they will be migrated to new Kia Uvo / Hyundai Bluelink servers. Related Issue: https://github.com/fuatakgun/kia_uvo/issues/22
 3. If you have migrated recently, you might need to wait one day to try again. Related Issue: https://community.home-assistant.io/t/kia-uvo-integration-pre-alpha/297927/12?u=fuatakgun
 4. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
