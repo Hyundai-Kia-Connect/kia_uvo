@@ -138,7 +138,31 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         pass
 
     def lock_action(self, token: Token, action):
-        pass
+        _LOGGER.debug(f"{DOMAIN} - Action for lock is: {action}")
+
+        if action == "close":
+            url = self.API_URL + "rcs/rdo/off"
+            _LOGGER.debug(f"{DOMAIN} - Calling Lock")
+        else:
+            url = self.API_URL + "rcs/rdo/on"
+            _LOGGER.debug(f"{DOMAIN} - Calling unlock")
+
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vin"] = token.vehicle_id
+        headers["registrationId"] = token.vehicle_regid
+        headers["APPCLOUD-VIN"] = token.vehicle_id
+
+        
+        data = {"userName": self.username, "vin": token.vehicle_id}
+        response = requests.post(url, headers=headers, json=data)
+        #response_headers = response.headers
+        #response = response.json()
+        #action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
+
+        #_LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
+        _LOGGER.debug(f"{DOMAIN} - Received lock_action response status code: {response.status_code}")
+        _LOGGER.debug(f"{DOMAIN} - Received lock_action response: {response.text}")
 
     def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
         pass
