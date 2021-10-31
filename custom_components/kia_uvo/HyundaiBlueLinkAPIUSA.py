@@ -168,14 +168,14 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
         data = {
             "Ims": 0,
-            "airCtrl": 0,
+            "airCtrl": int(climate),
             "airTemp": {
                 "unit": 1,
-                "value": 72
+                "value": set_temp
             },
-            "defrost": False,
-            "heating1": 0,
-            "igniOnDuration": 10,
+            "defrost": defrost,
+            "heating1": int(heating),
+            "igniOnDuration": duration,
             # "seatHeaterVentInfo": None,
             "username": self.username,
             "vin": token.vehicle_id
