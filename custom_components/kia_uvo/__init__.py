@@ -138,6 +138,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         kia_uvo_api,
         unit_of_measurement,
         enable_geolocation_entity,
+        region,
     )
 
     data = {

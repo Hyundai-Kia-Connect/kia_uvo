@@ -50,6 +50,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-origin",
         }
+        
 
     def login(self) -> Token:
         username = self.username
@@ -210,6 +211,8 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
 
     def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
+         
+
         url = self.API_URL + "rmtstrt"
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
@@ -220,7 +223,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         set_temp = hex(set_temp).split("x")
         set_temp = set_temp[1] + "H"
         set_temp = set_temp.zfill(3).upper()
-            
+
         payload = {
                 "setting": 
                 {"airCtrl": int(climate), 
@@ -236,19 +239,73 @@ class KiaUvoApiCA(KiaUvoApiImpl):
                 },
              "pin": self.pin
              }
-        
         data=json.dumps(payload)
         #_LOGGER.debug(f"{DOMAIN} - Planned start_climate payload {payload}")
 
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_headers = response.headers
+
         response = response.json()
         action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
         _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
 
+    def start_climate_ev(self, token: Token, set_temp, duration, defrost, climate, heating):
+         
+
+        url = self.API_URL + "evc/rfon"
+
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+        
+        set_temp = self.get_temperature_range_by_region().index(set_temp)
+        set_temp = hex(set_temp).split("x")
+        set_temp = set_temp[1] + "H"
+        set_temp = set_temp.zfill(3).upper()
+
+        payload = {
+                "hvacInfo": 
+                {"airCtrl": int(climate), 
+                "defrost": defrost, 
+                "heating1": int(heating),
+                "airTemp": {
+                    "value": set_temp, 
+                    "unit": 0, 
+                    "hvacTempType": 1
+                    }
+                },
+             "pin": self.pin
+             }
+
+        data=json.dumps(payload)
+        #_LOGGER.debug(f"{DOMAIN} - Planned start_climate payload {payload}")
+
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response_headers = response.headers
+
+        response = response.json()
+        action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
+        _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
 
     def stop_climate(self, token: Token):
         url = self.API_URL + "rmtstp"
+        
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+        
+        response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
+        response_headers = response.headers
+        response = response.json()
+
+        action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
+
+        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response {action_status}")
+    def stop_climate_ev(self, token: Token):
+        url = self.API_URL + "evc/rfoff"
+       
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
@@ -280,7 +337,28 @@ class KiaUvoApiCA(KiaUvoApiImpl):
             return response["result"]["transaction"]["apiStatusCode"]
         
     def start_charge(self, token: Token):
-        pass
+
+        url = self.API_URL + "evc/rcstrt"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+        
+        response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
+        response_headers = response.headers
+        response = response.json()
+
+        _LOGGER.debug(f"{DOMAIN} - Received start_charge response {response}")
 
     def stop_charge(self, token: Token):
-        pass
+        url = self.API_URL + "evc/rcstp"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+        
+        response = requests.post(url, headers=headers, data=json.dumps({"pin": self.pin}))
+        response_headers = response.headers
+        response = response.json()
+
+        _LOGGER.debug(f"{DOMAIN} - Received start_charge response {response}")

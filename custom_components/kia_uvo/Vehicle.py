@@ -29,6 +29,7 @@ class Vehicle(object):
         kia_uvo_api: KiaUvoApiImpl,
         unit_of_measurement: str,
         enable_geolocation_entity: bool,
+        region: str,
     ):
         self.hass = hass
         self.config_entry = config_entry
@@ -134,18 +135,28 @@ class Vehicle(object):
             climate = True
         if (heating is None):
             heating = False
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.start_climate, self.token, set_temp, duration, defrost, climate, heating
-        )
+        if(self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA):
+            await self.hass.async_add_executor_job(
+                self.kia_uvo_api.start_climate, self.token, set_temp, duration, defrost, climate, heating
+            )
+        else:            
+            await self.hass.async_add_executor_job(
+                self.kia_uvo_api.start_climate_ev, self.token, set_temp, duration, defrost, climate, heating
+            )
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(
             self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
         )
 
     async def stop_climate(self):
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.stop_climate, self.token
-        )
+        if(self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA):
+            await self.hass.async_add_executor_job(
+                self.kia_uvo_api.stop_climate_ev, self.token
+            )
+        else:
+            await self.hass.async_add_executor_job(
+                self.kia_uvo_api.stop_climate, self.token
+            )
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(
             self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
