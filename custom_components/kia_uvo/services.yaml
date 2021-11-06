@@ -33,7 +33,7 @@ start_climate:
       default: 21 
       selector:
         number:
-            min:  16
+            min: 16
             max: 85
             step: 0.5
             mode: box
