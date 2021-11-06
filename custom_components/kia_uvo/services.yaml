@@ -30,7 +30,7 @@ start_climate:
       description: Set temperature of climate control. Unit is specific to region. 
       required: false
       example: 21.5
-      default: 21 
+      default: 21
       selector:
         number:
             min: 16
