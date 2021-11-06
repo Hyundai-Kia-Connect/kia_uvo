@@ -3,11 +3,11 @@ force_update:
 update:
   description: Update vehicle data from cache
 start_climate:
-  description: TEST - Please use cautiously - start car and climate
+  description: TEST - Please use cautiously - start car and climate. Not all items available for all cars.  Refer to Hyundai or Kia app for which are supported for your car. 
   fields:
     Duration:
       name: Duration
-      description: On Duration(In Minutes)
+      description: On Duration
       required: false
       example: 5
       default: 5
@@ -27,16 +27,17 @@ start_climate:
         boolean: 
     Temperature:
       name: Temperature
-      description: Set temperature of climate control
+      description: Set temperature of climate control. Unit is specific to region. 
       required: false
       example: 21.5
-      default: 21
+      default: 21 
       selector:
         number:
-            min: 17
-            max: 32
-            step: 0.5  
-            unit_of_measurement: Degrees C
+            min:  16
+            max: 85
+            step: 0.5
+            mode: box
+            unit_of_measurement: Degrees
     Defrost:
       name: Defrost
       description: Front Windshield Defrost
