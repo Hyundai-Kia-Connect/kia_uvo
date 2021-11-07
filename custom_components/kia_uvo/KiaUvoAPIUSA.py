@@ -106,8 +106,9 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_id = vehicle_summary[0]["vehicleIdentifier"]
         vehicle_vin = vehicle_summary[0]["vin"]
         vehicle_key = vehicle_summary[0]['vehicleKey']
+        vehicle_model = vehicle_summary[0]['modelName']
 
-        token = UsaToken(session_id, vehicle_vin, vehicle_id, vehicle_name, vehicle_key)
+        token = UsaToken(session_id, vehicle_vin, vehicle_id, vehicle_name, vehicle_key, vehicle_model)
 
         return token
 
