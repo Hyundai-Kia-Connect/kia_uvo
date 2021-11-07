@@ -26,12 +26,13 @@ class Token(object):
 
 
 class UsaToken(Token):
-    def __init__(self, sid, vehicle_vin, vehicle_id, vehicle_name, vehicle_key):
+    def __init__(self, sid, vehicle_vin, vehicle_id, vehicle_name, vehicle_key, vehicle_model):
         self.sid = sid
         self.vin = vehicle_vin
         self.vehicle_id = vehicle_id
         self.vehicle_name = vehicle_name
         self.vehicle_key = vehicle_key
+        self.vehicle_model = vehicle_model
 
     def expire(self):
         pass
