@@ -24,15 +24,3 @@ class Token(object):
 
     def expire(self):
         self.valid_until = datetime.min.strftime(DATE_FORMAT)
-
-
-class UsaToken(Token):
-    def __init__(self, sid, vehicle_vin, vehicle_id, vehicle_name, vehicle_key):
-        self.sid = sid
-        self.vin = vehicle_vin
-        self.vehicle_id = vehicle_id
-        self.vehicle_name = vehicle_name
-        self.vehicle_key = vehicle_key
-
-    def expire(self):
-        pass
