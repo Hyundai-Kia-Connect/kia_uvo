@@ -16,7 +16,7 @@ import time
 
 from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT, VEHICLE_LOCK_ACTION
 from .KiaUvoApiImpl import KiaUvoApiImpl
-from .Token import Token, UsaToken
+from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -106,16 +106,34 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_id = vehicle_summary[0]["vehicleIdentifier"]
         vehicle_vin = vehicle_summary[0]["vin"]
         vehicle_key = vehicle_summary[0]['vehicleKey']
+        vehicle_registration_date = vehicle_summary[0].get("enrollmentDate","missing")
 
-        token = UsaToken(session_id, vehicle_vin, vehicle_id, vehicle_name, vehicle_key)
-
+        valid_until = (datetime.now() + timedelta(hours=1)).strftime(DATE_FORMAT)
+        
+        #using vehicle_VIN as device ID
+        #using vehicle_key as vehicle_regid
+        
+        token = Token({})
+        token.set(
+            session_id,
+            None,
+            vehicle_vin,
+            vehicle_name,
+            vehicle_id,
+            vehicle_key,
+            "Unknown",
+            vehicle_registration_date,
+            valid_until,
+            "NoStamp",
+        )
+        
         return token
 
     def get_cached_vehicle_status(self, token: Token):
         url = self.API_URL + "cmm/gvi"
         headers = self.api_headers()
-        headers['sid'] = token.sid
-        headers['vinkey'] = token.vehicle_key
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
 
         body = {
                 "vehicleConfigReq": {
@@ -135,14 +153,19 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                     "weather": "0"
                 },
                 "vinKey": [
-                    token.vehicle_key
+                    token.vehicle_regid
                 ]
             }
-        _LOGGER.debug(f"sending get vehicle info request ${body} with session id ${token.sid}")
+        _LOGGER.debug(f"sending get vehicle info request ${body} with session id ${token.access_token}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
         response_body = response.json()
-        return response_body
+        vehicle_data = {
+          "vehicleStatus": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["vehicleStatusRpt"]["vehicleStatus"]
+        }
+        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["dateTime"]["utc"]
+        return vehicle_data
+    
     def get_location(self, token: Token):
         pass
     def get_pin_token(self, token: Token):
