@@ -101,12 +101,13 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
-        vehicle_summary = response["payload"]["vehicleSummary"]
-        vehicle_name = vehicle_summary[0]["nickName"]
-        vehicle_id = vehicle_summary[0]["vehicleIdentifier"]
-        vehicle_vin = vehicle_summary[0]["vin"]
-        vehicle_key = vehicle_summary[0]['vehicleKey']
-        vehicle_registration_date = vehicle_summary[0].get("enrollmentDate","missing")
+        vehicle_summary = response["payload"]["vehicleSummary"][0]
+        vehicle_name = vehicle_summary["nickName"]
+        vehicle_id = vehicle_summary["vehicleIdentifier"]
+        vehicle_vin = vehicle_summary["vin"]
+        vehicle_key = vehicle_summary['vehicleKey']
+        vehicle_model = vehicle_summary["modelName"]
+        vehicle_registration_date = vehicle_summary.get("enrollmentDate","missing")
 
         valid_until = (datetime.now() + timedelta(hours=1)).strftime(DATE_FORMAT)
         
@@ -121,7 +122,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             vehicle_name,
             vehicle_id,
             vehicle_key,
-            "Unknown",
+            vehicle_model,
             vehicle_registration_date,
             valid_until,
             "NoStamp",
