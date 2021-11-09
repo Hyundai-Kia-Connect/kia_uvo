@@ -88,3 +88,5 @@ class KiaUvoApiImpl:
             return CA_TEMP_RANGE
         elif REGIONS[self.region] == REGION_EUROPE:
             return EU_TEMP_RANGE
+        elif REGIONS[self.region] == REGION_USA:
+            return USA_TEMP_RANGE
