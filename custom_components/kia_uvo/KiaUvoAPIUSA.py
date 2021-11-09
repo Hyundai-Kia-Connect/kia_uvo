@@ -167,6 +167,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                 "value": response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"]["vehicleDetail"]["vehicle"]["mileage"],
                 "unit": 3,
             },
+            "vehicleLocation": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["location"],
         }
         vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["dateTime"]["utc"]
         return vehicle_data
