@@ -36,6 +36,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("airConditioner", "Air Conditioner", "vehicleStatus.airCtrlOn", "mdi:air-conditioner", "mdi:air-conditioner", DEVICE_CLASS_POWER),
         ("defrost", "Defroster", "vehicleStatus.defrost", "mdi:car-defrost-front", "mdi:car-defrost-front", None),
         ("backWindowHeater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
+        ("sideMirrorHeater", "Side Mirror Heater", "vehicleStatus.sideMirrorHeat", "mdi:car-side", "mdi:car-side", None),
         ("steeringWheelHeater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
     ]
     
