@@ -53,7 +53,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     sensors = []
 
     for id, description, key, unit, icon, device_class in INSTRUMENTS:
-        if vehicle.get_child_value(key) != None:
+        if vehicle.get_child_value(key) is None:
+            _LOGGER.debug(f"skipping sensor for missing data, key:{key}")
+        else:
             sensors.append(InstrumentSensor(hass, config_entry, vehicle, id, description, key, unit, icon, device_class))
 
     sensors.append(InstrumentSensor(hass, config_entry, vehicle, "lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP))
@@ -101,7 +103,7 @@ class InstrumentSensor(KiaUvoEntity):
             value = NOT_APPLICABLE
         else:
             if self._source_unit != self._unit:
-                value = distance_util.convert(value, self._source_unit, self._unit)
+                value = distance_util.convert(float(value), self._source_unit, self._unit)
             if isinstance(value, float) == True:
                 value = round(value, 1)
 
