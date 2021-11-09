@@ -68,9 +68,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.BASE_URL: str = "api.owners.kia.com"
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
-
-        self.old_vehicle_status = {}
-
     def login(self) -> Token:
         username = self.username
         password = self.password
@@ -101,12 +98,13 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
-        vehicle_summary = response["payload"]["vehicleSummary"]
-        vehicle_name = vehicle_summary[0]["nickName"]
-        vehicle_id = vehicle_summary[0]["vehicleIdentifier"]
-        vehicle_vin = vehicle_summary[0]["vin"]
-        vehicle_key = vehicle_summary[0]['vehicleKey']
-        vehicle_registration_date = vehicle_summary[0].get("enrollmentDate","missing")
+        vehicle_summary = response["payload"]["vehicleSummary"][0]
+        vehicle_name = vehicle_summary["nickName"]
+        vehicle_id = vehicle_summary["vehicleIdentifier"]
+        vehicle_vin = vehicle_summary["vin"]
+        vehicle_key = vehicle_summary['vehicleKey']
+        vehicle_model = vehicle_summary["modelName"]
+        vehicle_registration_date = vehicle_summary.get("enrollmentDate","missing")
 
         valid_until = (datetime.now() + timedelta(hours=1)).strftime(DATE_FORMAT)
         
@@ -121,7 +119,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             vehicle_name,
             vehicle_id,
             vehicle_key,
-            "Unknown",
+            vehicle_model,
             vehicle_registration_date,
             valid_until,
             "NoStamp",
@@ -161,9 +159,30 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"got response {response.text}")
         response_body = response.json()
         vehicle_data = {
-          "vehicleStatus": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["vehicleStatusRpt"]["vehicleStatus"]
+            "vehicleStatus": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["vehicleStatusRpt"]["vehicleStatus"],
+            "odometer": {
+                "value": response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"]["vehicleDetail"]["vehicle"]["mileage"],
+                "unit": 3,
+            },
+            "vehicleLocation": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["location"],
         }
-        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["dateTime"]["utc"]
+
+        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["syncDate"]["utc"]
+
+        vehicle_data["vehicleStatus"]["doorOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]
+        vehicle_data["vehicleStatus"]["trunkOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]["trunk"]
+        vehicle_data["vehicleStatus"]["hoodOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]["hood"]
+
+        vehicle_data["vehicleStatus"]["tirePressureLamp"] = {
+            "tirePressureLampAll": vehicle_data["vehicleStatus"]["tirePressure"]["all"]
+        }
+
+        vehicle_data["vehicleStatus"]["airCtrlOn"] = vehicle_data["vehicleStatus"]["climate"]["airCtrl"]
+        vehicle_data["vehicleStatus"]["defrost"] = vehicle_data["vehicleStatus"]["climate"]["defrost"]
+        vehicle_data["vehicleStatus"]["sideBackWindowHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["rearWindow"]
+        vehicle_data["vehicleStatus"]["sideMirrorHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["sideMirror"]
+        vehicle_data["vehicleStatus"]["steerWheelHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["steeringWheel"]
+
         return vehicle_data
     
     def get_location(self, token: Token):
