@@ -168,7 +168,23 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                 "unit": 3,
             },
         }
-        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["dateTime"]["utc"]
+
+        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"]["syncDate"]["utc"]
+
+        vehicle_data["vehicleStatus"]["doorOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]
+        vehicle_data["vehicleStatus"]["trunkOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]["trunk"]
+        vehicle_data["vehicleStatus"]["hoodOpen"] = vehicle_data["vehicleStatus"]["doorStatus"]["hood"]
+
+        vehicle_data["vehicleStatus"]["tirePressureLamp"] = {
+            "tirePressureLampAll": vehicle_data["vehicleStatus"]["tirePressure"]["all"]
+        }
+
+        vehicle_data["vehicleStatus"]["airCtrlOn"] = vehicle_data["vehicleStatus"]["climate"]["airCtrl"]
+        vehicle_data["vehicleStatus"]["defrost"] = vehicle_data["vehicleStatus"]["climate"]["defrost"]
+        vehicle_data["vehicleStatus"]["sideBackWindowHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["rearWindow"]
+        vehicle_data["vehicleStatus"]["sideMirrorHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["sideMirror"]
+        vehicle_data["vehicleStatus"]["steerWheelHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["steeringWheel"]
+
         return vehicle_data
     
     def get_location(self, token: Token):
