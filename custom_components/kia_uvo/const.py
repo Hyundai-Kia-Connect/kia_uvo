@@ -56,6 +56,7 @@ DATE_FORMAT: str = "%Y-%m-%d %H:%M:%S.%f"
 DYNAMIC_DISTANCE_UNIT: str = "dynamic_distance_unit"
 DISTANCE_UNITS = {1: LENGTH_KILOMETERS, 3: LENGTH_MILES}
 DEFAULT_DISTANCE_UNIT = 1
+DYNAMIC_TEMP_UNIT: str = "dynamic_temp_unit"
 
 REGION_EUROPE = "Europe"
 REGION_CANADA = "Canada"
