@@ -183,6 +183,8 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_data["vehicleStatus"]["sideMirrorHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["sideMirror"]
         vehicle_data["vehicleStatus"]["steerWheelHeat"] = vehicle_data["vehicleStatus"]["climate"]["heatingAccessory"]["steeringWheel"]
 
+        vehicle_data["vehicleStatus"]["airTemp"] = vehicle_data["vehicleStatus"]["climate"]["airTemp"]
+
         return vehicle_data
     
     def get_location(self, token: Token):
