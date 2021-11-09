@@ -68,9 +68,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.BASE_URL: str = "api.owners.kia.com"
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
-
-        self.old_vehicle_status = {}
-
     def login(self) -> Token:
         username = self.username
         password = self.password
