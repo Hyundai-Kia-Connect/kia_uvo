@@ -200,7 +200,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "requestType": 0
         }
         _LOGGER.debug(f"sending update vehicle info request ${body} with session id ${token.access_token}")
-        _LOGGER.debug(f"headers {headers}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
 
