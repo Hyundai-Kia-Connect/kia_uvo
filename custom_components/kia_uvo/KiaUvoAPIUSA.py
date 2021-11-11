@@ -22,10 +22,25 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class KiaUvoAPIUSA(KiaUvoApiImpl):
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        region: int,
+        brand: int,
+        use_email_with_geocode_api: bool = False,
+        pin: str = "",
+    ):
+        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
+
+        # Randomly generate a plausible device id on startup
+        self.device_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(22)) + ':' + secrets.token_urlsafe(105)
+
+        self.BASE_URL: str = "api.owners.kia.com"
+        self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
     def api_headers(self) -> dict:
-        # offset from UTC. TODO actually read this from the system
-        offset = -7
+        offset = time.localtime().tm_gmtoff/60/60
         headers = {
             "content-type": "application/json;charset=UTF-8",
             "accept": "application/json, text/plain, */*",
@@ -50,23 +65,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         headers['date'] = date
         headers['deviceid'] = self.device_id
         return headers
-
-    def __init__(
-        self,
-        username: str,
-        password: str,
-        region: int,
-        brand: int,
-        use_email_with_geocode_api: bool = False,
-        pin: str = "",
-    ):
-        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
-
-        # Randomly generate a plausible device id on startup
-        self.device_id = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(22)) + ':' + secrets.token_urlsafe(105)
-
-        self.BASE_URL: str = "api.owners.kia.com"
-        self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
     def login(self) -> Token:
         username = self.username
@@ -154,14 +152,14 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                     token.vehicle_regid
                 ]
             }
-        _LOGGER.debug(f"sending get vehicle info request ${body} with session id ${token.access_token}")
+        _LOGGER.debug(f"sending get cached vehicle info request ${body} with session id ${token.access_token}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
         response_body = response.json()
         vehicle_data = {
             "vehicleStatus": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["vehicleStatusRpt"]["vehicleStatus"],
             "odometer": {
-                "value": response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"]["vehicleDetail"]["vehicle"]["mileage"],
+                "value": float(response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"]["vehicleDetail"]["vehicle"]["mileage"]),
                 "unit": 3,
             },
             "vehicleLocation": response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["location"],
@@ -191,8 +189,19 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         pass
     def get_pin_token(self, token: Token):
         pass
+
     def update_vehicle_status(self, token: Token):
-        pass
+        url = self.API_URL + "rems/rvs"
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        body = {
+            "requestType": 0
+        }
+        _LOGGER.debug(f"sending update vehicle info request ${body} with session id ${token.access_token}")
+        response = requests.post(url, json=body, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
 
     def lock_action(self, token: Token, action):
         pass
