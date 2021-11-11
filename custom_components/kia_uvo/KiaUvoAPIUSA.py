@@ -245,7 +245,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                 }
             }
         }
-        _LOGGER.debug(f"sending start climate vehicle info request {body} with session id {token.access_token}")
+        _LOGGER.debug(f"sending start_climate vehicle info request {body} with session id {token.access_token}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
 
@@ -255,7 +255,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         headers['sid'] = token.access_token
         headers['vinkey'] = token.vehicle_regid
 
-        _LOGGER.debug(f"sending stop_charge request to {url} with session id {token.access_token}")
+        _LOGGER.debug(f"sending stop_climate request to {url} with session id {token.access_token}")
         response = requests.get(url, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
 
