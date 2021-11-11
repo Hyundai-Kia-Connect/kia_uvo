@@ -40,7 +40,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
     def api_headers(self) -> dict:
-        offset = time.localtime().tm_gmtoff/60/60
+        offset = time.localtime().tm_gmtoff / 60 / 60
         headers = {
             "content-type": "application/json;charset=UTF-8",
             "accept": "application/json, text/plain, */*",
@@ -52,7 +52,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "from": "SPA",
             "host": self.BASE_URL,
             "language": "0",
-            "offset": str(offset),
+            "offset": str(int(offset)),
             "ostype": "Android",
             "osversion": "11",
             "secretkey": "98er-w34rf-ibf3-3f6h",
@@ -78,7 +78,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "deviceKey": "",
             "deviceType": 2,
             "userCredential": {
-            "userId": username, "password": password
+                "userId": username, "password": password
             }
         }
         headers = self.api_headers()
@@ -102,13 +102,13 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_vin = vehicle_summary["vin"]
         vehicle_key = vehicle_summary['vehicleKey']
         vehicle_model = vehicle_summary["modelName"]
-        vehicle_registration_date = vehicle_summary.get("enrollmentDate","missing")
+        vehicle_registration_date = vehicle_summary.get("enrollmentDate", "missing")
 
         valid_until = (datetime.now() + timedelta(hours=1)).strftime(DATE_FORMAT)
-        
-        #using vehicle_VIN as device ID
-        #using vehicle_key as vehicle_regid
-        
+
+        # using vehicle_VIN as device ID
+        # using vehicle_key as vehicle_regid
+
         token = Token({})
         token.set(
             session_id,
@@ -122,7 +122,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             valid_until,
             "NoStamp",
         )
-        
+
         return token
 
     def get_cached_vehicle_status(self, token: Token):
@@ -132,26 +132,26 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         headers['vinkey'] = token.vehicle_regid
 
         body = {
-                "vehicleConfigReq": {
-                    "airTempRange": "0",
-                    "maintenance": "0",
-                    "seatHeatCoolOption": "0",
-                    "vehicle": "1",
-                    "vehicleFeature": "0"
-                },
-                "vehicleInfoReq": {
-                    "drivingActivty": "0",
-                    "dtc": "1",
-                    "enrollment": "1",
-                    "functionalCards": "0",
-                    "location": "1",
-                    "vehicleStatus": "1",
-                    "weather": "0"
-                },
-                "vinKey": [
-                    token.vehicle_regid
-                ]
-            }
+            "vehicleConfigReq": {
+                "airTempRange": "0",
+                "maintenance": "0",
+                "seatHeatCoolOption": "0",
+                "vehicle": "1",
+                "vehicleFeature": "0"
+            },
+            "vehicleInfoReq": {
+                "drivingActivty": "0",
+                "dtc": "1",
+                "enrollment": "1",
+                "functionalCards": "0",
+                "location": "1",
+                "vehicleStatus": "1",
+                "weather": "0"
+            },
+            "vinKey": [
+                token.vehicle_regid
+            ]
+        }
         _LOGGER.debug(f"sending get cached vehicle info request ${body} with session id ${token.access_token}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
@@ -184,9 +184,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_data["vehicleStatus"]["airTemp"] = vehicle_data["vehicleStatus"]["climate"]["airTemp"]
 
         return vehicle_data
-    
+
     def get_location(self, token: Token):
         pass
+
     def get_pin_token(self, token: Token):
         pass
 
@@ -197,24 +198,104 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         headers['vinkey'] = token.vehicle_regid
 
         body = {
-            "requestType": 0
+            "requestType": 0  # value of 1 would return cached results instead of forcing update
         }
-        _LOGGER.debug(f"sending update vehicle info request ${body} with session id ${token.access_token}")
+        _LOGGER.debug(f"sending update vehicle info request {body} with session id {token.access_token}")
         response = requests.post(url, json=body, headers=headers)
         _LOGGER.debug(f"got response {response.text}")
 
     def lock_action(self, token: Token, action):
-        pass
+        _LOGGER.debug(f"Action for lock is: {action}")
+        if action == "close":
+            url = self.API_URL + "rems/door/lock"
+            _LOGGER.debug(f"Calling Lock")
+        else:
+            url = self.API_URL + "rems/door/unlock"
+            _LOGGER.debug(f"Calling unlock")
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        _LOGGER.debug(f"sending lock vehicle info request to {url} with session id {token.access_token}")
+        response = requests.get(url, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
 
     def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
-        pass
+        url = self.API_URL + "rems/start"
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        body = {
+            "remoteClimate": {
+                "airCtrl": climate,
+                "airTemp": {
+                    "unit": 1,
+                    "value": str(set_temp),
+                },
+                "defrost": defrost,
+                "heatingAccessory": {
+                    "rearWindow": int(heating),
+                    "sideMirror": int(heating),
+                    "steeringWheel": int(heating),
+                },
+                "ignitionOnDuration": {
+                    "unit": 4,
+                    "value": duration,
+                }
+            }
+        }
+        _LOGGER.debug(f"sending start climate vehicle info request {body} with session id {token.access_token}")
+        response = requests.post(url, json=body, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
 
     def stop_climate(self, token: Token):
-        pass
+        url = self.API_URL + "rems/stop"
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        _LOGGER.debug(f"sending stop_charge request to {url} with session id {token.access_token}")
+        response = requests.get(url, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
+
     def check_action_status(self, token: Token, pAuth, transactionId):
-        pass
-    def start_charge(self, token: Token):
+        # polling for action status is done as post to "cmm/gts" with body { "xid": "92d58389-bf06-4555-88d9-cba21dc4dda8" } response with all 0 is completed, "Xid" is provided as a response header of action request
+        # {
+        #     "payload": {
+        #         "alertStatus": 0,
+        #         "evStatus": 1, # 0 when done
+        #         "locationStatus": 0,
+        #         "remoteStatus": 0
+        #     },
+        #     "status": {
+        #         "errorCode": 0,
+        #         "errorMessage": "Success with response body",
+        #         "errorType": 0,
+        #         "statusCode": 0
+        #     }
+        # }
         pass
 
+    def start_charge(self, token: Token):
+        url = self.API_URL + "evc/charge"
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        body = {
+            "chargeRatio": 100
+        }
+        _LOGGER.debug(f"sending start_charge request to {url} with {body} with headers {headers}")
+        response = requests.post(url, json=body, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
+
     def stop_charge(self, token: Token):
-        pass
+        url = self.API_URL + "evc/cancel"
+        headers = self.api_headers()
+        headers['sid'] = token.access_token
+        headers['vinkey'] = token.vehicle_regid
+
+        _LOGGER.debug(f"sending stop_charge request to {url} with session id {token.access_token}")
+        response = requests.get(url, headers=headers)
+        _LOGGER.debug(f"got response {response.text}")
