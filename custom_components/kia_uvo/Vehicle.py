@@ -204,13 +204,16 @@ class Vehicle(object):
         self.last_updated = last_updated
 
     def set_engine_type(self):
-        if "evStatus" in self.vehicle_data["vehicleStatus"] and "lowFuelLight" in self.vehicle_data["vehicleStatus"]:
-            self.engine_type = VEHICLE_ENGINE_TYPE.PHEV
+        if "evStatus" in self.vehicle_data["vehicleStatus"] and self.token.vehicle_model.endswith(" EV"):
+            self.engine_type = VEHICLE_ENGINE_TYPE.EV
         else:
-            if "evStatus" in self.vehicle_data["vehicleStatus"]:
-                self.engine_type = VEHICLE_ENGINE_TYPE.EV
+            if "evStatus" in self.vehicle_data["vehicleStatus"] and "lowFuelLight" in self.vehicle_data["vehicleStatus"]:
+                self.engine_type = VEHICLE_ENGINE_TYPE.PHEV
             else:
-                self.engine_type = VEHICLE_ENGINE_TYPE.IC
+                if "evStatus" in self.vehicle_data["vehicleStatus"]:
+                    self.engine_type = VEHICLE_ENGINE_TYPE.EV
+                else:
+                    self.engine_type = VEHICLE_ENGINE_TYPE.IC
         _LOGGER.debug(f"{DOMAIN} - Engine type set {self.engine_type}")
 
     def get_child_value(self, key):
