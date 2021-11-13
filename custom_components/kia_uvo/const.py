@@ -18,7 +18,7 @@ CONF_ENABLE_GEOLOCATION_ENTITY: str = "enable_geolocation_entity"
 CONF_USE_EMAIL_WITH_GEOCODE_API: str = "use_email_with_geocode_api"
 CONF_BRAND: str = "brand"
 
-# I have seen that many people can survive with receiving updates in every 30 minutes. Let's see how KIA will responde
+# I have seen that many people can survive with receiving updates in every 30 minutes. Let's see how KIA will respond
 DEFAULT_SCAN_INTERVAL: int = 30
 # When vehicle is running/active, it will update its status regularly, so no need to force it. If it has not been running, we will force it every 240 minutes
 DEFAULT_FORCE_SCAN_INTERVAL: int = 240
