@@ -6,6 +6,7 @@ from homeassistant.const import (
     DEVICE_CLASS_TIMESTAMP,
     DEVICE_CLASS_TEMPERATURE,
     TIME_MINUTES,
+    TEMP_FAHRENHEIT,
     TEMP_CELSIUS
 )
 from homeassistant.util import distance as distance_util
@@ -13,6 +14,9 @@ import homeassistant.util.dt as dt_util
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import (
+    DYNAMIC_TEMP_UNIT,
+    REGION_USA,
+    REGIONS,
     DOMAIN,
     DATA_VEHICLE_INSTANCE,
     NOT_APPLICABLE,
@@ -48,7 +52,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
     INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
 
-    INSTRUMENTS.append(("temperatureSetpoint", "Set Temperature", "vehicleStatus.airTemp.value", TEMP_CELSIUS, None, DEVICE_CLASS_TEMPERATURE))
+    INSTRUMENTS.append(("temperatureSetpoint", "Set Temperature", "vehicleStatus.airTemp.value", DYNAMIC_TEMP_UNIT, None, DEVICE_CLASS_TEMPERATURE))
 
     sensors = []
 
@@ -93,7 +97,7 @@ class InstrumentSensor(KiaUvoEntity):
 
         value = self.vehicle.get_child_value(self._key)
 
-        if self._id == "temperatureSetpoint":
+        if self._id == "temperatureSetpoint" and REGIONS[self.vehicle.kia_uvo_api.region] != REGION_USA:
             value = value.replace("H", "")
             value = value.replace("C", "")
             value = "0x" + value
@@ -111,6 +115,12 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def unit_of_measurement(self):
+        if self._unit == DYNAMIC_TEMP_UNIT:
+            if REGIONS[self.vehicle.kia_uvo_api.region] != REGION_USA:
+                return TEMP_CELSIUS
+            else:
+                return TEMP_FAHRENHEIT
+
         if self._dynamic_distance_unit == False:
             return self._unit
 
