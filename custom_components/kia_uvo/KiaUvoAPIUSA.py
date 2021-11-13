@@ -248,6 +248,20 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         }
         self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
 
+    def check_action_status(self, token: Token, xid: str):
+        time.sleep(15)
+        completed = False
+        while not completed:
+            time.sleep(10)
+            url = self.API_URL + "cmm/gts"
+            body = {
+                "xid": xid
+            }
+            response = self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
+            response_json = response.json()
+            completed = all(v == 0 for v in response_json["payload"].values())
+        return completed
+
     def lock_action(self, token: Token, action):
         _LOGGER.debug(f"Action for lock is: {action}")
         if action == "close":
@@ -259,7 +273,8 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
 
         headers = self.authed_api_headers(token)
 
-        self.get_request_with_logging_and_active_session(token = token, url = url, headers = headers)
+        response = self.get_request_with_logging_and_active_session(token = token, url = url, headers = headers)
+        self.check_action_status(token, response.headers["Xid"])
 
     def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
         url = self.API_URL + "rems/start"
@@ -282,37 +297,23 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                 }
             }
         }
-        self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
+        response = self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
+        self.check_action_status(token, response.headers["Xid"])
 
     def stop_climate(self, token: Token):
         url = self.API_URL + "rems/stop"
-        self.get_request_with_logging_and_active_session(token = token, url = url)
-
-    def check_action_status(self, token: Token, pAuth, transactionId):
-        # polling for action status is done as post to "cmm/gts" with body { "xid": "92d58389-bf06-4555-88d9-cba21dc4dda8" } response with all 0 is completed, "Xid" is provided as a response header of action request
-        # {
-        #     "payload": {
-        #         "alertStatus": 0,
-        #         "evStatus": 1, # 0 when done
-        #         "locationStatus": 0,
-        #         "remoteStatus": 0
-        #     },
-        #     "status": {
-        #         "errorCode": 0,
-        #         "errorMessage": "Success with response body",
-        #         "errorType": 0,
-        #         "statusCode": 0
-        #     }
-        # }
-        pass
+        response = self.get_request_with_logging_and_active_session(token = token, url = url)
+        self.check_action_status(token, response.headers["Xid"])
 
     def start_charge(self, token: Token):
         url = self.API_URL + "evc/charge"
         body = {
             "chargeRatio": 100
         }
-        self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
+        response = self.post_request_with_logging_and_active_session(token = token, url = url, json_body = body)
+        self.check_action_status(token, response.headers["Xid"])
 
     def stop_charge(self, token: Token):
         url = self.API_URL + "evc/cancel"
-        self.get_request_with_logging_and_active_session(token = token, url = url)
+        response = self.get_request_with_logging_and_active_session(token = token, url = url)
+        self.check_action_status(token, response.headers["Xid"])
