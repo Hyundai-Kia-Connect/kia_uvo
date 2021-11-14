@@ -37,15 +37,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("backWindowHeater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
         ("sideMirrorHeater", "Side Mirror Heater", "vehicleStatus.sideMirrorHeat", "mdi:car-side", "mdi:car-side", None),
         ("steeringWheelHeater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
+        ("lowFuelLight", "Low Fuel Light", "vehicleStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None),
     ]
-    
-
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         BINARY_INSTRUMENTS.append(("charging", "Charging", "vehicleStatus.evStatus.batteryCharge", None, None, DEVICE_CLASS_BATTERY_CHARGING))
         BINARY_INSTRUMENTS.append(("pluggedIn", "Plugged In", "vehicleStatus.evStatus.batteryPlugin", None, None, DEVICE_CLASS_PLUG))
-    if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
-        BINARY_INSTRUMENTS.append(("lowFuelLight", "Low Fuel Light", "vehicleStatus.lowFuelLight", "mdi:gas-station-off", "mdi:gas-station", None))
 
     binary_sensors = []
 
