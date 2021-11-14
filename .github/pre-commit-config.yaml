@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.6.2
+    rev: v2.29.0
     hooks:
       - id: pyupgrade
         stages: [manual]
