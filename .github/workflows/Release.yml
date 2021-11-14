@@ -1,12 +1,14 @@
 ---
-name: "tagged-release"
+name: "pre-release"
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - "master"
 
 jobs:
-  tagged-release:
-    name: "Tagged Release"
+  pre-release:
+    name: "Pre Release"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -18,4 +20,6 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
