@@ -330,7 +330,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             url = self.API_URL + "rems/door/unlock"
             _LOGGER.debug(f"Calling unlock")
 
-
         headers = self.authed_api_headers(token)
 
         response = self.get_request_with_logging_and_active_session(
