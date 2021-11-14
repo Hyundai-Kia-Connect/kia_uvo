@@ -30,7 +30,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         use_email_with_geocode_api: bool = False,
         pin: str = "",
     ):
-        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
+        super().__init__(
+            username, password, region, brand, use_email_with_geocode_api, pin
+        )
 
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.kia.com"
@@ -307,7 +309,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
-    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
+    def start_climate(
+        self, token: Token, set_temp, duration, defrost, climate, heating
+    ):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
@@ -318,7 +322,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "Accept-Encoding": "gzip",
             "User-Agent": USER_AGENT_OK_HTTP,
         }
-        
+
         set_temp = self.get_temperature_range_by_region().index(set_temp)
         set_temp = hex(set_temp).split("x")
         set_temp = set_temp[1] + "H"

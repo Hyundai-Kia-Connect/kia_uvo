@@ -20,6 +20,7 @@ from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Vehicle(object):
     def __init__(
         self,
@@ -52,18 +53,28 @@ class Vehicle(object):
     async def update(self):
         try:
             current_vehicle_location = self.get_child_value("vehicleLocation")
-            self.vehicle_data = await self.hass.async_add_executor_job(self.kia_uvo_api.get_cached_vehicle_status, self.token)
+            self.vehicle_data = await self.hass.async_add_executor_job(
+                self.kia_uvo_api.get_cached_vehicle_status, self.token
+            )
             self.set_last_updated()
             self.set_engine_type()
             if self.enable_geolocation_entity == True:
-                await self.hass.async_add_executor_job(self.set_geocoded_location, current_vehicle_location)
+                await self.hass.async_add_executor_job(
+                    self.set_geocoded_location, current_vehicle_location
+                )
 
             async_dispatcher_send(self.hass, self.topic_update)
         except Exception as ex:
-            _LOGGER.error(f"{DOMAIN} - Exception in update : %s - traceback: %s", ex, traceback.format_exc())
+            _LOGGER.error(
+                f"{DOMAIN} - Exception in update : %s - traceback: %s",
+                ex,
+                traceback.format_exc(),
+            )
 
     async def force_update(self):
-        await self.hass.async_add_executor_job(self.kia_uvo_api.update_vehicle_status, self.token)
+        await self.hass.async_add_executor_job(
+            self.kia_uvo_api.update_vehicle_status, self.token
+        )
         await self.update()
 
     async def force_update_loop(self, _):
@@ -100,10 +111,11 @@ class Vehicle(object):
         new_lon = self.get_child_value("vehicleLocation.coord.lon")
 
         if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
-            self.vehicle_data["vehicleLocation"]["geocodedLocation"] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
+            self.vehicle_data["vehicleLocation"][
+                "geocodedLocation"
+            ] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
         else:
             self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
-
 
     async def lock_action(self, action: VEHICLE_LOCK_ACTION):
         await self.hass.async_add_executor_job(
@@ -125,23 +137,35 @@ class Vehicle(object):
         return False
 
     async def start_climate(self, set_temp, duration, defrost, climate, heating):
-        if (set_temp is None):
+        if set_temp is None:
             set_temp = 21
-        if (duration is None):
+        if duration is None:
             duration = 5
-        if (defrost is None):
+        if defrost is None:
             defrost = False
-        if (climate is None):
+        if climate is None:
             climate = True
-        if (heating is None):
+        if heating is None:
             heating = False
-        if(self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA):
+        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
             await self.hass.async_add_executor_job(
-                self.kia_uvo_api.start_climate_ev, self.token, set_temp, duration, defrost, climate, heating
+                self.kia_uvo_api.start_climate_ev,
+                self.token,
+                set_temp,
+                duration,
+                defrost,
+                climate,
+                heating,
             )
-        else:            
+        else:
             await self.hass.async_add_executor_job(
-                self.kia_uvo_api.start_climate, self.token, set_temp, duration, defrost, climate, heating
+                self.kia_uvo_api.start_climate,
+                self.token,
+                set_temp,
+                duration,
+                defrost,
+                climate,
+                heating,
             )
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(
@@ -149,7 +173,7 @@ class Vehicle(object):
         )
 
     async def stop_climate(self):
-        if(self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA):
+        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.stop_climate_ev, self.token
             )
@@ -204,10 +228,15 @@ class Vehicle(object):
         self.last_updated = last_updated
 
     def set_engine_type(self):
-        if "evStatus" in self.vehicle_data["vehicleStatus"] and self.token.vehicle_model.endswith(" EV"):
+        if "evStatus" in self.vehicle_data[
+            "vehicleStatus"
+        ] and self.token.vehicle_model.endswith(" EV"):
             self.engine_type = VEHICLE_ENGINE_TYPE.EV
         else:
-            if "evStatus" in self.vehicle_data["vehicleStatus"] and "lowFuelLight" in self.vehicle_data["vehicleStatus"]:
+            if (
+                "evStatus" in self.vehicle_data["vehicleStatus"]
+                and "lowFuelLight" in self.vehicle_data["vehicleStatus"]
+            ):
                 self.engine_type = VEHICLE_ENGINE_TYPE.PHEV
             else:
                 if "evStatus" in self.vehicle_data["vehicleStatus"]:

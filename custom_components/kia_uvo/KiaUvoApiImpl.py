@@ -63,7 +63,9 @@ class KiaUvoApiImpl:
     def lock_action(self, token: Token, action):
         pass
 
-    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
+    def start_climate(
+        self, token: Token, set_temp, duration, defrost, climate, heating
+    ):
         pass
 
     def stop_climate(self, token: Token):

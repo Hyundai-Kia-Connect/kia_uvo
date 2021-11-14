@@ -1,4 +1,12 @@
-from .const import REGIONS, REGION_CANADA, REGION_EUROPE, REGION_USA, BRANDS, BRAND_KIA, BRAND_HYUNDAI
+from .const import (
+    REGIONS,
+    REGION_CANADA,
+    REGION_EUROPE,
+    REGION_USA,
+    BRANDS,
+    BRAND_KIA,
+    BRAND_HYUNDAI,
+)
 
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .KiaUvoApiCA import KiaUvoApiCA
@@ -6,13 +14,14 @@ from .KiaUvoApiEU import KiaUvoApiEU
 from .KiaUvoAPIUSA import KiaUvoAPIUSA
 from .HyundaiBlueLinkAPIUSA import HyundaiBlueLinkAPIUSA
 
+
 def get_implementation_by_region_brand(
     region: int,
     brand: int,
     username: str,
     password: str,
     use_email_with_geocode_api: bool = False,
-    pin: str = ""
+    pin: str = "",
 ) -> KiaUvoApiImpl:  # pylint: disable=too-many-arguments
     if REGIONS[region] == REGION_CANADA:
         return KiaUvoApiCA(
