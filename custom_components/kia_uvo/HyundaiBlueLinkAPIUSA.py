@@ -11,7 +11,14 @@ import uuid
 import time
 import curlify
 
-from .const import DOMAIN, BRANDS, BRAND_HYUNDAI, BRAND_KIA, DATE_FORMAT, VEHICLE_LOCK_ACTION
+from .const import (
+    DOMAIN,
+    BRANDS,
+    BRAND_HYUNDAI,
+    BRAND_KIA,
+    DATE_FORMAT,
+    VEHICLE_LOCK_ACTION,
+)
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
@@ -28,16 +35,19 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         use_email_with_geocode_api: bool = False,
         pin: str = "",
     ):
-        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
-
+        super().__init__(
+            username, password, region, brand, use_email_with_geocode_api, pin
+        )
 
         self.BASE_URL: str = "api.telematics.hyundaiusa.com"
         self.LOGIN_API: str = "https://" + self.BASE_URL + "/v2/ac/"
         self.API_URL: str = "https://" + self.BASE_URL + "/ac/v2/"
 
         ts = time.time()
-        utc_offset = (datetime.fromtimestamp(ts) - datetime.utcfromtimestamp(ts)).total_seconds()
-        utc_offset_hours = int(utc_offset/60/60)
+        utc_offset = (
+            datetime.fromtimestamp(ts) - datetime.utcfromtimestamp(ts)
+        ).total_seconds()
+        utc_offset_hours = int(utc_offset / 60 / 60)
 
         self.old_vehicle_status = {}
         self.API_HEADERS = {
@@ -63,7 +73,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "username": self.username,
             "blueLinkServicePin": self.pin,
             "client_id": "m66129Bb-em93-SPAHYN-bZ91-am4540zp19920",
-            "clientSecret": "v558o935-6nne-423i-baa8"
+            "clientSecret": "v558o935-6nne-423i-baa8",
         }
 
         _LOGGER.debug(f"{DOMAIN} - initial API headers: {self.API_HEADERS}")
@@ -102,7 +112,9 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_model = vehicle_details["modelCode"]
         vehicle_registration_date = vehicle_details["enrollmentDate"]
 
-        valid_until = (datetime.now() + timedelta(seconds=expires_in)).strftime(DATE_FORMAT)
+        valid_until = (datetime.now() + timedelta(seconds=expires_in)).strftime(
+            DATE_FORMAT
+        )
 
         token = Token({})
         token.set(
@@ -138,17 +150,31 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_status = {}
         vehicle_status["vehicleStatus"] = response["vehicleStatus"]
 
-        vehicle_status["vehicleStatus"]["dateTime"] = vehicle_status["vehicleStatus"]["dateTime"].replace("-", "").replace("T", "").replace(":", "").replace("Z", "")
-        vehicle_status["vehicleStatus"]["time"] = vehicle_status["vehicleStatus"]["dateTime"]
-        vehicle_status["vehicleStatus"]["date"] = vehicle_status["vehicleStatus"]["dateTime"]
-        vehicle_status["vehicleStatus"]["doorLock"] = vehicle_status["vehicleStatus"]["doorLockStatus"]
+        vehicle_status["vehicleStatus"]["dateTime"] = (
+            vehicle_status["vehicleStatus"]["dateTime"]
+            .replace("-", "")
+            .replace("T", "")
+            .replace(":", "")
+            .replace("Z", "")
+        )
+        vehicle_status["vehicleStatus"]["time"] = vehicle_status["vehicleStatus"][
+            "dateTime"
+        ]
+        vehicle_status["vehicleStatus"]["date"] = vehicle_status["vehicleStatus"][
+            "dateTime"
+        ]
+        vehicle_status["vehicleStatus"]["doorLock"] = vehicle_status["vehicleStatus"][
+            "doorLockStatus"
+        ]
 
         return vehicle_status
-        
+
     def get_location(self, token: Token):
         pass
+
     def get_pin_token(self, token: Token):
         pass
+
     def update_vehicle_status(self, token: Token):
         pass
 
@@ -168,18 +194,21 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         headers["registrationId"] = token.vehicle_regid
         headers["APPCLOUD-VIN"] = token.vehicle_id
 
-        
         data = {"userName": self.username, "vin": token.vehicle_id}
         response = requests.post(url, headers=headers, json=data)
-        #response_headers = response.headers
-        #response = response.json()
-        #action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
+        # response_headers = response.headers
+        # response = response.json()
+        # action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
 
-        #_LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
-        _LOGGER.debug(f"{DOMAIN} - Received lock_action response status code: {response.status_code}")
+        # _LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
+        _LOGGER.debug(
+            f"{DOMAIN} - Received lock_action response status code: {response.status_code}"
+        )
         _LOGGER.debug(f"{DOMAIN} - Received lock_action response: {response.text}")
 
-    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
+    def start_climate(
+        self, token: Token, set_temp, duration, defrost, climate, heating
+    ):
         _LOGGER.debug(f"{DOMAIN} - Start engine..")
 
         url = self.API_URL + "rcs/rsc/start"
@@ -193,23 +222,22 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         data = {
             "Ims": 0,
             "airCtrl": int(climate),
-            "airTemp": {
-                "unit": 1,
-                "value": set_temp
-            },
+            "airTemp": {"unit": 1, "value": set_temp},
             "defrost": defrost,
             "heating1": int(heating),
             "igniOnDuration": duration,
             # "seatHeaterVentInfo": None,
             "username": self.username,
-            "vin": token.vehicle_id
-            }
+            "vin": token.vehicle_id,
+        }
         _LOGGER.debug(f"{DOMAIN} - Start engine data: {data}")
 
         response = requests.post(url, json=data, headers=headers)
 
         # _LOGGER.debug(f"{DOMAIN} - Start engine curl: {curlify.to_curl(response.request)}")
-        _LOGGER.debug(f"{DOMAIN} - Start engine response status code: {response.status_code}")
+        _LOGGER.debug(
+            f"{DOMAIN} - Start engine response status code: {response.status_code}"
+        )
         _LOGGER.debug(f"{DOMAIN} - Start engine response: {response.text}")
 
     def stop_climate(self, token: Token):
@@ -225,12 +253,14 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Stop engine headers: {headers}")
 
         response = requests.post(url, headers=headers)
-        _LOGGER.debug(f"{DOMAIN} - Stop engine response status code: {response.status_code}")
+        _LOGGER.debug(
+            f"{DOMAIN} - Stop engine response status code: {response.status_code}"
+        )
         _LOGGER.debug(f"{DOMAIN} - Stop engine response: {response.text}")
-
 
     def check_action_status(self, token: Token, pAuth, transactionId):
         pass
+
     def start_charge(self, token: Token):
         pass
 

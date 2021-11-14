@@ -8,7 +8,19 @@ class Token:
         if "stamp" not in self.__dict__:
             self.expire()
 
-    def set(self, access_token, refresh_token, device_id, vehicle_name, vehicle_id, vehicle_regid, vehicle_model, vehicle_registration_date, valid_until, stamp):
+    def set(
+        self,
+        access_token,
+        refresh_token,
+        device_id,
+        vehicle_name,
+        vehicle_id,
+        vehicle_regid,
+        vehicle_model,
+        vehicle_registration_date,
+        valid_until,
+        stamp,
+    ):
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.device_id = device_id

@@ -31,7 +31,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         use_email_with_geocode_api: bool = False,
         pin: str = "",
     ):
-        super().__init__(username, password, region, brand, use_email_with_geocode_api, pin)
+        super().__init__(
+            username, password, region, brand, use_email_with_geocode_api, pin
+        )
 
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.kia.com"
@@ -52,10 +54,22 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         if BRANDS[brand] == BRAND_KIA:
             auth_client_id = "f4d531c7-1043-444d-b09a-ad24bd913dd4"
-            self.LOGIN_FORM_URL: str = "https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            self.LOGIN_FORM_URL: str = (
+                "https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id="
+                + auth_client_id
+                + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri="
+                + self.USER_API_URL
+                + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            )
         elif BRANDS[brand] == BRAND_HYUNDAI:
             auth_client_id = "64621b96-0f0d-11ec-82a8-0242ac130003"
-            self.LOGIN_FORM_URL: str = "https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            self.LOGIN_FORM_URL: str = (
+                "https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id="
+                + auth_client_id
+                + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri="
+                + self.USER_API_URL
+                + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            )
 
         self.stamps_url: str = (
             "https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/"
@@ -87,8 +101,11 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         except Exception as ex1:
             self.authorization_code = self.get_authorization_code_with_form()
 
-
-        self.access_token, self.access_token, self.authorization_code = self.get_access_token()
+        (
+            self.access_token,
+            self.access_token,
+            self.authorization_code,
+        ) = self.get_access_token()
 
         self.token_type, self.refresh_token = self.get_refresh_token()
 
@@ -183,20 +200,24 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = session.get(url)
         _LOGGER.debug(f"{DOMAIN} - Get cookies response {session.cookies.get_dict()}")
         return session.cookies
-        #return session
+        # return session
 
     def set_session_language(self):
         ### Set Language for Session ###
         url = self.USER_API_URL + "language"
         headers = {"Content-type": "application/json"}
         payload = {"lang": "en"}
-        response = requests.post(url, json=payload, headers=headers, cookies=self.cookies)
+        response = requests.post(
+            url, json=payload, headers=headers, cookies=self.cookies
+        )
 
     def get_authorization_code_with_redirect_url(self):
         url = self.USER_API_URL + "signin"
         headers = {"Content-type": "application/json"}
         data = {"email": self.username, "password": self.password}
-        response = requests.post(url, json=data, headers=headers, cookies=self.cookies).json()
+        response = requests.post(
+            url, json=data, headers=headers, cookies=self.cookies
+        ).json()
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response}")
         parsed_url = urlparse(response["redirectUrl"])
         authorization_code = "".join(parse_qs(parsed_url.query)["code"])
@@ -216,11 +237,18 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         response = requests.get(login_form_url, headers=headers, cookies=self.cookies)
         form_cookies = response.cookies
-        _LOGGER.debug(f"{DOMAIN} - LoginForm {login_form_url} - Response {response.text}")
+        _LOGGER.debug(
+            f"{DOMAIN} - LoginForm {login_form_url} - Response {response.text}"
+        )
         soup = BeautifulSoup(response.content, "html.parser")
-        login_form_action_url = soup.find("form")["action"].replace("&amp;","&")
+        login_form_action_url = soup.find("form")["action"].replace("&amp;", "&")
 
-        data = {"username": self.username, "password": self.password, "credentialId": "", "rememberMe": "on"}
+        data = {
+            "username": self.username,
+            "password": self.password,
+            "credentialId": "",
+            "rememberMe": "on",
+        }
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
             "Host": "eu-account.hyundai.com",
@@ -229,23 +257,39 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "User-Agent": USER_AGENT_MOZILLA,
         }
 
-        response = requests.post(login_form_action_url, data=data, headers=headers, allow_redirects=False, cookies=form_cookies)
-        _LOGGER.debug(f"{DOMAIN} - LoginFormSubmit {login_form_action_url} - Response {response.status_code} - {response.headers}")
+        response = requests.post(
+            login_form_action_url,
+            data=data,
+            headers=headers,
+            allow_redirects=False,
+            cookies=form_cookies,
+        )
+        _LOGGER.debug(
+            f"{DOMAIN} - LoginFormSubmit {login_form_action_url} - Response {response.status_code} - {response.headers}"
+        )
         if response.status_code != 302:
-            print(f"{DOMAIN} - LoginFormSubmit Error {login_form_action_url} - Response {response.status_code} - {response.text}")
+            print(
+                f"{DOMAIN} - LoginFormSubmit Error {login_form_action_url} - Response {response.status_code} - {response.text}"
+            )
             return
 
         redirect_url = response.headers["Location"]
         headers = {"User-Agent": USER_AGENT_MOZILLA}
         response = requests.get(redirect_url, headers=headers, cookies=form_cookies)
-        _LOGGER.debug(f"{DOMAIN} - Redirect User Id {redirect_url} - Response {response.url} - {response.text}")
+        _LOGGER.debug(
+            f"{DOMAIN} - Redirect User Id {redirect_url} - Response {response.url} - {response.text}"
+        )
         parsed_url = urlparse(response.url)
         intUserId = "".join(parse_qs(parsed_url.query)["intUserId"])
 
-
         url = self.USER_API_URL + "silentsignin"
-        headers = {"User-Agent": USER_AGENT_MOZILLA, "ccsp-service-id": self.CCSP_SERVICE_ID,}
-        response = requests.post(url, headers=headers, json={"intUserId": intUserId}, cookies=self.cookies).json()
+        headers = {
+            "User-Agent": USER_AGENT_MOZILLA,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+        }
+        response = requests.post(
+            url, headers=headers, json={"intUserId": intUserId}, cookies=self.cookies
+        ).json()
         _LOGGER.debug(f"{DOMAIN} - silentsignin Response {response}")
         parsed_url = urlparse(response["redirectUrl"])
         authorization_code = "".join(parse_qs(parsed_url.query)["code"])
@@ -391,7 +435,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Lock Action Response {response}")
 
-    def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
+    def start_climate(
+        self, token: Token, set_temp, duration, defrost, climate, heating
+    ):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
