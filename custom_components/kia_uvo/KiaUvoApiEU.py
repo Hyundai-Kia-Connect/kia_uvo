@@ -1,5 +1,6 @@
 import logging
 
+from bs4 import BeautifulSoup
 from datetime import timedelta, datetime
 import push_receiver
 import random
@@ -50,6 +51,14 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         self.SPA_API_URL: str = "https://" + self.BASE_URL + "/api/v1/spa/"
         self.CLIENT_ID: str = self.CCSP_SERVICE_ID
         self.GCM_SENDER_ID = 199360397125
+
+        if BRANDS[brand] == BRAND_KIA:
+            auth_client_id = "f4d531c7-1043-444d-b09a-ad24bd913dd4"
+            self.LOGIN_FORM_URL: str = "https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+        elif BRANDS[brand] == BRAND_HYUNDAI:
+            auth_client_id = "64621b96-0f0d-11ec-82a8-0242ac130003"
+            self.LOGIN_FORM_URL: str = "https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+
         self.stamps_url: str = (
             "https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/"
             + BRANDS[brand].lower()
@@ -71,16 +80,53 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         if self.stamps is None:
             self.stamps = self.get_stamps_from_bluelinky()
 
-        username = self.username
-        password = self.password
+        self.device_id, self.stamp = self.get_device_id()
+        self.cookies = self.get_cookies()
+        self.set_session_language()
+        self.authorization_code = None
+        try:
+            self.authorization_code = self.get_authorization_code_with_redirect_url()
+        except Exception as ex1:
+            self.authorization_code = self.get_authorization_code_with_form()
 
-        ### test url: https://prd.eu-ccapi.kia.com:8080/web/v1/user/intgmain
 
-        ### Get Device Id ###
-        credentials = push_receiver.register(sender_id=self.GCM_SENDER_ID)
+        self.access_token, self.access_token, self.authorization_code = self.get_access_token()
+
+        self.token_type, self.refresh_token = self.get_refresh_token()
+
+        response = self.get_vehicle()
+        vehicle_name = response["vehicles"][0]["nickname"]
+        vehicle_id = response["vehicles"][0]["vehicleId"]
+        vehicle_model = response["vehicles"][0]["vehicleName"]
+        vehicle_registration_date = response["vehicles"][0]["regDate"]
+        valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
+
+        token = Token({})
+        token.set(
+            self.access_token,
+            self.refresh_token,
+            self.device_id,
+            vehicle_name,
+            vehicle_id,
+            None,
+            vehicle_model,
+            vehicle_registration_date,
+            valid_until,
+            self.stamp,
+        )
+
+        return token
+
+    def get_device_id(self):
+        registration_id = 1
+        try:
+            credentials = push_receiver.register(sender_id=self.GCM_SENDER_ID)
+            registration_id = credentials["gcm"]["token"]
+        except:
+            pass
         url = self.SPA_API_URL + "notifications/register"
         payload = {
-            "pushRegId": credentials["gcm"]["token"],
+            "pushRegId": registration_id,
             "pushType": "GCM",
             "uuid": str(uuid.uuid4()),
         }
@@ -106,7 +152,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             _LOGGER.debug(f"{DOMAIN} - Retry count {i} - Invalid stamp {stamp}")
 
         device_id = response["resMsg"]["deviceId"]
+        return device_id, stamp
 
+    def get_cookies(self):
         ### Get Cookies ###
         url = (
             self.USER_API_URL
@@ -135,29 +183,82 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Get cookies request {url}")
         session = requests.Session()
         response = session.get(url)
-        cookies = session.cookies.get_dict()
-        _LOGGER.debug(f"{DOMAIN} - Get cookies response {cookies}")
+        _LOGGER.debug(f"{DOMAIN} - Get cookies response {session.cookies.get_dict()}")
+        return session.cookies
+        #return session
 
+    def set_session_language(self):
         ### Set Language for Session ###
         url = self.USER_API_URL + "language"
         headers = {"Content-type": "application/json"}
         payload = {"lang": "en"}
-        response = requests.post(url, json=payload, headers=headers, cookies=cookies)
+        response = requests.post(url, json=payload, headers=headers, cookies=self.cookies)
 
-        ### Sign In with Email and Password and Get Authorization Code ###
+    def get_authorization_code_with_redirect_url(self):
         url = self.USER_API_URL + "signin"
         headers = {"Content-type": "application/json"}
-        data = {"email": username, "password": password}
-        response = requests.post(url, json=data, headers=headers, cookies=cookies)
-        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.json()}")
-        parsed_url = urlparse(response.json()["redirectUrl"])
+        data = {"email": self.username, "password": self.password}
+        response = requests.post(url, json=data, headers=headers, cookies=self.cookies).json()
+        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response}")
+        parsed_url = urlparse(response["redirectUrl"])
         authorization_code = "".join(parse_qs(parsed_url.query)["code"])
+        return authorization_code
 
+    def get_authorization_code_with_form(self):
+        url = self.USER_API_URL + "integrationinfo"
+        headers = {"User-Agent": USER_AGENT_MOZILLA}
+        response = requests.get(url, headers=headers, cookies=self.cookies).json()
+        _LOGGER.debug(f"{DOMAIN} - IntegrationInfo Response {response}")
+        user_id = response["userId"]
+        service_id = response["serviceId"]
+
+        login_form_url = self.LOGIN_FORM_URL
+        login_form_url = login_form_url.replace("$service_id", service_id)
+        login_form_url = login_form_url.replace("$user_id", user_id)
+
+        response = requests.get(login_form_url, headers=headers, cookies=self.cookies)
+        form_cookies = response.cookies
+        _LOGGER.debug(f"{DOMAIN} - LoginForm {login_form_url} - Response {response.text}")
+        soup = BeautifulSoup(response.content, "html.parser")
+        login_form_action_url = soup.find("form")["action"].replace("&amp;","&")
+
+        data = {"username": self.username, "password": self.password, "credentialId": "", "rememberMe": "on"}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Host": "eu-account.hyundai.com",
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_MOZILLA,
+        }
+
+        response = requests.post(login_form_action_url, data=data, headers=headers, allow_redirects=False, cookies=form_cookies)
+        _LOGGER.debug(f"{DOMAIN} - LoginFormSubmit {login_form_action_url} - Response {response.status_code} - {response.headers}")
+        if response.status_code != 302:
+            print(f"{DOMAIN} - LoginFormSubmit Error {login_form_action_url} - Response {response.status_code} - {response.text}")
+            return
+
+        redirect_url = response.headers["Location"]
+        headers = {"User-Agent": USER_AGENT_MOZILLA}
+        response = requests.get(redirect_url, headers=headers, cookies=form_cookies)
+        _LOGGER.debug(f"{DOMAIN} - Redirect User Id {redirect_url} - Response {response.url} - {response.text}")
+        parsed_url = urlparse(response.url)
+        intUserId = "".join(parse_qs(parsed_url.query)["intUserId"])
+
+
+        url = self.USER_API_URL + "silentsignin"
+        headers = {"User-Agent": USER_AGENT_MOZILLA, "ccsp-service-id": self.CCSP_SERVICE_ID,}
+        response = requests.post(url, headers=headers, json={"intUserId": intUserId}, cookies=self.cookies).json()
+        _LOGGER.debug(f"{DOMAIN} - silentsignin Response {response}")
+        parsed_url = urlparse(response["redirectUrl"])
+        authorization_code = "".join(parse_qs(parsed_url.query)["code"])
+        return authorization_code
+
+    def get_access_token(self):
         ### Get Access Token ###
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
-            "Stamp": stamp,
+            "Stamp": self.stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
             "Connection": "close",
@@ -169,7 +270,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "grant_type=authorization_code&redirect_uri=https%3A%2F%2F"
             + self.BASE_DOMAIN
             + "%3A8080%2Fapi%2Fv1%2Fuser%2Foauth2%2Fredirect&code="
-            + authorization_code
+            + self.authorization_code
         )
         _LOGGER.debug(f"{DOMAIN} - Get Access Token Data {headers }{data}")
         response = requests.post(url, data=data, headers=headers)
@@ -180,12 +281,14 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         access_token = token_type + " " + response["access_token"]
         authorization_code = response["refresh_token"]
         _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
+        return token_type, access_token, authorization_code
 
+    def get_refresh_token(self):
         ### Get Refresh Token ###
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
-            "Stamp": stamp,
+            "Stamp": self.stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
             "Connection": "close",
@@ -195,7 +298,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         data = (
             "grant_type=refresh_token&redirect_uri=https%3A%2F%2Fwww.getpostman.com%2Foauth2%2Fcallback&refresh_token="
-            + authorization_code
+            + self.authorization_code
         )
         _LOGGER.debug(f"{DOMAIN} - Get Refresh Token Data {data}")
         response = requests.post(url, data=data, headers=headers)
@@ -203,13 +306,15 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Get Refresh Token Response {response}")
         token_type = response["token_type"]
         refresh_token = token_type + " " + response["access_token"]
+        return token_type, refresh_token
 
+    def get_vehicle(self):
         ### Get Vehicles ###
         url = self.SPA_API_URL + "vehicles"
         headers = {
-            "Authorization": access_token,
-            "Stamp": stamp,
-            "ccsp-device-id": device_id,
+            "Authorization": self.access_token,
+            "Stamp": self.stamp,
+            "ccsp-device-id": self.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
             "Accept-Encoding": "gzip",
@@ -219,28 +324,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response}")
         response = response["resMsg"]
-        vehicle_name = response["vehicles"][0]["nickname"]
-        vehicle_id = response["vehicles"][0]["vehicleId"]
-        vehicle_model = response["vehicles"][0]["vehicleName"]
-        vehicle_registration_date = response["vehicles"][0]["regDate"]
-
-        valid_until = (datetime.now() + timedelta(hours=23)).strftime(DATE_FORMAT)
-
-        token = Token({})
-        token.set(
-            access_token,
-            refresh_token,
-            device_id,
-            vehicle_name,
-            vehicle_id,
-            None,
-            vehicle_model,
-            vehicle_registration_date,
-            valid_until,
-            stamp,
-        )
-
-        return token
+        return response
 
     def get_cached_vehicle_status(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
