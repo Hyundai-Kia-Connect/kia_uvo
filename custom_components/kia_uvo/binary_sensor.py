@@ -37,6 +37,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ("backWindowHeater", "Back Window Heater", "vehicleStatus.sideBackWindowHeat", "mdi:car-defrost-rear", "mdi:car-defrost-rear", None),
         ("sideMirrorHeater", "Side Mirror Heater", "vehicleStatus.sideMirrorHeat", "mdi:car-side", "mdi:car-side", None),
         ("steeringWheelHeater", "Steering Wheel Heater", "vehicleStatus.steerWheelHeat", "mdi:steering", "mdi:steering", None),
+        ("frSeatHeatState", "Front Right Seat Heater", "vehicleStatus.seatHeaterVentState.frSeatHeatState", "mdi:car-seat-heater", "mdi:car-seat-heater", None),
+        ("flSeatHeatState", "Front Left Seat Heater", "vehicleStatus.seatHeaterVentState.flSeatHeatState", "mdi:car-seat-heater", "mdi:car-seat-heater", None),
+        ("rrSeatHeatState", "Rear Right Seat Heater", "vehicleStatus.seatHeaterVentState.rrSeatHeatState", "mdi:car-seat-heater", "mdi:car-seat-heater", None),
+        ("rlSeatHeatState", "Rear Left Seat Heater", "vehicleStatus.seatHeaterVentState.rlSeatHeatState", "mdi:car-seat-heater", "mdi:car-seat-heater", None),
     ]
     
 
