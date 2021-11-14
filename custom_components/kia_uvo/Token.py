@@ -2,7 +2,7 @@ from datetime import datetime
 from .const import DATE_FORMAT
 
 
-class Token(object):
+class Token:
     def __init__(self, data):
         self.__dict__ = data
         if "stamp" not in self.__dict__:

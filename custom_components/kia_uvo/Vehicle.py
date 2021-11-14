@@ -21,7 +21,8 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 
-class Vehicle(object):
+
+class Vehicle:
     def __init__(
         self,
         hass: HomeAssistant,
