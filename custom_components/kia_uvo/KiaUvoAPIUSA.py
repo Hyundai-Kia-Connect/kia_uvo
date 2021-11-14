@@ -271,9 +271,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             url = self.API_URL + "rems/door/unlock"
             _LOGGER.debug(f"Calling unlock")
 
-        headers = self.authed_api_headers(token)
-
-        response = self.get_request_with_logging_and_active_session(token = token, url = url, headers = headers)
+        response = self.get_request_with_logging_and_active_session(token = token, url = url)
         self.check_action_status(token, response.headers["Xid"])
 
     def start_climate(self, token: Token, set_temp, duration, defrost, climate, heating):
