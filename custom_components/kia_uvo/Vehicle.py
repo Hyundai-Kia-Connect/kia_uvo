@@ -38,6 +38,7 @@ class Vehicle:
         self.kia_uvo_api: KiaUvoApiImpl = kia_uvo_api
         self.unit_of_measurement: str = unit_of_measurement
         self.enable_geolocation_entity: bool = enable_geolocation_entity
+        self.region: str = region
         self.name = token.vehicle_name
         self.model = token.vehicle_model
         self.id = token.vehicle_id
