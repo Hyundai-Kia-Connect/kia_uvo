@@ -39,15 +39,25 @@ jobs:
           pre-commit install-hooks --config .github/pre-commit-config.yaml
       - name: Run the check (${{ matrix.checks }})
         run: pre-commit run --hook-stage manual ${{ matrix.checks }} --all-files --config .github/pre-commit-config.yaml
-      - name: Set Lint branch name
+     # - name: Set Lint branch name
+     #   if: failure()
+    #  id: vars
+     #   run: echo ::set-output name=branch-name::"${{ matrix.checks }}/${{ github.head_ref }}"
+      #- name: Create Pull Request
+       # if: failure()
+      #  uses: peter-evans/create-pull-request@v3
+      #  with:
+      #    commit-message: action fixes automatically created. 
+      #    title: "fix: ${{ matrix.checks }} action"
+      #    body: This is an auto-generated PR with fixes by ${{ matrix.checks }}
+      #    branch: ${{ steps.vars.outputs.branch-name }}
+      - name: If needed, commit black changes to the pull request
         if: failure()
-        id: vars
-        run: echo ::set-output name=branch-name::"${{ matrix.checks }}/${{ github.head_ref }}"
-      - name: Create Pull Request
-        if: failure()
-        uses: peter-evans/create-pull-request@v3
-        with:
-          commit-message: action fixes automatically created. 
-          title: "fix: ${{ matrix.checks }} action"
-          body: This is an auto-generated PR with fixes by ${{ matrix.checks }}
-          branch: ${{ steps.vars.outputs.branch-name }}
+        run: |
+          black .
+          git config --global user.name 'autoblack'
+          git config --global user.email 'cclauss@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout $GITHUB_HEAD_REF
+          git commit -am "fixup: Format Python code with Black"
+          git push
