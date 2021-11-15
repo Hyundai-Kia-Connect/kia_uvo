@@ -1,6 +1,6 @@
 I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo)
 
-Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time.
+Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time. relase Test
 
 ## Installation ##
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
