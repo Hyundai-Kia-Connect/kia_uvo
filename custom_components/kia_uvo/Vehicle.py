@@ -53,7 +53,7 @@ class Vehicle:
 
     async def update(self):
         try:
-            previous_vehicle_status = self.vehicle_data["vehicleStatus"]
+            previous_vehicle_status = self.get_child_value("vehicleStatus")
             current_vehicle_location = self.get_child_value("vehicleLocation")
             self.vehicle_data = await self.hass.async_add_executor_job(
                 self.kia_uvo_api.get_cached_vehicle_status, self.token
@@ -67,10 +67,14 @@ class Vehicle:
 
             if (
                 self.get_child_value("vehicleStatus.engine") == False
-                and previous_vehicle_status.engine == False
+                and previous_vehicle_status is not None
+                and previous_vehicle_status["engine"] == False
                 and self.get_child_value("vehicleStatus.evStatus.batteryStatus") == 0
                 and previous_vehicle_status["evStatus"]["batteryStatus"] != 0
             ):
+                _LOGGER.debug(
+                    f"zero battery api error, force_update started to correct data"
+                )
                 await self.force_update()
             else:
                 async_dispatcher_send(self.hass, self.topic_update)
