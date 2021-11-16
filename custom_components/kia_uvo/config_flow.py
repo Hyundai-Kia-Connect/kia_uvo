@@ -10,16 +10,12 @@ from homeassistant import config_entries
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
-    CONF_UNIT_OF_MEASUREMENT,
-    CONF_UNIT_SYSTEM,
     CONF_REGION,
 )
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
-    DEFAULT_DISTANCE_UNIT,
-    DISTANCE_UNITS,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     CONF_PIN,
@@ -55,12 +51,6 @@ class KiaUvoOptionFlowHandler(config_entries.OptionsFlow):
         self.config_entry = config_entry
         self.schema = vol.Schema(
             {
-                vol.Optional(
-                    CONF_UNIT_OF_MEASUREMENT,
-                    default=self.config_entry.options.get(
-                        CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT
-                    ),
-                ): vol.In(DISTANCE_UNITS),
                 vol.Optional(
                     CONF_SCAN_INTERVAL,
                     default=self.config_entry.options.get(

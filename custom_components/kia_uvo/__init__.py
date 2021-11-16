@@ -27,7 +27,6 @@ from .const import (
     DATA_CONFIG_UPDATE_LISTENER,
     DATA_VEHICLE_LISTENER,
     DEFAULT_BRAND,
-    DEFAULT_DISTANCE_UNIT,
     DEFAULT_PIN,
     DEFAULT_REGION,
     DEFAULT_SCAN_INTERVAL,
@@ -120,9 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     brand = config_entry.data.get(CONF_BRAND, DEFAULT_BRAND)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
-    unit_of_measurement = DISTANCE_UNITS[
-        config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)
-    ]
+    unit_of_measurement = hass.config.as_dict()['unit_system']['length']
     no_force_scan_hour_start = config_entry.options.get(
         CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START
     )
