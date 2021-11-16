@@ -235,7 +235,9 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         )
 
         response_body = response.json()
-        vehicle_status = response_body["payload"]["vehicleInfoList"][0]["lastVehicleInfo"]["vehicleStatusRpt"]["vehicleStatus"]
+        vehicle_status = response_body["payload"]["vehicleInfoList"][0][
+            "lastVehicleInfo"
+        ]["vehicleStatusRpt"]["vehicleStatus"]
         vehicle_data = {
             "vehicleStatus": vehicle_status,
             "odometer": {
@@ -251,7 +253,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             ]["location"],
         }
 
-
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
 
         vehicle_status["doorOpen"] = vehicle_status["doorStatus"]
@@ -265,9 +266,15 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         climate_data = vehicle_status["climate"]
         vehicle_status["airCtrlOn"] = climate_data["airCtrl"]
         vehicle_status["defrost"] = climate_data["defrost"]
-        vehicle_status["sideBackWindowHeat"] = climate_data["heatingAccessory"]["rearWindow"]
-        vehicle_status["sideMirrorHeat"] = climate_data["heatingAccessory"]["sideMirror"]
-        vehicle_status["steerWheelHeat"] = climate_data["heatingAccessory"]["steeringWheel"]
+        vehicle_status["sideBackWindowHeat"] = climate_data["heatingAccessory"][
+            "rearWindow"
+        ]
+        vehicle_status["sideMirrorHeat"] = climate_data["heatingAccessory"][
+            "sideMirror"
+        ]
+        vehicle_status["steerWheelHeat"] = climate_data["heatingAccessory"][
+            "steeringWheel"
+        ]
 
         vehicle_status["airTemp"] = climate_data["airTemp"]
 
