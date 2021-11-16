@@ -7,7 +7,7 @@ from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     TIME_MINUTES,
     TEMP_FAHRENHEIT,
-    TEMP_CELSIUS
+    TEMP_CELSIUS,
 )
 from homeassistant.util import distance as distance_util
 import homeassistant.util.dt as dt_util
@@ -22,37 +22,176 @@ from .const import (
     NOT_APPLICABLE,
     DISTANCE_UNITS,
     VEHICLE_ENGINE_TYPE,
-    DYNAMIC_DISTANCE_UNIT
+    DYNAMIC_DISTANCE_UNIT,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     INSTRUMENTS = []
 
-    if vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
-        INSTRUMENTS.append(("evBatteryPercentage", "EV Battery", "vehicleStatus.evStatus.batteryStatus", PERCENTAGE, "mdi:car-electric", DEVICE_CLASS_BATTERY))
-        INSTRUMENTS.append(("evDrivingDistance", "Range by EV", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
-        INSTRUMENTS.append(("totalDrivingDistance", "Range Total", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
-        INSTRUMENTS.append(("estimatedCurrentChargeDuration", "Estimated Current Charge Duration", "vehicleStatus.evStatus.remainTime2.atc.value", TIME_MINUTES, "mdi:ev-station", None))
-        INSTRUMENTS.append(("estimatedFastChargeDuration", "Estimated Fast Charge Duration", "vehicleStatus.evStatus.remainTime2.etc1.value", TIME_MINUTES, "mdi:ev-station", None))
-        INSTRUMENTS.append(("estimatedPortableChargeDuration", "Estimated Portable Charge Duration", "vehicleStatus.evStatus.remainTime2.etc2.value", TIME_MINUTES, "mdi:ev-station", None))
-        INSTRUMENTS.append(("estimatedStationChargeDuration", "Estimated Station Charge Duration", "vehicleStatus.evStatus.remainTime2.etc3.value", TIME_MINUTES, "mdi:ev-station", None))
+    if (
+        vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
+        or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV
+    ):
+        INSTRUMENTS.append(
+            (
+                "evBatteryPercentage",
+                "EV Battery",
+                "vehicleStatus.evStatus.batteryStatus",
+                PERCENTAGE,
+                "mdi:car-electric",
+                DEVICE_CLASS_BATTERY,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "evDrivingDistance",
+                "Range by EV",
+                "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.evModeRange.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:road-variant",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "totalDrivingDistance",
+                "Range Total",
+                "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.totalAvailableRange.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:road-variant",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "estimatedCurrentChargeDuration",
+                "Estimated Current Charge Duration",
+                "vehicleStatus.evStatus.remainTime2.atc.value",
+                TIME_MINUTES,
+                "mdi:ev-station",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "estimatedFastChargeDuration",
+                "Estimated Fast Charge Duration",
+                "vehicleStatus.evStatus.remainTime2.etc1.value",
+                TIME_MINUTES,
+                "mdi:ev-station",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "estimatedPortableChargeDuration",
+                "Estimated Portable Charge Duration",
+                "vehicleStatus.evStatus.remainTime2.etc2.value",
+                TIME_MINUTES,
+                "mdi:ev-station",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "estimatedStationChargeDuration",
+                "Estimated Station Charge Duration",
+                "vehicleStatus.evStatus.remainTime2.etc3.value",
+                TIME_MINUTES,
+                "mdi:ev-station",
+                None,
+            )
+        )
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
-        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
+        INSTRUMENTS.append(
+            (
+                "fuelDrivingDistance",
+                "Range by Fuel",
+                "vehicleStatus.evStatus.drvDistance.0.rangeByFuel.gasModeRange.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:road-variant",
+                None,
+            )
+        )
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
-        INSTRUMENTS.append(("fuelDrivingDistance", "Range by Fuel", "vehicleStatus.dte.value", DYNAMIC_DISTANCE_UNIT, "mdi:road-variant", None))
-     
-    INSTRUMENTS.append(("odometer", "Odometer", "odometer.value", DYNAMIC_DISTANCE_UNIT, "mdi:speedometer", None))
-    INSTRUMENTS.append(("lastService", "Last Service", "lastService.value", DYNAMIC_DISTANCE_UNIT, "mdi:car-wrench", None))
-    INSTRUMENTS.append(("nextService", "Next Service", "nextService.value", DYNAMIC_DISTANCE_UNIT, "mdi:car-wrench", None))
-    INSTRUMENTS.append(("geocodedLocation", "Geocoded Location", "vehicleLocation.geocodedLocation.display_name", None, "mdi:map", None))
-    INSTRUMENTS.append(("carBattery", "Car Battery", "vehicleStatus.battery.batSoc", PERCENTAGE, "mdi:car-battery", DEVICE_CLASS_BATTERY))
+        INSTRUMENTS.append(
+            (
+                "fuelDrivingDistance",
+                "Range by Fuel",
+                "vehicleStatus.dte.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:road-variant",
+                None,
+            )
+        )
 
-    INSTRUMENTS.append(("temperatureSetpoint", "Set Temperature", "vehicleStatus.airTemp.value", DYNAMIC_TEMP_UNIT, None, DEVICE_CLASS_TEMPERATURE))
+    INSTRUMENTS.append(
+        (
+            "odometer",
+            "Odometer",
+            "odometer.value",
+            DYNAMIC_DISTANCE_UNIT,
+            "mdi:speedometer",
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "lastService",
+            "Last Service",
+            "lastService.value",
+            DYNAMIC_DISTANCE_UNIT,
+            "mdi:car-wrench",
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "nextService",
+            "Next Service",
+            "nextService.value",
+            DYNAMIC_DISTANCE_UNIT,
+            "mdi:car-wrench",
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "geocodedLocation",
+            "Geocoded Location",
+            "vehicleLocation.geocodedLocation.display_name",
+            None,
+            "mdi:map",
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "carBattery",
+            "Car Battery",
+            "vehicleStatus.battery.batSoc",
+            PERCENTAGE,
+            "mdi:car-battery",
+            DEVICE_CLASS_BATTERY,
+        )
+    )
+
+    INSTRUMENTS.append(
+        (
+            "temperatureSetpoint",
+            "Set Temperature",
+            "vehicleStatus.airTemp.value",
+            DYNAMIC_TEMP_UNIT,
+            None,
+            DEVICE_CLASS_TEMPERATURE,
+        )
+    )
 
     sensors = []
 
@@ -60,10 +199,35 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         if vehicle.get_child_value(key) is None:
             _LOGGER.debug(f"skipping sensor for missing data, key:{key}")
         else:
-            sensors.append(InstrumentSensor(hass, config_entry, vehicle, id, description, key, unit, icon, device_class))
+            sensors.append(
+                InstrumentSensor(
+                    hass,
+                    config_entry,
+                    vehicle,
+                    id,
+                    description,
+                    key,
+                    unit,
+                    icon,
+                    device_class,
+                )
+            )
 
-    sensors.append(InstrumentSensor(hass, config_entry, vehicle, "lastUpdated", "Last Update", "last_updated", "None", "mdi:update", DEVICE_CLASS_TIMESTAMP))
+    sensors.append(
+        InstrumentSensor(
+            hass,
+            config_entry,
+            vehicle,
+            "lastUpdated",
+            "Last Update",
+            "last_updated",
+            "None",
+            "mdi:update",
+            DEVICE_CLASS_TIMESTAMP,
+        )
+    )
     async_add_entities(sensors, True)
+
 
 class InstrumentSensor(KiaUvoEntity):
     def __init__(
@@ -97,17 +261,24 @@ class InstrumentSensor(KiaUvoEntity):
 
         value = self.vehicle.get_child_value(self._key)
 
-        if self._id == "temperatureSetpoint" and REGIONS[self.vehicle.kia_uvo_api.region] != REGION_USA:
+        if (
+            self._id == "temperatureSetpoint"
+            and REGIONS[self.vehicle.kia_uvo_api.region] != REGION_USA
+        ):
             value = value.replace("H", "")
             value = value.replace("C", "")
             value = "0x" + value
-            return self.vehicle.kia_uvo_api.get_temperature_range_by_region()[int(value, 16)]
+            return self.vehicle.kia_uvo_api.get_temperature_range_by_region()[
+                int(value, 16)
+            ]
 
         if value is None:
             value = NOT_APPLICABLE
         else:
             if self._source_unit != self._unit:
-                value = distance_util.convert(float(value), self._source_unit, self._unit)
+                value = distance_util.convert(
+                    float(value), self._source_unit, self._unit
+                )
             if isinstance(value, float) == True:
                 value = round(value, 1)
 
@@ -138,7 +309,11 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def state_attributes(self):
         if self._id == "geocodedLocation":
-            return {"address": self.vehicle.get_child_value("vehicleLocation.geocodedLocation.address")}
+            return {
+                "address": self.vehicle.get_child_value(
+                    "vehicleLocation.geocodedLocation.address"
+                )
+            }
         return None
 
     @property

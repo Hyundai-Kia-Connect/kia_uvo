@@ -4,17 +4,15 @@ from homeassistant.components.lock import LockEntity
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import (
-    DOMAIN,
-    DATA_VEHICLE_INSTANCE,
-    VEHICLE_LOCK_ACTION
-)
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_LOCK_ACTION
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
     async_add_entities([Lock(hass, config_entry, vehicle)], True)
+
 
 class Lock(KiaUvoEntity, LockEntity):
     def __init__(
