@@ -53,6 +53,7 @@ class Vehicle:
 
     async def update(self):
         try:
+            previous_vehicle_status = self.vehicle_data["vehicleStatus"]
             current_vehicle_location = self.get_child_value("vehicleLocation")
             self.vehicle_data = await self.hass.async_add_executor_job(
                 self.kia_uvo_api.get_cached_vehicle_status, self.token
@@ -64,7 +65,16 @@ class Vehicle:
                     self.set_geocoded_location, current_vehicle_location
                 )
 
-            async_dispatcher_send(self.hass, self.topic_update)
+            if (
+                self.get_child_value("vehicleStatus.engine") == False
+                and previous_vehicle_status.engine == False
+                and self.get_child_value("vehicleStatus.evStatus.batteryStatus") == 0
+                and previous_vehicle_status["evStatus"]["batteryStatus"] != 0
+            ):
+                await self.force_update()
+            else:
+                async_dispatcher_send(self.hass, self.topic_update)
+
         except Exception as ex:
             _LOGGER.error(
                 f"{DOMAIN} - Exception in update : %s - traceback: %s",
