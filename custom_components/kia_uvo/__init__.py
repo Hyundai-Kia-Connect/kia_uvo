@@ -119,7 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     brand = config_entry.data.get(CONF_BRAND, DEFAULT_BRAND)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
-    unit_of_measurement = hass.config.as_dict()['unit_system']['length']
+    unit_of_measurement = hass.config.as_dict()["unit_system"]["length"]
     no_force_scan_hour_start = config_entry.options.get(
         CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START
     )
