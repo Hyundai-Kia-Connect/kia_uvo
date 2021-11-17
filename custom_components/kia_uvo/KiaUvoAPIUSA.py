@@ -19,8 +19,10 @@ from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class AuthError(RequestException):
     pass
+
 
 def request_with_active_session(func):
     def request_with_active_session_wrapper(*args, **kwargs):
