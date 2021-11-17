@@ -189,6 +189,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "mdi:car-seat-heater",
             None,
         ),
+        (
+            "lowFuelLight",
+            "Low Fuel Light",
+            "vehicleStatus.lowFuelLight",
+            "mdi:gas-station-off",
+            "mdi:gas-station",
+            None,
+        ),
     ]
 
     if (
@@ -213,20 +221,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 None,
                 None,
                 DEVICE_CLASS_PLUG,
-            )
-        )
-    if (
-        vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV
-        or vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC
-    ):
-        BINARY_INSTRUMENTS.append(
-            (
-                "lowFuelLight",
-                "Low Fuel Light",
-                "vehicleStatus.lowFuelLight",
-                "mdi:gas-station-off",
-                "mdi:gas-station",
-                None,
             )
         )
 

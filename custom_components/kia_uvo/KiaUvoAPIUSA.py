@@ -235,10 +235,11 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         )
 
         response_body = response.json()
+        vehicle_status = response_body["payload"]["vehicleInfoList"][0][
+            "lastVehicleInfo"
+        ]["vehicleStatusRpt"]["vehicleStatus"]
         vehicle_data = {
-            "vehicleStatus": response_body["payload"]["vehicleInfoList"][0][
-                "lastVehicleInfo"
-            ]["vehicleStatusRpt"]["vehicleStatus"],
+            "vehicleStatus": vehicle_status,
             "odometer": {
                 "value": float(
                     response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
@@ -252,43 +253,30 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             ]["location"],
         }
 
-        vehicle_data["vehicleStatus"]["time"] = vehicle_data["vehicleStatus"][
-            "syncDate"
-        ]["utc"]
+        vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
 
-        vehicle_data["vehicleStatus"]["doorOpen"] = vehicle_data["vehicleStatus"][
-            "doorStatus"
-        ]
-        vehicle_data["vehicleStatus"]["trunkOpen"] = vehicle_data["vehicleStatus"][
-            "doorStatus"
-        ]["trunk"]
-        vehicle_data["vehicleStatus"]["hoodOpen"] = vehicle_data["vehicleStatus"][
-            "doorStatus"
-        ]["hood"]
+        vehicle_status["doorOpen"] = vehicle_status["doorStatus"]
+        vehicle_status["trunkOpen"] = vehicle_status["doorStatus"]["trunk"]
+        vehicle_status["hoodOpen"] = vehicle_status["doorStatus"]["hood"]
 
-        vehicle_data["vehicleStatus"]["tirePressureLamp"] = {
-            "tirePressureLampAll": vehicle_data["vehicleStatus"]["tirePressure"]["all"]
+        vehicle_status["tirePressureLamp"] = {
+            "tirePressureLampAll": vehicle_status["tirePressure"]["all"]
         }
 
-        vehicle_data["vehicleStatus"]["airCtrlOn"] = vehicle_data["vehicleStatus"][
-            "climate"
-        ]["airCtrl"]
-        vehicle_data["vehicleStatus"]["defrost"] = vehicle_data["vehicleStatus"][
-            "climate"
-        ]["defrost"]
-        vehicle_data["vehicleStatus"]["sideBackWindowHeat"] = vehicle_data[
-            "vehicleStatus"
-        ]["climate"]["heatingAccessory"]["rearWindow"]
-        vehicle_data["vehicleStatus"]["sideMirrorHeat"] = vehicle_data["vehicleStatus"][
-            "climate"
-        ]["heatingAccessory"]["sideMirror"]
-        vehicle_data["vehicleStatus"]["steerWheelHeat"] = vehicle_data["vehicleStatus"][
-            "climate"
-        ]["heatingAccessory"]["steeringWheel"]
+        climate_data = vehicle_status["climate"]
+        vehicle_status["airCtrlOn"] = climate_data["airCtrl"]
+        vehicle_status["defrost"] = climate_data["defrost"]
+        vehicle_status["sideBackWindowHeat"] = climate_data["heatingAccessory"][
+            "rearWindow"
+        ]
+        vehicle_status["sideMirrorHeat"] = climate_data["heatingAccessory"][
+            "sideMirror"
+        ]
+        vehicle_status["steerWheelHeat"] = climate_data["heatingAccessory"][
+            "steeringWheel"
+        ]
 
-        vehicle_data["vehicleStatus"]["airTemp"] = vehicle_data["vehicleStatus"][
-            "climate"
-        ]["airTemp"]
+        vehicle_status["airTemp"] = climate_data["airTemp"]
 
         return vehicle_data
 
