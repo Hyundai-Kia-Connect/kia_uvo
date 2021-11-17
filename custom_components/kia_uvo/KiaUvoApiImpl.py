@@ -1,12 +1,6 @@
 import logging
 
-from datetime import datetime
-from datetime import tzinfo
-import push_receiver
-import random
 import requests
-import uuid
-from urllib.parse import parse_qs, urlparse
 
 from homeassistant.util import dt as dt_util
 
@@ -33,6 +27,7 @@ class KiaUvoApiImpl:
         self.stamps = None
         self.region = region
         self.brand = brand
+        self.synchronous_actions = False
 
     def login(self) -> Token:
         pass
@@ -76,6 +71,9 @@ class KiaUvoApiImpl:
 
     def stop_charge(self, token: Token):
         pass
+
+    def synchronous_actions(self) -> bool:
+        self.synchronous_actions
 
     def get_timezone_by_region(self) -> tzinfo:
         if REGIONS[self.region] == REGION_CANADA:

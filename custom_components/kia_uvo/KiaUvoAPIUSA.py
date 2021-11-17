@@ -12,21 +12,15 @@ import time
 
 from .const import (
     DOMAIN,
-    BRANDS,
-    BRAND_HYUNDAI,
-    BRAND_KIA,
     DATE_FORMAT,
-    VEHICLE_LOCK_ACTION,
 )
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-
 class AuthError(RequestException):
     pass
-
 
 def request_with_active_session(func):
     def request_with_active_session_wrapper(*args, **kwargs):
@@ -87,6 +81,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         super().__init__(
             username, password, region, brand, use_email_with_geocode_api, pin
         )
+        self.synchronous_actions = True
 
         # Randomly generate a plausible device id on startup
         self.device_id = (

@@ -2,7 +2,6 @@ import logging
 
 from datetime import datetime
 import re
-import requests
 import traceback
 
 from homeassistant.config_entries import ConfigEntry
@@ -12,7 +11,6 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 from homeassistant.helpers.event import async_call_later
-import homeassistant.util.dt as dt_util
 
 from .const import *
 from .KiaUvoApiImpl import KiaUvoApiImpl
@@ -78,6 +76,15 @@ class Vehicle:
         )
         await self.update()
 
+    async def force_update_loop_start(self):
+        if self.kia_uvo_api.synchronous_actions:
+            await self.update()
+        else:
+            self.force_update_try_count = 0
+            self.force_update_try_caller = async_call_later(
+                self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+            )
+
     async def force_update_loop(self, _):
         _LOGGER.debug(
             f"{DOMAIN} - force_update_loop start {self.force_update_try_count} {COUNT_FORCE_UPDATE_AFTER_COMMAND}"
@@ -122,10 +129,7 @@ class Vehicle:
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.lock_action, self.token, action.value
         )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def refresh_token(self):
         _LOGGER.debug(
@@ -168,10 +172,7 @@ class Vehicle:
                 climate,
                 heating,
             )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def stop_climate(self):
         if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
@@ -182,26 +183,17 @@ class Vehicle:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.stop_climate, self.token
             )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def start_charge(self):
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.start_charge, self.token
         )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def stop_charge(self):
         await self.hass.async_add_executor_job(self.kia_uvo_api.stop_charge, self.token)
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     def login(self):
         self.token = self.kia_uvo_api.login()
