@@ -112,9 +112,7 @@ class Vehicle:
         new_lon = self.get_child_value("vehicleLocation.coord.lon")
 
         if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
-            self.vehicle_data["vehicleLocation"][
-                "geocodedLocation"
-            ] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
+            self.vehicle_data["vehicleLocation"]["geocodedLocation"] = self.kia_uvo_api.get_geocoded_location(new_lat, new_lon)
         else:
             self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
 
