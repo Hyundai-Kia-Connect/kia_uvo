@@ -168,9 +168,15 @@ class Vehicle:
                 climate,
                 heating,
             )
+        # call update to see climate started
         self.force_update_try_count = 0
         self.force_update_try_caller = async_call_later(
             self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+        )
+
+        # call update to see climate finished
+        async_call_later(
+            self.hass, (duration * 60) + 1, self.force_update_loop
         )
 
     async def stop_climate(self):
