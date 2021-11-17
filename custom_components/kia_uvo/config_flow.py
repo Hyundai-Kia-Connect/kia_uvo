@@ -17,8 +17,9 @@ from homeassistant.const import (
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
+from .utils import get_default_distance_unit
+
 from .const import (
-    DEFAULT_DISTANCE_UNIT,
     DISTANCE_UNITS,
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
@@ -58,7 +59,7 @@ class KiaUvoOptionFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(
                     CONF_UNIT_OF_MEASUREMENT,
                     default=self.config_entry.options.get(
-                        CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT
+                        CONF_UNIT_OF_MEASUREMENT, get_default_distance_unit()
                     ),
                 ): vol.In(DISTANCE_UNITS),
                 vol.Optional(
