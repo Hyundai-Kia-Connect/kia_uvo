@@ -108,6 +108,47 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             )
         )
 
+        INSTRUMENTS.append(
+            (
+                "targetSOCACCapacity",
+                "Target Capacity of Charge AC",
+                "vehicleStatus.evStatus.targetSOC.1.targetSOClevel",
+                PERCENTAGE,
+                "mdi:car-electric",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "targetSOCACRange",
+                "Target Range of Charge AC",
+                "vehicleStatus.evStatus.targetSOC.1.dte.totalAvailableRange.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:ev-station",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "targetSOCDCCapacity",
+                "Target Capacity of Charge DC",
+                "vehicleStatus.evStatus.targetSOC.0.targetSOClevel",
+                PERCENTAGE,
+                "mdi:car-electric",
+                None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "targetSOCDCRange",
+                "Target State of Charge DC",
+                "vehicleStatus.evStatus.targetSOC.0.dte.totalAvailableRange.value",
+                DYNAMIC_DISTANCE_UNIT,
+                "mdi:ev-station",
+                None,
+            )
+        )
+
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(
             (
@@ -181,7 +222,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DEVICE_CLASS_BATTERY,
         )
     )
-
     INSTRUMENTS.append(
         (
             "temperatureSetpoint",
@@ -253,6 +293,10 @@ class InstrumentSensor(KiaUvoEntity):
         self._dynamic_distance_unit = False
         if self._unit == DYNAMIC_DISTANCE_UNIT:
             self._dynamic_distance_unit = True
+        if self._id.startswith("targetSOC"):
+            self.vehicle.get_child_value("vehicleStatus.evStatus.targetSOC").sort(
+                key=lambda x: x.plugType
+            )
 
     @property
     def state(self):
