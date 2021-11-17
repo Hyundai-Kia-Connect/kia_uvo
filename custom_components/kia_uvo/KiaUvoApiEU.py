@@ -268,7 +268,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             f"{DOMAIN} - LoginFormSubmit {login_form_action_url} - Response {response.status_code} - {response.headers}"
         )
         if response.status_code != 302:
-            print(
+            _LOGGER.debug(
                 f"{DOMAIN} - LoginFormSubmit Error {login_form_action_url} - Response {response.status_code} - {response.text}"
             )
             return
@@ -279,8 +279,31 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(
             f"{DOMAIN} - Redirect User Id {redirect_url} - Response {response.url} - {response.text}"
         )
-        parsed_url = urlparse(response.url)
-        intUserId = "".join(parse_qs(parsed_url.query)["intUserId"])
+        
+        intUserId = 0
+        if "account-find-link" in response.text:
+            soup = BeautifulSoup(response.content, "html.parser")
+            login_form_action_url = soup.find("form")["action"].replace("&amp;","&")
+            data = {"actionType": "FIND", "createToUVO": "UVO", "email": ""}
+            headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT_MOZILLA}
+            response = requests.post(login_form_action_url, data=data, headers=headers, allow_redirects=False, cookies=self.cookies)
+
+            if response.status_code != 302:
+                _LOGGER.debug(f"{DOMAIN} - AccountFindLink Error {login_form_action_url} - Response {response.status_code}")
+                return
+
+            self.cookies.update(response.cookies)
+            redirect_url = response.headers["Location"]
+            headers = {"User-Agent": USER_AGENT_MOZILLA}
+            response = requests.get(redirect_url, headers=headers, cookies=self.cookies)
+            _LOGGER.debug(f"{DOMAIN} - Redirect User Id 2 {redirect_url} - Response {response.url}")
+            _LOGGER.debug(f"{DOMAIN} - Redirect 2 - Response Text {response.text}")
+            parsed_url = urlparse(response.url)
+            intUserId = "".join(parse_qs(parsed_url.query)["int_user_id"])
+        else:
+            parsed_url = urlparse(response.url)
+            intUserId = "".join(parse_qs(parsed_url.query)["intUserId"])
+
 
         url = self.USER_API_URL + "silentsignin"
         headers = {
