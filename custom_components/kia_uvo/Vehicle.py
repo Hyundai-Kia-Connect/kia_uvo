@@ -175,9 +175,7 @@ class Vehicle:
         )
 
         # call update to see climate finished
-        async_call_later(
-            self.hass, (duration * 60) + 1, self.force_update_loop
-        )
+        async_call_later(self.hass, (duration * 60) + 1, self.force_update_loop)
 
     async def stop_climate(self):
         if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
