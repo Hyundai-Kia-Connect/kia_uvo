@@ -20,7 +20,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - Charge Status and Plugged In Status
 - Low Fuel Light Status (for PHEV and IC)
 - Doors, Trunk and Hood Open/Close Status
-- Locking and Unlocking
+- Locking and Unlocking, do not overuse this!
 - Engine Status
 - Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap (optional, disabled by default)
 - Last Service and Next Service in Canada
@@ -31,8 +31,8 @@ You can install this either manually copying files or using HACS. Configuration 
 ## Supported services ##
 - update: get latest **cached** vehicle data
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
-- start_climate / stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
-- start_charge / stop_charge: You can control your charging using these services
+- start_climate / stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this, really do not overuse this!
+- start_charge / stop_charge: You can control your charging using these services, do not overuse this!
 
 I have posted an example screenshot from my own car.
 
