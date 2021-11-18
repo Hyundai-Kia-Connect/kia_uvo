@@ -21,13 +21,14 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.util import dt as dt_util
 
+from .utils import DEFAULT_DISTANCE_UNIT_ARRAY, get_default_distance_unit
+
 from .const import (
     DOMAIN,
     DATA_VEHICLE_INSTANCE,
     DATA_CONFIG_UPDATE_LISTENER,
     DATA_VEHICLE_LISTENER,
     DEFAULT_BRAND,
-    DEFAULT_DISTANCE_UNIT,
     DEFAULT_PIN,
     DEFAULT_REGION,
     DEFAULT_SCAN_INTERVAL,
@@ -120,8 +121,17 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     region = config_entry.data.get(CONF_REGION, DEFAULT_REGION)
     brand = config_entry.data.get(CONF_BRAND, DEFAULT_BRAND)
     credentials = config_entry.data.get(CONF_STORED_CREDENTIALS)
+
+    if len(DEFAULT_DISTANCE_UNIT_ARRAY) == 0:
+        system_default_distance_unit = hass.config.as_dict()["unit_system"]["length"]
+        DEFAULT_DISTANCE_UNIT_ARRAY.append(
+            list(DISTANCE_UNITS.keys())[
+                list(DISTANCE_UNITS.values()).index(system_default_distance_unit)
+            ]
+        )
+
     unit_of_measurement = DISTANCE_UNITS[
-        config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, DEFAULT_DISTANCE_UNIT)
+        config_entry.options.get(CONF_UNIT_OF_MEASUREMENT, get_default_distance_unit())
     ]
     no_force_scan_hour_start = config_entry.options.get(
         CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START
