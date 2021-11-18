@@ -52,3 +52,4 @@ logger:
   logs:
     custom_components.kia_uvo: debug
 ```
+
