@@ -55,9 +55,9 @@ def request_with_active_session(func):
 def request_with_logging(func):
     def request_with_logging_wrapper(*args, **kwargs):
         url = kwargs["url"]
-        body = kwargs.get("body")
-        if body is not None:
-            _LOGGER.debug(f"sending {url} request {body}")
+        json_body = kwargs.get("json_body")
+        if json_body is not None:
+            _LOGGER.debug(f"sending {url} request with {json_body}")
         else:
             _LOGGER.debug(f"sending {url} request")
         response = func(*args, **kwargs)
