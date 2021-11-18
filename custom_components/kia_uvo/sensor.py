@@ -122,7 +122,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             (
                 "targetSOCACRange",
                 "Target Range of Charge AC",
-                "vehicleStatus.evStatus.targetSOC.1.dte.totalAvailableRange.value",
+                "vehicleStatus.evStatus.targetSOC.1.dte.rangeByFuel.totalAvailableRange.value",
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:ev-station",
                 None,
@@ -142,7 +142,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             (
                 "targetSOCDCRange",
                 "Target State of Charge DC",
-                "vehicleStatus.evStatus.targetSOC.0.dte.totalAvailableRange.value",
+                "vehicleStatus.evStatus.targetSOC.0.dte.rangeByFuel.totalAvailableRange.value",
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:ev-station",
                 None,
@@ -293,13 +293,13 @@ class InstrumentSensor(KiaUvoEntity):
         self._dynamic_distance_unit = False
         if self._unit == DYNAMIC_DISTANCE_UNIT:
             self._dynamic_distance_unit = True
-        if self._id.startswith("targetSOC"):
-            self.vehicle.get_child_value("vehicleStatus.evStatus.targetSOC").sort(
-                key=lambda x: x.plugType
-            )
 
     @property
     def state(self):
+        if self._id.startswith("targetSOC"):
+            self.vehicle.get_child_value("vehicleStatus.evStatus.targetSOC").sort(
+                key=lambda x: x["plugType"]
+            )
         if self._id == "lastUpdated":
             return dt_util.as_local(self.vehicle.last_updated).isoformat()
 
