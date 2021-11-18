@@ -259,6 +259,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
 
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
 
+        vehicle_status["battery"] = {
+            "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
+        }
+
         vehicle_status["doorOpen"] = vehicle_status["doorStatus"]
         vehicle_status["trunkOpen"] = vehicle_status["doorStatus"]["trunk"]
         vehicle_status["hoodOpen"] = vehicle_status["doorStatus"]["hood"]
