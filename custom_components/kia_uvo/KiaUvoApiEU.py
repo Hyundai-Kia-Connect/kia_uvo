@@ -56,10 +56,26 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         if BRANDS[brand] == BRAND_KIA:
             auth_client_id = "f4d531c7-1043-444d-b09a-ad24bd913dd4"
-            self.LOGIN_FORM_URL: str = "https://" + self.LOGIN_FORM_HOST + "/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            self.LOGIN_FORM_URL: str = (
+                "https://"
+                + self.LOGIN_FORM_HOST
+                + "/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id="
+                + auth_client_id
+                + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri="
+                + self.USER_API_URL
+                + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            )
         elif BRANDS[brand] == BRAND_HYUNDAI:
             auth_client_id = "64621b96-0f0d-11ec-82a8-0242ac130003"
-            self.LOGIN_FORM_URL: str = "https://" + self.LOGIN_FORM_HOST + "/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=" + auth_client_id + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=" + self.USER_API_URL + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            self.LOGIN_FORM_URL: str = (
+                "https://"
+                + self.LOGIN_FORM_HOST
+                + "/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id="
+                + auth_client_id
+                + "&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri="
+                + self.USER_API_URL
+                + "integration/redirect/login&ui_locales=en&state=$service_id:$user_id"
+            )
 
         self.stamps_url: str = (
             "https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/"
@@ -241,7 +257,10 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "credentialId": "",
             "rememberMe": "on",
         }
-        headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT_MOZILLA}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": USER_AGENT_MOZILLA,
+        }
         response = requests.post(
             login_form_action_url,
             data=data,
@@ -270,27 +289,39 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         intUserId = 0
         if "account-find-link" in response.text:
             soup = BeautifulSoup(response.content, "html.parser")
-            login_form_action_url = soup.find("form")["action"].replace("&amp;","&")
+            login_form_action_url = soup.find("form")["action"].replace("&amp;", "&")
             data = {"actionType": "FIND", "createToUVO": "UVO", "email": ""}
-            headers = {"Content-Type": "application/x-www-form-urlencoded", "User-Agent": USER_AGENT_MOZILLA}
-            response = requests.post(login_form_action_url, data=data, headers=headers, allow_redirects=False, cookies=self.cookies)
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "User-Agent": USER_AGENT_MOZILLA,
+            }
+            response = requests.post(
+                login_form_action_url,
+                data=data,
+                headers=headers,
+                allow_redirects=False,
+                cookies=self.cookies,
+            )
 
             if response.status_code != 302:
-                _LOGGER.debug(f"{DOMAIN} - AccountFindLink Error {login_form_action_url} - Response {response.status_code}")
+                _LOGGER.debug(
+                    f"{DOMAIN} - AccountFindLink Error {login_form_action_url} - Response {response.status_code}"
+                )
                 return
 
             self.cookies = self.cookies | response.cookies.get_dict()
             redirect_url = response.headers["Location"]
             headers = {"User-Agent": USER_AGENT_MOZILLA}
             response = requests.get(redirect_url, headers=headers, cookies=self.cookies)
-            _LOGGER.debug(f"{DOMAIN} - Redirect User Id 2 {redirect_url} - Response {response.url}")
+            _LOGGER.debug(
+                f"{DOMAIN} - Redirect User Id 2 {redirect_url} - Response {response.url}"
+            )
             _LOGGER.debug(f"{DOMAIN} - Redirect 2 - Response Text {response.text}")
             parsed_url = urlparse(response.url)
             intUserId = "".join(parse_qs(parsed_url.query)["int_user_id"])
         else:
             parsed_url = urlparse(response.url)
             intUserId = "".join(parse_qs(parsed_url.query)["intUserId"])
-
 
         url = self.USER_API_URL + "silentsignin"
         headers = {
