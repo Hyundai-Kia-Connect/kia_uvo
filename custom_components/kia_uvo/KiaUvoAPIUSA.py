@@ -55,7 +55,11 @@ def request_with_active_session(func):
 def request_with_logging(func):
     def request_with_logging_wrapper(*args, **kwargs):
         url = kwargs["url"]
-        _LOGGER.debug(f"sending {url} request")
+        json_body = kwargs.get("json_body")
+        if json_body is not None:
+            _LOGGER.debug(f"sending {url} request with {json_body}")
+        else:
+            _LOGGER.debug(f"sending {url} request")
         response = func(*args, **kwargs)
         _LOGGER.debug(f"got response {response.text}")
         response_json = response.json()
@@ -254,6 +258,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         }
 
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
+
+        vehicle_status["battery"] = {
+            "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
+        }
 
         vehicle_status["doorOpen"] = vehicle_status["doorStatus"]
         vehicle_status["trunkOpen"] = vehicle_status["doorStatus"]["trunk"]
