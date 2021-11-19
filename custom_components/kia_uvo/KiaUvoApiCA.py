@@ -143,7 +143,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_status["nextService"]["value"] = response["imatServiceOdometer"]
 
         # Handles cars that have never had service
-        if response["msopServiceOdometerUnit"] is not None:
+        if response["msopServiceOdometer"]:
             vehicle_status["lastService"] = {}
             vehicle_status["lastService"]["unit"] = response["msopServiceOdometerUnit"]
             vehicle_status["lastService"]["value"] = response["msopServiceOdometer"]
