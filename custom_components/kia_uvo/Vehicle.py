@@ -54,15 +54,15 @@ class Vehicle:
     async def update(self):
         try:
             previous_vehicle_status = self.get_child_value("vehicleStatus")
+            previous_vehicle_location = self.get_child_value("vehicleLocation")
             self.vehicle_data = await self.hass.async_add_executor_job(
                 self.kia_uvo_api.get_cached_vehicle_status, self.token
             )
             self.set_last_updated()
             self.set_engine_type()
             if self.enable_geolocation_entity:
-                current_vehicle_location = self.get_child_value("vehicleLocation")
                 await self.hass.async_add_executor_job(
-                    self.set_geocoded_location, current_vehicle_location
+                    self.set_geocoded_location, previous_vehicle_location
                 )
 
             if (
