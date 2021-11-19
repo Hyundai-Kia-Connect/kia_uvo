@@ -107,7 +107,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 None,
             )
         )
-
         INSTRUMENTS.append(
             (
                 "targetSOCACCapacity",
@@ -115,16 +114,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "vehicleStatus.evStatus.targetSOC.1.targetSOClevel",
                 PERCENTAGE,
                 "mdi:car-electric",
-                None,
-            )
-        )
-        INSTRUMENTS.append(
-            (
-                "targetSOCACRange",
-                "Target Range of Charge AC",
-                "vehicleStatus.evStatus.targetSOC.1.dte.rangeByFuel.totalAvailableRange.value",
-                DYNAMIC_DISTANCE_UNIT,
-                "mdi:ev-station",
                 None,
             )
         )
@@ -138,16 +127,28 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 None,
             )
         )
-        INSTRUMENTS.append(
-            (
-                "targetSOCDCRange",
-                "Target State of Charge DC",
-                "vehicleStatus.evStatus.targetSOC.0.dte.rangeByFuel.totalAvailableRange.value",
-                DYNAMIC_DISTANCE_UNIT,
-                "mdi:ev-station",
-                None,
+
+        if vehicle.kia_uvo_api.supports_soc_range:
+            INSTRUMENTS.append(
+                (
+                    "targetSOCACRange",
+                    "Target Range of Charge AC",
+                    "vehicleStatus.evStatus.targetSOC.1.dte.rangeByFuel.totalAvailableRange.value",
+                    DYNAMIC_DISTANCE_UNIT,
+                    "mdi:ev-station",
+                    None,
+                )
             )
-        )
+            INSTRUMENTS.append(
+                (
+                    "targetSOCDCRange",
+                    "Target Range of Charge DC",
+                    "vehicleStatus.evStatus.targetSOC.0.dte.rangeByFuel.totalAvailableRange.value",
+                    DYNAMIC_DISTANCE_UNIT,
+                    "mdi:ev-station",
+                    None,
+                )
+            )
 
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV:
         INSTRUMENTS.append(

@@ -33,6 +33,7 @@ class KiaUvoApiImpl:
         self.stamps = None
         self.region = region
         self.brand = brand
+        self.supports_soc_range = True
 
     def login(self) -> Token:
         pass

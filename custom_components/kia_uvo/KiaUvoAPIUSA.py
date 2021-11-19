@@ -91,6 +91,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         super().__init__(
             username, password, region, brand, use_email_with_geocode_api, pin
         )
+        self.supports_soc_range = False
 
         # Randomly generate a plausible device id on startup
         self.device_id = (
