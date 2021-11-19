@@ -10,7 +10,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
 - It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
-- By default, distance unit is kilometers, you need to configure the integration if you want to switch to miles.
+- By default, distance unit is based on HA metric/imperial preference, you need to configure the integration if you want to change the distance unit.
 
 ## Supported entities ##
 - Air Conditioner Status, Defroster Status, Set Temperature
@@ -52,3 +52,4 @@ logger:
   logs:
     custom_components.kia_uvo: debug
 ```
+
