@@ -217,6 +217,19 @@ class Vehicle:
             self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
         )
 
+    async def set_charge_limits(self, ac_limit: int, dc_limit: int):
+        if ac_limit is None:
+            ac_limit = 90
+        if dc_limit is None:
+            dc_limit = 90
+        await self.hass.async_add_executor_job(
+            self.kia_uvo_api.set_charge_limits, self.token, ac_limit, dc_limit
+        )
+        self.force_update_try_count = 0
+        self.force_update_try_caller = async_call_later(
+            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+        )
+
     def login(self):
         self.token = self.kia_uvo_api.login()
 

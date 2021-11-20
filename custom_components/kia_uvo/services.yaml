@@ -64,3 +64,30 @@ lock:
   description: Lock the vehicle
 unlock:
   description: Unlock the vehicle
+set_charge_limits:
+  description: sets ac and dc charge capacity limits
+  fields:
+    dc_limit:
+      name: DC Charge limit
+      description: max charge capacity using DC charger
+      required: false
+      example: 50
+      default: 90
+      selector:
+        number:
+            min: 50
+            max: 100
+            step: 10
+            unit_of_measurement: '%'
+    ac_limit:
+      name: AC Charge limit
+      description: max charge capacity using AC charger
+      required: false
+      example: 50
+      default: 90
+      selector:
+        number:
+            min: 50
+            max: 100
+            step: 10
+            unit_of_measurement: '%'

@@ -381,3 +381,38 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url
         )
         self.check_action_status(token, response.headers["Xid"])
+
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        url = self.API_URL + "evc/sts"
+        body = {
+            "targetSOClist": [
+                {
+                    #                    "dte": {
+                    #                        "rangeByFuel": {
+                    #                            "evModeRange": {"unit": 3, "value": 193.0},
+                    #                            "gasModeRange": {"unit": 3, "value": 0.0},
+                    #                            "totalAvailableRange": {"unit": 3, "value": 193.0},
+                    #                        },
+                    #                        "type": 2,
+                    #                    },
+                    "plugType": 0,
+                    "targetSOClevel": dc_limit,
+                },
+                {
+                    #                    "dte": {
+                    #                        "rangeByFuel": {
+                    #                            "evModeRange": {"unit": 3, "value": 193.0},
+                    #                            "gasModeRange": {"unit": 3, "value": 0.0},
+                    #                            "totalAvailableRange": {"unit": 3, "value": 193.0},
+                    #                        },
+                    #                        "type": 2,
+                    #                    },
+                    "plugType": 1,
+                    "targetSOClevel": ac_limit,
+                },
+            ]
+        }
+        response = self.post_request_with_logging_and_active_session(
+            token=token, url=url, json_body=body
+        )
+        self.check_action_status(token, response.headers["Xid"])
