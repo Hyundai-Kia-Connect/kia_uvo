@@ -387,26 +387,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         body = {
             "targetSOClist": [
                 {
-                    #                    "dte": {
-                    #                        "rangeByFuel": {
-                    #                            "evModeRange": {"unit": 3, "value": 193.0},
-                    #                            "gasModeRange": {"unit": 3, "value": 0.0},
-                    #                            "totalAvailableRange": {"unit": 3, "value": 193.0},
-                    #                        },
-                    #                        "type": 2,
-                    #                    },
                     "plugType": 0,
                     "targetSOClevel": dc_limit,
                 },
                 {
-                    #                    "dte": {
-                    #                        "rangeByFuel": {
-                    #                            "evModeRange": {"unit": 3, "value": 193.0},
-                    #                            "gasModeRange": {"unit": 3, "value": 0.0},
-                    #                            "totalAvailableRange": {"unit": 3, "value": 193.0},
-                    #                        },
-                    #                        "type": 2,
-                    #                    },
                     "plugType": 1,
                     "targetSOClevel": ac_limit,
                 },
