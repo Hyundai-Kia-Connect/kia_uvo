@@ -38,7 +38,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         )
 
         if BRANDS[brand] == BRAND_KIA:
-            self.BASE_URL: str = "www.myuvo.ca"
+            self.BASE_URL: str = "kiaconnect.ca"
         elif BRANDS[brand] == BRAND_HYUNDAI:
             self.BASE_URL: str = "www.mybluelink.ca"
         self.old_vehicle_status = {}
@@ -142,9 +142,11 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_status["nextService"]["unit"] = response["imatServiceOdometerUnit"]
         vehicle_status["nextService"]["value"] = response["imatServiceOdometer"]
 
-        vehicle_status["lastService"] = {}
-        vehicle_status["lastService"]["unit"] = response["msopServiceOdometerUnit"]
-        vehicle_status["lastService"]["value"] = response["msopServiceOdometer"]
+        # Handles cars that have never had service
+        if response.get("msopServiceOdometer"):
+            vehicle_status["lastService"] = {}
+            vehicle_status["lastService"]["unit"] = response["msopServiceOdometerUnit"]
+            vehicle_status["lastService"]["value"] = response["msopServiceOdometer"]
 
         if not self.old_vehicle_status == {}:
             if (

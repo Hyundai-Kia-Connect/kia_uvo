@@ -1,7 +1,7 @@
 name: Lint
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - master
 
@@ -26,28 +26,19 @@ jobs:
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
-
       - name: Set up Python
         uses: actions/setup-python@v2
         id: python
         with:
           python-version: "3.x"
-
       - name: Install pre-commit
         run: |
           python3 -m pip install pre-commit
           pre-commit install-hooks --config .github/pre-commit-config.yaml
       - name: Run the check (${{ matrix.checks }})
         run: pre-commit run --hook-stage manual ${{ matrix.checks }} --all-files --config .github/pre-commit-config.yaml
-      - name: Set Lint branch name
+      - name: Commit Changes
         if: failure()
-        id: vars
-        run: echo ::set-output name=branch-name::"${{ matrix.checks }}/${{ github.head_ref }}"
-      - name: Create Pull Request
-        if: failure()
-        uses: peter-evans/create-pull-request@v3
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit-message: action fixes automatically created. 
-          title: "fix: ${{ matrix.checks }} action"
-          body: This is an auto-generated PR with fixes by ${{ matrix.checks }}
-          branch: ${{ steps.vars.outputs.branch-name }}
+          commit_message: "fix: ${{ matrix.checks }} action"
