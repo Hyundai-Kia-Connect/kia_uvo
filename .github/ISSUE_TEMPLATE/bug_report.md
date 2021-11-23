@@ -14,7 +14,7 @@ Please check Services, Known Bug / Issues and Troubleshooting over here first: h
 **Describe the bug**
 A clear and concise description of what the bug is.
 
-**Debug logs if an error occured**
+**Debug logs if an error occurred**
 
 Outlined here: https://github.com/fuatakgun/kia_uvo/blob/master/README.m
 
