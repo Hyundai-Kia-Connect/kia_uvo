@@ -360,7 +360,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         )
         if self.last_action_completed:
             action_status = response["result"]["transaction"]["apiStatusCode"]
-            _LOGGER.debug(f"{DOMAIN} - action_status: {action_status}")
+            _LOGGER.debug(f"{DOMAIN} - Last action_status: {action_status}")
         return self.last_action_completed
 
     def start_charge(self, token: Token):
