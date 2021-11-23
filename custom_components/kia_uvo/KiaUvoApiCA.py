@@ -355,7 +355,9 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response = requests.post(url, headers=headers)
         response = response.json()
 
-        self.last_action_completed = response["result"]["transaction"]["apiStatusCode"] != "null"
+        self.last_action_completed = (
+            response["result"]["transaction"]["apiStatusCode"] != "null"
+        )
         if self.last_action_completed:
             action_status = response["result"]["transaction"]["apiStatusCode"]
             _LOGGER.debug(f"{DOMAIN} - action_status: {action_status}")

@@ -309,7 +309,9 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url, json_body=body
         )
         response_json = response.json()
-        self.last_action_completed = all(v == 0 for v in response_json["payload"].values())
+        self.last_action_completed = all(
+            v == 0 for v in response_json["payload"].values()
+        )
         return self.last_action_completed
 
     def lock_action(self, token: Token, action):
