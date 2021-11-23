@@ -64,9 +64,9 @@ class Vehicle:
                 )
 
             if (
-                self.get_child_value("vehicleStatus.engine") == False
+                not self.get_child_value("vehicleStatus.engine")
                 and previous_vehicle_status is not None
-                and previous_vehicle_status["engine"] == False
+                and not previous_vehicle_status["engine"]
                 and self.get_child_value("vehicleStatus.evStatus.batteryStatus") == 0
                 and previous_vehicle_status["evStatus"]["batteryStatus"] != 0
             ):
@@ -91,12 +91,30 @@ class Vehicle:
         await self.update()
 
     async def force_update_loop_start(self):
-        if self.kia_uvo_api.synchronous_actions:
-            await self.update()
+        if self.kia_uvo_api.last_action_tracked:
+            self.force_update_try_caller = async_call_later(
+                self.hass,
+                INITIAL_STATUS_DELAY_AFTER_COMMAND,
+                self.check_action_completed_loop,
+            )
         else:
             self.force_update_try_count = 0
             self.force_update_try_caller = async_call_later(
                 self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+            )
+
+    async def check_action_completed_loop(self, _):
+        await self.hass.async_add_executor_job(
+            self.kia_uvo_api.check_last_action_status, self.token
+        )
+        if self.kia_uvo_api.last_action_completed:
+            self.kia_uvo_api.last_action_xid = None
+            await self.update()
+        else:
+            async_call_later(
+                self.hass,
+                RECHECK_STATUS_DELAY_AFTER_COMMAND,
+                self.check_action_completed_loop,
             )
 
     async def force_update_loop(self, _):

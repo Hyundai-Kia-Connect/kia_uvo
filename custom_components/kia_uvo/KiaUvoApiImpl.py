@@ -27,12 +27,15 @@ class KiaUvoApiImpl:
         self.stamps = None
         self.region = region
         self.brand = brand
-        self.synchronous_actions = False
+        self.last_action_tracked = False
 
     def login(self) -> Token:
         pass
 
     def get_cached_vehicle_status(self, token: Token):
+        pass
+
+    def check_last_action_status(self, token: Token):
         pass
 
     def get_geocoded_location(self, lat, lon):
