@@ -2,7 +2,7 @@ name: Release
 on:
   workflow_dispatch:
   schedule:
-  - cron: "0 8 * * Wed,Sat"
+  - cron: "0 8 * * Wed,Sun"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
-          git commit -m "chore: bumping verison to ${{steps.semantic_release_info.outputs.version}}"
+          git commit -m "chore: bumping version to ${{steps.semantic_release_info.outputs.version}}"
           git tag ${{ steps.semantic_release_info.outputs.git_tag }}
           
       - name: Push changes
