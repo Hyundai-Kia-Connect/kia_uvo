@@ -28,10 +28,10 @@ class LocationTracker(KiaUvoEntity, TrackerEntity):
     @property
     def longitude(self):
         return self.vehicle.get_child_value("vehicleLocation.coord.lon")
-    
+
     @property
     def location_accuracy(self):
-    #Estimating conversion on this from hdop to meters
+        # Estimating conversion on this from hdop to meters
         return int(self.vehicle.get_child_value("vehicleLocation.accuracy.hdop")) * 5
 
     @property
