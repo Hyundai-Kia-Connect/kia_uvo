@@ -89,7 +89,9 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
         climate = call.data.get("Climate")
         heating = call.data.get("Heating")
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        hass.create_task(vehicle.start_climate(set_temp, duration, defrost, climate, heating))
+        hass.create_task(
+            vehicle.start_climate(set_temp, duration, defrost, climate, heating)
+        )
 
     async def async_handle_stop_climate(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
