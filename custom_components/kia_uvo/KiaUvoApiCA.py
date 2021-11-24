@@ -2,12 +2,7 @@ import logging
 
 from datetime import timedelta, datetime
 import json
-import push_receiver
-import random
 import requests
-from urllib.parse import parse_qs, urlparse
-import uuid
-import time
 
 from .const import (
     DOMAIN,
@@ -15,7 +10,6 @@ from .const import (
     BRAND_HYUNDAI,
     BRAND_KIA,
     DATE_FORMAT,
-    VEHICLE_LOCK_ACTION,
 )
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
@@ -36,6 +30,11 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         super().__init__(
             username, password, region, brand, use_email_with_geocode_api, pin
         )
+
+        self.last_action_tracked = True
+        self.last_action_xid = None
+        self.last_action_completed = False
+        self.last_action_pin_auth = None
 
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_URL: str = "kiaconnect.ca"
@@ -64,7 +63,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         username = self.username
         password = self.password
 
-        ### Sign In with Email and Password and Get Authorization Code ###
+        # Sign In with Email and Password and Get Authorization Code
 
         url = self.API_URL + "lgn"
         data = {"loginId": username, "password": password}
@@ -78,7 +77,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
         _LOGGER.debug(f"{DOMAIN} - Refresh Token Value {refresh_token}")
 
-        ### Get Vehicles ###
+        # Get Vehicles
         url = self.API_URL + "vhcllst"
         headers = self.API_HEADERS
         headers["accessToken"] = access_token
@@ -181,7 +180,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
                 raise Exception("No Location Located")
 
         except:
-            _LOGGER.warn(f"{DOMAIN} - Get vehicle location failed")
+            _LOGGER.warning(f"{DOMAIN} - Get vehicle location failed")
             response = None
             return response
         else:
@@ -229,11 +228,10 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         )
         response_headers = response.headers
         response = response.json()
-        action_status = self.check_action_status(
-            token, headers["pAuth"], response_headers["transactionId"]
-        )
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
 
-        _LOGGER.debug(f"{DOMAIN} - Received lock_action response {action_status}")
+        _LOGGER.debug(f"{DOMAIN} - Received lock_action response")
 
     def start_climate(
         self, token: Token, set_temp, duration, defrost, climate, heating
@@ -267,9 +265,9 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response_headers = response.headers
         response = response.json()
 
-        action_status = self.check_action_status(
-            token, headers["pAuth"], response_headers["transactionId"]
-        )
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
+
         _LOGGER.debug(f"{DOMAIN} - Received start_climate response {response}")
 
     def start_climate_ev(
@@ -307,9 +305,8 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response_headers = response.headers
         response = response.json()
 
-        action_status = self.check_action_status(
-            token, headers["pAuth"], response_headers["transactionId"]
-        )
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
         _LOGGER.debug(f"{DOMAIN} - Received start_climate_ev response {response}")
 
     def stop_climate(self, token: Token):
@@ -325,11 +322,10 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response_headers = response.headers
         response = response.json()
 
-        action_status = self.check_action_status(
-            token, headers["pAuth"], response_headers["transactionId"]
-        )
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
 
-        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response {action_status}")
+        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response")
 
     def stop_climate_ev(self, token: Token):
         url = self.API_URL + "evc/rfoff"
@@ -344,28 +340,28 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         response_headers = response.headers
         response = response.json()
 
-        action_status = self.check_action_status(
-            token, headers["pAuth"], response_headers["transactionId"]
-        )
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
 
-        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response {action_status}")
+        _LOGGER.debug(f"{DOMAIN} - Received stop_climate response")
 
-    def check_action_status(self, token: Token, pAuth, transactionId):
+    def check_last_action_status(self, token: Token):
         url = self.API_URL + "rmtsts"
         headers = self.API_HEADERS
         headers["accessToken"] = token.access_token
         headers["vehicleId"] = token.vehicle_id
-        headers["transactionId"] = transactionId
-        headers["pAuth"] = pAuth
-        time.sleep(2)
+        headers["transactionId"] = self.last_action_xid
+        headers["pAuth"] = self.last_action_pin_auth
         response = requests.post(url, headers=headers)
         response = response.json()
 
-        if response["result"]["transaction"]["apiStatusCode"] == "null":
-            action_status = self.check_action_status(token, pAuth, transactionId)
-            return action_status
-        else:
-            return response["result"]["transaction"]["apiStatusCode"]
+        self.last_action_completed = (
+            response["result"]["transaction"]["apiStatusCode"] != "null"
+        )
+        if self.last_action_completed:
+            action_status = response["result"]["transaction"]["apiStatusCode"]
+            _LOGGER.debug(f"{DOMAIN} - Last action_status: {action_status}")
+        return self.last_action_completed
 
     def start_charge(self, token: Token):
         url = self.API_URL + "evc/rcstrt"
