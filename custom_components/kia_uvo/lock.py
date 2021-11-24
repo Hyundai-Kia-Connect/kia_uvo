@@ -40,7 +40,7 @@ class Lock(KiaUvoEntity, LockEntity):
         return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
 
     async def async_lock(self):
-        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.LOCK)
+        self.hass.create_task(self.vehicle.lock_action(VEHICLE_LOCK_ACTION.LOCK))
 
     async def async_unlock(self):
-        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.UNLOCK)
+        self.hass.create_task(self.vehicle.lock_action(VEHICLE_LOCK_ACTION.UNLOCK))

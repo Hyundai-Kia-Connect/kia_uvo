@@ -76,11 +76,11 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
 
     async def async_handle_force_update(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.force_update()
+        hass.create_task(vehicle.force_update())
 
     async def async_handle_update(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.update()
+        hass.create_task(vehicle.update())
 
     async def async_handle_start_climate(call):
         set_temp = call.data.get("Temperature")
@@ -89,19 +89,19 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
         climate = call.data.get("Climate")
         heating = call.data.get("Heating")
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.start_climate(set_temp, duration, defrost, climate, heating)
+        hass.create_task(vehicle.start_climate(set_temp, duration, defrost, climate, heating))
 
     async def async_handle_stop_climate(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.stop_climate()
+        hass.create_task(vehicle.stop_climate())
 
     async def async_handle_start_charge(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.start_charge()
+        hass.create_task(vehicle.start_charge())
 
     async def async_handle_stop_charge(call):
         vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-        await vehicle.stop_charge()
+        hass.create_task(vehicle.stop_charge())
 
     hass.services.async_register(DOMAIN, "force_update", async_handle_force_update)
     hass.services.async_register(DOMAIN, "update", async_handle_update)
