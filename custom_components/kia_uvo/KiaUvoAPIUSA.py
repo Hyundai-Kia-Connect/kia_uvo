@@ -12,11 +12,7 @@ import time
 
 from .const import (
     DOMAIN,
-    BRANDS,
-    BRAND_HYUNDAI,
-    BRAND_KIA,
     DATE_FORMAT,
-    VEHICLE_LOCK_ACTION,
 )
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
@@ -91,6 +87,9 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         super().__init__(
             username, password, region, brand, use_email_with_geocode_api, pin
         )
+        self.last_action_tracked = True
+        self.last_action_xid = None
+        self.last_action_completed = False
 
         # Randomly generate a plausible device id on startup
         self.device_id = (
@@ -157,7 +156,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         username = self.username
         password = self.password
 
-        ### Sign In with Email and Password and Get Authorization Code ###
+        # Sign In with Email and Password and Get Authorization Code
 
         url = self.API_URL + "prof/authUser"
 
@@ -176,7 +175,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             )
         _LOGGER.debug(f"got session id {session_id}")
 
-        ### Get Vehicles ###
+        # Get Vehicles
         url = self.API_URL + "ownr/gvl"
         headers = self.api_headers()
         headers["sid"] = session_id
@@ -303,19 +302,17 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url, json_body=body
         )
 
-    def check_action_status(self, token: Token, xid: str):
-        time.sleep(15)
-        completed = False
-        while not completed:
-            time.sleep(10)
-            url = self.API_URL + "cmm/gts"
-            body = {"xid": xid}
-            response = self.post_request_with_logging_and_active_session(
-                token=token, url=url, json_body=body
-            )
-            response_json = response.json()
-            completed = all(v == 0 for v in response_json["payload"].values())
-        return completed
+    def check_last_action_status(self, token: Token):
+        url = self.API_URL + "cmm/gts"
+        body = {"xid": self.last_action_xid}
+        response = self.post_request_with_logging_and_active_session(
+            token=token, url=url, json_body=body
+        )
+        response_json = response.json()
+        self.last_action_completed = all(
+            v == 0 for v in response_json["payload"].values()
+        )
+        return self.last_action_completed
 
     def lock_action(self, token: Token, action):
         _LOGGER.debug(f"Action for lock is: {action}")
@@ -330,7 +327,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url
         )
 
-        self.check_action_status(token, response.headers["Xid"])
+        self.last_action_xid = response.headers["Xid"]
 
     def start_climate(
         self, token: Token, set_temp, duration, defrost, climate, heating
@@ -358,14 +355,14 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         response = self.post_request_with_logging_and_active_session(
             token=token, url=url, json_body=body
         )
-        self.check_action_status(token, response.headers["Xid"])
+        self.last_action_xid = response.headers["Xid"]
 
     def stop_climate(self, token: Token):
         url = self.API_URL + "rems/stop"
         response = self.get_request_with_logging_and_active_session(
             token=token, url=url
         )
-        self.check_action_status(token, response.headers["Xid"])
+        self.last_action_xid = response.headers["Xid"]
 
     def start_charge(self, token: Token):
         url = self.API_URL + "evc/charge"
@@ -373,11 +370,11 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         response = self.post_request_with_logging_and_active_session(
             token=token, url=url, json_body=body
         )
-        self.check_action_status(token, response.headers["Xid"])
+        self.last_action_xid = response.headers["Xid"]
 
     def stop_charge(self, token: Token):
         url = self.API_URL + "evc/cancel"
         response = self.get_request_with_logging_and_active_session(
             token=token, url=url
         )
-        self.check_action_status(token, response.headers["Xid"])
+        self.last_action_xid = response.headers["Xid"]

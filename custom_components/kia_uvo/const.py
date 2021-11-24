@@ -43,6 +43,9 @@ DATA_CONFIG_UPDATE_LISTENER: str = (
     "config_update_listener"  # Config Options Update Listener Unsubcribe Caller
 )
 
+# action status delay constants
+INITIAL_STATUS_DELAY_AFTER_COMMAND: int = 15
+RECHECK_STATUS_DELAY_AFTER_COMMAND: int = 10
 # Retry Specific Constants
 START_FORCE_UPDATE_AFTER_COMMAND: int = 10  # Trigger first force update after a command
 INTERVAL_FORCE_UPDATE_AFTER_COMMAND: int = 30  # Consecutive force update calls interval
