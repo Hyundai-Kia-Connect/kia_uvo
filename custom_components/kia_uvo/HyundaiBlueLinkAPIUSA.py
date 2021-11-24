@@ -258,9 +258,6 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         )
         _LOGGER.debug(f"{DOMAIN} - Stop engine response: {response.text}")
 
-    def check_action_status(self, token: Token, pAuth, transactionId):
-        pass
-
     def start_charge(self, token: Token):
         pass
 

@@ -2,7 +2,6 @@ import logging
 
 from datetime import datetime
 import re
-import requests
 import traceback
 
 from homeassistant.config_entries import ConfigEntry
@@ -12,7 +11,6 @@ from homeassistant.helpers.dispatcher import (
     async_dispatcher_send,
 )
 from homeassistant.helpers.event import async_call_later
-import homeassistant.util.dt as dt_util
 
 from .const import *
 from .KiaUvoApiImpl import KiaUvoApiImpl
@@ -53,18 +51,32 @@ class Vehicle:
 
     async def update(self):
         try:
-            current_vehicle_location = self.get_child_value("vehicleLocation")
+            previous_vehicle_status = self.get_child_value("vehicleStatus")
+            previous_vehicle_location = self.get_child_value("vehicleLocation")
             self.vehicle_data = await self.hass.async_add_executor_job(
                 self.kia_uvo_api.get_cached_vehicle_status, self.token
             )
             self.set_last_updated()
             self.set_engine_type()
-            if self.enable_geolocation_entity == True:
+            if self.enable_geolocation_entity:
                 await self.hass.async_add_executor_job(
-                    self.set_geocoded_location, current_vehicle_location
+                    self.set_geocoded_location, previous_vehicle_location
                 )
 
-            async_dispatcher_send(self.hass, self.topic_update)
+            if (
+                not self.get_child_value("vehicleStatus.engine")
+                and previous_vehicle_status is not None
+                and not previous_vehicle_status["engine"]
+                and self.get_child_value("vehicleStatus.evStatus.batteryStatus") == 0
+                and previous_vehicle_status["evStatus"]["batteryStatus"] != 0
+            ):
+                _LOGGER.debug(
+                    f"zero battery api error, force_update started to correct data"
+                )
+                await self.force_update()
+            else:
+                async_dispatcher_send(self.hass, self.topic_update)
+
         except Exception as ex:
             _LOGGER.error(
                 f"{DOMAIN} - Exception in update : %s - traceback: %s",
@@ -77,6 +89,33 @@ class Vehicle:
             self.kia_uvo_api.update_vehicle_status, self.token
         )
         await self.update()
+
+    async def force_update_loop_start(self):
+        if self.kia_uvo_api.last_action_tracked:
+            self.force_update_try_caller = async_call_later(
+                self.hass,
+                INITIAL_STATUS_DELAY_AFTER_COMMAND,
+                self.check_action_completed_loop,
+            )
+        else:
+            self.force_update_try_count = 0
+            self.force_update_try_caller = async_call_later(
+                self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
+            )
+
+    async def check_action_completed_loop(self, _):
+        await self.hass.async_add_executor_job(
+            self.kia_uvo_api.check_last_action_status, self.token
+        )
+        if self.kia_uvo_api.last_action_completed:
+            self.kia_uvo_api.last_action_xid = None
+            await self.update()
+        else:
+            async_call_later(
+                self.hass,
+                RECHECK_STATUS_DELAY_AFTER_COMMAND,
+                self.check_action_completed_loop,
+            )
 
     async def force_update_loop(self, _):
         _LOGGER.debug(
@@ -122,10 +161,7 @@ class Vehicle:
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.lock_action, self.token, action.value
         )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def refresh_token(self):
         _LOGGER.debug(
@@ -168,10 +204,7 @@ class Vehicle:
                 climate,
                 heating,
             )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def stop_climate(self):
         if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
@@ -182,26 +215,17 @@ class Vehicle:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.stop_climate, self.token
             )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def start_charge(self):
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.start_charge, self.token
         )
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     async def stop_charge(self):
         await self.hass.async_add_executor_job(self.kia_uvo_api.stop_charge, self.token)
-        self.force_update_try_count = 0
-        self.force_update_try_caller = async_call_later(
-            self.hass, START_FORCE_UPDATE_AFTER_COMMAND, self.force_update_loop
-        )
+        await self.force_update_loop_start()
 
     def login(self):
         self.token = self.kia_uvo_api.login()
