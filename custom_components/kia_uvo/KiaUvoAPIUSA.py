@@ -115,9 +115,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"SESSION:{self.session}")
 
     def __del__(self):
-        asyncio.run_coroutine_threadsafe(
-            self.session.close(), self.hass.loop
-        ).result()
+        asyncio.run_coroutine_threadsafe(self.session.close(), self.hass.loop).result()
 
     def api_headers(self) -> dict:
         return {
@@ -139,7 +137,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "tokentype": "G",
             "user-agent": "okhttp/3.12.1",
             "deviceid": self.device_id,
-            "date": datetime.now(tz=pytz.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+            "date": datetime.now(tz=pytz.utc).strftime("%a, %d %b %Y %H:%M:%S GMT"),
         }
 
     def authed_api_headers(self, token: Token):
