@@ -148,7 +148,7 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             brand = user_input[CONF_BRAND]
 
             self.kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-                region, brand, username, password
+                self.hass, region, brand, username, password
             )
 
             try:
