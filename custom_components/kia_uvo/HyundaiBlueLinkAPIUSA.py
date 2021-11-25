@@ -166,6 +166,9 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_status["vehicleStatus"]["doorLock"] = vehicle_status["vehicleStatus"][
             "doorLockStatus"
         ]
+        vehicle_status["vehicleLocation"] = vehicle_status["vehicleStatus"][
+            "vehicleLocation"
+        ]
 
         return vehicle_status
 
