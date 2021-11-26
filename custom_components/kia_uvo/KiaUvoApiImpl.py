@@ -9,6 +9,7 @@ from homeassistant.helpers.dispatcher import (
 
 from .const import *
 from .Token import Token
+import time
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class KiaUvoApiImpl:
         self.last_action_xid = None
         self.last_action_completed = False
         self.last_action_name = None
+        self.last_action_start_time = None
 
         self.supports_soc_range = True
 
@@ -107,7 +109,14 @@ class KiaUvoApiImpl:
 
     def action_status_starting(self, action_name):
         if self.last_action_tracked:
+            if self.action_status_in_progress():
+                if self.last_action_start_time + FIVE_MINUTES_IN_SECONDS < time.time():
+                    self.action_status_completed()
+                    # assume exception occurred and release old locks
+                else:
+                    raise RuntimeError(f"API Action already in progress {self.last_action_name}")
             self.last_action_name = action_name
+            self.last_action_start_time = time.time()
             self._action_status_update()
 
     def action_status_in_progress(self):
