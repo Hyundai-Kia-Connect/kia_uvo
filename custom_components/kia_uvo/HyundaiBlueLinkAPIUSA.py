@@ -28,6 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
     def __init__(
         self,
+        hass,
         username: str,
         password: str,
         region: int,
@@ -36,7 +37,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         pin: str = "",
     ):
         super().__init__(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
 
         self.BASE_URL: str = "api.telematics.hyundaiusa.com"
@@ -165,6 +166,34 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         ]
         vehicle_status["vehicleStatus"]["doorLock"] = vehicle_status["vehicleStatus"][
             "doorLockStatus"
+        ]
+        vehicle_status["vehicleLocation"] = vehicle_status["vehicleStatus"][
+            "vehicleLocation"
+        ]
+        vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureLampAll"
+        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureWarningLampAll"
+        ]
+        vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureLampFL"
+        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureWarningLampFrontLeft"
+        ]
+        vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureLampFR"
+        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureWarningLampFrontRight"
+        ]
+        vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureLampRR"
+        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureWarningLampRearRight"
+        ]
+        vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureLampRL"
+        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+            "tirePressureWarningLampRearLeft"
         ]
 
         return vehicle_status

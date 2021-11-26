@@ -22,6 +22,7 @@ def get_default_distance_unit() -> int:
 
 
 def get_implementation_by_region_brand(
+    hass,
     region: int,
     brand: int,
     username: str,
@@ -31,17 +32,17 @@ def get_implementation_by_region_brand(
 ) -> KiaUvoApiImpl:  # pylint: disable=too-many-arguments
     if REGIONS[region] == REGION_CANADA:
         return KiaUvoApiCA(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
     elif REGIONS[region] == REGION_EUROPE:
         return KiaUvoApiEU(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
     elif REGIONS[region] == REGION_USA and BRANDS[brand] == BRAND_HYUNDAI:
         return HyundaiBlueLinkAPIUSA(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
     elif REGIONS[region] == REGION_USA and BRANDS[brand] == BRAND_KIA:
         return KiaUvoAPIUSA(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
