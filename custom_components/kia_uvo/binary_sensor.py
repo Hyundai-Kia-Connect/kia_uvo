@@ -1,5 +1,6 @@
 import logging
 
+from homeassistant.core import callback
 from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_BATTERY_CHARGING,
     DEVICE_CLASS_PLUG,
@@ -8,11 +9,12 @@ from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_DOOR,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_HEAT,
+    DEVICE_CLASS_CONNECTIVITY,
 )
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_ENGINE_TYPE
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_ENGINE_TYPE, TOPIC_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -244,6 +246,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     async_add_entities(binary_sensors, True)
     async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
+    async_add_entities([APIActionInProgress(hass, config_entry, vehicle)], True)
 
 
 class InstrumentSensor(KiaUvoEntity):
@@ -320,3 +323,52 @@ class VehicleEntity(KiaUvoEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
+
+
+class APIActionInProgress(KiaUvoEntity):
+    def __init__(self, hass, config_entry, vehicle: Vehicle):
+        super().__init__(hass, config_entry, vehicle)
+        self.topic_update = TOPIC_UPDATE.format(f"{vehicle.id}-API-AIP")
+        self._is_on = False
+        self._is_available = False
+        self._name = None
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-{self.vehicle.id}-API-action-in-progress"
+
+    @property
+    def device_class(self):
+        return DEVICE_CLASS_CONNECTIVITY
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def icon(self):
+        return "mdi:api" if self.is_on else "mdi:api-off"
+
+    @property
+    def state(self):
+        return "on" if self.is_on else "off"
+
+    @property
+    def available(self) -> bool:
+        return self._is_available
+
+    @property
+    def is_on(self) -> bool:
+        return self._is_on
+        return
+
+    @callback
+    def update_from_latest_data(self):
+        vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        self._is_on = (
+            not vehicle.kia_uvo_api.last_action_completed
+            and vehicle.kia_uvo_api.last_action_name is not None
+        )
+        self._is_available = not not vehicle and vehicle.kia_uvo_api.last_action_tracked
+        self._name = f"API Action ({vehicle.kia_uvo_api.last_action_name})"
+        _LOGGER.debug(f"Updating API entity {self}")

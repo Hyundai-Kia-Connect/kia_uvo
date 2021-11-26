@@ -90,6 +90,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.last_action_tracked = True
         self.last_action_xid = None
         self.last_action_completed = False
+        self.last_action_name = None
 
         # Randomly generate a plausible device id on startup
         self.device_id = (

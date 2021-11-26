@@ -34,6 +34,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         self.last_action_tracked = True
         self.last_action_xid = None
         self.last_action_completed = False
+        self.last_action_name = None
         self.last_action_pin_auth = None
 
         if BRANDS[brand] == BRAND_KIA:

@@ -1,4 +1,4 @@
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
@@ -15,17 +15,17 @@ class KiaUvoEntity(Entity):
         self.topic_update_listener = None
 
     async def async_added_to_hass(self):
-        @callback
-        def update():
-            self.update_from_latest_data()
-            self.async_write_ha_state()
-
         await super().async_added_to_hass()
         self.topic_update_listener = async_dispatcher_connect(
-            self.hass, self.topic_update, update
+            self.hass, self.topic_update, self._update
         )
         self.async_on_remove(self.topic_update_listener)
         self.update_from_latest_data()
+
+    @callback
+    def _update(self):
+        self.update_from_latest_data()
+        self.async_write_ha_state()
 
     @property
     def available(self) -> bool:

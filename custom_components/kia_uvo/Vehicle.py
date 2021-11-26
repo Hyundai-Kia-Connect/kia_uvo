@@ -7,7 +7,6 @@ import traceback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
     async_dispatcher_send,
 )
 from homeassistant.helpers.event import async_call_later
@@ -109,6 +108,9 @@ class Vehicle:
         )
         if self.kia_uvo_api.last_action_completed:
             self.kia_uvo_api.last_action_xid = None
+            self.kia_uvo_api.last_action_completed = True
+            self.kia_uvo_api.last_action_name = None
+            self._action_status_update()
             await self.update()
         else:
             async_call_later(
@@ -116,6 +118,14 @@ class Vehicle:
                 RECHECK_STATUS_DELAY_AFTER_COMMAND,
                 self.check_action_completed_loop,
             )
+
+    def _action_status_started(self, action_name):
+        if self.kia_uvo_api.last_action_tracked:
+            self.kia_uvo_api.last_action_name = action_name
+            self._action_status_update()
+
+    def _action_status_update(self):
+        async_dispatcher_send(self.hass, TOPIC_UPDATE.format(f"{self.id}-API-AIP"))
 
     async def force_update_loop(self, _):
         _LOGGER.debug(
@@ -158,6 +168,7 @@ class Vehicle:
             self.vehicle_data["vehicleLocation"]["geocodedLocation"] = old_geocode
 
     async def lock_action(self, action: VEHICLE_LOCK_ACTION):
+        self._action_status_started(f"Lock {action}")
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.lock_action, self.token, action.value
         )
@@ -174,6 +185,7 @@ class Vehicle:
         return False
 
     async def start_climate(self, set_temp, duration, defrost, climate, heating):
+        self._action_status_started(f"Start Climate")
         if set_temp is None:
             set_temp = 21
         if duration is None:
@@ -207,6 +219,7 @@ class Vehicle:
         await self.force_update_loop_start()
 
     async def stop_climate(self):
+        self._action_status_started(f"Stop Climate")
         if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.stop_climate_ev, self.token
@@ -218,12 +231,14 @@ class Vehicle:
         await self.force_update_loop_start()
 
     async def start_charge(self):
+        self._action_status_started(f"Start Charge")
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.start_charge, self.token
         )
         await self.force_update_loop_start()
 
     async def stop_charge(self):
+        self._action_status_started(f"Stop Charge")
         await self.hass.async_add_executor_job(self.kia_uvo_api.stop_charge, self.token)
         await self.force_update_loop_start()
 
