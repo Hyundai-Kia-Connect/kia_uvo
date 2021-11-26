@@ -97,9 +97,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
         self.last_action_tracked = True
-        self.last_action_xid = None
-        self.last_action_completed = False
-        self.last_action_name = None
 
         self.supports_soc_range = False
 

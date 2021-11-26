@@ -328,14 +328,14 @@ class VehicleEntity(KiaUvoEntity):
 class APIActionInProgress(KiaUvoEntity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
         super().__init__(hass, config_entry, vehicle)
-        self.topic_update = TOPIC_UPDATE.format(f"{vehicle.id}-API-AIP")
+        self.topic_update = TOPIC_UPDATE.format(f"API-AIP")
         self._is_on = False
         self._is_available = False
         self._name = None
 
     @property
     def unique_id(self):
-        return f"{DOMAIN}-{self.vehicle.id}-API-action-in-progress"
+        return f"{DOMAIN}-API-action-in-progress"
 
     @property
     def device_class(self):
@@ -360,15 +360,13 @@ class APIActionInProgress(KiaUvoEntity):
     @property
     def is_on(self) -> bool:
         return self._is_on
-        return
 
     @callback
     def update_from_latest_data(self):
         vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         self._is_on = (
-            not vehicle.kia_uvo_api.last_action_completed
-            and vehicle.kia_uvo_api.last_action_name is not None
+            not not vehicle
+            and vehicle.kia_uvo_api.action_status_in_progress()
         )
         self._is_available = not not vehicle and vehicle.kia_uvo_api.last_action_tracked
         self._name = f"API Action ({vehicle.kia_uvo_api.last_action_name})"
-        _LOGGER.debug(f"Updating API entity {self}")

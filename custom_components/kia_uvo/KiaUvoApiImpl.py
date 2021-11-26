@@ -3,6 +3,9 @@ import logging
 import requests
 
 from homeassistant.util import dt as dt_util
+from homeassistant.helpers.dispatcher import (
+    async_dispatcher_send,
+)
 
 from .const import *
 from .Token import Token
@@ -29,7 +32,12 @@ class KiaUvoApiImpl:
         self.stamps = None
         self.region = region
         self.brand = brand
+
         self.last_action_tracked = False
+        self.last_action_xid = None
+        self.last_action_completed = False
+        self.last_action_name = None
+
         self.supports_soc_range = True
 
     def login(self) -> Token:
@@ -96,3 +104,25 @@ class KiaUvoApiImpl:
             return EU_TEMP_RANGE
         elif REGIONS[self.region] == REGION_USA:
             return USA_TEMP_RANGE
+
+    def action_status_starting(self, action_name):
+        if self.last_action_tracked:
+            self.last_action_name = action_name
+            self._action_status_update()
+
+    def action_status_in_progress(self):
+        if self.last_action_tracked:
+            return (
+                not self.last_action_completed
+                and self.last_action_name is not None
+            )
+        return False
+
+    def action_status_completed(self):
+        self.kia_uvo_api.last_action_xid = None
+        self.kia_uvo_api.last_action_completed = True
+        self.kia_uvo_api.last_action_name = None
+        self._action_status_update()
+
+    def _action_status_update(self):
+        async_dispatcher_send(self.hass, TOPIC_UPDATE.format(f"API-AIP"))
