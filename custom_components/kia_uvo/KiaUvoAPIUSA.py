@@ -112,7 +112,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
         self.session = ClientSession(raise_for_status=True)
-        _LOGGER.debug(f"SESSION:{self.session}")
 
     def __del__(self):
         asyncio.run_coroutine_threadsafe(self.session.close(), self.hass.loop).result()
