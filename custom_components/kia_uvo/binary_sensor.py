@@ -365,8 +365,7 @@ class APIActionInProgress(KiaUvoEntity):
     def update_from_latest_data(self):
         vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
         self._is_on = (
-            not not vehicle
-            and vehicle.kia_uvo_api.action_status_in_progress()
+            not not vehicle and vehicle.kia_uvo_api.action_status_in_progress()
         )
         self._is_available = not not vehicle and vehicle.kia_uvo_api.last_action_tracked
         self._name = f"API Action ({vehicle.kia_uvo_api.last_action_name})"

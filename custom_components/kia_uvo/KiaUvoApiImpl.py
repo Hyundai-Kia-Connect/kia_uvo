@@ -112,10 +112,7 @@ class KiaUvoApiImpl:
 
     def action_status_in_progress(self):
         if self.last_action_tracked:
-            return (
-                not self.last_action_completed
-                and self.last_action_name is not None
-            )
+            return not self.last_action_completed and self.last_action_name is not None
         return False
 
     def action_status_completed(self):
