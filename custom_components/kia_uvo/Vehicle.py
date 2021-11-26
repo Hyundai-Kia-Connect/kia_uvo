@@ -7,7 +7,6 @@ import traceback
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import (
-    async_dispatcher_connect,
     async_dispatcher_send,
 )
 from homeassistant.helpers.event import async_call_later
