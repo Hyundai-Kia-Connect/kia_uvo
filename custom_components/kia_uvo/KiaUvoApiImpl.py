@@ -78,6 +78,9 @@ class KiaUvoApiImpl:
     def stop_charge(self, token: Token):
         pass
 
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        pass
+
     def get_timezone_by_region(self) -> tzinfo:
         if REGIONS[self.region] == REGION_CANADA:
             return dt_util.UTC

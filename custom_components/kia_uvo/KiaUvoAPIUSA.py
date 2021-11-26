@@ -409,3 +409,22 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url
         )
         self.last_action_xid = response.headers["Xid"]
+
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        url = self.API_URL + "evc/sts"
+        body = {
+            "targetSOClist": [
+                {
+                    "plugType": 0,
+                    "targetSOClevel": dc_limit,
+                },
+                {
+                    "plugType": 1,
+                    "targetSOClevel": ac_limit,
+                },
+            ]
+        }
+        response = self.post_request_with_logging_and_active_session(
+            token=token, url=url, json_body=body
+        )
+        self.last_action_xid = response.headers["Xid"]
