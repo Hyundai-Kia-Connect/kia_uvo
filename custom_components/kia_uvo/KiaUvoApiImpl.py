@@ -114,7 +114,9 @@ class KiaUvoApiImpl:
                     self.action_status_completed()
                     # assume exception occurred and release old locks
                 else:
-                    raise RuntimeError(f"API Action already in progress {self.last_action_name}")
+                    raise RuntimeError(
+                        f"API Action already in progress {self.last_action_name}"
+                    )
             self.last_action_name = action_name
             self.last_action_start_time = time.time()
             self._action_status_update()
