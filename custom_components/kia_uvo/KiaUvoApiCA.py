@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 class KiaUvoApiCA(KiaUvoApiImpl):
     def __init__(
         self,
+        hass,
         username: str,
         password: str,
         region: int,
@@ -28,7 +29,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         pin: str = "",
     ):
         super().__init__(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
 
         self.last_action_tracked = True

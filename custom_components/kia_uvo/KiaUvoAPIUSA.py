@@ -6,21 +6,20 @@ import string
 import secrets
 
 import pytz
-import requests
-from requests import Response, RequestException
 import time
 
 from .const import (
-    DOMAIN,
     DATE_FORMAT,
 )
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
+from aiohttp import ClientSession, ClientResponse, ClientError
+import asyncio
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class AuthError(RequestException):
+class AuthError(ClientError):
     pass
 
 
@@ -50,6 +49,7 @@ def request_with_active_session(func):
 
 def request_with_logging(func):
     def request_with_logging_wrapper(*args, **kwargs):
+        self = args[0]
         url = kwargs["url"]
         json_body = kwargs.get("json_body")
         if json_body is not None:
@@ -57,8 +57,13 @@ def request_with_logging(func):
         else:
             _LOGGER.debug(f"sending {url} request")
         response = func(*args, **kwargs)
-        _LOGGER.debug(f"got response {response.text}")
-        response_json = response.json()
+        response_text = asyncio.run_coroutine_threadsafe(
+            response.text(), self.hass.loop
+        ).result()
+        _LOGGER.debug(f"got response {response_text}")
+        response_json = asyncio.run_coroutine_threadsafe(
+            response.json(), self.hass.loop
+        ).result()
         if response_json["status"]["statusCode"] == 0:
             return response
         if (
@@ -68,8 +73,11 @@ def request_with_logging(func):
         ):
             _LOGGER.debug(f"error: session invalid")
             raise AuthError
-        _LOGGER.error(f"error: unknown error response {response.text}")
-        raise RequestException
+        response_text = asyncio.run_coroutine_threadsafe(
+            response.text(), self.hass.loop
+        ).result()
+        _LOGGER.error(f"error: unknown error response {response_text}")
+        raise ClientError
 
     return request_with_logging_wrapper
 
@@ -77,6 +85,7 @@ def request_with_logging(func):
 class KiaUvoAPIUSA(KiaUvoApiImpl):
     def __init__(
         self,
+        hass,
         username: str,
         password: str,
         region: int,
@@ -85,12 +94,14 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         pin: str = "",
     ):
         super().__init__(
-            username, password, region, brand, use_email_with_geocode_api, pin
+            hass, username, password, region, brand, use_email_with_geocode_api, pin
         )
         self.last_action_tracked = True
         self.last_action_xid = None
         self.last_action_completed = False
         self.last_action_name = None
+
+        self.supports_soc_range = False
 
         # Randomly generate a plausible device id on startup
         self.device_id = (
@@ -104,9 +115,13 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self.BASE_URL: str = "api.owners.kia.com"
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
 
+        self.session = ClientSession(raise_for_status=True)
+
+    def __del__(self):
+        asyncio.run_coroutine_threadsafe(self.session.close(), self.hass.loop).result()
+
     def api_headers(self) -> dict:
-        offset = time.localtime().tm_gmtoff / 60 / 60
-        headers = {
+        return {
             "content-type": "application/json;charset=UTF-8",
             "accept": "application/json, text/plain, */*",
             "accept-encoding": "gzip, deflate, br",
@@ -117,19 +132,16 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "from": "SPA",
             "host": self.BASE_URL,
             "language": "0",
-            "offset": str(int(offset)),
+            "offset": str(int(time.localtime().tm_gmtoff / 60 / 60)),
             "ostype": "Android",
             "osversion": "11",
             "secretkey": "98er-w34rf-ibf3-3f6h",
             "to": "APIGW",
             "tokentype": "G",
             "user-agent": "okhttp/3.12.1",
+            "deviceid": self.device_id,
+            "date": datetime.now(tz=pytz.utc).strftime("%a, %d %b %Y %H:%M:%S GMT"),
         }
-        # should produce something like "Mon, 18 Oct 2021 07:06:26 GMT". May require adjusting locale to en_US
-        date = datetime.now(tz=pytz.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
-        headers["date"] = date
-        headers["deviceid"] = self.device_id
-        return headers
 
     def authed_api_headers(self, token: Token):
         headers = self.api_headers()
@@ -141,17 +153,21 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
     @request_with_logging
     def post_request_with_logging_and_active_session(
         self, token: Token, url: str, json_body: dict
-    ) -> Response:
+    ) -> ClientResponse:
         headers = self.authed_api_headers(token)
-        return requests.post(url, json=json_body, headers=headers)
+        return asyncio.run_coroutine_threadsafe(
+            self.session.post(url=url, json=json_body, headers=headers), self.hass.loop
+        ).result()
 
     @request_with_active_session
     @request_with_logging
     def get_request_with_logging_and_active_session(
         self, token: Token, url: str
-    ) -> Response:
+    ) -> ClientResponse:
         headers = self.authed_api_headers(token)
-        return requests.get(url, headers=headers)
+        return asyncio.run_coroutine_threadsafe(
+            self.session.get(url=url, headers=headers), self.hass.loop
+        ).result()
 
     def login(self) -> Token:
         username = self.username
@@ -167,12 +183,17 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "userCredential": {"userId": username, "password": password},
         }
         headers = self.api_headers()
-        response = requests.post(url, json=data, headers=headers)
-        _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
+        _LOGGER.debug(f"posting to {url} with data:{data}")
+        response: ClientResponse = asyncio.run_coroutine_threadsafe(
+            self.session.post(url=url, json=data, headers=headers), self.hass.loop
+        ).result()
         session_id = response.headers.get("sid")
         if not session_id:
+            response_text = asyncio.run_coroutine_threadsafe(
+                response.text(), self.hass.loop
+            ).result()
             raise Exception(
-                f"no session id returned in login. Response: {response.text} headers {response.headers} cookies {response.cookies}"
+                f"no session id returned in login. Response: {response_text} headers {response.headers} cookies {response.cookies}"
             )
         _LOGGER.debug(f"got session id {session_id}")
 
@@ -180,10 +201,16 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         url = self.API_URL + "ownr/gvl"
         headers = self.api_headers()
         headers["sid"] = session_id
-        response = requests.get(url, headers=headers)
-        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
-        response = response.json()
-        vehicle_summary = response["payload"]["vehicleSummary"][0]
+        _LOGGER.debug(f"getting {url}")
+        response: ClientResponse = asyncio.run_coroutine_threadsafe(
+            self.session.get(url=url, headers=headers), self.hass.loop
+        ).result()
+        response_json = asyncio.run_coroutine_threadsafe(
+            response.json(), self.hass.loop
+        ).result()
+
+        _LOGGER.debug(f"Get Vehicles Response {response_json}")
+        vehicle_summary = response_json["payload"]["vehicleSummary"][0]
         vehicle_name = vehicle_summary["nickName"]
         vehicle_id = vehicle_summary["vehicleIdentifier"]
         vehicle_vin = vehicle_summary["vin"]
@@ -238,21 +265,24 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             token=token, url=url, json_body=body
         )
 
-        response_body = response.json()
-        vehicle_status = response_body["payload"]["vehicleInfoList"][0][
+        response_json = asyncio.run_coroutine_threadsafe(
+            response.json(), self.hass.loop
+        ).result()
+
+        vehicle_status = response_json["payload"]["vehicleInfoList"][0][
             "lastVehicleInfo"
         ]["vehicleStatusRpt"]["vehicleStatus"]
         vehicle_data = {
             "vehicleStatus": vehicle_status,
             "odometer": {
                 "value": float(
-                    response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
+                    response_json["payload"]["vehicleInfoList"][0]["vehicleConfig"][
                         "vehicleDetail"
                     ]["vehicle"]["mileage"]
                 ),
                 "unit": 3,
             },
-            "vehicleLocation": response_body["payload"]["vehicleInfoList"][0][
+            "vehicleLocation": response_json["payload"]["vehicleInfoList"][0][
                 "lastVehicleInfo"
             ]["location"],
         }
@@ -309,7 +339,9 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         response = self.post_request_with_logging_and_active_session(
             token=token, url=url, json_body=body
         )
-        response_json = response.json()
+        response_json = asyncio.run_coroutine_threadsafe(
+            response.json(), self.hass.loop
+        ).result()
         self.last_action_completed = all(
             v == 0 for v in response_json["payload"].values()
         )
@@ -377,5 +409,24 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         url = self.API_URL + "evc/cancel"
         response = self.get_request_with_logging_and_active_session(
             token=token, url=url
+        )
+        self.last_action_xid = response.headers["Xid"]
+
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        url = self.API_URL + "evc/sts"
+        body = {
+            "targetSOClist": [
+                {
+                    "plugType": 0,
+                    "targetSOClevel": dc_limit,
+                },
+                {
+                    "plugType": 1,
+                    "targetSOClevel": ac_limit,
+                },
+            ]
+        }
+        response = self.post_request_with_logging_and_active_session(
+            token=token, url=url, json_body=body
         )
         self.last_action_xid = response.headers["Xid"]

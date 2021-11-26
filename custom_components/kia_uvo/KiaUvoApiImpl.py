@@ -13,6 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 class KiaUvoApiImpl:
     def __init__(
         self,
+        hass,
         username: str,
         password: str,
         region: int,
@@ -20,6 +21,7 @@ class KiaUvoApiImpl:
         use_email_with_geocode_api: bool = False,
         pin: str = "",
     ):
+        self.hass = hass
         self.username = username
         self.password = password
         self.pin = pin
@@ -28,6 +30,7 @@ class KiaUvoApiImpl:
         self.region = region
         self.brand = brand
         self.last_action_tracked = False
+        self.supports_soc_range = True
 
     def login(self) -> Token:
         pass
@@ -73,6 +76,9 @@ class KiaUvoApiImpl:
         pass
 
     def stop_charge(self, token: Token):
+        pass
+
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
         pass
 
     def get_timezone_by_region(self) -> tzinfo:
