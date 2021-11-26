@@ -116,9 +116,9 @@ class KiaUvoApiImpl:
         return False
 
     def action_status_completed(self):
-        self.kia_uvo_api.last_action_xid = None
-        self.kia_uvo_api.last_action_completed = True
-        self.kia_uvo_api.last_action_name = None
+        self.last_action_xid = None
+        self.last_action_completed = True
+        self.last_action_name = None
         self._action_status_update()
 
     def _action_status_update(self):
