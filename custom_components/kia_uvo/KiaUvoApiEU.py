@@ -24,7 +24,6 @@ ACCEPT_HEADER_ALL: str = "text/html,application/xhtml+xml,application/xml;q=0.9,
 class KiaUvoApiEU(KiaUvoApiImpl):
     def __init__(
         self,
-        hass,
         username: str,
         password: str,
         region: int,
@@ -33,7 +32,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         pin: str = "",
     ):
         super().__init__(
-            hass, username, password, region, brand, use_email_with_geocode_api, pin
+            username, password, region, brand, use_email_with_geocode_api, pin
         )
 
         if BRANDS[brand] == BRAND_KIA:

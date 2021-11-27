@@ -13,7 +13,6 @@ _LOGGER = logging.getLogger(__name__)
 class KiaUvoApiImpl:
     def __init__(
         self,
-        hass,
         username: str,
         password: str,
         region: int,
@@ -21,7 +20,6 @@ class KiaUvoApiImpl:
         use_email_with_geocode_api: bool = False,
         pin: str = "",
     ):
-        self.hass = hass
         self.username = username
         self.password = password
         self.pin = pin
