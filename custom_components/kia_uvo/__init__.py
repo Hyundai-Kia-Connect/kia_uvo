@@ -164,7 +164,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     )
 
     kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-        hass, region, brand, username, password, use_email_with_geocode_api, pin
+        region, brand, username, password, use_email_with_geocode_api, pin
     )
     vehicle: Vehicle = Vehicle(
         hass,
