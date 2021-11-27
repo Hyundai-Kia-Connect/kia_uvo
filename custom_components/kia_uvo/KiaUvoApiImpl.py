@@ -110,7 +110,7 @@ class KiaUvoApiImpl:
     def action_status_starting(self, action_name):
         if self.last_action_tracked:
             if self.action_status_in_progress():
-                if self.last_action_start_time + FIVE_MINUTES_IN_SECONDS < time.time():
+                if self.last_action_start_time + ACTION_LOCK_TIMEOUT_IN_SECONDS < time.time():
                     self.action_status_completed()
                     # assume exception occurred and release old locks
                 else:
