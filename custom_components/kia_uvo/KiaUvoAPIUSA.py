@@ -264,7 +264,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
         }
 
-        if(vehicle_status.get("evStatus")):
+        if vehicle_status.get("evStatus"):
             vehicle_status["evStatus"]["remainTime2"] = {
                 "atc": vehicle_status["evStatus"]["remainChargeTime"][0]["timeInterval"]
             }
