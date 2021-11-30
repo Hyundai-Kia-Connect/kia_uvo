@@ -110,7 +110,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - vehicle_regid={vehicle_regid}")
         vehicle_model = vehicle_details["modelCode"]
         vehicle_registration_date = vehicle_details["enrollmentDate"]
-        
+
         if vehicle_details["modelYear"] > 2016:
             self.API_HEADERS["gen"] = 2
         else:
