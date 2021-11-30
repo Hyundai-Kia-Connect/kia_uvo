@@ -169,31 +169,32 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_status["vehicleLocation"] = vehicle_status["vehicleStatus"][
             "vehicleLocation"
         ]
-        vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureLampAll"
-        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureWarningLampAll"
-        ]
-        vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureLampFL"
-        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureWarningLampFrontLeft"
-        ]
-        vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureLampFR"
-        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureWarningLampFrontRight"
-        ]
-        vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureLampRR"
-        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureWarningLampRearRight"
-        ]
-        vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureLampRL"
-        ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
-            "tirePressureWarningLampRearLeft"
-        ]
+        if vehicle_status["vehicleStatus"].get("tirePressureLamp"):
+            vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureLampAll"
+            ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureWarningLampAll"
+            ]
+            vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureLampFL"
+            ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureWarningLampFrontLeft"
+            ]
+            vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureLampFR"
+            ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureWarningLampFrontRight"
+            ]
+            vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureLampRR"
+            ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureWarningLampRearRight"
+            ]
+            vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureLampRL"
+            ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
+                "tirePressureWarningLampRearLeft"
+            ]
 
         return vehicle_status
 
