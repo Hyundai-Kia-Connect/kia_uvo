@@ -69,7 +69,6 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "refresh": "false",
             "encryptFlag": "false",
             "brandIndicator": "H",
-            "gen": "2",
             "username": self.username,
             "blueLinkServicePin": self.pin,
             "client_id": "m66129Bb-em93-SPAHYN-bZ91-am4540zp19920",
@@ -111,7 +110,11 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - vehicle_regid={vehicle_regid}")
         vehicle_model = vehicle_details["modelCode"]
         vehicle_registration_date = vehicle_details["enrollmentDate"]
-
+        
+        if vehicle_details["modelYear"] > 2016:
+            self.API_HEADERS["gen"] = 2
+        else:
+            self.API_HEADERS["gen"] = 1
         valid_until = (datetime.now() + timedelta(seconds=expires_in)).strftime(
             DATE_FORMAT
         )
