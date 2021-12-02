@@ -142,13 +142,19 @@ class Vehicle:
         old_lat = None
         old_lon = None
         old_geocode = None
-        if not old_vehicle_location is None:
+        if (
+            not old_vehicle_location is None
+            and old_vehicle_location.get("coord") is not None
+        ):
             old_lat = old_vehicle_location["coord"]["lat"]
             old_lon = old_vehicle_location["coord"]["lon"]
             old_geocode = old_vehicle_location.get("geocodedLocation", None)
 
         new_lat = self.get_child_value("vehicleLocation.coord.lat")
         new_lon = self.get_child_value("vehicleLocation.coord.lon")
+
+        if self.vehicle_data.get("vehicleLocation") is None:
+            self.vehicle_data["vehicleLocation"] = {}
 
         if (old_lat != new_lat or old_lon != new_lon) or old_geocode is None:
             self.vehicle_data["vehicleLocation"][
