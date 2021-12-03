@@ -211,7 +211,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         headers = self.API_HEADERS
         headers["accessToken"] = access_token
         response = requests.get(url, headers=headers)
-        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
+        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response}")
         response = response.json()
 
         return response
