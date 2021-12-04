@@ -136,8 +136,8 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self.token = None
 
     async def async_step_user(self, user_input=None):
-        await self.async_set_unique_id(DOMAIN)
-        self._abort_if_unique_id_configured()
+        #await self.async_set_unique_id(DOMAIN)
+        #self._abort_if_unique_id_configured()
         errors = None
 
         if user_input is not None:
