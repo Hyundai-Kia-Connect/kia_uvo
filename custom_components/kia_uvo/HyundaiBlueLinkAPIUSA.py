@@ -98,12 +98,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Refresh Token Value {refresh_token}")
 
         ### Get Vehicles ###
-        url = self.API_URL + "enrollment/details/" + username
-        headers = self.API_HEADERS
-        headers["accessToken"] = access_token
-        response = requests.get(url, headers=headers)
-        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
-        response = response.json()
+        response = self.get_vehicle(access_token)
         vehicle_details = response["enrolledVehicleDetails"][0]["vehicleDetails"]
         vehicle_name = vehicle_details["nickName"]
         vehicle_id = vehicle_details["vin"]
@@ -195,11 +190,30 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             ] = vehicle_status["vehicleStatus"]["tirePressureLamp"][
                 "tirePressureWarningLampRearLeft"
             ]
-
+        # Get Odomoter Details
+        response = self.get_vehicle(token.access_token)
+        vehicle_status["odometer"] = {}
+        vehicle_status["odometer"]["unit"] = 3
+        vehicle_status["odometer"]["value"] = response["enrolledVehicleDetails"][0][
+            "vehicleDetails"
+        ]["odometer"]
         return vehicle_status
 
     def get_location(self, token: Token):
         pass
+
+    def get_vehicle(self, access_token):
+        username = self.username
+        password = self.password
+
+        url = self.API_URL + "enrollment/details/" + username
+        headers = self.API_HEADERS
+        headers["accessToken"] = access_token
+        response = requests.get(url, headers=headers)
+        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
+        response = response.json()
+
+        return response
 
     def get_pin_token(self, token: Token):
         pass
