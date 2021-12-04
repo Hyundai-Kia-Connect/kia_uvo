@@ -43,17 +43,17 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
     def login(self) -> Token:
 
-        response = '{"valid_until": "2021-12-10 18:53:33.708376", "access_token": "test==", "refresh_token": "refresh==", "device_id": "", "vehicle_name": "Test Car", "vehicle_id": "ueXJcjLp1qUDY+new==", "vehicle_regid": "", "vehicle_model": "New Car", "vehicle_registration_date": "missing", "stamp": "NoStamp"}'
+        response = '{"valid_until": "2021-12-10 18:53:33.708376", "access_token": "test==", "refresh_token": "refresh==", "device_id": "", "vehicle_name": "Test Car", "vehicle_id": "Testcar123", "vehicle_regid": "", "vehicle_model": "New Car", "vehicle_registration_date": "missing", "stamp": "NoStamp"}'
         response = json.loads(response)
         token = Token({})
         token.set(
             response["access_token"],
             response["refresh_token"],
             None,
-            response["vehicle_name"],
-            response["vehicle_id"],
+            response["vehicle_name"]+self.username,
+            response["vehicle_id"]+self.username,
             None,
-            response["vehicle_model"],
+            self.username,
             response["vehicle_registration_date"],
             response["valid_until"],
             "NoStamp",

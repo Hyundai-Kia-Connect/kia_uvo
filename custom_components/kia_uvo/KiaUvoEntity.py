@@ -3,7 +3,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
 from .Vehicle import Vehicle
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, BRANDS
+from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, BRANDS, CONF_VEHICLE_IDENTIFIER
 
 
 class KiaUvoEntity(Entity):
@@ -49,4 +49,4 @@ class KiaUvoEntity(Entity):
 
     @callback
     def update_from_latest_data(self):
-        self.vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+        self.vehicle = self.hass.data[DOMAIN][self.vehicle.id][DATA_VEHICLE_INSTANCE]

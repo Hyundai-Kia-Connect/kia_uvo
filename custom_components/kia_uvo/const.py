@@ -17,6 +17,8 @@ CONF_NO_FORCE_SCAN_HOUR_FINISH: str = "no_force_scan_hour_finish"
 CONF_ENABLE_GEOLOCATION_ENTITY: str = "enable_geolocation_entity"
 CONF_USE_EMAIL_WITH_GEOCODE_API: str = "use_email_with_geocode_api"
 CONF_BRAND: str = "brand"
+CONF_VEHICLES: str = "vehicles"
+CONF_VEHICLE_IDENTIFIER: str = "vehicle_identifier"
 
 # I have seen that many people can survive with receiving updates in every 30 minutes. Let's see how KIA will respond
 DEFAULT_SCAN_INTERVAL: int = 30
