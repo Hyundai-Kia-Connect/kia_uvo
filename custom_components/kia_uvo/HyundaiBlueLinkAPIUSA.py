@@ -26,6 +26,11 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
+
+    old_vehicle_status = None
+    # initialize with a timestamp which will allow the first fetch to occur
+    last_loc_timestamp = datetime.now() - timedelta(hours=3)
+
     def __init__(
         self,
         username: str,
@@ -49,7 +54,6 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         ).total_seconds()
         utc_offset_hours = int(utc_offset / 60 / 60)
 
-        self.old_vehicle_status = {}
         self.API_HEADERS = {
             "content-type": "application/json;charset=UTF-8",
             "accept": "application/json, text/plain, */*",
@@ -197,10 +201,84 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         vehicle_status["odometer"]["value"] = response["enrolledVehicleDetails"][0][
             "vehicleDetails"
         ]["odometer"]
+
+        vehicle_status["vehicleLocation"] = self.get_location(
+            token, vehicle_status["odometer"]["value"]
+        )
+        HyundaiBlueLinkAPIUSA.old_vehicle_status = vehicle_status
         return vehicle_status
 
-    def get_location(self, token: Token):
-        pass
+    def get_location(self, token: Token, current_odometer):
+        r"""
+        Get the location of the vehicle
+
+        Only update the location if the odometer moved AND if the last location update was over an hour ago.
+        Note that the "last updated" time is initially set to three hours ago.
+
+        This will help to prevent too many cals to the API
+        """
+        url = self.API_URL + "rcs/rfc/findMyCar"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+        prev_odometer = "0"
+        if HyundaiBlueLinkAPIUSA.old_vehicle_status is not None:
+            prev_odometer = HyundaiBlueLinkAPIUSA.old_vehicle_status.get(
+                "odometer", {}
+            ).get("value")
+        check_server = (
+            current_odometer > prev_odometer
+            and HyundaiBlueLinkAPIUSA.last_loc_timestamp
+            < datetime.now() - timedelta(hours=1)
+        )
+        if check_server:
+            try:
+                HyundaiBlueLinkAPIUSA.last_loc_timestamp = datetime.now()
+                response = requests.get(url, headers=headers)
+                response_json = response.json()
+                _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response_json}")
+                if response_json.get("coord") is not None:
+                    return response_json
+                else:
+                    # Check for rate limit exceeded
+                    # These hard-coded values were extracted from a rate limit exceeded response.  In either case the log
+                    # will include the full response when the "coord" attribute is not present
+                    if (
+                        response_json.get("errorCode", 0) == 502
+                        and response_json.get("errorSubCode", "") == "HT_534"
+                    ):
+                        # rate limit exceeded; set the last_loc_timestamp such that the next check will be at least 12 hours from now
+                        HyundaiBlueLinkAPIUSA.last_loc_timestamp = (
+                            datetime.now() + timedelta(hours=11)
+                        )
+                        _LOGGER.warn(
+                            f"{DOMAIN} - get vehicle location rate limit exceeded.  Location will not be fetched until at least {HyundaiBlueLinkAPIUSA.last_loc_timestamp + timedelta(hours = 12)}"
+                        )
+                    else:
+                        _LOGGER.warn(
+                            f"{DOMAIN} - Unable to get vehicle location: {response_json}"
+                        )
+
+                    if HyundaiBlueLinkAPIUSA.old_vehicle_status is not None:
+                        return HyundaiBlueLinkAPIUSA.old_vehicle_status.get(
+                            "vehicleLocation"
+                        )
+                    else:
+                        return None
+
+            except Exception as e:
+                _LOGGER.warning(
+                    f"{DOMAIN} - Get vehicle location failed: {e}", exc_info=True
+                )
+                if HyundaiBlueLinkAPIUSA.old_vehicle_status is not None:
+                    return HyundaiBlueLinkAPIUSA.old_vehicle_status.get(
+                        "vehicleLocation"
+                    )
+                else:
+                    return None
+        elif HyundaiBlueLinkAPIUSA.old_vehicle_status is not None:
+            return HyundaiBlueLinkAPIUSA.old_vehicle_status.get("vehicleLocation")
 
     def get_vehicle(self, access_token):
         username = self.username
