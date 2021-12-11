@@ -195,7 +195,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         await refresh_config_entry()
         await vehicle.refresh_token()
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
-        event_time_local = event_time_utc.astimezone(local_timezone)
+        event_time_local = dt_util.as_local(event_time_utc)
         await vehicle.update()
         call_force_update = False
 
