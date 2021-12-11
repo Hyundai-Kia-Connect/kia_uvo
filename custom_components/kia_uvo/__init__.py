@@ -265,7 +265,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     if unload_ok:
         vehicle_identifier = config_entry.data[CONF_VEHICLE_IDENTIFIER]
         vehicle_listener = hass.data[DOMAIN][vehicle_identifier][DATA_VEHICLE_LISTENER]
-        vehicle_topic_listener()
+        vehicle_listener()
 
         config_update_listener = hass.data[DOMAIN][vehicle_identifier][
             DATA_CONFIG_UPDATE_LISTENER
