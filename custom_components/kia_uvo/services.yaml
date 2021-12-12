@@ -1,10 +1,33 @@
 force_update:
   description: Force your vehicle to update its data
+  fields:
+      device_id:
+        name: Device
+        description: Device id of the vehicle.
+        required: false
+        selector:
+          device:
+            integration: kia_uvo
 update:
   description: Update vehicle data from cache
+  fields:
+      device_id:
+          name: Device
+          description: Device id of the vehicle.
+          required: false
+          selector:
+            device:
+              integration: kia_uvo
 start_climate:
   description: TEST - Please use cautiously - start car and climate. Not all items available for all cars.  Refer to Hyundai or Kia app for which are supported for your car. 
   fields:
+   device_id:
+    name: Device
+    description: Device id of the vehicle.
+    required: false
+    selector:
+      device:
+        integration: kia_uvo
     Duration:
       name: Duration
       description: On Duration
@@ -56,17 +79,64 @@ start_climate:
         boolean:  
 stop_climate:
   description: TEST - Please use cautiously - stop car and climate
+  fields:
+    device_id:
+    name: Device
+    description: Device id of the vehicle.
+    required: false
+    selector:
+      device:
+        integration: kia_uvo
 start_charge:
   description: Start charging
+  fields:
+    device_id:
+      name: Device
+      description: Device id of the vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
 stop_charge:
   description: Stop charging
+  fields:
+    device_id:
+      name: Device
+      description: Device id of the vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
 lock:
   description: Lock the vehicle
+  fields:
+    device_id:
+      name: Device
+      description: Device id of the vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
 unlock:
   description: Unlock the vehicle
+  fields:
+    device_id:
+      name: Device
+      description: Device id of the vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
 set_charge_limits:
   description: sets ac and dc charge capacity limits
   fields:
+    device_id:
+      name: Device
+      description: Device id of the vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
     dc_limit:
       name: DC Charge limit
       description: max charge capacity using DC charger
@@ -91,3 +161,4 @@ set_charge_limits:
             max: 100
             step: 10
             unit_of_measurement: '%'
+              fields:
