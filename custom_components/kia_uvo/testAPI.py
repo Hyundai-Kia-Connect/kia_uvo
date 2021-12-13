@@ -45,6 +45,8 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
         response = '{"valid_until": "2021-12-10 18:53:33.708376", "access_token": "test==", "refresh_token": "refresh==", "device_id": "", "vehicle_name": "Test Car", "vehicle_id": "Testcar123", "vehicle_regid": "", "vehicle_model": "New Car", "vehicle_registration_date": "missing", "stamp": "NoStamp"}'
         response = json.loads(response)
+        valid_until = datetime.now() + timedelta(minutes=15)
+        valid_until = valid_until.strftime("%m-%d-%Y %H:%M:%S")
         token = Token({})
         token.set(
             response["access_token"],
@@ -55,7 +57,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             None,
             self.username,
             response["vehicle_registration_date"],
-            response["valid_until"],
+            valid_until,
             "NoStamp",
         )
         _LOGGER.debug(f"{DOMAIN} - Token test: {token}")
