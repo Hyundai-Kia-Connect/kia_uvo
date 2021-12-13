@@ -161,4 +161,3 @@ set_charge_limits:
             max: 100
             step: 10
             unit_of_measurement: '%'
-              fields:
