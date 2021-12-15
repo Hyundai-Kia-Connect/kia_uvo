@@ -32,7 +32,7 @@ TIME_ZONE_EUROPE = tz.gettz("Europe/Berlin")
 
 # Integration Setting Constants
 PARALLEL_UPDATES: int = 1
-CONFIG_FLOW_VERSION: int = 1
+CONFIG_FLOW_VERSION: int = 2
 PLATFORMS = ["binary_sensor", "device_tracker", "sensor", "lock"]
 TOPIC_UPDATE: str = f"{DOMAIN}_update_{0}"
 
