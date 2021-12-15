@@ -146,7 +146,7 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow):
             region = user_input[CONF_REGION]
             pin = user_input.get(CONF_PIN, "")
             brand = user_input[CONF_BRAND]
-            
+
             self.kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
                 region, brand, username, password
             )
@@ -187,7 +187,9 @@ class KiaUvoConfigFlowHandler(config_entries.ConfigFlow):
     ):
         vehicle_map = {}
         for vehicle in self.data[CONF_VEHICLES]:
-            vehicle_map[vehicle.vehicle_id] = f"{vehicle.vehicle_name} ({vehicle.vehicle_model})"
+            vehicle_map[
+                vehicle.vehicle_id
+            ] = f"{vehicle.vehicle_name} ({vehicle.vehicle_model})"
 
         errors: Dict[str, str] = {}
         data_schema = {

@@ -4,7 +4,12 @@ from homeassistant.components.lock import LockEntity
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_LOCK_ACTION, CONF_VEHICLE_IDENTIFIER
+from .const import (
+    DOMAIN,
+    DATA_VEHICLE_INSTANCE,
+    VEHICLE_LOCK_ACTION,
+    CONF_VEHICLE_IDENTIFIER,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

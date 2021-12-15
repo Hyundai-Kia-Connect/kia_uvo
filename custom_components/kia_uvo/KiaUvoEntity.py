@@ -3,7 +3,13 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import Entity
 
 from .Vehicle import Vehicle
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, TOPIC_UPDATE, BRANDS, CONF_VEHICLE_IDENTIFIER
+from .const import (
+    DOMAIN,
+    DATA_VEHICLE_INSTANCE,
+    TOPIC_UPDATE,
+    BRANDS,
+    CONF_VEHICLE_IDENTIFIER,
+)
 
 
 class KiaUvoEntity(Entity):

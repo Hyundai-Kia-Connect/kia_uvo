@@ -12,7 +12,12 @@ from homeassistant.components.binary_sensor import (
 
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_ENGINE_TYPE, CONF_VEHICLE_IDENTIFIER
+from .const import (
+    DOMAIN,
+    DATA_VEHICLE_INSTANCE,
+    VEHICLE_ENGINE_TYPE,
+    CONF_VEHICLE_IDENTIFIER,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
