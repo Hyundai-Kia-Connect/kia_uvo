@@ -275,3 +275,17 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         hass.data[DOMAIN][vehicle_identifier] = None
 
     return unload_ok
+
+async def async_migrate_entry(hass, config_entry: ConfigEntry):
+
+    if config_entry.version == 1:
+        new = config_entry.data
+        _LOGGER.debug(f"{DOMAIN} - New: {new}")
+
+        #hass.data[DOMAIN] = []
+        #hass.data[DOMAIN][stored_credentials.vehicle_id] = vehicle_data_temp
+        #new = {}
+        #hass.config_entries.async_update_entry(config_entry, data=new)
+        #config_entry.version = 2
+    _LOGGER.info("Migration to version %s successful", config_entry.version)
+    return True
