@@ -259,10 +259,11 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         }
 
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
-
-        vehicle_status["battery"] = {
-            "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
-        }
+        
+        if vehicle_status["batteryStatus"].get("stateOfCharge"):
+            vehicle_status["battery"] = {
+                "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
+            }
 
         if vehicle_status.get("evStatus"):
             vehicle_status["evStatus"]["remainTime2"] = {
