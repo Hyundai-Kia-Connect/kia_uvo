@@ -274,9 +274,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_status["trunkOpen"] = vehicle_status["doorStatus"]["trunk"]
         vehicle_status["hoodOpen"] = vehicle_status["doorStatus"]["hood"]
 
-        vehicle_status["tirePressureLamp"] = {
-            "tirePressureLampAll": vehicle_status["tirePressure"]["all"]
-        }
+        if vehicle_status.get("tirePressure"):
+            vehicle_status["tirePressureLamp"] = {
+                "tirePressureLampAll": vehicle_status["tirePressure"]["all"]
+            }
 
         climate_data = vehicle_status["climate"]
         vehicle_status["airCtrlOn"] = climate_data["airCtrl"]
