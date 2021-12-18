@@ -61,7 +61,7 @@ class Vehicle:
             if self.enable_geolocation_entity:
                 await self.hass.async_add_executor_job(
                     self.set_geocoded_location, previous_vehicle_location
-                )   
+                )
             if (
                 not self.get_child_value("vehicleStatus.engine")
                 and previous_vehicle_status is not None
@@ -74,7 +74,7 @@ class Vehicle:
                 )
                 self.vehicle_data["vehicleStatus"]["evStatus"] = {}
                 async_dispatcher_send(self.hass, self.topic_update)
-                
+
                 await self.force_update()
             else:
                 async_dispatcher_send(self.hass, self.topic_update)
