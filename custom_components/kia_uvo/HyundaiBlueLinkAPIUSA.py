@@ -32,7 +32,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class cipherAdapter(HTTPAdapter):
     """
-    A HTTPAdapter that re-enables poor ciphers required by Hyundai. 
+    A HTTPAdapter that re-enables poor ciphers required by Hyundai.
     """
 
     def init_poolmanager(self, *args, **kwargs):
