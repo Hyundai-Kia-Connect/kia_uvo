@@ -190,7 +190,7 @@ class Vehicle:
             climate = True
         if heating is None:
             heating = False
-        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
+        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and REGIONS[self.region] == REGION_CANADA:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.start_climate_ev,
                 self.token,
@@ -213,7 +213,7 @@ class Vehicle:
         await self.force_update_loop_start()
 
     async def stop_climate(self):
-        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and self.region == REGION_CANADA:
+        if self.engine_type == VEHICLE_ENGINE_TYPE.EV and REGIONS[self.region] == REGION_CANADA:
             await self.hass.async_add_executor_job(
                 self.kia_uvo_api.stop_climate_ev, self.token
             )
