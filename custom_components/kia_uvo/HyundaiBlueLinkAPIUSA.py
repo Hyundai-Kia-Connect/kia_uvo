@@ -114,7 +114,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         data = {"username": username, "password": password}
         headers = self.API_HEADERS
         sessions = requests.Session()
-        sessions.mount("self.API_URL", PostAdapter())
+        sessions.mount("self.LOGIN_API", PostAdapter())
         response = sessions.post(url, json=data, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
         response = response.json()
