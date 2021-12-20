@@ -38,12 +38,12 @@ class cipherAdapter(HTTPAdapter):
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
         kwargs["ssl_context"] = context
-        return super(cipherAdapter, self).init_poolmanager(*args, **kwargs)
+        return super().init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
         kwargs["ssl_context"] = context
-        return super(cipherAdapter, self).proxy_manager_for(*args, **kwargs)
+        return super().proxy_manager_for(*args, **kwargs)
 
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
