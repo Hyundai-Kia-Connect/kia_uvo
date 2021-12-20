@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_REGION,
+    ATTR_DEVICE_ID,
 )
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
