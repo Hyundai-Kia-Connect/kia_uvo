@@ -25,25 +25,26 @@ from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 
-CIPHERS = (
-    'DEFAULT@SECLEVEL=2'
-)
+CIPHERS = "DEFAULT@SECLEVEL=2"
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class cipherAdapter(HTTPAdapter):
     """
     A TransportAdapter that re-enables 3DES support in Requests.
     """
+
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
-        kwargs['ssl_context'] = context
+        kwargs["ssl_context"] = context
         return super(DESAdapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
-        kwargs['ssl_context'] = context
+        kwargs["ssl_context"] = context
         return super(DESAdapter, self).proxy_manager_for(*args, **kwargs)
+
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
@@ -100,7 +101,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "clientSecret": "v558o935-6nne-423i-baa8",
         }
         self.sessions = requests.Session()
-        self.sessions.mount('https://' + self.BASE_URL, cipherAdapter())
+        self.sessions.mount("https://" + self.BASE_URL, cipherAdapter())
 
         _LOGGER.debug(f"{DOMAIN} - initial API headers: {self.API_HEADERS}")
 
@@ -109,10 +110,9 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         password = self.password
 
         ### Sign In with Email and Password and Get Authorization Code ###
-        
-        
+
         url = self.LOGIN_API + "oauth/token"
-        
+
         data = {"username": username, "password": password}
         headers = self.API_HEADERS
         response = self.sessions.post(url, json=data, headers=headers)
