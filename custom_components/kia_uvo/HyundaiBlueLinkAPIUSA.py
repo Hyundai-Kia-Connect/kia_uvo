@@ -32,18 +32,18 @@ _LOGGER = logging.getLogger(__name__)
 
 class cipherAdapter(HTTPAdapter):
     """
-    A TransportAdapter that re-enables 3DES support in Requests.
+    A HTTPAdapter that re-enables poor ciphers required by Hyundai. 
     """
 
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
         kwargs["ssl_context"] = context
-        return super(DESAdapter, self).init_poolmanager(*args, **kwargs)
+        return super(cipherAdapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
         kwargs["ssl_context"] = context
-        return super(DESAdapter, self).proxy_manager_for(*args, **kwargs)
+        return super(cipherAdapter, self).proxy_manager_for(*args, **kwargs)
 
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
