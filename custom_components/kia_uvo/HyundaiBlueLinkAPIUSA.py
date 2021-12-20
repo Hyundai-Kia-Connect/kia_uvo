@@ -10,6 +10,8 @@ from urllib.parse import parse_qs, urlparse
 import uuid
 import time
 import curlify
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
 from .const import (
     DOMAIN,
@@ -22,8 +24,26 @@ from .const import (
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
+
+CIPHERS = (
+    'DEFAULT@SECLEVEL=2'
+)
+
 _LOGGER = logging.getLogger(__name__)
 
+class PostAdapter(HTTPAdapter):
+    """
+    A TransportAdapter that re-enables 3DES support in Requests.
+    """
+    def init_poolmanager(self, *args, **kwargs):
+        context = create_urllib3_context(ciphers=CIPHERS)
+        kwargs['ssl_context'] = context
+        return super(DESAdapter, self).init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        context = create_urllib3_context(ciphers=CIPHERS)
+        kwargs['ssl_context'] = context
+        return super(DESAdapter, self).proxy_manager_for(*args, **kwargs)
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
@@ -87,12 +107,15 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         password = self.password
 
         ### Sign In with Email and Password and Get Authorization Code ###
-
+        
+        
         url = self.LOGIN_API + "oauth/token"
-
+        
         data = {"username": username, "password": password}
         headers = self.API_HEADERS
-        response = requests.post(url, json=data, headers=headers)
+        sessions = requests.Session()
+        sessions.mount('self.API_URL', PostAdapter())
+        response = sessions.post(url, json=data, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
         response = response.json()
         access_token = response["access_token"]
