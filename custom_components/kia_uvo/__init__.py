@@ -210,7 +210,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
 
     async def update(event_time_utc: datetime):
         await refresh_config_entry()
-        #await vehicle.refresh_token()
+        # await vehicle.refresh_token()
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
         event_time_local = dt_util.as_local(event_time_utc)
 
@@ -275,6 +275,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         hass.data[DOMAIN][vehicle_identifier] = None
 
     return unload_ok
+
 
 async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
