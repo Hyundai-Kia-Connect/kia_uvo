@@ -25,26 +25,25 @@ from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 
-CIPHERS = "DEFAULT@SECLEVEL=2"
+CIPHERS = (
+    'DEFAULT@SECLEVEL=2'
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-
-class PostAdapter(HTTPAdapter):
+class cipherAdapter(HTTPAdapter):
     """
     A TransportAdapter that re-enables 3DES support in Requests.
     """
-
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
-        kwargs["ssl_context"] = context
+        kwargs['ssl_context'] = context
         return super(DESAdapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=CIPHERS)
-        kwargs["ssl_context"] = context
+        kwargs['ssl_context'] = context
         return super(DESAdapter, self).proxy_manager_for(*args, **kwargs)
-
 
 class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
@@ -100,6 +99,8 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
             "client_id": "m66129Bb-em93-SPAHYN-bZ91-am4540zp19920",
             "clientSecret": "v558o935-6nne-423i-baa8",
         }
+        self.sessions = requests.Session()
+        self.sessions.mount('https://' + self.BASE_URL, cipherAdapter())
 
         _LOGGER.debug(f"{DOMAIN} - initial API headers: {self.API_HEADERS}")
 
@@ -108,14 +109,13 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         password = self.password
 
         ### Sign In with Email and Password and Get Authorization Code ###
-
+        
+        
         url = self.LOGIN_API + "oauth/token"
-
+        
         data = {"username": username, "password": password}
         headers = self.API_HEADERS
-        sessions = requests.Session()
-        sessions.mount("self.LOGIN_API", PostAdapter())
-        response = sessions.post(url, json=data, headers=headers)
+        response = self.sessions.post(url, json=data, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
         response = response.json()
         access_token = response["access_token"]
@@ -165,7 +165,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
         _LOGGER.debug(f"{DOMAIN} - using API headers: {self.API_HEADERS}")
 
-        response = requests.get(url, headers=headers)
+        response = self.sessions.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
 
@@ -258,7 +258,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         if check_server:
             try:
                 HyundaiBlueLinkAPIUSA.last_loc_timestamp = datetime.now()
-                response = requests.get(url, headers=headers)
+                response = self.sessions.get(url, headers=headers)
                 response_json = response.json()
                 _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response_json}")
                 if response_json.get("coord") is not None:
@@ -310,7 +310,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         url = self.API_URL + "enrollment/details/" + username
         headers = self.API_HEADERS
         headers["accessToken"] = access_token
-        response = requests.get(url, headers=headers)
+        response = self.sessions.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
 
@@ -339,7 +339,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         headers["APPCLOUD-VIN"] = token.vehicle_id
 
         data = {"userName": self.username, "vin": token.vehicle_id}
-        response = requests.post(url, headers=headers, json=data)
+        response = self.sessions.post(url, headers=headers, json=data)
         # response_headers = response.headers
         # response = response.json()
         # action_status = self.check_action_status(token, headers["pAuth"], response_headers["transactionId"])
@@ -376,7 +376,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
         }
         _LOGGER.debug(f"{DOMAIN} - Start engine data: {data}")
 
-        response = requests.post(url, json=data, headers=headers)
+        response = self.sessions.post(url, json=data, headers=headers)
 
         # _LOGGER.debug(f"{DOMAIN} - Start engine curl: {curlify.to_curl(response.request)}")
         _LOGGER.debug(
@@ -396,7 +396,7 @@ class HyundaiBlueLinkAPIUSA(KiaUvoApiImpl):
 
         _LOGGER.debug(f"{DOMAIN} - Stop engine headers: {headers}")
 
-        response = requests.post(url, headers=headers)
+        response = self.sessions.post(url, headers=headers)
         _LOGGER.debug(
             f"{DOMAIN} - Stop engine response status code: {response.status_code}"
         )
