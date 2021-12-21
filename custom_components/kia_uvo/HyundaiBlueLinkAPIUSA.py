@@ -25,7 +25,7 @@ from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
 
 
-CIPHERS = "DEFAULT@SECLEVEL=2"
+CIPHERS = "DEFAULT@SECLEVEL=1"
 
 _LOGGER = logging.getLogger(__name__)
 
