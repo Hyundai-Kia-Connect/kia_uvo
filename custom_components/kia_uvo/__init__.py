@@ -183,8 +183,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         DATA_CONFIG_UPDATE_LISTENER: None,
     }
 
-
-
     async def update(event_time_utc: datetime):
         await refresh_config_entry()
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
@@ -220,22 +218,24 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         async_update_options
     )
     hass.data[DOMAIN] = data
-        
+
     def shutdown(event: Event) -> None:
         refresh_config_entry(hass, config_entry)
-        
+
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
-        
+
     return True
 
 
 async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
     await hass.config_entries.async_reload(config_entry.entry_id)
-    
+
+
 async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     current_data = config_entry.data.copy()
     current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
     hass.config_entries.async_update_entry(config_entry, data=current_data)
+
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     refresh_config_entry(hass, config_entry)
