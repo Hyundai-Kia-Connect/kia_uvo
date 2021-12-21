@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_REGION,
+    EVENT_HOMEASSISTANT_STOP,
 )
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -182,8 +183,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         DATA_CONFIG_UPDATE_LISTENER: None,
     }
 
-    async def refresh_config_entry():
-        is_token_updated = await vehicle.refresh_token()
+
 
     async def update(event_time_utc: datetime):
         await refresh_config_entry()
@@ -220,18 +220,25 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         async_update_options
     )
     hass.data[DOMAIN] = data
-
+        
+    def shutdown(event: Event) -> None:
+        refresh_config_entry(hass, config_entry)
+        
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
+        
     return True
 
 
 async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
     await hass.config_entries.async_reload(config_entry.entry_id)
-
-
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    
+async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     current_data = config_entry.data.copy()
     current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
     hass.config_entries.async_update_entry(config_entry, data=current_data)
+
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    refresh_config_entry(hass, config_entry)
     unload_ok = all(
         await asyncio.gather(
             *[
