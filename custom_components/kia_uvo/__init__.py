@@ -230,6 +230,7 @@ async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     current_data = config_entry.data.copy()
+    current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
     hass.config_entries.async_update_entry(config_entry, data=current_data)
     unload_ok = all(
         await asyncio.gather(
