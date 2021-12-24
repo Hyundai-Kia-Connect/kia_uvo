@@ -20,6 +20,7 @@ DEFAULT_DISTANCE_UNIT_ARRAY = []
 def get_default_distance_unit() -> int:
     return DEFAULT_DISTANCE_UNIT_ARRAY[0]
 
+
 def get_implementation_by_region_brand(
     region: int,
     brand: int,
