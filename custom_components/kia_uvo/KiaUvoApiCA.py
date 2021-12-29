@@ -35,8 +35,8 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         self.last_action_xid = None
         self.last_action_completed = False
         self.last_action_pin_auth = None
-        self.temperature_range_ICE_C = [x * 0.5 for x in range(32, 64)]
-        self.temperature_range_EV_C = [x * 0.5 for x in range(28, 64)]
+        self.temperature_range_old_C = [x * 0.5 for x in range(32, 64)]
+        self.temperature_range_new_C = [x * 0.5 for x in range(28, 64)]
 
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_URL: str = "kiaconnect.ca"
@@ -244,7 +244,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["vehicleId"] = token.vehicle_id
         headers["pAuth"] = self.get_pin_token(token)
 
-        set_temp = self.temperature_range_ICE_C.index(set_temp)
+        set_temp = self.temperature_range_old_C.index(set_temp)
         set_temp = hex(set_temp).split("x")
         set_temp = set_temp[1] + "H"
         set_temp = set_temp.zfill(3).upper()
@@ -281,7 +281,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["vehicleId"] = token.vehicle_id
         headers["pAuth"] = self.get_pin_token(token)
 
-        set_temp = self.temperature_range_EV_C.index(set_temp)
+        set_temp = self.temperature_range_new_C.index(set_temp)
         set_temp = hex(set_temp).split("x")
         set_temp = set_temp[1] + "H"
         set_temp = set_temp.zfill(3).upper()
