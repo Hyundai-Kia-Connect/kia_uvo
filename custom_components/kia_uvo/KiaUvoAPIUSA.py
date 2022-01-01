@@ -279,7 +279,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         ]
 
         vehicle_status["airTemp"] = climate_data["airTemp"]
-
+        vehicle_status["dte"] = vehicle_status["distanceToEmpty"]
         vehicle_data = {
             "vehicleStatus": vehicle_status,
             "odometer": {
