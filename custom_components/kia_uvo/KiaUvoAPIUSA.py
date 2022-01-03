@@ -243,20 +243,6 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_status = response_body["payload"]["vehicleInfoList"][0][
             "lastVehicleInfo"
         ]["vehicleStatusRpt"]["vehicleStatus"]
-        vehicle_data = {
-            "vehicleStatus": vehicle_status,
-            "odometer": {
-                "value": float(
-                    response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
-                        "vehicleDetail"
-                    ]["vehicle"]["mileage"]
-                ),
-                "unit": 3,
-            },
-            "vehicleLocation": response_body["payload"]["vehicleInfoList"][0][
-                "lastVehicleInfo"
-            ]["location"],
-        }
 
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
 
@@ -293,7 +279,21 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         ]
 
         vehicle_status["airTemp"] = climate_data["airTemp"]
-
+        vehicle_status["dte"] = vehicle_status["distanceToEmpty"]
+        vehicle_data = {
+            "vehicleStatus": vehicle_status,
+            "odometer": {
+                "value": float(
+                    response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
+                        "vehicleDetail"
+                    ]["vehicle"]["mileage"]
+                ),
+                "unit": 3,
+            },
+            "vehicleLocation": response_body["payload"]["vehicleInfoList"][0][
+                "lastVehicleInfo"
+            ]["location"],
+        }
         return vehicle_data
 
     def get_location(self, token: Token):
