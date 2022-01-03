@@ -317,8 +317,6 @@ class InstrumentSensor(KiaUvoEntity):
                     return temp_range[-1]
             else:
                 value = value.replace("H", "")
-                value = value.replace("C", "")
-                value = "0x" + value
                 return temp_range[int(value, 16)]
 
         if value is None:

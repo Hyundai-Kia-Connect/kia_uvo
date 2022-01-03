@@ -260,9 +260,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
 
         vehicle_status["time"] = vehicle_status["syncDate"]["utc"]
 
-        vehicle_status["battery"] = {
-            "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
-        }
+        if vehicle_status["batteryStatus"].get("stateOfCharge"):
+            vehicle_status["battery"] = {
+                "batSoc": vehicle_status["batteryStatus"]["stateOfCharge"],
+            }
 
         if vehicle_status.get("evStatus"):
             vehicle_status["evStatus"]["remainTime2"] = {
@@ -273,9 +274,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         vehicle_status["trunkOpen"] = vehicle_status["doorStatus"]["trunk"]
         vehicle_status["hoodOpen"] = vehicle_status["doorStatus"]["hood"]
 
-        vehicle_status["tirePressureLamp"] = {
-            "tirePressureLampAll": vehicle_status["tirePressure"]["all"]
-        }
+        if vehicle_status.get("tirePressure"):
+            vehicle_status["tirePressureLamp"] = {
+                "tirePressureLampAll": vehicle_status["tirePressure"]["all"]
+            }
 
         climate_data = vehicle_status["climate"]
         vehicle_status["airCtrlOn"] = climate_data["airCtrl"]
