@@ -33,6 +33,9 @@ class KiaUvoApiImpl:
     def login(self) -> Token:
         pass
 
+    def get_vehicles(self, token: Token):
+        pass
+
     def get_cached_vehicle_status(self, token: Token):
         pass
 
