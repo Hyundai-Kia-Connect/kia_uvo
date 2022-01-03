@@ -110,6 +110,16 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         return token
 
+    def get_vehicles(self, token: Token):
+        url = self.API_URL + "vhcllst"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        response = requests.post(url, headers=headers)
+        _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
+        response = response.json()
+        response = response["result"]
+        return response
+
     def get_cached_vehicle_status(self, token: Token):
         # Vehicle Status Call
         url = self.API_URL + "lstvhclsts"
@@ -127,11 +137,7 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         vehicle_status["vehicleStatus"]["time"] = response["lastStatusDate"]
 
         # Service Status Call
-        url = self.API_URL + "nxtsvc"
-        response = requests.post(url, headers=headers)
-        response = response.json()
-        _LOGGER.debug(f"{DOMAIN} - Get Service status data {response}")
-        response = response["result"]["maintenanceInfo"]
+        response = self.get_next_service(token)
 
         vehicle_status["odometer"] = {}
         vehicle_status["odometer"]["unit"] = response["currentOdometerUnit"]
@@ -162,6 +168,17 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         self.old_vehicle_status = vehicle_status
         return vehicle_status
+
+    def get_next_service(self, token: Token):
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        url = self.API_URL + "nxtsvc"
+        response = requests.post(url, headers=headers)
+        response = response.json()
+        _LOGGER.debug(f"{DOMAIN} - Get Service status data {response}")
+        response = response["result"]["maintenanceInfo"]
+        return response
 
     def get_location(self, token: Token):
         url = self.API_URL + "fndmcr"
