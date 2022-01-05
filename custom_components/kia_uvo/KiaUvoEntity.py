@@ -53,7 +53,6 @@ class KiaUvoEntity(Entity):
         self.vehicle = self.hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
 
-
 class KiaUvoSensorEntity(SensorEntity):
     def __init__(self, hass, config_entry, vehicle: Vehicle):
         self.hass = hass
