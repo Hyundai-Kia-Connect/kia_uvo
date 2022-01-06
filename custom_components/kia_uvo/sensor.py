@@ -11,9 +11,9 @@ from homeassistant.const import (
 )
 from homeassistant.util import distance as distance_util
 import homeassistant.util.dt as dt_util
-from homeassistant.components.sensor import SensorStateClass
+from homeassistant.components.sensor import SensorStateClass, SensorEntity
 from .Vehicle import Vehicle
-from .KiaUvoEntity import KiaUvoEntity, KiaUvoSensorEntity
+from .KiaUvoEntity import KiaUvoEntity
 from .const import (
     DYNAMIC_TEMP_UNIT,
     REGION_USA,
@@ -292,7 +292,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities(sensors, True)
 
 
-class InstrumentSensor(KiaUvoSensorEntity):
+class InstrumentSensor(KiaUvoEntity, SensorEntity):
     def __init__(
         self,
         hass,
