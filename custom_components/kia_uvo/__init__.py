@@ -43,7 +43,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         region = config_entry.data.get(CONF_REGION, "")
         brand = config_entry.data.get(CONF_BRAND, "")
         title = f"{brand} {region} {username}"
-        unique_id = hashlib.sha256(new_title.encode("utf-8")).hexdigest()
+        unique_id = hashlib.sha256(title.encode("utf-8")).hexdigest()
         new_data = {
             "CONF_USERNAME" : username,
             "CONF_PASSWORD" :password,
