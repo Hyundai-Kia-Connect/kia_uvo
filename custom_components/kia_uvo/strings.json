@@ -1,37 +1,22 @@
 {
-  "title": "Kia Uvo / Hyundai Bluelink",
   "config": {
     "step": {
       "user": {
-        "title": "Kia Uvo / Hyundai Bluelink: Authentication",
-        "description": "Set up your Kia Uvo / Hyundai Bluelink to integrate with Home Assistant.",
         "data": {
-          "username": "Username",
-          "password": "Password",
-          "region": "Region",
-          "pin": "Pin (Required for Canada)",
-          "brand": "Brand"
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]",
+          "region": "[%key:component::hyundai_kia_connect::config::step::user::data::region%]",
+          "brand": "[%key:component::hyundai_kia_connect::config::step::user::data::brand%]",
+          "pin": "[%key:common::config_flow::data::pin%]"
         }
       }
     },
     "error": {
-      "auth": "Login failed into Kia Uvo / Hyundai Bluelink Servers. Please use official Kia Uvo app to logout and log back in and try again!"
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "Kia Uvo: Configuration",
-        "data": {
-          "unit_of_measurement": "Distance Unit",
-          "scan_interval": "Scan Interval in Minutes",
-          "force_scan_interval": "Force Scan Interval in Minutes",
-          "no_force_scan_hour_start": "Blackout Start Hour - (No Force Scan)",
-          "no_force_scan_hour_finish": "Blackout Finish Hour - (No Force Scan)",
-          "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
-          "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-        }
-      }
+      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]"
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
     }
   }
 }
