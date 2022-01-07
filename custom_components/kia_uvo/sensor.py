@@ -11,6 +11,7 @@ from homeassistant.const import (
 )
 from homeassistant.util import distance as distance_util
 import homeassistant.util.dt as dt_util
+from homeassistant.components.sensor import SensorStateClass, SensorEntity
 from .Vehicle import Vehicle
 from .KiaUvoEntity import KiaUvoEntity
 from .const import (
@@ -45,6 +46,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 PERCENTAGE,
                 "mdi:car-electric",
                 DEVICE_CLASS_BATTERY,
+                SensorStateClass.MEASUREMENT,
             )
         )
         INSTRUMENTS.append(
@@ -55,6 +57,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:road-variant",
                 None,
+                SensorStateClass.MEASUREMENT,
             )
         )
         INSTRUMENTS.append(
@@ -65,6 +68,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:road-variant",
                 None,
+                SensorStateClass.MEASUREMENT,
             )
         )
         INSTRUMENTS.append(
@@ -74,6 +78,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "vehicleStatus.evStatus.remainTime2.atc.value",
                 TIME_MINUTES,
                 "mdi:ev-station",
+                None,
                 None,
             )
         )
@@ -85,6 +90,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 TIME_MINUTES,
                 "mdi:ev-station",
                 None,
+                None,
             )
         )
         INSTRUMENTS.append(
@@ -94,6 +100,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "vehicleStatus.evStatus.remainTime2.etc2.value",
                 TIME_MINUTES,
                 "mdi:ev-station",
+                None,
                 None,
             )
         )
@@ -105,6 +112,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 TIME_MINUTES,
                 "mdi:ev-station",
                 None,
+                None,
             )
         )
         INSTRUMENTS.append(
@@ -115,6 +123,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 PERCENTAGE,
                 "mdi:car-electric",
                 None,
+                None,
             )
         )
         INSTRUMENTS.append(
@@ -124,6 +133,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "vehicleStatus.evStatus.targetSOC.0.targetSOClevel",
                 PERCENTAGE,
                 "mdi:car-electric",
+                None,
                 None,
             )
         )
@@ -137,6 +147,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                     DYNAMIC_DISTANCE_UNIT,
                     "mdi:ev-station",
                     None,
+                    None,
                 )
             )
             INSTRUMENTS.append(
@@ -146,6 +157,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                     "vehicleStatus.evStatus.targetSOC.0.dte.rangeByFuel.totalAvailableRange.value",
                     DYNAMIC_DISTANCE_UNIT,
                     "mdi:ev-station",
+                    None,
                     None,
                 )
             )
@@ -159,6 +171,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:road-variant",
                 None,
+                None,
             )
         )
     if vehicle.engine_type is VEHICLE_ENGINE_TYPE.IC:
@@ -169,6 +182,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "vehicleStatus.dte.value",
                 DYNAMIC_DISTANCE_UNIT,
                 "mdi:road-variant",
+                None,
                 None,
             )
         )
@@ -181,6 +195,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DYNAMIC_DISTANCE_UNIT,
             "mdi:speedometer",
             None,
+            SensorStateClass.TOTAL_INCREASING,
         )
     )
     INSTRUMENTS.append(
@@ -190,6 +205,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "lastService.value",
             DYNAMIC_DISTANCE_UNIT,
             "mdi:car-wrench",
+            None,
             None,
         )
     )
@@ -201,6 +217,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DYNAMIC_DISTANCE_UNIT,
             "mdi:car-wrench",
             None,
+            None,
         )
     )
     INSTRUMENTS.append(
@@ -210,6 +227,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "vehicleLocation.geocodedLocation.display_name",
             None,
             "mdi:map",
+            None,
             None,
         )
     )
@@ -221,6 +239,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             PERCENTAGE,
             "mdi:car-battery",
             DEVICE_CLASS_BATTERY,
+            None,
         )
     )
     INSTRUMENTS.append(
@@ -231,12 +250,13 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DYNAMIC_TEMP_UNIT,
             None,
             DEVICE_CLASS_TEMPERATURE,
+            None,
         )
     )
 
     sensors = []
 
-    for id, description, key, unit, icon, device_class in INSTRUMENTS:
+    for id, description, key, unit, icon, device_class, state_class in INSTRUMENTS:
         if vehicle.get_child_value(key) is None:
             _LOGGER.debug(f"skipping sensor for missing data, key:{key}")
         else:
@@ -251,6 +271,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                     unit,
                     icon,
                     device_class,
+                    state_class,
                 )
             )
 
@@ -265,12 +286,13 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "None",
             "mdi:update",
             DEVICE_CLASS_TIMESTAMP,
+            None,
         )
     )
     async_add_entities(sensors, True)
 
 
-class InstrumentSensor(KiaUvoEntity):
+class InstrumentSensor(KiaUvoEntity, SensorEntity):
     def __init__(
         self,
         hass,
@@ -282,6 +304,7 @@ class InstrumentSensor(KiaUvoEntity):
         unit,
         icon,
         device_class,
+        state_class,
     ):
         super().__init__(hass, config_entry, vehicle)
         self._id = id
@@ -291,6 +314,7 @@ class InstrumentSensor(KiaUvoEntity):
         self._source_unit = unit
         self._icon = icon
         self._device_class = device_class
+        self._state_class = state_class
         self._dynamic_distance_unit = False
         if self._unit == DYNAMIC_DISTANCE_UNIT:
             self._dynamic_distance_unit = True
@@ -368,6 +392,10 @@ class InstrumentSensor(KiaUvoEntity):
     @property
     def device_class(self):
         return self._device_class
+
+    @property
+    def state_class(self):
+        return self._state_class
 
     @property
     def name(self):
