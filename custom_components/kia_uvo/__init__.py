@@ -1,7 +1,13 @@
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform, CONF_USERNAME, CONF_REGION, CONF_PIN, CONF_PASSWORD
+from homeassistant.const import (
+    Platform,
+    CONF_USERNAME,
+    CONF_REGION,
+    CONF_PIN,
+    CONF_PASSWORD,
+)
 from homeassistant.core import HomeAssistant
 import hashlib
 
@@ -33,6 +39,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
     return unload_ok
 
+
 async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if config_entry.version == 1:
@@ -45,18 +52,22 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         title = f"{BRANDS[brand]} {REGIONS[region]} {username}"
         unique_id = hashlib.sha256(title.encode("utf-8")).hexdigest()
         new_data = {
-            CONF_USERNAME : username,
-            CONF_PASSWORD :password,
-            CONF_PIN : pin,
-            CONF_REGION : region,
-            CONF_BRAND : brand
+            CONF_USERNAME: username,
+            CONF_PASSWORD: password,
+            CONF_PIN: pin,
+            CONF_REGION: region,
+            CONF_BRAND: brand,
         }
-        registry = hass.helpers.entity_registry.async_get(hass)   
-        entities = hass.helpers.entity_registry.async_entries_for_config_entry(registry, config_entry.entry_id)
+        registry = hass.helpers.entity_registry.async_get(hass)
+        entities = hass.helpers.entity_registry.async_entries_for_config_entry(
+            registry, config_entry.entry_id
+        )
         for entity in entities:
-            registry.async_remove(entity.entity_id)         
-            
-        hass.config_entries.async_update_entry(config_entry, unique_id=unique_id, title=title, data=new_data)  
+            registry.async_remove(entity.entity_id)
+
+        hass.config_entries.async_update_entry(
+            config_entry, unique_id=unique_id, title=title, data=new_data
+        )
         config_entry.version = 2
         _LOGGER.info("Migration to version %s successful", config_entry.version)
     return True
