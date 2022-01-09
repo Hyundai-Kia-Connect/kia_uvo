@@ -1,17 +1,11 @@
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import (
-    Platform,
-    CONF_USERNAME,
-    CONF_REGION,
-    CONF_PIN,
-    CONF_PASSWORD,
-)
+from homeassistant.const import Platform, CONF_USERNAME, CONF_REGION, CONF_PIN, CONF_PASSWORD
 from homeassistant.core import HomeAssistant
 import hashlib
 
-from .const import DOMAIN, CONF_BRAND, DEFAULT_PIN
+from .const import DOMAIN, CONF_BRAND, DEFAULT_PIN, BRANDS, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,7 +33,6 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
     return unload_ok
 
-
 async def async_migrate_entry(hass, config_entry: ConfigEntry):
 
     if config_entry.version == 1:
@@ -49,18 +42,21 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         pin = config_entry.data.get(CONF_PIN, DEFAULT_PIN)
         region = config_entry.data.get(CONF_REGION, "")
         brand = config_entry.data.get(CONF_BRAND, "")
-        title = f"{brand} {region} {username}"
+        title = f"{BRANDS[brand]} {REGIONS[region]} {username}"
         unique_id = hashlib.sha256(title.encode("utf-8")).hexdigest()
         new_data = {
-            "CONF_USERNAME": username,
-            "CONF_PASSWORD": password,
-            "CONF_PIN": pin,
-            "CONF_REGION": region,
-            "CONF_BRAND": brand,
+            CONF_USERNAME : username,
+            CONF_PASSWORD :password,
+            CONF_PIN : pin,
+            CONF_REGION : region,
+            CONF_BRAND : brand
         }
-        _LOGGER.info("New Data: %s", new_data)
-        hass.config_entries.async_update_entry(config_entry, data=new_data)
-
-        config_entry.version = 1
+        registry = hass.helpers.entity_registry.async_get(hass)   
+        entities = hass.helpers.entity_registry.async_entries_for_config_entry(registry, config_entry.entry_id)
+        for entity in entities:
+            registry.async_remove(entity.entity_id)         
+            
+        hass.config_entries.async_update_entry(config_entry, unique_id=unique_id, title=title, data=new_data)  
+        config_entry.version = 2
         _LOGGER.info("Migration to version %s successful", config_entry.version)
     return True
