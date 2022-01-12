@@ -257,7 +257,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "frSeatHeatState",
             "Front Right Seat",
-            "vehicleStatus.seatHeaterVentState.frSeatHeatState",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.frSeatHeatState"],
             DYNAMIC_TEMP_UNIT,
             None,
             None,
@@ -268,7 +268,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "flSeatHeatState",
             "Front Left Seat",
-            "vehicleStatus.seatHeaterVentState.rrSeatHeatState",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.rrSeatHeatState"],
             DYNAMIC_TEMP_UNIT,
             None,
             None,
@@ -279,7 +279,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "rrSeatHeatState",
             "Rear Right Seat",
-            "vehicleStatus.seatHeaterVentState.rrSeatHeatState",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.rrSeatHeatState"],
             DYNAMIC_TEMP_UNIT,
             None,
             None,
@@ -290,7 +290,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         (
             "rlSeatHeatState",
             "Rear Left Seat",
-            "vehicleStatus.airTemp.value",
+            SEAT_STATUS["vehicleStatus.airTemp.value"],
             DYNAMIC_TEMP_UNIT,
             None,
             None,
