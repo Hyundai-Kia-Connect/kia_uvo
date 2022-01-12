@@ -33,6 +33,18 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     INSTRUMENTS = []
+    
+    INSTRUMENTS.append(
+        (
+            "fuelLevel",
+            "Fuel Level",
+            "vehicleStatus.fuelLevel",
+            PERCENTAGE,
+            "mdi:fuel",
+            DEVICE_CLASS_TEMPERATURE,
+            SensorStateClass.MEASUREMENT,
+        )
+    )
 
     if (
         vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
@@ -253,6 +265,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             None,
         )
     )
+    
 
     sensors = []
 
