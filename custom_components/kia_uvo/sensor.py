@@ -33,7 +33,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     INSTRUMENTS = []
-    
+
     INSTRUMENTS.append(
         (
             "fuelLevel",
@@ -265,7 +265,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             None,
         )
     )
-    
 
     sensors = []
 
