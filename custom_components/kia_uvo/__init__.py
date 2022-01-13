@@ -199,8 +199,17 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         call_force_update = False
 
         if (
-            ((no_force_scan_hour_start <= no_force_scan_hour_finish) and (event_time_local.hour < no_force_scan_hour_start or event_time_local.hour >= no_force_scan_hour_finish))
-            or ((no_force_scan_hour_start >= no_force_scan_hour_finish) and (event_time_local.hour < no_force_scan_hour_start and event_time_local.hour >= no_force_scan_hour_finish))
+            (no_force_scan_hour_start <= no_force_scan_hour_finish)
+            and (
+                event_time_local.hour < no_force_scan_hour_start
+                or event_time_local.hour >= no_force_scan_hour_finish
+            )
+        ) or (
+            (no_force_scan_hour_start >= no_force_scan_hour_finish)
+            and (
+                event_time_local.hour < no_force_scan_hour_start
+                and event_time_local.hour >= no_force_scan_hour_finish
+            )
         ):
             if (
                 datetime.now(local_timezone) - vehicle.last_updated
