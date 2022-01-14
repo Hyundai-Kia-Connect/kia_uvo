@@ -134,14 +134,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DEVICE_CLASS_PROBLEM,
         ),
         (
-            "breakOilStatus",
-            "Break Oil Status",
-            "vehicleStatus.breakOilStatus",
-            "mdi:car",
-            "mdi:car-brake-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
             "airConditioner",
             "Air Conditioner",
             "vehicleStatus.airCtrlOn",
