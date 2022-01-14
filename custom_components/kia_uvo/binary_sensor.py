@@ -118,6 +118,22 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             DEVICE_CLASS_PROBLEM,
         ),
         (
+            "smartKeyBatteryWarning",
+            "Smart Key Battery Warning",
+            "vehicleStatus.smartKeyBatteryWarning",
+            "mdi:battery",
+            "mdi:battery-alert",
+            DEVICE_CLASS_PROBLEM,
+        ),
+        (
+            "washerFluidStatus",
+            "Washer Fluid Warning",
+            "vehicleStatus.washerFluidStatus",
+            "mdi:wiper-wash",
+            "mdi:wiper-wash-alert",
+            DEVICE_CLASS_PROBLEM,
+        ),
+        (
             "airConditioner",
             "Air Conditioner",
             "vehicleStatus.airCtrlOn",
