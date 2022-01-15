@@ -24,7 +24,6 @@ from .const import (
     DISTANCE_UNITS,
     VEHICLE_ENGINE_TYPE,
     DYNAMIC_DISTANCE_UNIT,
-    SEAT_STATUS,
 )
 
 _LOGGER = logging.getLogger(__name__)
