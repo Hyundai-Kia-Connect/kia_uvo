@@ -12,6 +12,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_UNIT_OF_MEASUREMENT,
     CONF_REGION,
+    EVENT_HOMEASSISTANT_STOP,
 )
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -182,17 +183,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         DATA_CONFIG_UPDATE_LISTENER: None,
     }
 
-    async def refresh_config_entry():
-        is_token_updated = await vehicle.refresh_token()
-        if is_token_updated:
-            new_data = config_entry.data.copy()
-            new_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
-            hass.config_entries.async_update_entry(
-                config_entry, data=new_data, options=config_entry.options
-            )
-
     async def update(event_time_utc: datetime):
-        await refresh_config_entry()
+        await vehicle.refresh_token()
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
         event_time_local = dt_util.as_local(event_time_utc)
         await vehicle.update()
@@ -236,11 +228,32 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     )
     hass.data[DOMAIN] = data
 
+    def shutdown(event) -> None:
+        _LOGGER.debug(f"{DOMAIN} - Shutdown event received")
+        asyncio.run_coroutine_threadsafe(
+            refresh_config_entry(hass, config_entry), hass.loop
+        ).result()
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
+
     return True
 
 
 async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
     await hass.config_entries.async_reload(config_entry.entry_id)
+
+
+async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry started")
+    current_data = config_entry.data.copy()
+    vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+    if current_data[CONF_STORED_CREDENTIALS] == vars(vehicle.token):
+        _LOGGER.debug(
+            f"{DOMAIN} - refresh_config_entry - data is up to date, nothing saved"
+        )
+        return
+    current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
+    hass.config_entries.async_update_entry(config_entry, data=current_data)
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
