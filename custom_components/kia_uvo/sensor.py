@@ -265,6 +265,50 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             None,
         )
     )
+    INSTRUMENTS.append(
+        (
+            "frSeatHeatState",
+            "Front Right Seat",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.frSeatHeatState"],
+            DYNAMIC_TEMP_UNIT,
+            None,
+            None,
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "flSeatHeatState",
+            "Front Left Seat",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.rrSeatHeatState"],
+            DYNAMIC_TEMP_UNIT,
+            None,
+            None,
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "rrSeatHeatState",
+            "Rear Right Seat",
+            SEAT_STATUS["vehicleStatus.seatHeaterVentState.rrSeatHeatState"],
+            DYNAMIC_TEMP_UNIT,
+            None,
+            None,
+            None,
+        )
+    )
+    INSTRUMENTS.append(
+        (
+            "rlSeatHeatState",
+            "Rear Left Seat",
+            SEAT_STATUS["vehicleStatus.airTemp.value"],
+            DYNAMIC_TEMP_UNIT,
+            None,
+            None,
+            None,
+        )
+    )
 
     sensors = []
 
