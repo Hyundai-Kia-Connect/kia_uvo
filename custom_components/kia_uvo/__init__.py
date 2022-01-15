@@ -237,7 +237,6 @@ async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
 async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     _LOGGER.debug(f"{DOMAIN} - refresh_config_entry started")
     current_data = config_entry.data.copy()
-    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry current data - {current_data}")
     vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
     if current_data[CONF_STORED_CREDENTIALS] == vars(vehicle.token):
         _LOGGER.debug(
@@ -245,7 +244,6 @@ async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
         )
         return
     current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
-    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry new data - {current_data}")
     hass.config_entries.async_update_entry(config_entry, data=current_data)
 
 
