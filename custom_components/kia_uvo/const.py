@@ -77,6 +77,8 @@ CA_TEMP_RANGE = [x * 0.5 for x in range(32, 64)]
 USA_TEMP_RANGE = range(62, 82)
 
 SEAT_STATUS = {
+    0: "Off",
+    1: "On",
     2: "Off",
     3: "Low Cool",
     4: "Medium Cool",
