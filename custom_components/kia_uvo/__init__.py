@@ -184,7 +184,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     }
 
     async def update(event_time_utc: datetime):
-        await refresh_config_entry()
+        await vehicle.refresh_token()
         local_timezone = vehicle.kia_uvo_api.get_timezone_by_region()
         event_time_local = dt_util.as_local(event_time_utc)
         await vehicle.update()
@@ -219,8 +219,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     )
     hass.data[DOMAIN] = data
 
-    def shutdown(event: Event) -> None:
-        refresh_config_entry(hass, config_entry)
+    def shutdown(event) -> None:
+        _LOGGER.debug(f"{DOMAIN} - Shutdown event received")
+        asyncio.run_coroutine_threadsafe(
+            refresh_config_entry(hass, config_entry), hass.loop
+        ).result()
 
     hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, shutdown)
 
@@ -232,13 +235,21 @@ async def async_update_options(hass: HomeAssistant, config_entry: ConfigEntry):
 
 
 async def refresh_config_entry(hass: HomeAssistant, config_entry: ConfigEntry):
+    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry started")
     current_data = config_entry.data.copy()
+    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry current data - {current_data}")
+    vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+    if current_data[CONF_STORED_CREDENTIALS] == vars(vehicle.token):
+        _LOGGER.debug(
+            f"{DOMAIN} - refresh_config_entry - data is up to date, nothing saved"
+        )
+        return
     current_data[CONF_STORED_CREDENTIALS] = vars(vehicle.token)
+    _LOGGER.debug(f"{DOMAIN} - refresh_config_entry new data - {current_data}")
     hass.config_entries.async_update_entry(config_entry, data=current_data)
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
-    refresh_config_entry(hass, config_entry)
     unload_ok = all(
         await asyncio.gather(
             *[
