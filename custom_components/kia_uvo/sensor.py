@@ -41,7 +41,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "vehicleStatus.fuelLevel",
             PERCENTAGE,
             "mdi:fuel",
-            DEVICE_CLASS_TEMPERATURE,
+            None,
             SensorStateClass.MEASUREMENT,
         )
     )
