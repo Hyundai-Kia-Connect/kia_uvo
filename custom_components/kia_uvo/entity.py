@@ -17,7 +17,7 @@ class HyundaiKiaConnectEntity(CoordinatorEntity):
         """Return device information to use for this entity."""
         return {
             "identifiers": {(DOMAIN, self.vehicle.id)},
-            "manufacturer": f"{BRANDS[self.coordinator.data.brand]} {REGIONS[self.coordinator.data.region]}",
+            "manufacturer": f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
             "model": self.vehicle.model,
             "name": self.vehicle.name,
         }

@@ -1,6 +1,7 @@
 """Sensor for Hyundai / Kia Connect integration."""
 from __future__ import annotations
 
+from collections.abc import Callable
 import logging
 from typing import Final
 
@@ -13,7 +14,12 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import LENGTH_KILOMETERS, PERCENTAGE
 
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 from .const import DOMAIN
+from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,18 +83,22 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
 )
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
     """Set up sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.data.vehicles.keys():
-        vehicle: Vehicle = coordinator.data.vehicles[vehicle_id]
+    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
-    async_add_entities(entities, True)
+    async_add_entities(entities)
     return True
 
 
