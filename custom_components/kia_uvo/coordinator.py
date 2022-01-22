@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from datetime import timedelta
 import logging
+from site import venv
 
 from hyundai_kia_connect_api import VehicleManager
 
@@ -103,4 +104,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         """Refresh token if needed via library."""
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_refresh_token
+        )
+    async def async_lock_vehicle(self, vehicle_id: str):
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.lock_action(vehicle_id, "close")
+        )
+    async def async_unlock_vehicle(self, vehicle_id: str):
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.lock_action(vehicle_id, "open")
         )

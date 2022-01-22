@@ -1,0 +1,62 @@
+"""Lock for Hyundai / Kia Connect integration."""
+from __future__ import annotations
+
+import logging
+
+from homeassistant.components.lock import LockEntity
+
+from hyundai_kia_connect_api import Vehicle
+from .const import DOMAIN
+from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .entity import HyundaiKiaConnectEntity
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    coordinator = hass.data[DOMAIN][config_entry.unique_id]
+    entities = []
+    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        entities.append(
+                Lock(coordinator, vehicle)
+            )
+
+    async_add_entities(entities)
+    return True
+
+
+class Lock(LockEntity, HyundaiKiaConnectEntity):
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ):
+        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+
+    @property
+    def name(self):
+        return f"{self.vehicle.name} Door Lock"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}_{self.vehicle.id}_doorLock"
+
+    @property
+    def is_locked(self):
+        return self.vehicle.is_locked
+
+    @property
+    def icon(self):
+        return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
+
+    async def async_lock(self):
+        await self.coordinator.async_lock_vehicle(self.vehicle.id)
+
+    async def async_unlock(self):
+        await self.coordinator.async_unlock_vehicle(self.vehicle.id)
