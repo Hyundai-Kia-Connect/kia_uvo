@@ -27,13 +27,13 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        entities.append(HyundaiKiaConnectLocationTracker(coordinator, vehicle))
+        entities.append(HyundaiKiaConnectTracker(coordinator, vehicle))
 
     async_add_entities(entities)
     return True
 
 
-class HyundaiKiaConnectLocationTracker(TrackerEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
