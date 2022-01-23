@@ -115,7 +115,7 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Hyundai / Kia Connect."""
 
-    VERSION = 1
+    VERSION = 2
 
     @staticmethod
     @callback
