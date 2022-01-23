@@ -24,32 +24,22 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         entities.append(
-                Lock(coordinator, vehicle)
+                HyundaiKiaConnectLock(coordinator, vehicle)
             )
 
     async_add_entities(entities)
     return True
 
 
-class Lock(LockEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ):
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-
-    @property
-    def name(self):
-        return f"{self.vehicle.name} Door Lock"
-
-    @property
-    def unique_id(self):
-        return f"{DOMAIN}_{self.vehicle.id}_doorLock"
-
-    @property
-    def is_locked(self):
-        return self.vehicle.is_locked
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.name}_door_lock"
+        self._attr_name = f"{vehicle.name} Door Lock"
 
     @property
     def icon(self):
