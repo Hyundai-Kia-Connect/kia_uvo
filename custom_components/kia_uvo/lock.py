@@ -38,7 +38,7 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ):
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.name}_door_lock"
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_door_lock"
         self._attr_name = f"{vehicle.name} Door Lock"
 
     @property
