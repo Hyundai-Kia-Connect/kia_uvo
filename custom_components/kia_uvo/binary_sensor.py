@@ -98,12 +98,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         off_icon="mdi:car-seat-heater",
     ),
     HyundaiKiaBinarySensorEntityDescription(
-        key="is_locked",
-        name="Lock",
-        is_on=lambda vehicle: vehicle.is_locked,
-        device_class=BinarySensorDeviceClass.LOCK,
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
         key="front_left_door_is_open",
         name="Front Left Door",
         is_on=lambda vehicle: vehicle.front_left_door_is_open,
