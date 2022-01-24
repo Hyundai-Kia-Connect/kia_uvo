@@ -105,6 +105,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_refresh_token
         )
+
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.hass.async_add_executor_job(self.vehicle_manager.lock, vehicle_id)
 
