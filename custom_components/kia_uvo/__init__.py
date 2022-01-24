@@ -16,7 +16,7 @@ from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.DEVICE_TRACKER]
+PLATFORMS: list[str] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.DEVICE_TRACKER, Platform.LOCK]
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
