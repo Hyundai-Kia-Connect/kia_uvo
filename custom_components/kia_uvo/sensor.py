@@ -11,6 +11,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
+    SensorStateClass,
 )
 from homeassistant.const import LENGTH_KILOMETERS, PERCENTAGE
 
@@ -36,6 +37,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Odometer",
         icon="mdi:speedometer",
         native_unit_of_measurement=LENGTH_KILOMETERS,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_last_service_distance",
