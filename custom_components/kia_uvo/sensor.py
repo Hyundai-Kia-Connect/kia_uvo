@@ -137,4 +137,4 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         if self._description.native_unit_of_measurement == DYNAMIC_UNIT:
             return getattr(self.vehicle, self._key+"_unit")
         else:
-            self._description.native_unit_of_measurement
+            return self._description.native_unit_of_measurement
