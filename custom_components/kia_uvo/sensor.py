@@ -295,7 +295,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "lastUpdated",
             "Last Update",
             "last_updated",
-            "None",
+            None,
             "mdi:update",
             DEVICE_CLASS_TIMESTAMP,
             None,
