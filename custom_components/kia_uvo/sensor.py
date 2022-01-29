@@ -160,6 +160,6 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def native_unit_of_measurement(self):
         """Return the unit the value was reported in by the sensor"""
         if self._description.native_unit_of_measurement == DYNAMIC_UNIT:
-            return getattr(self.vehicle, self._key+"_unit")
+            return getattr(self.vehicle, self._key + "_unit")
         else:
             return self._description.native_unit_of_measurement
