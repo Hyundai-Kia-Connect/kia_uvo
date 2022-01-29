@@ -42,7 +42,7 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     @property
     def icon(self):
         return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
-    
+
     @property
     def is_locked(self):
         return getattr(self.vehicle, "is_locked")
