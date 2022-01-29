@@ -100,20 +100,19 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:ev-station",
         native_unit_of_measurement=TIME_MINUTES,
     ),
-        SensorEntityDescription(
+    SensorEntityDescription(
         key="ev_estimated_portable_charge_duration",
         name="Estimated portable Charge Duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=TIME_MINUTES,
     ),
-        SensorEntityDescription(
+    SensorEntityDescription(
         key="ev_estimated_station_charge_duration",
         name="Estimated Station Charge Duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=TIME_MINUTES,
     ),
 )
-
 
 
 async def async_setup_entry(
