@@ -424,7 +424,11 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
-        return response["resMsg"]["vehicleStatusInfo"]
+        if response["resCode"] == 0000:
+            return response["resMsg"]["vehicleStatusInfo"]
+        else: 
+            _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status API failed to respond with data")
+            return None
 
     def get_geocoded_location(self, lat, lon):
         email_parameter = ""
