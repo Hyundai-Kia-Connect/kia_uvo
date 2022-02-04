@@ -158,6 +158,27 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         on_icon="mdi:gas-station-off",
         off_icon="mdi:gas-station",
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="smart_key_battery_warning_is_on",
+        name="Smart Key Battery Warning",
+        is_on=lambda vehicle: vehicle.smart_key_battery_warning_is_on,
+        on_icon="mdi:battery-alert",
+        off_icon="mdi:battery",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="washer_fluid_warning_is_on",
+        name="Washer Fluid Warning",
+        is_on=lambda vehicle: vehicle.washer_fluid_warning_is_on,
+        on_icon="mdi:wiper-wash-alert",
+        off_icon="mdi:wiper-wash",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_all_warning_is_on",
+        name="Tire Pressure - All",
+        is_on=lambda vehicle: vehicle.tire_pressure_all_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+    ),
 )
 
 
