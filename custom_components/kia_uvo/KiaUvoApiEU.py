@@ -424,6 +424,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
+        location  = self.get_location(token)
         return response["resMsg"]["vehicleStatusInfo"]
 
     def get_geocoded_location(self, lat, lon):
@@ -442,6 +443,31 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url)
         response = response.json()
         return response
+
+    def get_location(self, token: Token):
+        url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/location"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": token.stamp,
+            "ccsp-device-id": token.device_id,
+            "Host": self.BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
+        try:
+            response = requests.get(url)
+            response = response.json()
+            _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
+            if response["responseHeader"]["responseCode"] != 0:
+                raise Exception("No Location Located")
+
+        except:
+            _LOGGER.warning(f"{DOMAIN} - Get vehicle location failed")
+            response = None
+            return response
+        else:
+            return response["resMsg"]["gpsDetail"]
 
     def update_vehicle_status(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
