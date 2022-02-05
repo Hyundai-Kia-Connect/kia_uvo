@@ -424,7 +424,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
-        location  = self.get_location(token)
+        location = self.get_location(token)
         return response["resMsg"]["vehicleStatusInfo"]
 
     def get_geocoded_location(self, lat, lon):
