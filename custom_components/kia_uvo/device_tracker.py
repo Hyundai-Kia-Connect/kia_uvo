@@ -43,7 +43,6 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_location"
         self._attr_name = f"{vehicle.name} Location"
         self._attr_icon = "mdi:map-marker-outline"
-        
 
     @property
     def latitude(self):
