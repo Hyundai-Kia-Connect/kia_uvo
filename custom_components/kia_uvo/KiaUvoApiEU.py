@@ -38,6 +38,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.kia.com"
             self.CCSP_SERVICE_ID: str = "fdc85c00-0a2f-4c64-bcb4-2cfb1500730a"
+            self.APP_ID: str = "e7bcd186-a5fd-410d-92cb-6876a42288bd"
             self.BASIC_AUTHORIZATION: str = (
                 "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA=="
             )
@@ -45,6 +46,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         elif BRANDS[brand] == BRAND_HYUNDAI:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.hyundai.com"
             self.CCSP_SERVICE_ID: str = "6d477c38-3ca4-4cf3-9557-2a1929a94654"
+            self.APP_ID: str = "014d2225-8495-4735-812d-2616334fd15d"
             self.BASIC_AUTHORIZATION: str = "Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg=="
             self.LOGIN_FORM_HOST = "eu-account.hyundai.com"
 
@@ -156,6 +158,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             stamp = random.choice(self.stamps)
             headers = {
                 "ccsp-service-id": self.CCSP_SERVICE_ID,
+                "ccsp-application-id": self.APP_ID,
                 "Stamp": stamp,
                 "Content-Type": "application/json;charset=UTF-8",
                 "Host": self.BASE_URL,
