@@ -85,6 +85,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             + "-"
             + self.APP_ID
             + ".json"
+        )
 
     def get_stamps_from_bluelinky(self) -> list:
         stamps = []
