@@ -347,6 +347,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "Stamp": self.stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
@@ -377,6 +379,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "Stamp": self.stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
@@ -402,6 +406,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles"
         headers = {
             "Authorization": self.access_token,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "Stamp": self.stamp,
             "ccsp-device-id": self.device_id,
             "Host": self.BASE_URL,
@@ -419,6 +425,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "Stamp": token.stamp,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
