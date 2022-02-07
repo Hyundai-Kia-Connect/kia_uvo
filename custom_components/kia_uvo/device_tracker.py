@@ -27,7 +27,8 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        entities.append(HyundaiKiaConnectTracker(coordinator, vehicle))
+        if(vehicle.location is not None):
+            entities.append(HyundaiKiaConnectTracker(coordinator, vehicle))
 
     async_add_entities(entities)
     return True
