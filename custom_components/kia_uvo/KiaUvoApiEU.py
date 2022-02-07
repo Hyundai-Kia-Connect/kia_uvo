@@ -15,7 +15,7 @@ from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-INVALID_STAMP_RETRY_COUNT = 10
+INVALID_STAMP_RETRY_COUNT = 50
 USER_AGENT_OK_HTTP: str = "okhttp/3.10.0"
 USER_AGENT_MOZILLA: str = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
 ACCEPT_HEADER_ALL: str = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
@@ -82,8 +82,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         self.stamps_url: str = (
             "https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/"
             + BRANDS[brand].lower()
+            + "-"
+            + self.APP_ID
             + ".json"
-        )
 
     def get_stamps_from_bluelinky(self) -> list:
         stamps = []
