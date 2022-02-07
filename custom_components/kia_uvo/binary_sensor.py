@@ -179,6 +179,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="air_control_is_on",
+        name="Air Conditioner",
+        is_on=lambda vehicle: vehicle.air_control_is_on,
+        on_icon="mdi:mdi:air-conditioner",
+        off_icon="mdi:mdi:air-conditioner",
+    ),
 )
 
 
