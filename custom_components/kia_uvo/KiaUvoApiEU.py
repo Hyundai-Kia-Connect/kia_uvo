@@ -16,7 +16,7 @@ from .Token import Token
 _LOGGER = logging.getLogger(__name__)
 
 INVALID_STAMP_RETRY_COUNT = 10
-USER_AGENT_OK_HTTP: str = "okhttp/3.12.0"
+USER_AGENT_OK_HTTP: str = "okhttp/3.10.0"
 USER_AGENT_MOZILLA: str = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
 ACCEPT_HEADER_ALL: str = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
 
@@ -154,7 +154,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "uuid": str(uuid.uuid4()),
         }
 
-        for i in [0, INVALID_STAMP_RETRY_COUNT]:
+        for i in range(0, INVALID_STAMP_RETRY_COUNT):
             stamp = random.choice(self.stamps)
             headers = {
                 "ccsp-service-id": self.CCSP_SERVICE_ID,
@@ -330,6 +330,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "User-Agent": USER_AGENT_MOZILLA,
             "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
         }
         response = requests.post(
             url, headers=headers, json={"intUserId": intUserId}, cookies=self.cookies
@@ -451,6 +452,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.refresh_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -467,6 +470,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -486,6 +491,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -517,6 +524,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -543,6 +552,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -560,6 +571,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "Authorization": token.access_token,
             "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
