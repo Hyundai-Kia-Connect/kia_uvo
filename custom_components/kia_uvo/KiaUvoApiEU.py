@@ -452,7 +452,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
     def update_vehicle_status(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
-            "Authorization": token.access_token,
+            "Authorization": token.refresh_token,
             "Stamp": token.stamp,
             "ccsp-service-id": self.CCSP_SERVICE_ID,
             "ccsp-application-id": self.APP_ID,
