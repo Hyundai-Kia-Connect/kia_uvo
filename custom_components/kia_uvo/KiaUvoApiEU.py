@@ -152,7 +152,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             vehicle_model,
             vehicle_registration_date,
             valid_until,
-            None,
+            stamp,
         )
 
         return token
