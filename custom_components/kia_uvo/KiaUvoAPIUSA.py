@@ -219,7 +219,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         body = {
             "vehicleConfigReq": {
                 "airTempRange": "0",
-                "maintenance": "0",
+                "maintenance": "1",
                 "seatHeatCoolOption": "0",
                 "vehicle": "1",
                 "vehicleFeature": "0",
@@ -287,6 +287,14 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                     response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
                         "vehicleDetail"
                     ]["vehicle"]["mileage"]
+                ),
+                "unit": 3,
+            },
+            "nextService": {
+                "value": float(
+                    response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
+                        "maintenance"
+                    ]["nextServiceMile"]
                 ),
                 "unit": 3,
             },
