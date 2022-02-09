@@ -289,6 +289,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                     ]["vehicle"]["mileage"]
                 ),
                 "unit": 3,
+            },
             "nextService": {
                 "value": float(
                     response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
