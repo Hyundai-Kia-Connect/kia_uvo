@@ -24,7 +24,7 @@ SUPPORTED_SERVICES = (SERVICE_UPDATE, SERVICE_FORCE_UPDATE, SERVICE_LOCK, SERVIC
 _LOGGER = logging.getLogger(__name__)
 
 @callback
-def async_setup_services(hass: HomeAssistant) -> None:
+def async_setup_services(hass: HomeAssistant) -> bool:
     """Set up services for Hyundai Kia Connect"""
 
     async def async_handle_force_update(call):
@@ -87,8 +87,7 @@ def async_unload_services(hass) -> None:
 
 
 def _get_coordinator_from_device(hass: HomeAssistant, call: ServiceCall) -> HyundaiKiaConnectDataUpdateCoordinator:
-    dev_reg = device_registry.async_get(hass)
-    device_entry = dev_reg.async_get(call.data[ATTR_DEVICE_ID][0])
+    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID][0])
     _LOGGER.debug(
         f"Device: {device_entry}"
     )
