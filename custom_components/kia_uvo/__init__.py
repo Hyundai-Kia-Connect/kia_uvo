@@ -13,6 +13,7 @@ import hashlib
 
 from .const import DOMAIN, CONF_BRAND, DEFAULT_PIN, BRANDS, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -23,6 +24,11 @@ PLATFORMS: list[str] = [
     Platform.LOCK,
 ]
 
+async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
+    async_setup_services(hass)
+
+    return True
+
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Hyundai / Kia Connect from a config entry."""
@@ -31,6 +37,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
     hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
+
     return True
 
 
@@ -40,7 +47,8 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         config_entry, PLATFORMS
     ):
         del hass.data[DOMAIN][config_entry.unique_id]
-
+    if not hass.data[DOMAIN]:
+        async_unload_services(hass)
     return unload_ok
 
 

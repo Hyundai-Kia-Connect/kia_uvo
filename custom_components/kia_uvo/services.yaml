@@ -1,0 +1,63 @@
+force_update: 
+  description: Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+update: 
+  description: Update vehicle data from service cache
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+stop_climate:
+  description: Please use cautiously - stop car and climate
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+start_charge:
+  description: Start charging
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+stop_charge:
+  description: Stop charging
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+lock:
+  description: Lock the vehicle
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+unlock:
+  description: Unlock the vehicle
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
