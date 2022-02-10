@@ -78,6 +78,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             service,
             services[service]
         )
+    return True
 
 @callback
 def async_unload_services(hass) -> None:
