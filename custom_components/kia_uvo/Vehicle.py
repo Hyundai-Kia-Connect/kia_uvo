@@ -182,7 +182,7 @@ class Vehicle:
     async def start_climate(self, set_temp, duration, defrost, climate, heating):
         if set_temp is None:
             set_temp = 21
-        if REGIONS[self.region] == REGION_USA:
+        if REGIONS[self.region] == REGION_USA and BRANDS[self.brand] == BRAND_KIA:
             if set_temp < 62:
                 set_temp = "LOW"
             elif set_temp > 82:
