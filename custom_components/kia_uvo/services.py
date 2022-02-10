@@ -88,9 +88,6 @@ def async_unload_services(hass) -> None:
 
 def _get_coordinator_from_device(hass: HomeAssistant, call: ServiceCall) -> HyundaiKiaConnectDataUpdateCoordinator:
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID][0])
-    _LOGGER.debug(
-        f"Device: {device_entry}"
-    )
     config_entry_ids = device_entry.config_entries
     config_entry_id = next(
         (
