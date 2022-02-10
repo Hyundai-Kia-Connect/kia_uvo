@@ -23,7 +23,6 @@ def async_setup_services(hass: HomeAssistant) -> None:
     """Set up services for Hyundai Kia Connect"""
 
     async def async_handle_force_update(call):
-        _LOGGER.debug(f"Force Update Call: {call.data}")
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_force_update_all()
     
@@ -31,7 +30,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
     async def async_handle_update(call):
         coordinator = hass.data[DOMAIN][config_entry.unique_id]
         await coordinator.async_update_all()
-        pass
+        
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
