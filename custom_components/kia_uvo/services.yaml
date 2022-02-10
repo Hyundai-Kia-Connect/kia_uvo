@@ -1,0 +1,14 @@
+force_update: 
+  description: Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.
+  fields: 
+    vehicle_id: 
+      selector: 
+        device: 
+          integration: kia_uvo
+update: 
+  description: Update vehicle data from service cache
+  fields: 
+    vehicle_id: 
+      selector: 
+        device: 
+          integration: kia_uvo
