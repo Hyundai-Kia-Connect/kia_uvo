@@ -181,11 +181,12 @@ class Vehicle:
 
     async def start_climate(self, set_temp, duration, defrost, climate, heating):
         if set_temp is None:
-            set_temp = 72
-        elif set_temp < 62:
-            set_temp = "LOW"
-        elif set_temp > 82:
-            set_temp = "HIGH"
+            set_temp = 21
+        if REGIONS[self.region] == REGION_USA: 
+            if set_temp < 62:
+                set_temp = "LOW"
+            elif set_temp > 82:
+                set_temp = "HIGH"
         if duration is None:
             duration = 5
         if defrost is None:
