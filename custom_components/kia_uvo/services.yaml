@@ -27,17 +27,17 @@ start_climate:
         boolean: 
     Temperature:
       name: Temperature
-      description: Set temperature of climate control. For US Kia, anything lower than 62 will be translated to 'LOW' and anything higher than 82 will be translated to 'HIGH', in accordance with the official app.
+      description: Set temperature of climate control. Unit is specific to region. For US Kia, anything lower than 62 will be translated to 'LOW' and anything higher than 82 will be translated to 'HIGH', in accordance with the vehicle and the UVO app.
       required: false
-      example: 72
-      default: 72
+      example: 21.5
+      default: 21
       selector:
         number:
-          min: 60
+          min: 16
           max: 85
           step: 0.5
+          mode: box
           unit_of_measurement: Degrees
-          mode: slider
     Defrost:
       name: Defrost
       description: Front Windshield Defrost
