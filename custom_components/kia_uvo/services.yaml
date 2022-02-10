@@ -16,3 +16,48 @@ update:
       selector: 
         device: 
           integration: kia_uvo
+stop_climate:
+  description: Please use cautiously - stop car and climate
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+start_charge:
+  description: Start charging
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+stop_charge:
+  description: Stop charging
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+lock:
+  description: Lock the vehicle
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+unlock:
+  description: Unlock the vehicle
+  fields: 
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
