@@ -33,11 +33,11 @@ start_climate:
       default: 21
       selector:
         number:
-          min: 16
-          max: 85
-          step: 0.5
-          mode: box
-          unit_of_measurement: Degrees
+            min: 16
+            max: 85
+            step: 0.5
+            mode: box
+            unit_of_measurement: Degrees
     Defrost:
       name: Defrost
       description: Front Windshield Defrost
