@@ -3,11 +3,10 @@ from typing import Any, cast
 
 
 from homeassistant.const import ATTR_DEVICE_ID
-from homeassistant.config_entries import ConfigEntry, ConfigEntryState
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import ServiceCall, callback, HomeAssistant
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
-from homeassistant.helpers import entity_registry
 
 from .const import DOMAIN
 
