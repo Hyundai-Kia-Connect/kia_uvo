@@ -24,6 +24,7 @@ PLATFORMS: list[str] = [
     Platform.LOCK,
 ]
 
+
 async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
     async_setup_services(hass)
 
