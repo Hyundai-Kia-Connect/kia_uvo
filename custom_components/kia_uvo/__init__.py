@@ -30,12 +30,6 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
     return True
 
 
-async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
-    async_setup_services(hass)
-
-    return True
-
-
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Hyundai / Kia Connect from a config entry."""
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
