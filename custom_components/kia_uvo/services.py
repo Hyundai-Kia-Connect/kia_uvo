@@ -38,11 +38,11 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_start_climate(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        #await coordinator.async_update_all()
+        #await coordinator.async_start_climate(call.data[ATTR_DEVICE_ID])
 
     async def async_handle_stop_climate(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        #await coordinator.async_update_all()
+        await coordinator.async_stop_climate(call.data[ATTR_DEVICE_ID])
 
     async def async_handle_lock(call):
         coordinator = _get_coordinator_from_device(hass, call)
@@ -54,11 +54,11 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_start_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        #await coordinator.async_update_all()
+        await coordinator.async_start_charge(call.data[ATTR_DEVICE_ID])
 
     async def async_handle_stop_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        #await coordinator.async_update_all()
+        await coordinator.async_stop_charge(call.data[ATTR_DEVICE_ID])
         
 
     services = {
