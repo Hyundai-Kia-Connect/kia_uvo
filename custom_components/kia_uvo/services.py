@@ -18,6 +18,7 @@ SERVICE_STOP_CLIMATE = "stop_climate"
 SERVICE_START_CLIMATE = "start_climate"
 SERVICE_START_CHARGE = "start_charge"
 SERVICE_STOP_CHARGE = "stop_charge"
+SERVICE_SET_CHARGE_LIMIT = "set_charge_limits"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -28,6 +29,7 @@ SUPPORTED_SERVICES = (
     SERVICE_START_CLIMATE,
     SERVICE_START_CHARGE,
     SERVICE_STOP_CHARGE,
+    SERVICE_SET_CHARGE_LIMIT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -69,6 +71,12 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_stop_charge(call.data[ATTR_DEVICE_ID])
 
+    async def async_handle_set_charge_limit(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        ac_limit = call.data.get("ac_limit")
+        dc_limit = call.data.get("dc_limit")
+        await coordinator.set_charge_limits(call.data[ATTR_DEVICE_ID], ac_limit, dc_limit)
+
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
         SERVICE_UPDATE: async_handle_update,
@@ -78,6 +86,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_UNLOCK: async_handle_unlock,
         SERVICE_START_CHARGE: async_handle_start_charge,
         SERVICE_STOP_CHARGE: async_handle_stop_charge,
+        SERVICE_SET_CHARGE_LIMIT: async_handle_set_charge_limit,
     }
 
     for service in SUPPORTED_SERVICES:

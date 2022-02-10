@@ -129,3 +129,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_charge, vehicle_id
         )
+
+    async def set_charge_limits(self, vehicle_id: str, ac_limit: int, dc_limit: int):
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.set_charge_limits, vehicle_id, ac_limit, dc_limit
+        )

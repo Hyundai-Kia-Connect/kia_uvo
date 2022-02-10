@@ -61,3 +61,36 @@ unlock:
       selector: 
         device: 
           integration: kia_uvo
+set_charge_limits:
+  description: sets ac and dc charge capacity limits
+  fields:
+    device_id: 
+      description: Vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+    dc_limit:
+      name: DC Charge limit
+      description: max charge capacity using DC charger
+      required: false
+      example: 50
+      default: 90
+      selector:
+        number:
+            min: 50
+            max: 100
+            step: 10
+            unit_of_measurement: '%'
+    ac_limit:
+      name: AC Charge limit
+      description: max charge capacity using AC charger
+      required: false
+      example: 50
+      default: 90
+      selector:
+        number:
+            min: 50
+            max: 100
+            step: 10
+            unit_of_measurement: '%'
