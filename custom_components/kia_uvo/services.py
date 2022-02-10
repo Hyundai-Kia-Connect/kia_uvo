@@ -1,5 +1,9 @@
 import logging
+from typing import Any, cast
+
+
 from homeassistant.const import ATTR_DEVICE_ID
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.core import ServiceCall, callback, HomeAssistant
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
@@ -25,8 +29,8 @@ def async_setup_services(hass: HomeAssistant) -> None:
     
 
     async def async_handle_update(call):
-        #coordinator = hass.data[DOMAIN][config_entry.unique_id]
-        #await coordinator.async_update_all()
+        coordinator = hass.data[DOMAIN][config_entry.unique_id]
+        await coordinator.async_update_all()
         pass
 
     services = {
@@ -49,17 +53,23 @@ def async_unload_services(hass) -> None:
 
 
 def _get_coordinator_from_device(hass: HomeAssistant, call: ServiceCall) -> HyundaiKiaConnectDataUpdateCoordinator:
-    config_entry_ids = hass.data[DOMAIN].keys()
-    if len(config_entry_ids) == 1:
-        return hass.data[DOMAIN][config_entry_ids[0]]
-
-    dev_reg = device_registry.async_get_registry(hass)
-    device = dev_reg.async_get_device(call.data[ATTR_DEVICE_ID])
+    dev_reg = device_registry.async_get(hass)
+    device_entry = dev_reg.async_get(call.data[ATTR_DEVICE_ID][0])
     _LOGGER.debug(
-        f"Device: {device}"
+        f"Device: {device_entry}"
     )
-    config_entry = device.config_entries
-    _LOGGER.debug(
-        f"Config Entires: {config_entry}"
+    config_entry_ids = device_entry.config_entries
+    config_entry_id = next(
+        (
+            config_entry_id
+            for config_entry_id in config_entry_ids
+            if cast(
+                ConfigEntry,
+                hass.config_entries.async_get_entry(config_entry_id),
+            ).domain
+            == DOMAIN
+        ),
+        None,
     )
-    return hass.data[DOMAIN][config_entry[0].unique_id]
+    config_entry_unique_id = hass.config_entries.async_get_entry(config_entry_id).unique_id
+    return hass.data[DOMAIN][config_entry_unique_id]
