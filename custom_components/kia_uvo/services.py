@@ -46,11 +46,11 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_lock(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_lock_vehicle(call.data[ATTR_DEVICE_ID][0])
+        await coordinator.async_lock_vehicle(call.data[ATTR_DEVICE_ID])
 
     async def async_handle_unlock(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_unlock_vehicle(call.data[ATTR_DEVICE_ID][0])
+        await coordinator.async_unlock_vehicle(call.data[ATTR_DEVICE_ID])
 
     async def async_handle_start_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)
@@ -87,7 +87,7 @@ def async_unload_services(hass) -> None:
 
 
 def _get_coordinator_from_device(hass: HomeAssistant, call: ServiceCall) -> HyundaiKiaConnectDataUpdateCoordinator:
-    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID][0])
+    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     config_entry_ids = device_entry.config_entries
     config_entry_id = next(
         (
