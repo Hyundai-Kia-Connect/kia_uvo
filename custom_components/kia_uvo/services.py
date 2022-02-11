@@ -7,6 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import ServiceCall, callback, HomeAssistant
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
+from hyundai_kia_connect_api import ClimateRequestOptions
 
 from .const import DOMAIN
 
@@ -44,6 +45,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         await coordinator.async_force_update_all()
 
     async def async_handle_update(call):
+        _LOGGER.debug(f"Call:{call.data}")
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_update_all()
 
@@ -53,31 +55,35 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_stop_climate(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_stop_climate(call.data[ATTR_DEVICE_ID])
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_stop_climate(vehicle_id)
 
     async def async_handle_lock(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_lock_vehicle(call.data[ATTR_DEVICE_ID])
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_lock_vehicle(vehicle_id)
 
     async def async_handle_unlock(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_unlock_vehicle(call.data[ATTR_DEVICE_ID])
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+
+        await coordinator.async_unlock_vehicle(vehicle_id)
 
     async def async_handle_start_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_start_charge(call.data[ATTR_DEVICE_ID])
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_start_charge(vehicle_id)
 
     async def async_handle_stop_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        await coordinator.async_stop_charge(call.data[ATTR_DEVICE_ID])
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_stop_charge(vehicle_id)
 
     async def async_handle_set_charge_limit(call):
         coordinator = _get_coordinator_from_device(hass, call)
         ac_limit = call.data.get("ac_limit")
         dc_limit = call.data.get("dc_limit")
-        await coordinator.set_charge_limits(
-            call.data[ATTR_DEVICE_ID], ac_limit, dc_limit
-        )
+        await coordinator.set_charge_limits(call.data[ATTR_DEVICE_ID], ac_limit, dc_limit)
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
@@ -101,6 +107,11 @@ def async_unload_services(hass) -> None:
     for service in SUPPORTED_SERVICES:
         hass.services.async_remove(DOMAIN, service)
 
+def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
+    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
+    for entry in device_entry.identifiers:
+        vehicle_id=entry[1]
+    return vehicle_id
 
 def _get_coordinator_from_device(
     hass: HomeAssistant, call: ServiceCall
