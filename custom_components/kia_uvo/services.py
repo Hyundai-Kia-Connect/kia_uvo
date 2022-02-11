@@ -83,7 +83,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         ac_limit = call.data.get("ac_limit")
         dc_limit = call.data.get("dc_limit")
-        await coordinator.set_charge_limits(call.data[ATTR_DEVICE_ID], ac_limit, dc_limit)
+        await coordinator.set_charge_limits(
+            call.data[ATTR_DEVICE_ID], ac_limit, dc_limit
+        )
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
@@ -107,11 +109,13 @@ def async_unload_services(hass) -> None:
     for service in SUPPORTED_SERVICES:
         hass.services.async_remove(DOMAIN, service)
 
+
 def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     for entry in device_entry.identifiers:
-        vehicle_id=entry[1]
+        vehicle_id = entry[1]
     return vehicle_id
+
 
 def _get_coordinator_from_device(
     hass: HomeAssistant, call: ServiceCall
