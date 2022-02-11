@@ -113,7 +113,8 @@ def async_unload_services(hass) -> None:
 def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     for entry in device_entry.identifiers:
-        vehicle_id = entry[1]
+        if entry[0] == DOMAIN:
+            vehicle_id = entry[1]
     return vehicle_id
 
 
