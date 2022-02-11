@@ -3,6 +3,7 @@ force_update:
   fields: 
     device_id: 
       name: Vehicle
+      description:
       required: true
       selector: 
         device: 
@@ -12,6 +13,7 @@ update:
   fields: 
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -21,11 +23,12 @@ start_climate:
   fields: 
     device_id:
       name: Vehicle
+      description:
       required: true
       selector: 
         device: 
           integration: kia_uvo
-    Duration:
+    duration:
       name: Duration
       description: On Duration
       required: false
@@ -37,14 +40,14 @@ start_climate:
             max: 10
             step: 1
             unit_of_measurement: minutes
-    Climate:
+    climate:
       name: Climate
       description: Enable the HVAC System
       required: true
       default: true  
       selector:
         boolean: 
-    Temperature:
+    temperature:
       name: Temperature
       description: Set temperature of climate control. Unit is specific to region.
       required: true
@@ -57,14 +60,14 @@ start_climate:
             step: 0.5
             mode: box
             unit_of_measurement: Degrees
-    Defrost:
+    defrost:
       name: Defrost
       description: Front Windshield Defrost
       required: false
       default: false
       selector:
         boolean:
-    Heating:
+    heating:
       name: Heating
       description: Heated features like the steering wheel and rear window
       required: false
@@ -138,6 +141,7 @@ stop_climate:
   fields: 
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -147,6 +151,7 @@ start_charge:
   fields: 
     device_id: 
       name: Vehicle
+      description:
       required: true
       selector: 
         device: 
@@ -156,6 +161,7 @@ stop_charge:
   fields: 
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -165,6 +171,7 @@ lock:
   fields: 
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -174,6 +181,7 @@ unlock:
   fields: 
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -183,6 +191,7 @@ set_charge_limits:
   fields:
     device_id: 
       name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
