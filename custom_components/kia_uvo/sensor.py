@@ -119,6 +119,26 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:ev-station",
         native_unit_of_measurement=TIME_MINUTES,
     ),
+    SensorEntityDescription(
+        key="front_left_seat_status",
+        name="Front Left Seat",
+        icon="mdi:car-seat-heater",
+    ),
+    SensorEntityDescription(
+        key="front_right_seat_status",
+        name="Front Right Seat",
+        icon="mdi:car-seat-heater",
+    ),
+    SensorEntityDescription(
+        key="rear_left_seat_status",
+        name="Rear Left Seat",
+        icon="mdi:car-seat-heater",
+    ),
+    SensorEntityDescription(
+        key="rear_right_seat_status",
+        name="Rear Right Seat",
+        icon="mdi:car-seat-heater",
+    ),
 )
 
 
