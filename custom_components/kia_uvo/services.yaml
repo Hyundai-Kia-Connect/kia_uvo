@@ -2,7 +2,8 @@ force_update:
   description: Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description:
       required: true
       selector: 
         device: 
@@ -11,16 +12,136 @@ update:
   description: Update vehicle data from service cache
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
           integration: kia_uvo
+start_climate:
+  description: Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your cars mobile app as a guide and match the options available in your car. 
+  fields: 
+    device_id:
+      name: Vehicle
+      description:
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+    duration:
+      name: Duration
+      description: On Duration
+      required: false
+      example: 5
+      default: 5
+      selector:
+        number:
+            min: 1
+            max: 10
+            step: 1
+            unit_of_measurement: minutes
+    climate:
+      name: Climate
+      description: Enable the HVAC System
+      required: true
+      default: true  
+      selector:
+        boolean: 
+    temperature:
+      name: Temperature
+      description: Set temperature of climate control. Unit is specific to region.
+      required: true
+      example: 21.5
+      default: 21
+      selector:
+        number:
+            min: 16
+            max: 85
+            step: 0.5
+            mode: box
+            unit_of_measurement: Degrees
+    defrost:
+      name: Defrost
+      description: Front Windshield Defrost
+      required: false
+      default: false
+      selector:
+        boolean:
+    heating:
+      name: Heating
+      description: Heated features like the steering wheel and rear window
+      required: false
+      example: false
+      default: false  
+      selector:
+        select:  
+          options:
+            - "Off"
+            - "Steering Wheel and Rear Window"
+            - "Rear Window Only"
+            - "Steering Wheel Only"
+    flseat:
+      name: Front Left Seat
+      required: false
+      selector:
+        select:
+          options:  
+            - "Off"
+            - "On"
+            - Low Cool
+            - Medium Cool
+            - High Cool
+            - Low Heat 
+            - Medium Heat
+            - High Heat
+    frseat:
+      name: Front Right Seat
+      required: false
+      selector:
+        select:
+          options:  
+            - "Off"
+            - "On"
+            - Low Cool
+            - Medium Cool
+            - High Cool
+            - Low Heat 
+            - Medium Heat
+            - High Heat    
+    rlseat:
+      name: Rear Left Seat
+      required: false
+      selector:
+        select:
+          options:  
+            - "Off"
+            - "On"
+            - Low Cool
+            - Medium Cool
+            - High Cool
+            - Low Heat 
+            - Medium Heat
+            - High Heat
+    rrseat:
+      name: Rear Right Seat
+      required: false
+      selector:
+        select:
+          options:  
+            - "Off"
+            - "On"
+            - Low Cool
+            - Medium Cool
+            - High Cool
+            - Low Heat 
+            - Medium Heat
+            - High Heat
 stop_climate:
   description: Please use cautiously - stop car and climate
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -29,7 +150,8 @@ start_charge:
   description: Start charging
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description:
       required: true
       selector: 
         device: 
@@ -38,7 +160,8 @@ stop_charge:
   description: Stop charging
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -47,7 +170,8 @@ lock:
   description: Lock the vehicle
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -56,7 +180,8 @@ unlock:
   description: Unlock the vehicle
   fields: 
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
@@ -65,7 +190,8 @@ set_charge_limits:
   description: sets ac and dc charge capacity limits
   fields:
     device_id: 
-      description: Vehicle
+      name: Vehicle
+      description: 
       required: true
       selector: 
         device: 
