@@ -23,7 +23,7 @@ start_climate:
   fields: 
     device_id:
       name: Vehicle
-      description:
+      description: Vehicle to target
       required: true
       selector: 
         device: 
