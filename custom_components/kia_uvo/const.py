@@ -40,6 +40,6 @@ HEAT_STATUS = {
     None: None,
     0: "Off",
     1: "Steering Wheel and Rear Window",
-    2: "Rear Window",
-    3: "Steering Wheel",
+    2: "Rear Window Only",
+    3: "Steering Wheel Only",
 }

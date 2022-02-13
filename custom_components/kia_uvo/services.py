@@ -56,10 +56,10 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             duration=call.data.get("duration"),
             climate=call.data.get("climate"),
             heating=_get_key_from_dict(HEAT_STATUS, call.data.get("heating")),
-            front_left_seat=_get_key_from_dict(HEAT_STATUS, call.data.get("flseat")),
-            front_right_seat=_get_key_from_dict(HEAT_STATUS, call.data.get("frseat")),
-            rear_left_seat=_get_key_from_dict(HEAT_STATUS, call.data.get("rlseat")),
-            rear_right_seat=_get_key_from_dict(HEAT_STATUS, call.data.get("rrseat")),
+            front_left_seat=_get_key_from_dict(SEAT_STATUS, call.data.get("flseat")),
+            front_right_seat=_get_key_from_dict(SEAT_STATUS, call.data.get("frseat")),
+            rear_left_seat=_get_key_from_dict(SEAT_STATUS, call.data.get("rlseat")),
+            rear_right_seat=_get_key_from_dict(SEAT_STATUS, call.data.get("rrseat")),
         )
         _LOGGER.debug(f"Climate Request Options:{climate_request_options}")
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
