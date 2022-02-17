@@ -1,10 +1,13 @@
 import logging
 
 from homeassistant.const import (
+    ENERGY_KILO_WATT_HOUR,
+    ENERGY_WATT_HOUR,
     PERCENTAGE,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_TIMESTAMP,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_ENERGY,
     TIME_MINUTES,
     TEMP_FAHRENHEIT,
     TEMP_CELSIUS,
@@ -33,18 +36,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
 
     INSTRUMENTS = []
-
-    INSTRUMENTS.append(
-        (
-            "fuelLevel",
-            "Fuel Level",
-            "vehicleStatus.fuelLevel",
-            PERCENTAGE,
-            "mdi:fuel",
-            None,
-            SensorStateClass.MEASUREMENT,
-        )
-    )
 
     if (
         vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
@@ -147,6 +138,39 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 "mdi:car-electric",
                 None,
                 None,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "totalEnergyConsumption",
+                "Total Energy Consumption",
+                "drvhistory.totalPwrCsp",
+                ENERGY_WATT_HOUR,
+                "mdi:car-electric",
+                DEVICE_CLASS_ENERGY,
+                SensorStateClass.TOTAL_INCREASING,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "totalEnergyRecuperation",
+                "Total Energy Recuperation",
+                "drvhistory.regenPwr",
+                ENERGY_WATT_HOUR,
+                "mdi:battery-plus-variant",
+                DEVICE_CLASS_ENERGY,
+                SensorStateClass.TOTAL_INCREASING,
+            )
+        )
+        INSTRUMENTS.append(
+            (
+                "averageEnergyConsumption",
+                "Average Energy Consumption",
+                "drvhistory.consumption30d",
+                f"{ENERGY_WATT_HOUR}/{vehicle.unit_of_measurement}",
+                "mdi:car-electric",
+                None,
+                SensorStateClass.MEASUREMENT,
             )
         )
 
@@ -295,7 +319,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "lastUpdated",
             "Last Update",
             "last_updated",
-            "None",
+            None,
             "mdi:update",
             DEVICE_CLASS_TIMESTAMP,
             None,
@@ -355,6 +379,11 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
 
         if value is None:
             value = NOT_APPLICABLE
+        elif (
+            self._source_unit == ENERGY_WATT_HOUR
+            and self._unit == ENERGY_KILO_WATT_HOUR
+        ):
+            value = round(value / 1000, 1)
         else:
             if self._source_unit != self._unit:
                 value = distance_util.convert(
@@ -372,6 +401,8 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
                 return TEMP_CELSIUS
             else:
                 return TEMP_FAHRENHEIT
+        elif self._unit == ENERGY_WATT_HOUR:
+            self._unit = ENERGY_KILO_WATT_HOUR
 
         if self._dynamic_distance_unit == False:
             return self._unit
@@ -394,6 +425,16 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
                 "address": self.vehicle.get_child_value(
                     "vehicleLocation.geocodedLocation.address"
                 )
+            }
+        elif self._id == "totalEnergyConsumption":
+            return {
+                "totalPwrCsp": self.vehicle.get_child_value("drvhistory.totalPwrCsp"),
+                "motorPwrCsp": self.vehicle.get_child_value("drvhistory.motorPwrCsp"),
+                "climatePwrCsp": self.vehicle.get_child_value("drvhistory.climatePwrCsp"),
+                "eDPwrCsp": self.vehicle.get_child_value("drvhistory.eDPwrCsp"),
+                "regenPwr": self.vehicle.get_child_value("drvhistory.regenPwr"),
+                "batteryMgPwrCsp": self.vehicle.get_child_value("drvhistory.batteryMgPwrCsp"),
+                "calculativeOdo": self.vehicle.get_child_value("drvhistory.calculativeOdo")
             }
         return None
 
