@@ -1,22 +1,25 @@
+from datetime import datetime, timedelta
+import json
 import logging
-
-from bs4 import BeautifulSoup
-from datetime import timedelta, datetime
-import push_receiver
 import random
-import requests
+import traceback
 from urllib.parse import parse_qs, urlparse
 import uuid
-import traceback
 
-from .const import BRANDS, BRAND_HYUNDAI, BRAND_KIA, DOMAIN, DATE_FORMAT
+from bs4 import BeautifulSoup
+import dateutil.parser
+import push_receiver
+import pytz
+import requests
+
 from .KiaUvoApiImpl import KiaUvoApiImpl
 from .Token import Token
+from .const import BRAND_HYUNDAI, BRAND_KIA, BRANDS, DATE_FORMAT, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-INVALID_STAMP_RETRY_COUNT = 10
-USER_AGENT_OK_HTTP: str = "okhttp/3.12.0"
+INVALID_STAMP_RETRY_COUNT = 1
+USER_AGENT_OK_HTTP: str = "okhttp/3.10.0"
 USER_AGENT_MOZILLA: str = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19"
 ACCEPT_HEADER_ALL: str = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
 
@@ -38,6 +41,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         if BRANDS[brand] == BRAND_KIA:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.kia.com"
             self.CCSP_SERVICE_ID: str = "fdc85c00-0a2f-4c64-bcb4-2cfb1500730a"
+            self.APP_ID: str = "e7bcd186-a5fd-410d-92cb-6876a42288bd"
             self.BASIC_AUTHORIZATION: str = (
                 "Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA=="
             )
@@ -45,6 +49,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         elif BRANDS[brand] == BRAND_HYUNDAI:
             self.BASE_DOMAIN: str = "prd.eu-ccapi.hyundai.com"
             self.CCSP_SERVICE_ID: str = "6d477c38-3ca4-4cf3-9557-2a1929a94654"
+            self.APP_ID: str = "014d2225-8495-4735-812d-2616334fd15d"
             self.BASIC_AUTHORIZATION: str = "Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg=="
             self.LOGIN_FORM_HOST = "eu-account.hyundai.com"
 
@@ -80,25 +85,39 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         self.stamps_url: str = (
             "https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/"
             + BRANDS[brand].lower()
-            + ".json"
+            + "-"
+            + self.APP_ID
+            + ".v2.json"
         )
 
     def get_stamps_from_bluelinky(self) -> list:
         stamps = []
         response = requests.get(self.stamps_url)
-        stampsAsText = response.text
-        for stamp in stampsAsText.split('"'):
-            stamp = stamp.strip()
-            if len(stamp) == 64:
-                stamps.append(stamp)
+        stamps = response.json()
         return stamps
 
-    def login(self) -> Token:
-
+    def get_stamp(self) -> str:
         if self.stamps is None:
             self.stamps = self.get_stamps_from_bluelinky()
 
-        self.device_id, self.stamp = self.get_device_id()
+        frequency = self.stamps["frequency"]
+        generated_at = dateutil.parser.isoparse(self.stamps["generated"])
+        position = int(
+            (datetime.now(pytz.utc) - generated_at).total_seconds() * 1000.0 / frequency
+        )
+        stamp_count = len(self.stamps["stamps"])
+        _LOGGER.debug(
+            f"{DOMAIN} - get_stamp {generated_at} {frequency} {position} {stamp_count} {((datetime.now(pytz.utc) - generated_at).total_seconds()*1000.0)/frequency}"
+        )
+        if (position * 100.0) / stamp_count > 90:
+            self.stamps = None
+            return self.get_stamp()
+        else:
+            return self.stamps["stamps"][position]
+
+    def login(self) -> Token:
+        stamp = self.get_stamp()
+        self.device_id = self.get_device_id(stamp)
         self.cookies = self.get_cookies()
         self.set_session_language()
         self.authorization_code = None
@@ -111,9 +130,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             self.access_token,
             self.access_token,
             self.authorization_code,
-        ) = self.get_access_token()
+        ) = self.get_access_token(stamp)
 
-        self.token_type, self.refresh_token = self.get_refresh_token()
+        self.token_type, self.refresh_token = self.get_refresh_token(stamp)
 
         response = self.get_vehicle()
         vehicle_name = response["vehicles"][0]["nickname"]
@@ -133,12 +152,12 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             vehicle_model,
             vehicle_registration_date,
             valid_until,
-            self.stamp,
+            stamp,
         )
 
         return token
 
-    def get_device_id(self):
+    def get_device_id(self, stamp):
         registration_id = 1
         try:
             credentials = push_receiver.register(sender_id=self.GCM_SENDER_ID)
@@ -152,10 +171,10 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "uuid": str(uuid.uuid4()),
         }
 
-        for i in [0, INVALID_STAMP_RETRY_COUNT]:
-            stamp = random.choice(self.stamps)
+        for i in range(0, INVALID_STAMP_RETRY_COUNT):
             headers = {
                 "ccsp-service-id": self.CCSP_SERVICE_ID,
+                "ccsp-application-id": self.APP_ID,
                 "Stamp": stamp,
                 "Content-Type": "application/json;charset=UTF-8",
                 "Host": self.BASE_URL,
@@ -173,7 +192,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             _LOGGER.debug(f"{DOMAIN} - Retry count {i} - Invalid stamp {stamp}")
 
         device_id = response["resMsg"]["deviceId"]
-        return device_id, stamp
+        return device_id
 
     def get_cookies(self):
         ### Get Cookies ###
@@ -327,6 +346,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         headers = {
             "User-Agent": USER_AGENT_MOZILLA,
             "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
         }
         response = requests.post(
             url, headers=headers, json={"intUserId": intUserId}, cookies=self.cookies
@@ -336,12 +356,14 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         authorization_code = "".join(parse_qs(parsed_url.query)["code"])
         return authorization_code
 
-    def get_access_token(self):
+    def get_access_token(self, stamp):
         ### Get Access Token ###
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
-            "Stamp": self.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
             "Connection": "close",
@@ -366,12 +388,14 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Access Token Value {access_token}")
         return token_type, access_token, authorization_code
 
-    def get_refresh_token(self):
+    def get_refresh_token(self, stamp):
         ### Get Refresh Token ###
         url = self.USER_API_URL + "oauth2/token"
         headers = {
             "Authorization": self.BASIC_AUTHORIZATION,
-            "Stamp": self.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": stamp,
             "Content-type": "application/x-www-form-urlencoded",
             "Host": self.BASE_URL,
             "Connection": "close",
@@ -396,7 +420,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles"
         headers = {
             "Authorization": self.access_token,
-            "Stamp": self.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": self.get_stamp(),
             "ccsp-device-id": self.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -413,7 +439,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status/latest"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": self.get_stamp(),
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -495,7 +523,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
             "Authorization": token.refresh_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -511,7 +541,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -530,7 +562,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -561,7 +595,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/temperature"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -587,7 +623,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
@@ -604,7 +642,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/charge"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",

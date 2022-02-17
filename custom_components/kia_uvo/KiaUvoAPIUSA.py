@@ -219,7 +219,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         body = {
             "vehicleConfigReq": {
                 "airTempRange": "0",
-                "maintenance": "0",
+                "maintenance": "1",
                 "seatHeatCoolOption": "0",
                 "vehicle": "1",
                 "vehicleFeature": "0",
@@ -290,6 +290,14 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
                 ),
                 "unit": 3,
             },
+            "nextService": {
+                "value": float(
+                    response_body["payload"]["vehicleInfoList"][0]["vehicleConfig"][
+                        "maintenance"
+                    ]["nextServiceMile"]
+                ),
+                "unit": 3,
+            },
             "vehicleLocation": response_body["payload"]["vehicleInfoList"][0][
                 "lastVehicleInfo"
             ]["location"],
@@ -342,6 +350,10 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self, token: Token, set_temp, duration, defrost, climate, heating
     ):
         url = self.API_URL + "rems/start"
+        if set_temp < 62:
+            set_temp = "LOW"
+        elif set_temp > 82:
+            set_temp = "HIGH"
         body = {
             "remoteClimate": {
                 "airCtrl": climate,
