@@ -231,6 +231,16 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         )
         BINARY_INSTRUMENTS.append(
             (
+                "batteryPreconditioning",
+                "Battery Preconditioning",
+                "vehicleStatus.evStatus.batteryPreconditioning",
+                None,
+                None,
+                DEVICE_CLASS_PLUG,
+            )
+        )
+        BINARY_INSTRUMENTS.append(
+            (
                 "pluggedIn",
                 "Plugged In",
                 "vehicleStatus.evStatus.batteryPlugin",
