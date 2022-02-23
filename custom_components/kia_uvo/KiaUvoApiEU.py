@@ -424,7 +424,6 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
-        location = self.get_location(token)
         return response["resMsg"]["vehicleStatusInfo"]
 
     def get_geocoded_location(self, lat, lon):
@@ -444,7 +443,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = response.json()
         return response
 
-    def get_location(self, token: Token):
+    def update_location(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/location"
         headers = {
             "Authorization": token.access_token,
@@ -464,10 +463,6 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         except:
             _LOGGER.warning(f"{DOMAIN} - Get vehicle location failed")
-            response = None
-            return response
-        else:
-            return response["resMsg"]["gpsDetail"]
 
     def update_vehicle_status(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
@@ -484,6 +479,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
+        self.update_location(token)
 
     def lock_action(self, token: Token, action):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
