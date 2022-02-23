@@ -456,7 +456,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             "User-Agent": USER_AGENT_OK_HTTP,
         }
         try:
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             response = response.json()
             _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
             if response["responseHeader"]["responseCode"] != 0:
