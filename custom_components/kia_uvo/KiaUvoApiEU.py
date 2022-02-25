@@ -458,7 +458,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             response = requests.get(url, headers=headers)
             response = response.json()
             _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
-            if response["responseHeader"]["responseCode"] != 0:
+            if response["resCode"] != 0000:
                 raise Exception("No Location Located")
 
         except:
