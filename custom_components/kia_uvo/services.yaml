@@ -27,7 +27,7 @@ start_climate:
         boolean: 
     Temperature:
       name: Temperature
-      description: Set temperature of climate control. Unit is specific to region. 
+      description: Set temperature of climate control. Unit is specific to region. For US Kia, anything lower than 62 will be translated to 'LOW' and anything higher than 82 will be translated to 'HIGH', in accordance with the vehicle and the UVO app.
       required: false
       example: 21.5
       default: 21
