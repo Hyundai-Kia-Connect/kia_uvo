@@ -471,6 +471,29 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = response.json()
         return response
 
+    def update_location(self, token: Token):
+        url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/location"
+        headers = {
+            "Authorization": token.access_token,
+            "Stamp": self.get_stamp(),
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "ccsp-device-id": token.device_id,
+            "Host": self.BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
+        try:
+            response = requests.get(url, headers=headers)
+            response = response.json()
+            _LOGGER.debug(f"{DOMAIN} - Get Vehicle Location {response}")
+            if response["resCode"] != "0000":
+                raise Exception("No Location Located")
+
+        except:
+            _LOGGER.warning(f"{DOMAIN} - Get vehicle location failed")
+
     def update_vehicle_status(self, token: Token):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/status"
         headers = {
@@ -488,6 +511,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         response = requests.get(url, headers=headers)
         response = response.json()
         _LOGGER.debug(f"{DOMAIN} - Received forced vehicle data {response}")
+        self.update_location(token)
 
     def lock_action(self, token: Token, action):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/control/door"
