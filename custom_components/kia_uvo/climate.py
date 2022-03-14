@@ -54,6 +54,8 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     # internal target state that can be sent to the car
     climate_config: ClimateRequestOptions
 
+    # TODO: if possible in Climate, add possibility to set those
+    # as well. Are there maybe additional properties?
     heat_status_int_to_str: dict[int | None, str | None] = {
         None: None,
         0: "Off",
@@ -61,7 +63,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         2: "Rear Window",
         3: "Steering Wheel",
     }
-    heat_status_int_to_str = {v: k for [k, v] in heat_status_int_to_str.items()}
+    heat_status_str_to_int = {v: k for [k, v] in heat_status_int_to_str.items()}
 
     def get_internal_heat_int_for_climate_request(self):
         if (
