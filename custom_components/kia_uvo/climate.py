@@ -5,21 +5,16 @@ import logging
 from time import sleep
 
 from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle, VehicleManager
-from hyundai_kia_connect_api.utils import (
-    get_hex_temp_into_index,
-    get_index_into_hex_temp,
-)
+from hyundai_kia_connect_api.utils import get_hex_temp_into_index
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
     CURRENT_HVAC_COOL,
-    CURRENT_HVAC_FAN,
     CURRENT_HVAC_HEAT,
     CURRENT_HVAC_IDLE,
     CURRENT_HVAC_OFF,
     HVAC_MODE_AUTO,
     HVAC_MODE_COOL,
-    HVAC_MODE_FAN_ONLY,
     HVAC_MODE_HEAT,
     HVAC_MODE_OFF,
     SUPPORT_TARGET_TEMPERATURE,
@@ -58,20 +53,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     # The python lib climate request is also treated as
     # internal target state that can be sent to the car
     climate_config: ClimateRequestOptions
-
-    # seat_status_int_to_str: dict[int | None, str | None] = {
-    #     None: None,
-    #     0: "Off",
-    #     1: "On",
-    #     2: "Off",
-    #     3: "Low Cool",
-    #     4: "Medium Cool",
-    #     5: "High Cool",
-    #     6: "Low Heat",
-    #     7: "Medium Heat",
-    #     8: "High Heat",
-    # }
-    # seat_status_str_to_int = {v: k for [k, v] in seat_status_int_to_str.items()}
 
     heat_status_int_to_str: dict[int | None, str | None] = {
         None: None,
@@ -163,10 +144,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     def hvac_mode(self) -> str:
         """Get the configured climate control operation mode."""
 
-        # HVAC_MODE can be determined based on activation state of
-        # AC and Heater. TODO: use Coordinator data, not internal state
-        # state = [self.vehicle.air_control_is_on, self.vehicle.defrost_is_on]
-
         if not self.vehicle.air_control_is_on:
             return HVAC_MODE_OFF
 
@@ -226,14 +203,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode):
         """Set the operation mode of the in-car climate control."""
 
-        # # update climate and heating activation according to HVAC MODE
-        # [self.climate_config.climate, self.climate_config.heating] = {
-        #     HVAC_MODE_COOL: [True, 0],
-        #     HVAC_MODE_HEAT: [False, 1],
-        #     HVAC_MODE_OFF: [False, 0],
-        # }[hvac_mode]
-
-        # and send to car
         if hvac_mode == HVAC_MODE_OFF:
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.api.stop_climate,
@@ -266,7 +235,8 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
                 self.vehicle_manager.token,
                 self.vehicle,
             )
-            # TODO: extremely ugly but works - think about this again, if we can react to the car reporting "ac off"
+            # Wait, because the car ignores the start_climate command if it comes too fast after stopping
+            # TODO: replace with some more event driven method
             await self.hass.async_add_executor_job(sleep, 5.0)
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.api.start_climate,
