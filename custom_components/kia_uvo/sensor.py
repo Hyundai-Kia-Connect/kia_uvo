@@ -165,17 +165,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         )
         INSTRUMENTS.append(
             (
-                "totalEnergyRecuperation",
-                "Total Energy Recuperation",
-                "drvhistory.regenPwr",
-                ENERGY_WATT_HOUR,
-                "mdi:battery-plus-variant",
-                DEVICE_CLASS_ENERGY,
-                SensorStateClass.TOTAL_INCREASING,
-            )
-        )
-        INSTRUMENTS.append(
-            (
                 "averageEnergyConsumption",
                 "Average Energy Consumption",
                 "drvhistory.consumption30d",
