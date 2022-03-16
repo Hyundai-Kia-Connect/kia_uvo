@@ -454,9 +454,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - get_cached_vehicle_status response {response}")
 
         try:
-            response["resMsg"]["vehicleStatusInfo"]["drvhistory"] = self.get_driving_info(
-                token
-            )
+            response["resMsg"]["vehicleStatusInfo"][
+                "drvhistory"
+            ] = self.get_driving_info(token)
         except:
             _LOGGER.warning("Unable to get drivingInfo")
 
@@ -493,7 +493,8 @@ class KiaUvoApiEU(KiaUvoApiImpl):
             for drivingInfoItem in response30d["resMsg"]["drivingInfo"]:
                 if drivingInfoItem["drivingPeriod"] == 0:
                     drivingInfo["consumption30d"] = round(
-                        drivingInfoItem["totalPwrCsp"] / drivingInfoItem["calculativeOdo"]
+                        drivingInfoItem["totalPwrCsp"]
+                        / drivingInfoItem["calculativeOdo"]
                     )
                     break
 

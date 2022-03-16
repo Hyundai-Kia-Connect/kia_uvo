@@ -431,11 +431,17 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
             return {
                 "totalPwrCsp": self.vehicle.get_child_value("drvhistory.totalPwrCsp"),
                 "motorPwrCsp": self.vehicle.get_child_value("drvhistory.motorPwrCsp"),
-                "climatePwrCsp": self.vehicle.get_child_value("drvhistory.climatePwrCsp"),
+                "climatePwrCsp": self.vehicle.get_child_value(
+                    "drvhistory.climatePwrCsp"
+                ),
                 "eDPwrCsp": self.vehicle.get_child_value("drvhistory.eDPwrCsp"),
                 "regenPwr": self.vehicle.get_child_value("drvhistory.regenPwr"),
-                "batteryMgPwrCsp": self.vehicle.get_child_value("drvhistory.batteryMgPwrCsp"),
-                "calculativeOdo": self.vehicle.get_child_value("drvhistory.calculativeOdo")
+                "batteryMgPwrCsp": self.vehicle.get_child_value(
+                    "drvhistory.batteryMgPwrCsp"
+                ),
+                "calculativeOdo": self.vehicle.get_child_value(
+                    "drvhistory.calculativeOdo"
+                ),
             }
         return None
 
