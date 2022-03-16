@@ -466,7 +466,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/drvhistory"
         headers = {
             "Authorization": token.access_token,
-            "Stamp": token.stamp,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": self.get_stamp(),
             "ccsp-device-id": token.device_id,
             "Host": self.BASE_URL,
             "Connection": "Keep-Alive",
