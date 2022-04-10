@@ -199,6 +199,22 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             )
         )
 
+    if (
+      vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
+      and vehicle.kia_uvo_api.supports_drive_history
+    ):
+        INSTRUMENTS.append(
+            (
+                "averageElectricConsumptionToday",
+                "Average electric consumption today",
+                "averageElectricConsumptionToday",
+                NOT_APPLICABLE,
+                "mdi:car-electric",
+                None,
+                None,
+            )
+        )
+
     INSTRUMENTS.append(
         (
             "odometer",
