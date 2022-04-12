@@ -8,7 +8,7 @@ from homeassistant.const import (
     TIME_MINUTES,
     TEMP_FAHRENHEIT,
     TEMP_CELSIUS,
-    ENERGY_KILO_WATT_HOUR
+    ENERGY_KILO_WATT_HOUR,
 )
 from homeassistant.util import distance as distance_util
 import homeassistant.util.dt as dt_util
@@ -201,8 +201,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         )
 
     if (
-      vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
-      and vehicle.kia_uvo_api.supports_drive_history
+        vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
+        and vehicle.kia_uvo_api.supports_drive_history
     ):
         INSTRUMENTS.append(
             (
