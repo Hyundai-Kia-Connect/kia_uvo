@@ -1,9 +1,7 @@
 {
-  "title": "Kia Uvo / Hyundai Bluelink",
   "config": {
     "step": {
       "user": {
-        "title": "Kia Uvo / Hyundai Bluelink: Authentication",
         "description": "Set up your Kia Uvo / Hyundai Bluelink to integrate with Home Assistant.",
         "data": {
           "username": "Username",
@@ -21,7 +19,6 @@
   "options": {
     "step": {
       "init": {
-        "title": "Kia Uvo: Configuration",
         "data": {
           "unit_of_measurement": "Distance Unit",
           "scan_interval": "Scan Interval in Minutes",
