@@ -370,14 +370,14 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["pAuth"] = self.get_pin_token(token)
 
         payload = {
-            "tsoc": {{
+            "tsoc": [{
                 "plugType": 0,
                 "level": ac_limit,
                 },
                 {
                 "plugType": 1,
                 "level": dc_limit,          
-                }},
+                }],
             "pin": self.pin,
         }
         
