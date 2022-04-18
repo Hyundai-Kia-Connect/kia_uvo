@@ -372,11 +372,11 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         payload = {
             "tsoc": [{
                 "plugType": 0,
-                "level": ac_limit,
+                "level": dc_limit,
                 },
                 {
                 "plugType": 1,
-                "level": dc_limit,          
+                "level": ac_limit,          
                 }],
             "pin": self.pin,
         }
