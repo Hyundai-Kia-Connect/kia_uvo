@@ -370,17 +370,19 @@ class KiaUvoApiCA(KiaUvoApiImpl):
         headers["pAuth"] = self.get_pin_token(token)
 
         payload = {
-            "tsoc": [{
-                "plugType": 0,
-                "level": dc_limit,
+            "tsoc": [
+                {
+                    "plugType": 0,
+                    "level": dc_limit,
                 },
                 {
-                "plugType": 1,
-                "level": ac_limit,          
-                }],
+                    "plugType": 1,
+                    "level": ac_limit,
+                },
+            ],
             "pin": self.pin,
         }
-        
+
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         response_headers = response.headers
         response = response.json()
