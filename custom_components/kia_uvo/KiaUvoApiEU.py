@@ -486,7 +486,6 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         drivingInfo = {}
 
-
         try:
             drivingInfo = responseAlltime["resMsg"]["drivingInfoDetail"][0]
 
