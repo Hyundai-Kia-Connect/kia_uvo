@@ -249,6 +249,16 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 DEVICE_CLASS_PLUG,
             )
         )
+        BINARY_INSTRUMENTS.append(
+            (
+                "chargingPortDoor",
+                "Charging Port Door",
+                "vehicleStatus.evStatus.chargePortDoorOpenStatus",
+                "mdi:ev-plug-type2",
+                "mdi:ev-plug-type2",
+                DEVICE_CLASS_DOOR,
+            )
+        )
 
     binary_sensors = []
 
@@ -299,7 +309,10 @@ class InstrumentSensor(KiaUvoEntity):
 
     @property
     def is_on(self) -> bool:
-        return bool(self.vehicle.get_child_value(self.key))
+        if self.id == "chargingPortDoor":
+            return True if self.vehicle.get_child_value(self.key) == 1 else False
+        else:
+            return bool(self.vehicle.get_child_value(self.key))
 
     @property
     def state(self):

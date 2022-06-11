@@ -362,6 +362,35 @@ class KiaUvoApiCA(KiaUvoApiImpl):
 
         _LOGGER.debug(f"{DOMAIN} - Received stop_climate response")
 
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        url = self.API_URL + "evc/setsoc"
+        headers = self.API_HEADERS
+        headers["accessToken"] = token.access_token
+        headers["vehicleId"] = token.vehicle_id
+        headers["pAuth"] = self.get_pin_token(token)
+
+        payload = {
+            "tsoc": [
+                {
+                    "plugType": 0,
+                    "level": dc_limit,
+                },
+                {
+                    "plugType": 1,
+                    "level": ac_limit,
+                },
+            ],
+            "pin": self.pin,
+        }
+
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        response_headers = response.headers
+        response = response.json()
+
+        self.last_action_xid = response_headers["transactionId"]
+        self.last_action_pin_auth = headers["pAuth"]
+        _LOGGER.debug(f"{DOMAIN} - Received set_charge_limits response {response}")
+
     def check_last_action_status(self, token: Token):
         url = self.API_URL + "rmtsts"
         headers = self.API_HEADERS
