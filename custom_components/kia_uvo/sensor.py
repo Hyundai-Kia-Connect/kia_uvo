@@ -154,8 +154,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         )
         INSTRUMENTS.append(
             (
-                "totalEnergyConsumption",
-                "Total Energy Consumption",
+                "monthlyEnergyConsumption",
+                "Monthly Energy Consumption",
                 "drvhistory.totalPwrCsp",
                 ENERGY_WATT_HOUR,
                 "mdi:car-electric",
@@ -427,7 +427,7 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
                     "vehicleLocation.geocodedLocation.address"
                 )
             }
-        elif self._id == "totalEnergyConsumption":
+        elif self._id == "monthlyEnergyConsumption":
             return {
                 "totalPwrCsp": self.vehicle.get_child_value("drvhistory.totalPwrCsp"),
                 "motorPwrCsp": self.vehicle.get_child_value("drvhistory.motorPwrCsp"),

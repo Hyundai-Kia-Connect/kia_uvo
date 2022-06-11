@@ -486,11 +486,9 @@ class KiaUvoApiEU(KiaUvoApiImpl):
 
         drivingInfo = {}
 
+
         try:
-            for drivingInfoItem in responseAlltime["resMsg"]["drivingInfo"]:
-                if drivingInfoItem["drivingPeriod"] == 0:
-                    drivingInfo = drivingInfoItem
-                    break
+            drivingInfo = responseAlltime["resMsg"]["drivingInfoDetail"][0]
 
             for drivingInfoItem in response30d["resMsg"]["drivingInfo"]:
                 if drivingInfoItem["drivingPeriod"] == 0:
