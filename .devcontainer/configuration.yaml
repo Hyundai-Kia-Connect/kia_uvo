@@ -3,3 +3,4 @@ logger:
   default: error
   logs:
     custom_components.kia_uvo: debug
+    
