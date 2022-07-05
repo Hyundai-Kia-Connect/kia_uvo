@@ -442,9 +442,12 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
                 "calculativeOdo": self.vehicle.get_child_value(
                     "drvhistory.calculativeOdo"
                 ),
-                "drivingDate": ''.join(filter(str.isdigit, self.vehicle.get_child_value(
-                    "drvhistory.drivingDate"
-                ))),
+                "drivingDate": "".join(
+                    filter(
+                        str.isdigit,
+                        self.vehicle.get_child_value("drvhistory.drivingDate"),
+                    )
+                ),
             }
         return None
 
