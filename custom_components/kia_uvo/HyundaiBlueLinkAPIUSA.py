@@ -3,7 +3,6 @@ import logging
 import time
 from datetime import timedelta, datetime
 import json
-import push_receiver
 import random
 import requests
 from urllib.parse import parse_qs, urlparse
