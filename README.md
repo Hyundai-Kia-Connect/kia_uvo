@@ -1,5 +1,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
+Warning: please do not set very low values for force sync because it will drain your battery. 
+This integration is mimicking mobile app and you can face the same issue in the mobile app too.
 
 I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This integration also consumes and models items after [Bluelinky](https://github.com/Hacksore/bluelinky), it uses stamps they have been able to create for EU.  We thank them for being pioneers on this journey. 
 
