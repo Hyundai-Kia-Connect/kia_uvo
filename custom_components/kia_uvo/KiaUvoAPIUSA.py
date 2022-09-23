@@ -175,7 +175,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
     ) -> Response:
         headers = self.authed_api_headers(token)
         return self.sessions.get(url, headers=headers)
-        
+
     def login(self) -> Token:
         username = self.username
         password = self.password
