@@ -8,6 +8,8 @@ import secrets
 import pytz
 import requests
 from requests import Response, RequestException
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 import time
 
 from .const import (
@@ -19,7 +21,7 @@ from .Token import Token
 
 _LOGGER = logging.getLogger(__name__)
 
-CIPHERS = "ALL"
+CIPHERS = "DEFAULT@SECLEVEL=1"
 
 
 class cipherAdapter(HTTPAdapter):
@@ -122,6 +124,8 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
 
         self.BASE_URL: str = "api.owners.kia.com"
         self.API_URL: str = "https://" + self.BASE_URL + "/apigw/v1/"
+        self.sessions = requests.Session()
+        self.sessions.mount(self.API_URL, cipherAdapter())
 
     def api_headers(self) -> dict:
         offset = time.localtime().tm_gmtoff / 60 / 60
@@ -162,7 +166,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self, token: Token, url: str, json_body: dict
     ) -> Response:
         headers = self.authed_api_headers(token)
-        return requests.post(url, json=json_body, headers=headers)
+        return self.sessions.post(url, json=json_body, headers=headers)
 
     @request_with_active_session
     @request_with_logging
@@ -170,8 +174,8 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         self, token: Token, url: str
     ) -> Response:
         headers = self.authed_api_headers(token)
-        return requests.get(url, headers=headers)
-
+        return self.sessions.get(url, headers=headers)
+        
     def login(self) -> Token:
         username = self.username
         password = self.password
@@ -186,7 +190,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
             "userCredential": {"userId": username, "password": password},
         }
         headers = self.api_headers()
-        response = requests.post(url, json=data, headers=headers)
+        response = self.sessions.post(url, json=data, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Sign In Response {response.text}")
         session_id = response.headers.get("sid")
         if not session_id:
@@ -199,7 +203,7 @@ class KiaUvoAPIUSA(KiaUvoApiImpl):
         url = self.API_URL + "ownr/gvl"
         headers = self.api_headers()
         headers["sid"] = session_id
-        response = requests.get(url, headers=headers)
+        response = self.sessions.get(url, headers=headers)
         _LOGGER.debug(f"{DOMAIN} - Get Vehicles Response {response.text}")
         response = response.json()
         vehicle_summary = response["payload"]["vehicleSummary"][0]
