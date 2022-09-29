@@ -632,3 +632,31 @@ class KiaUvoApiEU(KiaUvoApiImpl):
         _LOGGER.debug(f"{DOMAIN} - Stop Charge Action Request {payload}")
         response = requests.post(url, json=payload, headers=headers).json()
         _LOGGER.debug(f"{DOMAIN} - Stop Charge Action Response {response}")
+
+    def set_charge_limits(self, token: Token, ac_limit: int, dc_limit: int):
+        url = self.SPA_API_URL + "vehicles/" + token.vehicle_id + "/charge/target"
+        headers = {
+            "Authorization": token.access_token,
+            "ccsp-service-id": self.CCSP_SERVICE_ID,
+            "ccsp-application-id": self.APP_ID,
+            "Stamp": self.get_stamp(),
+            "ccsp-device-id": token.device_id,
+            "Host": self.BASE_URL,
+            "Connection": "Keep-Alive",
+            "Accept-Encoding": "gzip",
+            "User-Agent": USER_AGENT_OK_HTTP,
+        }
+
+        body = {
+            "targetSOClist": [
+                {
+                    "plugType": 0,
+                    "targetSOClevel": dc_limit,
+                },
+                {
+                    "plugType": 1,
+                    "targetSOClevel": ac_limit,
+                },
+            ]
+        }
+        response = requests.post(url, json=body, headers=headers)
