@@ -458,7 +458,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
                 "drvhistory"
             ] = self.get_driving_info(token)
         except:
-            _LOGGER.warning("Unable to get drivingInfo")
+            _LOGGER.debug("Unable to get drivingInfo")
 
         return response["resMsg"]["vehicleStatusInfo"]
 
@@ -498,7 +498,7 @@ class KiaUvoApiEU(KiaUvoApiImpl):
                     break
 
         except:
-            _LOGGER.warning("Unable to parse drivingInfo")
+            _LOGGER.debug("Unable to parse drivingInfo")
 
         return drivingInfo
 
