@@ -240,14 +240,15 @@ class Vehicle:
         await self.force_update_loop_start()
 
     async def set_charge_limits(self, ac_limit: int, dc_limit: int):
-        if ac_limit is None:
-            ac_limit = 90
-        if dc_limit is None:
-            dc_limit = 90
-        await self.hass.async_add_executor_job(
-            self.kia_uvo_api.set_charge_limits, self.token, ac_limit, dc_limit
-        )
-        await self.force_update_loop_start()
+        if ac_limit is not None and dc_limit is not None:
+            if ac_limit is None:
+                ac_limit = 90
+            if dc_limit is None:
+                dc_limit = 90
+            await self.hass.async_add_executor_job(
+                self.kia_uvo_api.set_charge_limits, self.token, ac_limit, dc_limit
+            )
+            await self.force_update_loop_start()
 
     def login(self):
         self.token = self.kia_uvo_api.login()
