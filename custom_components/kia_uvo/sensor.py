@@ -134,7 +134,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             (
                 "targetSOCACCapacity",
                 "Target Capacity of Charge AC",
-                "vehicleStatus.evStatus.targetSOC.1.targetSOClevel",
+                "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.1.targetSOClevel",
                 PERCENTAGE,
                 "mdi:car-electric",
                 None,
@@ -145,7 +145,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             (
                 "targetSOCDCCapacity",
                 "Target Capacity of Charge DC",
-                "vehicleStatus.evStatus.targetSOC.0.targetSOClevel",
+                "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.0.targetSOClevel",
                 PERCENTAGE,
                 "mdi:car-electric",
                 None,
@@ -180,7 +180,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 (
                     "targetSOCACRange",
                     "Target Range of Charge AC",
-                    "vehicleStatus.evStatus.targetSOC.1.dte.rangeByFuel.totalAvailableRange.value",
+                    "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.1.dte.rangeByFuel.totalAvailableRange.value",
                     DYNAMIC_DISTANCE_UNIT,
                     "mdi:ev-station",
                     None,
@@ -191,7 +191,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
                 (
                     "targetSOCDCRange",
                     "Target Range of Charge DC",
-                    "vehicleStatus.evStatus.targetSOC.0.dte.rangeByFuel.totalAvailableRange.value",
+                    "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.0.dte.rangeByFuel.totalAvailableRange.value",
                     DYNAMIC_DISTANCE_UNIT,
                     "mdi:ev-station",
                     None,
@@ -359,7 +359,7 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
     @property
     def state(self):
         if self._id.startswith("targetSOC"):
-            self.vehicle.get_child_value("vehicleStatus.evStatus.targetSOC").sort(
+            self.vehicle.get_child_value("vehicleStatus.evStatus.reservChargeInfos.targetSOClist").sort(
                 key=lambda x: x["plugType"]
             )
         if self._id == "lastUpdated":
