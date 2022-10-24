@@ -34,12 +34,12 @@ jobs:
 
       - name: Create GitHub Release
         if: ${{steps.semantic_release_info.outputs.version != ''}}
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          tag_name: ${{ steps.semantic_release_info.outputs.git_tag }}
-          release_name: ${{ steps.semantic_release_info.outputs.git_tag }}
+          tag: ${{ steps.semantic_release_info.outputs.git_tag }}
+          name: ${{ steps.semantic_release_info.outputs.git_tag }}
           body: ${{ steps.semantic_release_info.outputs.notes }}
           draft: false
           prerelease: false
