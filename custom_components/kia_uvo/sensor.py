@@ -359,9 +359,9 @@ class InstrumentSensor(KiaUvoEntity, SensorEntity):
     @property
     def state(self):
         if self._id.startswith("targetSOC"):
-            self.vehicle.get_child_value("vehicleStatus.evStatus.reservChargeInfos.targetSOClist").sort(
-                key=lambda x: x["plugType"]
-            )
+            self.vehicle.get_child_value(
+                "vehicleStatus.evStatus.reservChargeInfos.targetSOClist"
+            ).sort(key=lambda x: x["plugType"])
         if self._id == "lastUpdated":
             return dt_util.as_local(self.vehicle.last_updated).isoformat()
 
