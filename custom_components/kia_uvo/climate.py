@@ -213,7 +213,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
                 self.vehicle.id,
                 self.climate_config,
             )
-            self.vehicle.air_control_is_on = True
+           self.vehicle.air_control_is_on = True
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
 
