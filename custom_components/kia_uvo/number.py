@@ -21,7 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 AC_CHARGING_LIMIT_KEY = "_ac_charging_limit"
 DC_CHARGING_LIMIT_KEY = "_dc_charging_limit"
 
-CHARGING_LIMIT_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
+NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
         key=AC_CHARGING_LIMIT_KEY,
         name="AC Charging Limit",
@@ -49,8 +49,8 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        for descr in CHARGING_LIMIT_DESCRIPTIONS:
-            entities.append(HyundaiKiaChargingLimitNumber(coordinator, descr, vehicle))
+        for description in NUMBER_DESCRIPTIONS:
+            entities.append(HyundaiKiaChargingLimitNumber(coordinator, description, vehicle))
 
     async_add_entities(entities)
     return True
