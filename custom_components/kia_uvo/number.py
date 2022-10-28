@@ -50,7 +50,8 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
-            entities.append(HyundaiKiaChargingLimitNumber(coordinator, description, vehicle))
+            if getattr(vehicle, description.key, None) is not None:
+                entities.append(HyundaiKiaChargingLimitNumber(coordinator, description, vehicle))
 
     async_add_entities(entities)
     return True
