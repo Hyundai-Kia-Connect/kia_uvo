@@ -16,6 +16,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
 - It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure the integration if you want to change the distance unit.
+- API to the cloud uses port 8080
 
 ## Supported entities ##
 - Air Conditioner Status, Defroster Status, Set Temperature
