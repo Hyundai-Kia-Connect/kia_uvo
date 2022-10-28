@@ -1,4 +1,4 @@
-"""Device Tracker for Hyundai / Kia Connect integration."""
+"""Number for Hyundai / Kia Connect integration."""
 from __future__ import annotations
 
 import logging
