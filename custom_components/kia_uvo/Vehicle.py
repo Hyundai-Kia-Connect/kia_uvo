@@ -240,10 +240,18 @@ class Vehicle:
         await self.force_update_loop_start()
 
     async def set_charge_limits(self, ac_limit: int, dc_limit: int):
+        if ac_limit is None and dc_limit is None:
+            _LOGGER.debug(f"{DOMAIN} - No charge limits set, skipping")
+            return
         if ac_limit is None:
-            ac_limit = 90
+            ac_limit = self.get_child_value(
+                "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.1.targetSOClevel"
+            )
         if dc_limit is None:
-            dc_limit = 90
+            dc_limit = self.get_child_value(
+                "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.0.targetSOClevel"
+            )
+        _LOGGER.debug(f"{DOMAIN} - ac_limit = {ac_limit}, dc_limit = {dc_limit}")
         await self.hass.async_add_executor_job(
             self.kia_uvo_api.set_charge_limits, self.token, ac_limit, dc_limit
         )
