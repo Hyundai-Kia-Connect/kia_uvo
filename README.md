@@ -5,8 +5,6 @@ This integration is mimicking mobile app and you can face the same issue in the 
 
 I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This integration also consumes and models items after [Bluelinky](https://github.com/Hacksore/bluelinky), it uses stamps they have been able to create for EU.  We thank them for being pioneers on this journey. 
 
-Warning ahead; this is beta phase, please do not expect something fully functional, I will improve the integration by time.
-
 ## Installation ##
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
 
