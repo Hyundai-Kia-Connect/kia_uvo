@@ -12,7 +12,7 @@ from homeassistant.const import (
     TEMP_FAHRENHEIT,
     TEMP_CELSIUS,
 )
-from homeassistant.util import distance as distance_util
+from homeassistant.util.unit_conversion import DistanceConverter as distance_util
 import homeassistant.util.dt as dt_util
 from homeassistant.components.sensor import SensorStateClass, SensorEntity
 from .Vehicle import Vehicle
