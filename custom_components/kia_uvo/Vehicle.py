@@ -244,11 +244,11 @@ class Vehicle:
             _LOGGER.debug(f"{DOMAIN} - No charge limits set, skipping")
             return
         if ac_limit is None:
-            ac_limit = self.vehicle_data.get_child_value(
+            ac_limit = self.get_child_value(
                 "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.1.targetSOClevel"
             )
         if dc_limit is None:
-            dc_limit = self.vehicle_data.get_child_value(
+            dc_limit = self.get_child_value(
                 "vehicleStatus.evStatus.reservChargeInfos.targetSOClist.0.targetSOClevel"
             )
         _LOGGER.debug(f"{DOMAIN} - ac_limit = {ac_limit}, dc_limit = {dc_limit}")
