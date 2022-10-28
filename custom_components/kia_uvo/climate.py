@@ -5,7 +5,6 @@ import logging
 from time import sleep
 
 from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle, VehicleManager
-from hyundai_kia_connect_api.utils import get_hex_temp_into_index
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
@@ -97,9 +96,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
         # set the Climate Request to the current actual state of the car
         self.climate_config = ClimateRequestOptions(
-            set_temp=self.vehicle_manager.api.temperature_range[
-                get_hex_temp_into_index(self.vehicle._air_temperature)
-            ],
+            set_temp=self.vehicle.air_temperature,
             climate=self.vehicle.air_control_is_on,
             heating=self.get_internal_heat_int_for_climate_request(),
             defrost=self.vehicle.defrost_is_on,
@@ -113,8 +110,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def current_temperature(self) -> float | None:
         """Get the current in-car temperature."""
-        index = get_hex_temp_into_index(self.vehicle.air_temperature)
-        return self.vehicle_manager.api.temperature_range[index]
+        return self.vehicle.air_temperature
 
     @property
     def target_temperature(self) -> float | None:
