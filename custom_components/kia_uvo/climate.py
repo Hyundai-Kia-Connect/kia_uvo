@@ -203,16 +203,14 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
         if hvac_mode == HVAC_MODE_OFF:
             await self.hass.async_add_executor_job(
-                self.vehicle_manager.api.stop_climate,
-                self.vehicle_manager.token,
-                self.vehicle,
+                self.vehicle_manager.stop_climate,
+                self.vehicle.id,
             )
             self.vehicle.air_control_is_on = False
         else:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.api.start_climate,
-                self.vehicle_manager.token,
-                self.vehicle,
+           await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_climate,
+                self.vehicle.id,
                 self.climate_config,
             )
             self.vehicle.air_control_is_on = True
@@ -229,17 +227,15 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if self.hvac_mode != HVAC_MODE_OFF and old_temp != self.climate_config.set_temp:
             # Car does not accept changing the temp after starting the heating. So we have to turn off first
             await self.hass.async_add_executor_job(
-                self.vehicle_manager.api.stop_climate,
-                self.vehicle_manager.token,
-                self.vehicle,
+                self.vehicle_manager.stop_climate,
+                self.vehicle.id,
             )
             # Wait, because the car ignores the start_climate command if it comes too fast after stopping
             # TODO: replace with some more event driven method
             await self.hass.async_add_executor_job(sleep, 5.0)
             await self.hass.async_add_executor_job(
-                self.vehicle_manager.api.start_climate,
-                self.vehicle_manager.token,
-                self.vehicle,
+                self.vehicle_manager.start_climate,
+                self.vehicle.id,
                 self.climate_config,
             )
         self.coordinator.async_request_refresh()
