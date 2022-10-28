@@ -3,6 +3,7 @@ force_update:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -12,6 +13,7 @@ update:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -21,6 +23,7 @@ start_climate:
   fields: 
     device_id:
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -138,7 +141,7 @@ stop_climate:
   fields: 
     device_id: 
       name: Vehicle
-      description: 
+      description: Target vehicle 
       required: true
       selector: 
         device: 
@@ -148,6 +151,7 @@ start_charge:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -157,6 +161,7 @@ stop_charge:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -166,6 +171,7 @@ lock:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -175,6 +181,7 @@ unlock:
   fields: 
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
@@ -184,6 +191,7 @@ set_charge_limits:
   fields:
     device_id: 
       name: Vehicle
+      description: Target vehicle
       required: true
       selector: 
         device: 
