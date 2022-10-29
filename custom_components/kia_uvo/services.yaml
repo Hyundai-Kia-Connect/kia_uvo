@@ -127,6 +127,7 @@ start_climate:
             - High Heat
     rrseat:
       name: Rear Right Seat
+      description: Rear Rear Seat Heat Cool Setting
       required: false
       selector:
         select:
