@@ -82,6 +82,7 @@ start_climate:
             - "Steering Wheel Only"
     flseat:
       name: Front Left Seat
+      description: Front Left Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -96,6 +97,7 @@ start_climate:
             - High Heat
     frseat:
       name: Front Right Seat
+      description: Front Right Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -110,6 +112,7 @@ start_climate:
             - High Heat    
     rlseat:
       name: Rear Left Seat
+      description: Rear Left Seat Heat Cool Setting
       required: false
       selector:
         select:
