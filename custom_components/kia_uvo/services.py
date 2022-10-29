@@ -53,10 +53,10 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         climate_request_options = ClimateRequestOptions(
-            set_temp=call.data["temperature"],
-            duration=call.data["duration"],
-            climate=call.data["climate"],
-            heating=call.data["heating"],
+            duration=call.data.get["duration"],
+            set_temp=call.data.get["temperature"],
+            climate=call.data.get["climate"],
+            heating=call.data.get["heating"],
         )
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
 
