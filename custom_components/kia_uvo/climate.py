@@ -147,7 +147,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
         # Cheating: there is no perfect mapping to either heat or cool,
         # as the API can only set target temp and then decides: so we
-        # just derive the same by temperatur change direction.
+        # just derive the same by temperature change direction.
         if self.current_temperature > self.climate_config.set_temp:
             return HVAC_MODE_COOL
         if self.current_temperature < self.climate_config.set_temp:
