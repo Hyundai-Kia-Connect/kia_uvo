@@ -78,7 +78,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
 
-        await self.async_check_and_refresh_token()
+        await self.async_update_all()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_force_update_vehicles,
             self.force_refresh_interval,
@@ -98,6 +98,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_all_vehicles_states
         )
+        return await self.async_update_all()
 
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
