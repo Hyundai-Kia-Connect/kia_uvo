@@ -76,10 +76,14 @@ start_climate:
       selector:
         select:  
           options:
-            - "Off"
-            - "Steering Wheel and Rear Window"
-            - "Rear Window Only"
-            - "Steering Wheel Only"
+            - label: "Off"
+              value: 0
+            - label: "Steering Wheel, Side and Back Defroster"
+              value: 1
+            - label: "Rear Window Only"
+              value: 2
+            - label: "Steering Wheel Only"
+              value: 3
     flseat:
       name: Front Left Seat
       description: Front Left Seat Heat Cool Setting
@@ -87,14 +91,22 @@ start_climate:
       selector:
         select:
           options:  
-            - "Off"
-            - "On"
-            - Low Cool
-            - Medium Cool
-            - High Cool
-            - Low Heat 
-            - Medium Heat
-            - High Heat
+            - label: "Off"
+              value: 0
+            - label: "On"
+              value: 1
+            - label: Low Cool
+              value: 3
+            - label: Medium Cool
+              value: 4
+            - label: High Cool
+              value: 5
+            - label: Low Heat 
+              value: 6
+            - label: Medium Heat
+              value: 7
+            - label: High Heat
+              value: 8
     frseat:
       name: Front Right Seat
       description: Front Right Seat Heat Cool Setting
@@ -102,14 +114,22 @@ start_climate:
       selector:
         select:
           options:  
-            - "Off"
-            - "On"
-            - Low Cool
-            - Medium Cool
-            - High Cool
-            - Low Heat 
-            - Medium Heat
-            - High Heat    
+            - label: "Off"
+              value: 0
+            - label: "On"
+              value: 1
+            - label: Low Cool
+              value: 3
+            - label: Medium Cool
+              value: 4
+            - label: High Cool
+              value: 5
+            - label: Low Heat 
+              value: 6
+            - label: Medium Heat
+              value: 7
+            - label: High Heat
+              value: 8   
     rlseat:
       name: Rear Left Seat
       description: Rear Left Seat Heat Cool Setting
@@ -117,14 +137,22 @@ start_climate:
       selector:
         select:
           options:  
-            - "Off"
-            - "On"
-            - Low Cool
-            - Medium Cool
-            - High Cool
-            - Low Heat 
-            - Medium Heat
-            - High Heat
+            - label: "Off"
+              value: 0
+            - label: "On"
+              value: 1
+            - label: Low Cool
+              value: 3
+            - label: Medium Cool
+              value: 4
+            - label: High Cool
+              value: 5
+            - label: Low Heat 
+              value: 6
+            - label: Medium Heat
+              value: 7
+            - label: High Heat
+              value: 8
     rrseat:
       name: Rear Right Seat
       description: Rear Rear Seat Heat Cool Setting
@@ -132,14 +160,22 @@ start_climate:
       selector:
         select:
           options:  
-            - "Off"
-            - "On"
-            - Low Cool
-            - Medium Cool
-            - High Cool
-            - Low Heat 
-            - Medium Heat
-            - High Heat
+            - label: "Off"
+              value: 0
+            - label: "On"
+              value: 1
+            - label: Low Cool
+              value: 3
+            - label: Medium Cool
+              value: 4
+            - label: High Cool
+              value: 5
+            - label: Low Heat 
+              value: 6
+            - label: Medium Heat
+              value: 7
+            - label: High Heat
+              value: 8
 stop_climate:
   description: Please use cautiously - stop car and climate
   fields: 
