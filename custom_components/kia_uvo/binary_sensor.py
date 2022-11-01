@@ -155,8 +155,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         key="air_control_is_on",
         name="Air Conditioner",
         is_on=lambda vehicle: vehicle.air_control_is_on,
-        on_icon="mdi:mdi:air-conditioner",
-        off_icon="mdi:mdi:air-conditioner",
+        on_icon="mdi:air-conditioner",
+        off_icon="mdi:air-conditioner",
     ),
 )
 
