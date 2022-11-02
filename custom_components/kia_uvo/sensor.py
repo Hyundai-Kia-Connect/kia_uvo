@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, TIME_MINUTES
+from homeassistant.const import PERCENTAGE, TIME_MINUTES, ENERGY_WATT_HOUR
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -118,6 +118,20 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Estimated Station Charge Duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=TIME_MINUTES,
+    ),
+    SensorEntityDescription(
+        key="total_power_consumed",
+        name="Monthly Energy Consumption",
+        icon="mdi:car-electric",
+        native_unit_of_measurement=ENERGY_WATT_HOUR,
+        device_class=SensorDeviceClass.DEVICE_CLASS_ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+    ),
+    SensorEntityDescription(
+        key="power_consumption_30d",
+        name="Average Energy Consumption",
+        icon="mdi:car-electric",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="front_left_seat_status",
