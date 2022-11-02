@@ -120,7 +120,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=TIME_MINUTES,
     ),
     SensorEntityDescription(
-        key="total_power_consumed",
+        key="_total_power_consumed",
         name="Monthly Energy Consumption",
         icon="mdi:car-electric",
         native_unit_of_measurement=ENERGY_WATT_HOUR,
@@ -128,7 +128,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     SensorEntityDescription(
-        key="power_consumption_30d",
+        key="_power_consumption_30d",
         name="Average Energy Consumption",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
