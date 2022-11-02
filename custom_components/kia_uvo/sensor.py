@@ -33,20 +33,20 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="_odometer",
+        key="odometer",
         name="Odometer",
         icon="mdi:speedometer",
         native_unit_of_measurement=DYNAMIC_UNIT,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key="_last_service_distance",
+        key="last_service_distance",
         name="Last Service",
         icon="mdi:car-wrench",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="_next_service_distance",
+        key="next_service_distance",
         name="Next Service",
         icon="mdi:car-wrench",
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -71,13 +71,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
-        key="_ev_driving_distance",
+        key="ev_driving_distance",
         name="EV Range",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="_fuel_driving_distance",
+        key="fuel_driving_distance",
         name="Fuel Driving Distance",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -90,7 +90,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key="_air_temperature",
+        key="air_temperature",
         name="Set Temperature",
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -120,7 +120,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=TIME_MINUTES,
     ),
     SensorEntityDescription(
-        key="_total_power_consumed",
+        key="total_power_consumed",
         name="Monthly Energy Consumption",
         icon="mdi:car-electric",
         native_unit_of_measurement=ENERGY_WATT_HOUR,
@@ -128,7 +128,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     SensorEntityDescription(
-        key="_power_consumption_30d",
+        key="power_consumption_30d",
         name="Average Energy Consumption",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
