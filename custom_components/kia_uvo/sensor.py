@@ -33,20 +33,20 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="odometer",
+        key="_odometer",
         name="Odometer",
         icon="mdi:speedometer",
         native_unit_of_measurement=DYNAMIC_UNIT,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key="last_service_distance",
+        key="_last_service_distance",
         name="Last Service",
         icon="mdi:car-wrench",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="next_service_distance",
+        key="_next_service_distance",
         name="Next Service",
         icon="mdi:car-wrench",
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -71,13 +71,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
-        key="ev_driving_distance",
+        key="_ev_driving_distance",
         name="EV Range",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="fuel_driving_distance",
+        key="_fuel_driving_distance",
         name="Fuel Driving Distance",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -90,7 +90,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
-        key="air_temperature",
+        key="_air_temperature",
         name="Set Temperature",
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.TEMPERATURE,
