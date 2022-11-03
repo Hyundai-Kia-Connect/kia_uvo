@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, TIME_MINUTES, ENERGY_WATT_HOUR
+from homeassistant.const import PERCENTAGE, TIME_MINUTES, ENERGY_WATT_HOUR, DEVICE_CLASS_ENERGY
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
