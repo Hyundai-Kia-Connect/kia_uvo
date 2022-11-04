@@ -56,7 +56,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Car Battery Level",
         icon="mdi:car-battery",
         native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
         key="last_updated_at",
