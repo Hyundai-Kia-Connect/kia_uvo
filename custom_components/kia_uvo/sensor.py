@@ -275,7 +275,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             "vehicleStatus.battery.batSoc",
             PERCENTAGE,
             "mdi:car-battery",
-            DEVICE_CLASS_BATTERY,
+            None,
             None,
         )
     )
