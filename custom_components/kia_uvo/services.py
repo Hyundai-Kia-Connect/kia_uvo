@@ -7,7 +7,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import ServiceCall, callback, HomeAssistant
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
-from hyundai_kia_connect_api import ClimateRequestOptions
+from hyundai_kia_connect_api import ClimateRequestOptions, EvChargeLimits
 
 from .const import DOMAIN
 
@@ -92,11 +92,13 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_set_charge_limit(call):
         coordinator = _get_coordinator_from_device(hass, call)
-        ac_limit = call.data.get("ac_limit")
-        dc_limit = call.data.get("dc_limit")
-        if ac_limit is not None or dc_limit is not none:
+        ev_limits = EvChargeLimits(
+            ac = call.data.get("ac_limit"),
+            dc = call.data.get("dc_limit"),
+        )
+        if ev_limits.ac is not None or ev_limits.dc is not none:
             await coordinator.set_charge_limits(
-                call.data[ATTR_DEVICE_ID], ac_limit, dc_limit
+                call.data[ATTR_DEVICE_ID], ev_limits
             )
 
     services = {
