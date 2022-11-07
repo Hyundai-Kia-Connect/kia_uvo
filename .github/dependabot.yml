@@ -5,6 +5,7 @@ updates:
     directory: "/"
     # Check for updates once a week
     schedule:
+      interval: "weekly"
   - package-ecosystem: "pip"
     directory: "/custom_components/kia_uvo"
     # Check for updates once a week
