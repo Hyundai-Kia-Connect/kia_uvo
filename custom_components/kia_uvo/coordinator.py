@@ -77,13 +77,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
-
-        await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_force_update_vehicles,
-            self.force_refresh_interval,
-        )
-        return self.data
+        try: 
+            await self.async_check_and_refresh_token()
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_force_update_vehicles,
+                self.force_refresh_interval,
+            )
+            return self.data
+        except as err: 
+            UpdateFailed(f"Error communicating with API: {err}")
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""
