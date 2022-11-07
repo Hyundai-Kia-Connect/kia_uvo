@@ -74,14 +74,14 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._vehicle = vehicle
 
     @property
-    def value(self) -> float | None:
+    def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
         if self.entity_description.key == AC_CHARGING_LIMIT_KEY:
             return self._vehicle.ev_charge_limits.ac
         else:
             return self._vehicle.ev_charge_limits.dc
 
-    async def async_set_value(self, value: float) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         """Set new charging limit."""
         # force refresh of state so that we can get the value for the other charging limit
         # since we have to set both limits as compound API call.
