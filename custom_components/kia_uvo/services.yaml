@@ -92,7 +92,7 @@ start_climate:
         select:
           options:  
             - label: "Off"
-              value: 0
+              value: "0"
             - label: "On"
               value: 1
             - label: Low Cool
@@ -115,7 +115,7 @@ start_climate:
         select:
           options:  
             - label: "Off"
-              value: 0
+              value: "0"
             - label: "On"
               value: 1
             - label: Low Cool
@@ -138,7 +138,7 @@ start_climate:
         select:
           options:  
             - label: "Off"
-              value: 0
+              value: "0"
             - label: "On"
               value: 1
             - label: Low Cool
@@ -161,7 +161,7 @@ start_climate:
         select:
           options:  
             - label: "Off"
-              value: 0
+              value: "0"
             - label: "On"
               value: 1
             - label: Low Cool
