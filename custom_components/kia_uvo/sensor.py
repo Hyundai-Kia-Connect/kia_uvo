@@ -138,6 +138,11 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Rear Right Seat",
         icon="mdi:car-seat-heater",
     ),
+    SensorEntityDescription(
+        key="_geocode_name",
+        name="Geocoded Location",
+        icon="mdi:map",
+    ),
 )
 
 
@@ -188,3 +193,10 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             return getattr(self.vehicle, self._key + "_unit")
         else:
             return self._description.native_unit_of_measurement
+
+    @property
+    def state_attributes(self):
+        if self._description.key == "_geocode_name":
+            return {
+                "address": getattr(self.vehicle, "_geocode_address")                
+            }

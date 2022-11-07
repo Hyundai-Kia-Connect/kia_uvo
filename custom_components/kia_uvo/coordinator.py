@@ -28,6 +28,10 @@ from .const import (
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY, 
+    DEFAULT_USE_EMAIL_WITH_GEOCODE_API, 
+    CONF_USE_EMAIL_WITH_GEOCODE_API, 
+    CONF_ENABLE_GEOLOCATION_ENTITY
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,6 +49,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             username=config_entry.data.get(CONF_USERNAME),
             password=config_entry.data.get(CONF_PASSWORD),
             pin=config_entry.data.get(CONF_PIN),
+            geocode_api_enable=config_entry.options.get(
+        CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
+        ),
+            geocode_api_use_email=config_entry.options.get(
+            CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
+        )
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
@@ -60,6 +70,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.no_force_refresh_hour_finish: int = config_entry.options.get(
             CONF_NO_FORCE_REFRESH_HOUR_FINISH, DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH
+        )
+        self.enable_geolocation_entity = config_entry.options.get(
+        CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
+        )
+        self.use_email_with_geocode_api = config_entry.options.get(
+            CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
         )
 
         super().__init__(
