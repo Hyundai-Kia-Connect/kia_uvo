@@ -77,44 +77,33 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
         if self.entity_description.key == AC_CHARGING_LIMIT_KEY:
-            return self._vehicle.ev_charge_limits.ac
+            return self.vehicle.ev_charge_limits.ac
         else:
-            return self._vehicle.ev_charge_limits.dc
+            return self.vehicle.ev_charge_limits.dc
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new charging limit."""
         # force refresh of state so that we can get the value for the other charging limit
         # since we have to set both limits as compound API call.
-        current_limits = await self.hass.async_add_executor_job(
-            self._vehicle_manager.api.get_charge_limits,
-            self._vehicle_manager.token,
-            self.vehicle,
-        )
+        await self.coordinator.async_force_update_all()
 
-        # don't do anything for null change
         if (
             self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            and current_limits.ac == int(value)
+            and vehicle.ev_charge_limits.ac == int(value)
         ):
             return
         if (
             self.entity_description.key == DC_CHARGING_LIMIT_KEY
-            and current_limits.dc == int(value)
+            and vehicle.ev_charge_limits.dc == int(value)
         ):
             return
 
         # set new limits
         self._vehicle.ev_charge_limits = (
-            EvChargeLimits(ac=value, dc=current_limits.dc)
+            EvChargeLimits(ac=value, dc=vehicle.ev_charge_limits.dc)
             if self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            else EvChargeLimits(ac=current_limits.ac, dc=value)
+            else EvChargeLimits(ac=vehicle.ev_charge_limits.ac, dc=value)
         )
-
-        await self.hass.async_add_executor_job(
-            self._vehicle_manager.api.set_charge_limits,
-            self._vehicle_manager.token,
-            self._vehicle,
-            self._vehicle.ev_charge_limits,
-        )
+        await self.coordinator.async_set_charge_limits(self.vehicle.id, EvChargeLimits(ac=value, dc=current_limits.dc))
 
         self.async_write_ha_state()
