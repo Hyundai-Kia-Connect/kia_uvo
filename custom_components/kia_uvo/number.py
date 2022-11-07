@@ -26,17 +26,17 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         key=AC_CHARGING_LIMIT_KEY,
         name="AC Charging Limit",
         icon="mdi:ev-plug-type2",
-        min_value=50,
-        max_value=100,
-        step=10,
+        native_min_value=50,
+        native_max_value=100,
+        native_step=10,
     ),
     NumberEntityDescription(
         key=DC_CHARGING_LIMIT_KEY,
         name="DC Charging Limit",
         icon="mdi:ev-plug-ccs2",
-        min_value=50,
-        max_value=100,
-        step=10,
+        native_min_value=50,
+        native_max_value=100,
+        native_step=10,
     ),
 )
 
