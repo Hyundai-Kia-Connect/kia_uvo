@@ -117,7 +117,7 @@ start_climate:
             - label: "Off"
               value: "0"
             - label: "On"
-              value: 1
+              value: "1"
             - label: Low Cool
               value: 3
             - label: Medium Cool
@@ -140,7 +140,7 @@ start_climate:
             - label: "Off"
               value: "0"
             - label: "On"
-              value: 1
+              value: "1"
             - label: Low Cool
               value: 3
             - label: Medium Cool
@@ -163,7 +163,7 @@ start_climate:
             - label: "Off"
               value: "0"
             - label: "On"
-              value: 1
+              value: "1"
             - label: Low Cool
               value: 3
             - label: Medium Cool
