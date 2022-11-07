@@ -84,7 +84,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 self.force_refresh_interval,
             )
             return self.data
-        except as err: 
+        except Exception as err: 
             UpdateFailed(f"Error communicating with API: {err}")
 
     async def async_update_all(self) -> None:
