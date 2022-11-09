@@ -57,6 +57,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             set_temp=call.data.get("temperature"),
             climate=call.data.get("climate"),
             heating=call.data.get("heating"),
+            defrost=call.data.get("defrost"),
             front_left_seat=call.data.get("flseat"),
             front_right_seat=call.data.get("frseat"),
             rear_left_seat=call.data.get("rlseat"),
