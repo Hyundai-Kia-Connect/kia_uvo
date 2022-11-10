@@ -93,14 +93,13 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
     async def async_handle_set_charge_limit(call):
         coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
         ev_limits = EvChargeLimits(
             ac = call.data.get("ac_limit"),
             dc = call.data.get("dc_limit"),
         )
         if ev_limits.ac is not None or ev_limits.dc is not none:
-            await coordinator.set_charge_limits(
-                call.data[ATTR_DEVICE_ID], ev_limits
-            )
+            await coordinator.set_charge_limits(vehicle_id, ev_limits)
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
