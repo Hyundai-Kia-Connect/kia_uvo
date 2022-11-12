@@ -9,7 +9,7 @@ Warning ahead; this is pre-alpha phase, please do not expect something fully fun
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
 
 - Region support has been added, you can test initial set of functionality for Canada and USA regions and share your findings.
-- It will only fetch values for the first car, I am not sure if there are people outside using Kia Uvo / Hyundai Bluelink with multiple cars :)
+- Multiple cars and accounts are supported. To add additional accounts just go through setup a second time. 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
 - It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
@@ -34,7 +34,7 @@ You can install this either manually copying files or using HACS. Configuration 
 ## Supported services ##
 - update: get latest **cached** vehicle data
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
-- start_climate / stop_climate: I am not able to test this as I own an PHEV but looking for volunteers to help on this
+- start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate. 
 - start_charge / stop_charge: You can control your charging using these services
 - set_charge_limits: You can control your charging capacity limits using this services (USA Kia Only)
 
