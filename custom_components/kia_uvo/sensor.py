@@ -197,6 +197,4 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def state_attributes(self):
         if self._description.key == "_geocode_name":
-            return {
-                "address": getattr(self.vehicle, "_geocode_address")                
-            }
+            return {"address": getattr(self.vehicle, "_geocode_address")}
