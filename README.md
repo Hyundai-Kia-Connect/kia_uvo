@@ -1,14 +1,13 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 
-I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo)
+I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This now uses our underlying python package: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api. 
 
 Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time.
 
 ## Installation ##
-You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
-
-- Region support has been added, you can test initial set of functionality for Canada and USA regions and share your findings.
+You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing, a PR for this would be great!). 
+- EU, CAD and US is supported by this.  USA support is limited. 
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time. 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
