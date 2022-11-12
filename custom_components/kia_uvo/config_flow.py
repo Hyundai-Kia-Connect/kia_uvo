@@ -34,6 +34,10 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     REGIONS,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+    DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -99,6 +103,20 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
                         DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
                     ),
                 ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+                vol.Optional(
+                    CONF_ENABLE_GEOLOCATION_ENTITY,
+                    default=self.config_entry.options.get(
+                        CONF_ENABLE_GEOLOCATION_ENTITY,
+                        DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+                    ),
+                ): bool,
+                vol.Optional(
+                    CONF_USE_EMAIL_WITH_GEOCODE_API,
+                    default=self.config_entry.options.get(
+                        CONF_USE_EMAIL_WITH_GEOCODE_API,
+                        DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
+                    ),
+                ): bool,
             }
         )
 
