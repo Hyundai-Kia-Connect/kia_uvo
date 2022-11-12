@@ -1,5 +1,8 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
+Version 2.0 is currently in testing / beta phase.  This can be downloaded in HACS be enabling beta releases.  Please test this out if willing to provide debug logs.   In the next month or so if issue reports are solved I will promote it to the main release.   So testing is appreciated.  This new version supports multi car multi brand as well as fixes core architecture that allows us to do things like set seat heat level and display this easily. Only large bug fixes will go to 1.X going forward.  New features and PRs are requested to go to the 2.0 branch as well. 
+
+
 Warning: please do not set very low values for force sync because it will drain your battery. 
 This integration is mimicking mobile app and you can face the same issue in the mobile app too.
 
