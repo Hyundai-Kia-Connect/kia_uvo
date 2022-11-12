@@ -100,7 +100,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         on_icon="mdi:car-door",
         off_icon="mdi:car-door",
         device_class=BinarySensorDeviceClass.DOOR,
-
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="trunk_is_open",
@@ -143,7 +142,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.smart_key_battery_warning_is_on,
         on_icon="mdi:battery-alert",
         off_icon="mdi:battery",
-        device_class=BinarySensorDeviceClass.BATTERY,       
+        device_class=BinarySensorDeviceClass.BATTERY,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="washer_fluid_warning_is_on",
