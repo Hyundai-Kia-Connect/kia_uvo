@@ -5,7 +5,11 @@ from datetime import timedelta
 import logging
 from site import venv
 
-from hyundai_kia_connect_api import VehicleManager, ClimateRequestOptions, EvChargeLimits
+from hyundai_kia_connect_api import (
+    VehicleManager,
+    ClimateRequestOptions,
+    EvChargeLimits,
+)
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -16,7 +20,7 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import (
     CONF_BRAND,
@@ -93,13 +97,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
-
-        await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_force_update_vehicles,
-            self.force_refresh_interval,
-        )
-        return self.data
+        try:
+            await self.async_check_and_refresh_token()
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_force_update_vehicles,
+                self.force_refresh_interval,
+            )
+            return self.data
+        except Exception as err:
+            UpdateFailed(f"Error communicating with API: {err}")
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""
@@ -126,9 +132,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.hass.async_add_executor_job(self.vehicle_manager.lock, vehicle_id)
         await self.async_refresh()
+
     async def async_unlock_vehicle(self, vehicle_id: str):
         await self.hass.async_add_executor_job(self.vehicle_manager.unlock, vehicle_id)
         await self.async_refresh()
+
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
@@ -145,7 +153,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_start_charge(self, vehicle_id: str):
         await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_charge, vehicle_id
+            self.vehicle_manager.start_charge, vehicle_id
         )
         await self.async_refresh()
 

@@ -208,12 +208,12 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             )
             self.vehicle.air_control_is_on = False
         else:
-           await self.hass.async_add_executor_job(
+            await self.hass.async_add_executor_job(
                 self.vehicle_manager.start_climate,
                 self.vehicle.id,
                 self.climate_config,
             )
-           self.vehicle.air_control_is_on = True
+            self.vehicle.air_control_is_on = True
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
 

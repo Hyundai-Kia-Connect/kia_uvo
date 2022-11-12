@@ -40,6 +40,7 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     ),
 )
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -51,7 +52,9 @@ async def async_setup_entry(
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:
-                entities.append(HyundaiKiaChargingLimitNumber(coordinator, description, vehicle))
+                entities.append(
+                    HyundaiKiaChargingLimitNumber(coordinator, description, vehicle)
+                )
 
     async_add_entities(entities)
     return True
@@ -104,6 +107,8 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
             if self.entity_description.key == AC_CHARGING_LIMIT_KEY
             else EvChargeLimits(ac=vehicle.ev_charge_limits.ac, dc=value)
         )
-        await self.coordinator.async_set_charge_limits(self.vehicle.id, EvChargeLimits(ac=value, dc=current_limits.dc))
+        await self.coordinator.async_set_charge_limits(
+            self.vehicle.id, EvChargeLimits(ac=value, dc=current_limits.dc)
+        )
 
         self.async_write_ha_state()

@@ -23,7 +23,7 @@ PLATFORMS: list[str] = [
     Platform.DEVICE_TRACKER,
     Platform.LOCK,
     Platform.NUMBER,
-    #Platform.CLIMATE,
+    # Platform.CLIMATE,
 ]
 
 
@@ -38,8 +38,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()
-    except (asyncio.TimeoutError, TimeoutException) as ex:
-        raise ConfigEntryNotReady(f"Timeout while connecting")
+    except Exception as ex:
+        raise ConfigEntryNotReady(f"Config Not Ready: {ex}")
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
     hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
