@@ -75,6 +75,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.front_left_door_is_open,
         on_icon="mdi:car-door",
         off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_door_is_open",
@@ -82,6 +83,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.front_right_door_is_open,
         on_icon="mdi:car-door",
         off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="back_left_door_is_open",
@@ -89,6 +91,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.back_left_door_is_open,
         on_icon="mdi:car-door",
         off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="back_right_door_is_open",
@@ -96,6 +100,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.back_right_door_is_open,
         on_icon="mdi:car-door",
         off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="trunk_is_open",
@@ -110,6 +116,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.hood_is_open,
         on_icon="mdi:car",
         off_icon="mdi:car",
+        device_class=BinarySensorDeviceClass.DOOR,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="ev_battery_is_charging",
@@ -150,6 +157,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.tire_pressure_all_warning_is_on,
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="tire_pressure_rear_left_warning_is_on",
@@ -157,6 +165,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.tire_pressure_rear_left_warning_is_on,
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="tire_pressure_front_left_warning_is_on",
@@ -164,6 +173,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.tire_pressure_front_left_warning_is_on,
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="tire_pressure_front_right_warning_is_on",
@@ -171,6 +181,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.tire_pressure_front_right_warning_is_on,
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="tire_pressure_rear_right_warning_is_on",
@@ -178,6 +189,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.tire_pressure_rear_right_warning_is_on,
         on_icon="mdi:car-tire-alert",
         off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="air_control_is_on",
