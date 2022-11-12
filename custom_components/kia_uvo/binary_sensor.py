@@ -146,7 +146,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         device_class=BinarySensorDeviceClass.BATTERY,       
     ),
     HyundaiKiaBinarySensorEntityDescription(
-    HyundaiKiaBinarySensorEntityDescription(
         key="washer_fluid_warning_is_on",
         name="Washer Fluid Warning",
         is_on=lambda vehicle: vehicle.washer_fluid_warning_is_on,
