@@ -70,7 +70,7 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
         description: NumberEntityDescription,
         vehicle: Vehicle,
     ) -> None:
-        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+        super().__init__(coordinator, vehicle)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
         self.entity_description = description
         self._vehicle_manager = coordinator.vehicle_manager
