@@ -15,9 +15,9 @@ class HyundaiKiaConnectEntity(CoordinatorEntity):
     @property
     def device_info(self):
         """Return device information to use for this entity."""
-        return {
-            "identifiers": {(DOMAIN, self.vehicle.id)},
-            "manufacturer": f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
-            "model": self.vehicle.model,
-            "name": self.vehicle.name,
-        }
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.vehicle.id)},
+            manufacturer=f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
+            model=self.vehicle.model,
+            name=self.vehicle.name,
+        )
