@@ -172,7 +172,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         self, coordinator, description: SensorEntityDescription, vehicle: Vehicle
     ):
         """Initialize the sensor."""
-        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+        super().__init__(coordinator, vehicle)
         self._description = description
         self._key = self._description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
