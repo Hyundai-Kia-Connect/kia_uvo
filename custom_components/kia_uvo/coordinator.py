@@ -129,40 +129,47 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def async_lock_vehicle(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(self.vehicle_manager.lock, vehicle_id)
         await self.async_request_refresh()
 
     async def async_unlock_vehicle(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(self.vehicle_manager.unlock, vehicle_id)
         await self.async_request_refresh()
 
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.start_climate, vehicle_id, climate_options
         )
         await self.async_request_refresh()
 
     async def async_stop_climate(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_climate, vehicle_id
         )
         await self.async_request_refresh()
 
     async def async_start_charge(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_charge, vehicle_id
         )
         await self.async_request_refresh()
 
     async def async_stop_charge(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_charge, vehicle_id
         )
         await self.async_request_refresh()
 
     async def set_charge_limits(self, vehicle_id: str, ev_limits: EvChargeLimits):
+        await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.set_charge_limits, vehicle_id, ev_limits
         )
