@@ -112,7 +112,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.update_all_vehicles_with_cached_state
         )
-        await self.async_write_ha_state()
+        await self.async_refresh()
 
     async def async_force_update_all(self) -> None:
         """Force refresh vehicle data and update it."""
@@ -120,7 +120,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_all_vehicles_states
         )
-        await self.async_write_ha_state()
+        await self.async_refresh()
 
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
