@@ -4,8 +4,8 @@
   "documentation": "https://github.com/fuatakgun/kia_uvo",
   "issue_tracker": "https://github.com/fuatakgun/kia_uvo/issues",
   "codeowners": ["@fuatakgun"],
-  "requirements": ["hyundai_kia_connect_api==1.39.2"],
-  "version": "2.0.27",
+  "requirements": ["hyundai_kia_connect_api==1.39.4"],
+  "version": "2.0.28",
   "config_flow": true,
   "iot_class": "cloud_polling",
   "integration_type": "hub"
