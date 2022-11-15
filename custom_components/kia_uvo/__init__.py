@@ -9,6 +9,7 @@ from homeassistant.const import (
     CONF_PASSWORD,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 import hashlib
 
 from .const import DOMAIN, CONF_BRAND, DEFAULT_PIN, BRANDS, REGIONS
