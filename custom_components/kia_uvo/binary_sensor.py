@@ -150,6 +150,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.washer_fluid_warning_is_on,
         on_icon="mdi:wiper-wash-alert",
         off_icon="mdi:wiper-wash",
+        device_class=BinarySensorDeviceClass.PROBLEM,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="tire_pressure_all_warning_is_on",
