@@ -27,8 +27,8 @@ _LOGGER = logging.getLogger(__name__)
 
 SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(
-        key="_total_driving_distance",
-        name="Total Driving Distance",
+        key="_total_driving_range",
+        name="Total Driving Range",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
@@ -70,14 +70,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
-        key="_ev_driving_distance",
+        key="_ev_driving_range",
         name="EV Range",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="_fuel_driving_distance",
-        name="Fuel Driving Distance",
+        key="_fuel_driving_range",
+        name="Fuel Driving Range",
         icon="mdi:road-variant",
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
