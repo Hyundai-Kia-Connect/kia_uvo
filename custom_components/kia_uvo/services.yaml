@@ -70,7 +70,7 @@ start_climate:
     heating:
       name: Heating
       description: Heated features like the steering wheel and rear window
-      required: false
+      required: true
       example: false
       default: false  
       selector:
