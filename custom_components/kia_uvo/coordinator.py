@@ -1,7 +1,7 @@
 """Coordinator for Hyundai / Kia Connect integration."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import *
 import logging
 from site import venv
 
@@ -97,12 +97,25 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
-
-        await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_force_update_vehicles,
-            self.force_refresh_interval,
-        )
+        if (
+            (no_force_scan_hour_start <= no_force_scan_hour_finish)
+            and (
+                datetime.now(local_timezone) < no_force_scan_hour_start
+                or datetime.utcnow() >= no_force_scan_hour_finish
+            )
+        ) or (
+            (no_force_scan_hour_start >= no_force_scan_hour_finish)
+            and (
+                datetime.now(local_timezone) < no_force_scan_hour_start
+                and datetime.now(local_timezone) >= no_force_scan_hour_finish
+            )
+        ):
+            await self.async_check_and_refresh_token()
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_force_update_vehicles,
+                self.force_refresh_interval,
+            )
+        
 
         return self.data
 
