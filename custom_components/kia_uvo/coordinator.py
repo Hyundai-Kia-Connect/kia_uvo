@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+
 import logging
 from site import venv
 
@@ -21,6 +22,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_BRAND,
@@ -97,12 +99,30 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
-
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_force_update_vehicles,
-            self.force_refresh_interval,
-        )
+        current_hour = dt_util.now().hour
+
+        if (
+            (self.no_force_refresh_hour_start <= self.no_force_refresh_hour_finish)
+            and (
+                current_hour < self.no_force_refresh_hour_start
+                or current_hour >= no_force_refresh_hour_finish
+            )
+        ) or (
+            (self.no_force_refresh_hour_start >= self.no_force_refresh_hour_finish)
+            and (
+                current_hour < self.no_force_refresh_hour_start
+                and current_hour >= self.no_force_refresh_hour_finish
+            )
+        ):
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_force_update_vehicles,
+                self.force_refresh_interval,
+            )
+        else: 
+            await self.hass.async_add_executor_job(self.vehicle_manager.update_all_vehicles_with_cached_state)
+            
+        
 
         return self.data
 
