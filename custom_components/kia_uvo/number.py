@@ -73,7 +73,6 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = self._description.icon
         self._attr_name = f"{vehicle.name} {self._description.name}"
-        self._attr_state_class = self._description.state_class
         self._attr_device_class = self._description.device_class
 
     @property
