@@ -98,13 +98,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
         if (
-            (no_force_scan_hour_start <= no_force_scan_hour_finish)
+            (no_force_refresh_hour_start <= no_force_refresh_hour_finish)
             and (
-                datetime.now(local_timezone) < no_force_scan_hour_start
+                datetime.now(local_timezone) < no_force_refresh_hour_start
                 or datetime.utcnow() >= no_force_scan_hour_finish
             )
         ) or (
-            (no_force_scan_hour_start >= no_force_scan_hour_finish)
+            (no_force_refresh_hour_start >= no_force_refresh_hour_finish)
             and (
                 datetime.now(local_timezone) < no_force_scan_hour_start
                 and datetime.now(local_timezone) >= no_force_scan_hour_finish
