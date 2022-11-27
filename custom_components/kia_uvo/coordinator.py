@@ -1,7 +1,7 @@
 """Coordinator for Hyundai / Kia Connect integration."""
 from __future__ import annotations
 
-from datetime import *
+from datetime import timedelta
 
 import logging
 from site import venv
