@@ -53,17 +53,14 @@ async def async_setup_entry(
         for description in NUMBER_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:
                 entities.append(
-                    HyundaiKiaChargingLimitNumber(coordinator, description, vehicle)
+                    HyundaiKiaConnectNumber(coordinator, description, vehicle)
                 )
 
     async_add_entities(entities)
     return True
 
 
-class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
-    _vehicle_manager: VehicleManager
-    _vehicle: Vehicle
-
+class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
@@ -71,10 +68,14 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         super().__init__(coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
-        self.entity_description = description
-        self._vehicle_manager = coordinator.vehicle_manager
-        self._vehicle = vehicle
+        self._description = description
+        self._key = self._description.key
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
+        self._attr_icon = self._description.icon
+        self._attr_name = f"{vehicle.name} {self._description.name}"
+        self._attr_state_class = self._description.state_class
+        self._attr_device_class = self._description.device_class
+
 
     @property
     def native_value(self) -> float | None:
@@ -92,12 +93,12 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
 
         if (
             self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            and vehicle.ev_charge_limits.ac == int(value)
+            and self.vehicle.ev_charge_limits.ac == int(value)
         ):
             return
         if (
             self.entity_description.key == DC_CHARGING_LIMIT_KEY
-            and vehicle.ev_charge_limits.dc == int(value)
+            and self.vehicle.ev_charge_limits.dc == int(value)
         ):
             return
 
@@ -105,7 +106,7 @@ class HyundaiKiaChargingLimitNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._vehicle.ev_charge_limits = (
             EvChargeLimits(ac=value, dc=vehicle.ev_charge_limits.dc)
             if self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            else EvChargeLimits(ac=vehicle.ev_charge_limits.ac, dc=value)
+            else EvChargeLimits(ac=self.vehicle.ev_charge_limits.ac, dc=value)
         )
         await self.coordinator.async_set_charge_limits(
             self.vehicle.id, EvChargeLimits(ac=value, dc=current_limits.dc)
