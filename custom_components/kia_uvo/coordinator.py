@@ -119,10 +119,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 self.vehicle_manager.check_and_force_update_vehicles,
                 self.force_refresh_interval,
             )
-        else: 
-            await self.hass.async_add_executor_job(self.vehicle_manager.update_all_vehicles_with_cached_state)
-            
-        
+        else:
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.update_all_vehicles_with_cached_state
+            )
 
         return self.data
 

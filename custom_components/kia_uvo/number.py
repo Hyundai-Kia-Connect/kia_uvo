@@ -76,7 +76,6 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._attr_state_class = self._description.state_class
         self._attr_device_class = self._description.device_class
 
-
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
