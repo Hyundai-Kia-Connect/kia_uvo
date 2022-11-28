@@ -115,10 +115,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 and current_hour >= self.no_force_refresh_hour_finish
             )
         ):
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.check_and_force_update_vehicles,
-                self.force_refresh_interval,
-            )
+            try:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.check_and_force_update_vehicles,
+                    self.force_refresh_interval,
+                )
+            except Exception as Argument : 
+                await self.hass.async_add_executor_job(
+                self.vehicle_manager.update_all_vehicles_with_cached_state
+                )
+                _LOGGER.exception("Force update failed, falling back to cached.")
+                
+                
         else:
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.update_all_vehicles_with_cached_state
