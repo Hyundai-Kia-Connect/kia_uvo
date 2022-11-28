@@ -101,7 +101,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
             return
 
         # set new limits
-        self._vehicle.ev_charge_limits = (
+        self.vehicle.ev_charge_limits = (
             EvChargeLimits(ac=value, dc=vehicle.ev_charge_limits.dc)
             if self.entity_description.key == AC_CHARGING_LIMIT_KEY
             else EvChargeLimits(ac=self.vehicle.ev_charge_limits.ac, dc=value)
