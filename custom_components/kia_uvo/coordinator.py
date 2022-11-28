@@ -106,7 +106,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             (self.no_force_refresh_hour_start <= self.no_force_refresh_hour_finish)
             and (
                 current_hour < self.no_force_refresh_hour_start
-                or current_hour >= no_force_refresh_hour_finish
+                or current_hour >= self.no_force_refresh_hour_finish
             )
         ) or (
             (self.no_force_refresh_hour_start >= self.no_force_refresh_hour_finish)
