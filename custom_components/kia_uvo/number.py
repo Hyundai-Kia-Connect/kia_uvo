@@ -73,13 +73,12 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = self._description.icon
         self._attr_name = f"{vehicle.name} {self._description.name}"
-        self._attr_state_class = self._description.state_class
         self._attr_device_class = self._description.device_class
 
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
-        if self.entity_description.key == AC_CHARGING_LIMIT_KEY:
+        if self._key == AC_CHARGING_LIMIT_KEY:
             return self.vehicle.ev_charge_limits.ac
         else:
             return self.vehicle.ev_charge_limits.dc
@@ -102,7 +101,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
             return
 
         # set new limits
-        self._vehicle.ev_charge_limits = (
+        self.vehicle.ev_charge_limits = (
             EvChargeLimits(ac=value, dc=vehicle.ev_charge_limits.dc)
             if self.entity_description.key == AC_CHARGING_LIMIT_KEY
             else EvChargeLimits(ac=self.vehicle.ev_charge_limits.ac, dc=value)
