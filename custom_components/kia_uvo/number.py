@@ -78,7 +78,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
-        if self.entity_description.key == AC_CHARGING_LIMIT_KEY:
+        if self._key == AC_CHARGING_LIMIT_KEY:
             return self.vehicle.ev_charge_limits.ac
         else:
             return self.vehicle.ev_charge_limits.dc
