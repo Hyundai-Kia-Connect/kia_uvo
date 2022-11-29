@@ -5,7 +5,6 @@ import logging
 from typing import Final
 
 from hyundai_kia_connect_api import Vehicle, VehicleManager
-from hyundai_kia_connect_api.Vehicle import EvChargeLimits
 
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -18,8 +17,8 @@ from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-AC_CHARGING_LIMIT_KEY = "_ac_charging_limit"
-DC_CHARGING_LIMIT_KEY = "_dc_charging_limit"
+AC_CHARGING_LIMIT_KEY = "ev_charge_limits_ac"
+DC_CHARGING_LIMIT_KEY = "ev_charge_limits_dc"
 
 NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
@@ -78,10 +77,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
-        if self._key == AC_CHARGING_LIMIT_KEY:
-            return self.vehicle.ev_charge_limits.ac
-        else:
-            return self.vehicle.ev_charge_limits.dc
+        return getattr(self.vehicle, self._key)
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new charging limit."""
@@ -91,23 +87,24 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
 
         if (
             self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            and self.vehicle.ev_charge_limits.ac == int(value)
+            and self.vehicle.ev_charge_limits_ac == int(value)
         ):
             return
         if (
             self.entity_description.key == DC_CHARGING_LIMIT_KEY
-            and self.vehicle.ev_charge_limits.dc == int(value)
+            and self.vehicle.ev_charge_limits_dc == int(value)
         ):
             return
 
         # set new limits
-        self.vehicle.ev_charge_limits = (
-            EvChargeLimits(ac=value, dc=vehicle.ev_charge_limits.dc)
-            if self.entity_description.key == AC_CHARGING_LIMIT_KEY
-            else EvChargeLimits(ac=self.vehicle.ev_charge_limits.ac, dc=value)
-        )
+        if self.entity_description.key == AC_CHARGING_LIMIT_KEY:
+            ac=value
+            dc=self.vehicle.ev_charge_limits_dc
+        else: 
+            ac=self.vehicle.ev_charge_limits_ac 
+            dc=value     
         await self.coordinator.async_set_charge_limits(
-            self.vehicle.id, EvChargeLimits(ac=value, dc=current_limits.dc)
+            self.vehicle.id, ac, dc
         )
 
         self.async_write_ha_state()

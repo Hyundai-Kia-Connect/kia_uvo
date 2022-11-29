@@ -9,7 +9,6 @@ from site import venv
 from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
-    EvChargeLimits,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -188,9 +187,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
         await self.async_request_refresh()
 
-    async def set_charge_limits(self, vehicle_id: str, ev_limits: EvChargeLimits):
+    async def set_charge_limits(self, vehicle_id: str, ac: int, dc: int):
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
-            self.vehicle_manager.set_charge_limits, vehicle_id, ev_limits
+            self.vehicle_manager.set_charge_limits, vehicle_id, ac, dc)
         )
         await self.async_request_refresh()
