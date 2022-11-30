@@ -106,6 +106,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, dc)
 
         self.async_write_ha_state()
+
     @property
     def native_min_value(self):
         """Return native_min_value as reported in by the sensor"""
