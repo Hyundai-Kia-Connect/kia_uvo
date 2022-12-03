@@ -37,7 +37,7 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         icon="mdi:ev-plug-ccs2",
         native_min_value=50,
         native_max_value=100,
-        native_step=10,        
+        native_step=10,
         native_unit_of_measurement=PERCENTAGE,
     ),
 )
