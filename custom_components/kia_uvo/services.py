@@ -123,6 +123,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_START_CHARGE: async_handle_start_charge,
         SERVICE_STOP_CHARGE: async_handle_stop_charge,
         SERVICE_SET_CHARGE_LIMIT: async_handle_set_charge_limit,
+        SERVICE_OPEN_CHARGE_PORT: async_handle_open_charge_port,
+        SERVICE_CLOSE_CHARGE_PORT: async_handle_close_charge_port,
+
     }
 
     for service in SUPPORTED_SERVICES:
