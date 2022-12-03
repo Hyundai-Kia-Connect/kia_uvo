@@ -7,11 +7,12 @@ from typing import Final
 from hyundai_kia_connect_api import Vehicle, VehicleManager
 
 from homeassistant.components.number import NumberEntity, NumberEntityDescription
+from homeassistant.const import PERCENTAGE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -28,6 +29,7 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         native_min_value=50,
         native_max_value=100,
         native_step=10,
+        native_unit_of_measurement=PERCENTAGE,
     ),
     NumberEntityDescription(
         key=DC_CHARGING_LIMIT_KEY,
@@ -35,7 +37,8 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         icon="mdi:ev-plug-ccs2",
         native_min_value=50,
         native_max_value=100,
-        native_step=10,
+        native_step=10,        
+        native_unit_of_measurement=PERCENTAGE,
     ),
 )
 
@@ -121,3 +124,11 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     def native_step(self):
         """Return step value as reported in by the sensor"""
         return self._description.native_step
+
+    @property
+    def native_unit_of_measurement(self):
+        """Return the unit the value was reported in by the sensor"""
+        if self._description.native_unit_of_measurement == DYNAMIC_UNIT:
+            return getattr(self.vehicle, self._key + "_unit")
+        else:
+            return self._description.native_unit_of_measurement
