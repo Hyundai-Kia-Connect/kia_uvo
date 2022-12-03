@@ -226,6 +226,26 @@ unlock:
       selector: 
         device: 
           integration: kia_uvo
+close_charge_port:
+  description: Close Charge Port
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+open_charge_port:
+  description: Open Charge Port
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo        
 set_charge_limits:
   description: sets ac and dc charge capacity limits
   fields:

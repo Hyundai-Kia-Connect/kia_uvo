@@ -20,6 +20,8 @@ SERVICE_START_CLIMATE = "start_climate"
 SERVICE_START_CHARGE = "start_charge"
 SERVICE_STOP_CHARGE = "stop_charge"
 SERVICE_SET_CHARGE_LIMIT = "set_charge_limits"
+SERVICE_OPEN_CHARGE_PORT = "open_charge_port"
+SERVICE_CLOSE_CHARGE_PORT = "close_charge_port"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -31,6 +33,8 @@ SUPPORTED_SERVICES = (
     SERVICE_START_CHARGE,
     SERVICE_STOP_CHARGE,
     SERVICE_SET_CHARGE_LIMIT,
+    SERVICE_OPEN_CHARGE_PORT,
+    SERVICE_CLOSE_CHARGE_PORT,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -78,8 +82,17 @@ def async_setup_services(hass: HomeAssistant) -> bool:
     async def async_handle_unlock(call):
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
-
         await coordinator.async_unlock_vehicle(vehicle_id)
+
+    async def async_handle_open_charge_port(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_open_charge_port(vehicle_id)
+
+    async def async_handle_close_charge_port(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_close_charge_port(vehicle_id)
 
     async def async_handle_start_charge(call):
         coordinator = _get_coordinator_from_device(hass, call)

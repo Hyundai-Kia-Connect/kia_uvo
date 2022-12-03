@@ -157,6 +157,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(self.vehicle_manager.unlock, vehicle_id)
         await self.async_request_refresh()
 
+    async def async_open_charge_port(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
+        await self.hass.async_add_executor_job(self.vehicle_manager.open_charge_port, vehicle_id)
+        await self.async_request_refresh()
+
+    async def async_close_charge_port(self, vehicle_id: str):
+        await self.async_check_and_refresh_token()
+        await self.hass.async_add_executor_job(self.vehicle_manager.close_charge_port, vehicle_id)
+        await self.async_request_refresh()
+
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
