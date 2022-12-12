@@ -199,6 +199,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         on_icon="mdi:air-conditioner",
         off_icon="mdi:air-conditioner",
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_charge_port_door_is_open",
+        name="EV Charge Port",
+        is_on=lambda vehicle: vehicle.ev_charge_port_door_is_open,
+        on_icon="mdi:ev-station",
+        off_icon="mdi:ev-station",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
 )
 
 
