@@ -36,6 +36,16 @@ You can install this either manually copying files or using HACS. Configuration 
 - start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate. 
 - start_charge / stop_charge: You can control your charging using these services
 - set_charge_limits: You can control your charging capacity limits using this services (USA Kia Only)
+- open_charge_port / close_charge_port:  Open or close the charge port.
+
+| Service       | EU        | CA        | USA Kia        | USA Hyundai        |
+| ------------- | --        | --        | --------       | ------------       |
+| Update        | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| Force Update  | &#10004;  | &#10004;  | &#10004;       |           |
+| start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| start stop charge  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| set charge limits  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| open and close charge port  | &#10004;  |   | |          |
 
 I have posted an example screenshot from my own car.
 
