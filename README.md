@@ -12,7 +12,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
 - It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
-- By default, distance unit is based on HA metric/imperial preference, you need to configure the integration if you want to change the distance unit.
+- By default, distance unit is based on HA metric/imperial preference, you need to configure each entity if you would like other units.
 
 ## Supported entities ##
 - Air Conditioner Status, Defroster Status, Set Temperature
@@ -28,7 +28,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - Last Service and Next Service in Canada
 - Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
 - Latest Update
-- Configurable distance units, cache update interval, force update interval, blackout start and finish hours
+- cache update interval, force update interval, blackout start and finish hours
 
 ## Supported services ##
 - update: get latest **cached** vehicle data
