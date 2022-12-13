@@ -138,6 +138,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Average Energy Consumption",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=f"{ENERGY_WATT_HOUR}/100km"
     ),
     SensorEntityDescription(
         key="front_left_seat_status",
