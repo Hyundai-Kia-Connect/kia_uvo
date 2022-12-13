@@ -13,7 +13,18 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 import hashlib
 
-from .const import DOMAIN, CONF_BRAND, DEFAULT_PIN, BRANDS, REGIONS, CONF_FORCE_REFRESH_INTERVAL, CONF_NO_FORCE_REFRESH_HOUR_FINISH, CONF_NO_FORCE_REFRESH_HOUR_START, CONF_ENABLE_GEOLOCATION_ENTITY, CONF_USE_EMAIL_WITH_GEOCODE_API
+from .const import (
+    DOMAIN,
+    CONF_BRAND,
+    DEFAULT_PIN,
+    BRANDS,
+    REGIONS,
+    CONF_FORCE_REFRESH_INTERVAL,
+    CONF_NO_FORCE_REFRESH_HOUR_FINISH,
+    CONF_NO_FORCE_REFRESH_HOUR_START,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+)
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .services import async_setup_services, async_unload_services
 
@@ -70,9 +81,15 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         region = config_entry.data.get(CONF_REGION, "")
         brand = config_entry.data.get(CONF_BRAND, "")
         geolocation_enable = config_entry.data.get(CONF_ENABLE_GEOLOCATION_ENTITY, "")
-        geolocation_use_email = config_entry.data.get(CONF_USE_EMAIL_WITH_GEOCODE_API, "")
-        no_force_finish_hour = config_entry.data.get(CONF_NO_FORCE_REFRESH_HOUR_FINISH, "")
-        no_force_start_hour = config_entry.data.get(CONF_NO_FORCE_REFRESH_HOUR_START, "")
+        geolocation_use_email = config_entry.data.get(
+            CONF_USE_EMAIL_WITH_GEOCODE_API, ""
+        )
+        no_force_finish_hour = config_entry.data.get(
+            CONF_NO_FORCE_REFRESH_HOUR_FINISH, ""
+        )
+        no_force_start_hour = config_entry.data.get(
+            CONF_NO_FORCE_REFRESH_HOUR_START, ""
+        )
         force_refresh_interval = config_entry.data.get(CONF_FORCE_REFRESH_INTERVAL, "")
         scan_interval = config_entry.data.get(CONF_SCAN_INTERVAL, "")
         title = f"{BRANDS[brand]} {REGIONS[region]} {username}"
