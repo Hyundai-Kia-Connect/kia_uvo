@@ -13,7 +13,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import PERCENTAGE, TIME_MINUTES, ENERGY_WATT_HOUR
+from homeassistant.const import PERCENTAGE, TIME_MINUTES, ENERGY_WATT_HOUR, ENERGY_KILO_WATT_HOUR
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -132,6 +132,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Average Energy Consumption",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=f"{ENERGY_KILO_WATT_HOUR}/100km"
     ),
     SensorEntityDescription(
         key="front_left_seat_status",
