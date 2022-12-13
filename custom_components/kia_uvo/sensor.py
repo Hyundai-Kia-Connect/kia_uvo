@@ -30,6 +30,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="_total_driving_range",
         name="Total Driving Range",
         icon="mdi:road-variant",
+        device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
@@ -37,18 +38,21 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Odometer",
         icon="mdi:speedometer",
         native_unit_of_measurement=DYNAMIC_UNIT,
+        device_class=SensorDeviceClass.DISTANCE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_last_service_distance",
         name="Last Service",
         icon="mdi:car-wrench",
+        device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
         key="_next_service_distance",
         name="Next Service",
         icon="mdi:car-wrench",
+        device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
@@ -74,12 +78,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="_ev_driving_range",
         name="EV Range",
         icon="mdi:road-variant",
+        device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
         key="_fuel_driving_range",
         name="Fuel Driving Range",
         icon="mdi:road-variant",
+        device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
