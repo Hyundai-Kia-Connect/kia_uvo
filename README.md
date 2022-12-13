@@ -41,8 +41,8 @@ You can install this either manually copying files or using HACS. Configuration 
 | Update        | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
 | Force Update  | &#10004;  | &#10004;  | &#10004;       |           |
 | start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
-| start stop charge  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
-| set charge limits  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| start stop charge  | &#10004;  | &#10004;  | &#10004;       |            |
+| set charge limits  | &#10004;  | &#10004;  | &#10004;       |            |
 | open and close charge port  | &#10004;  |   | |          |
 
 I have posted an example screenshot from my own car.
