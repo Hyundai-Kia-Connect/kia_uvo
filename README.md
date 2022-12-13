@@ -3,8 +3,6 @@
 
 I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This now uses our underlying python package: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api. 
 
-Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time.
-
 ## Installation ##
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing, a PR for this would be great!). 
 - EU, CAD and US is supported by this.  USA support is limited. 
