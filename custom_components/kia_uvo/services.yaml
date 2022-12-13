@@ -1,11 +1,34 @@
-force_update:
-  description: Force your vehicle to update its data
-update:
-  description: Update vehicle data from cache
+force_update: 
+  description: Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+update: 
+  description: Update vehicle data from service cache
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
 start_climate:
-  description: TEST - Please use cautiously - start car and climate. Not all items available for all cars.  Refer to Hyundai or Kia app for which are supported for your car. 
-  fields:
-    Duration:
+  description: Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your cars mobile app as a guide and match the options available in your car. 
+  fields: 
+    device_id:
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+    duration:
       name: Duration
       description: On Duration
       required: false
@@ -17,18 +40,17 @@ start_climate:
             max: 10
             step: 1
             unit_of_measurement: minutes
-    Climate:
+    climate:
       name: Climate
       description: Enable the HVAC System
-      required: false
-      example: true
+      required: true
       default: true  
       selector:
         boolean: 
-    Temperature:
+    temperature:
       name: Temperature
-      description: Set temperature of climate control. Unit is specific to region. For US Kia, anything lower than 62 will be translated to 'LOW' and anything higher than 82 will be translated to 'HIGH', in accordance with the vehicle and the UVO app.
-      required: false
+      description: Set temperature of climate control. Unit is specific to region.
+      required: true
       example: 21.5
       default: 21
       selector:
@@ -38,35 +60,202 @@ start_climate:
             step: 0.5
             mode: box
             unit_of_measurement: Degrees
-    Defrost:
+    defrost:
       name: Defrost
       description: Front Windshield Defrost
       required: false
-      example: false
       default: false
       selector:
         boolean:
-    Heating:
+    heating:
       name: Heating
       description: Heated features like the steering wheel and rear window
-      required: false
+      required: true
       example: false
       default: false  
       selector:
-        boolean:  
+        select:  
+          options:
+            - label: "Off"
+              value: "0"
+            - label: "Steering Wheel, Side and Back Defroster"
+              value: "1"
+            - label: "Rear Window Only"
+              value: "2"
+            - label: "Steering Wheel Only"
+              value: "3"
+    flseat:
+      name: Front Left Seat
+      description: Front Left Seat Heat Cool Setting
+      required: false
+      selector:
+        select:
+          options:  
+            - label: "Off"
+              value: "0"
+            - label: "On"
+              value: "1"
+            - label: "Low Cool"
+              value: "3"
+            - label: "Medium Cool"
+              value: "4"
+            - label: "High Cool"
+              value: "5"
+            - label: "Low Heat"
+              value: "6"
+            - label: "Medium Heat"
+              value: "7"
+            - label: "High Heat"
+              value: "8" 
+    frseat:
+      name: Front Right Seat
+      description: Front Right Seat Heat Cool Setting
+      required: false
+      selector:
+        select:
+          options:  
+            - label: "Off"
+              value: "0"
+            - label: "On"
+              value: "1"
+            - label: "Low Cool"
+              value: "3"
+            - label: "Medium Cool"
+              value: "4"
+            - label: "High Cool"
+              value: "5"
+            - label: "Low Heat"
+              value: "6"
+            - label: "Medium Heat"
+              value: "7"
+            - label: "High Heat"
+              value: "8"  
+    rlseat:
+      name: Rear Left Seat
+      description: Rear Left Seat Heat Cool Setting
+      required: false
+      selector:
+        select:
+          options:  
+            - label: "Off"
+              value: "0"
+            - label: "On"
+              value: "1"
+            - label: "Low Cool"
+              value: "3"
+            - label: "Medium Cool"
+              value: "4"
+            - label: "High Cool"
+              value: "5"
+            - label: "Low Heat"
+              value: "6"
+            - label: "Medium Heat"
+              value: "7"
+            - label: "High Heat"
+              value: "8" 
+    rrseat:
+      name: Rear Right Seat
+      description: Rear Rear Seat Heat Cool Setting
+      required: false
+      selector:
+        select:
+          options:  
+            - label: "Off"
+              value: "0"
+            - label: "On"
+              value: "1"
+            - label: "Low Cool"
+              value: "3"
+            - label: "Medium Cool"
+              value: "4"
+            - label: "High Cool"
+              value: "5"
+            - label: "Low Heat"
+              value: "6"
+            - label: "Medium Heat"
+              value: "7"
+            - label: "High Heat"
+              value: "8" 
 stop_climate:
-  description: TEST - Please use cautiously - stop car and climate
+  description: Please use cautiously - stop car and climate
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle 
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
 start_charge:
   description: Start charging
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
 stop_charge:
   description: Stop charging
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
 lock:
   description: Lock the vehicle
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
 unlock:
   description: Unlock the vehicle
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+close_charge_port:
+  description: Close Charge Port
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
+open_charge_port:
+  description: Open Charge Port
+  fields: 
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo        
 set_charge_limits:
   description: sets ac and dc charge capacity limits
   fields:
+    device_id: 
+      name: Vehicle
+      description: Target vehicle
+      required: true
+      selector: 
+        device: 
+          integration: kia_uvo
     dc_limit:
       name: DC Charge limit
       description: max charge capacity using DC charger

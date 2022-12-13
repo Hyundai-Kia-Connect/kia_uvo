@@ -1,361 +1,265 @@
+"""Sensor for Hyundai / Kia Connect integration."""
+from __future__ import annotations
+
+from collections.abc import Callable
+from dataclasses import dataclass
 import logging
+from typing import Final
+
+from hyundai_kia_connect_api import Vehicle
 
 from homeassistant.components.binary_sensor import (
-    DEVICE_CLASS_BATTERY_CHARGING,
-    DEVICE_CLASS_PLUG,
-    DEVICE_CLASS_PROBLEM,
-    DEVICE_CLASS_LOCK,
-    DEVICE_CLASS_DOOR,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_HEAT,
+    BinarySensorDeviceClass,
+    BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .Vehicle import Vehicle
-from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_ENGINE_TYPE
+from .const import DOMAIN
+from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
+@dataclass
+class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
+    """A class that describes custom binary sensor entities."""
 
-    BINARY_INSTRUMENTS = [
-        (
-            "hood",
-            "Hood",
-            "vehicleStatus.hoodOpen",
-            "mdi:car",
-            "mdi:car",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "trunk",
-            "Trunk",
-            "vehicleStatus.trunkOpen",
-            "mdi:car-back",
-            "mdi:car-back",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "frontLeft",
-            "Door - Front Left",
-            "vehicleStatus.doorOpen.frontLeft",
-            "mdi:car-door",
-            "mdi:car-door",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "frontRight",
-            "Door - Front Right",
-            "vehicleStatus.doorOpen.frontRight",
-            "mdi:car-door",
-            "mdi:car-door",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "backLeft",
-            "Door - Rear Left",
-            "vehicleStatus.doorOpen.backLeft",
-            "mdi:car-door",
-            "mdi:car-door",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "backRight",
-            "Door - Rear Right",
-            "vehicleStatus.doorOpen.backRight",
-            "mdi:car-door",
-            "mdi:car-door",
-            DEVICE_CLASS_DOOR,
-        ),
-        (
-            "engine",
-            "Engine",
-            "vehicleStatus.engine",
-            "mdi:engine",
-            "mdi:engine-off",
-            DEVICE_CLASS_POWER,
-        ),
-        (
-            "tirePressureLampAll",
-            "Tire Pressure - All",
-            "vehicleStatus.tirePressureLamp.tirePressureLampAll",
-            "mdi:car-tire-alert",
-            "mdi:car-tire-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "tirePressureLampFL",
-            "Tire Pressure - Front Left",
-            "vehicleStatus.tirePressureLamp.tirePressureLampFL",
-            "mdi:car-tire-alert",
-            "mdi:car-tire-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "tirePressureLampFR",
-            "Tire Pressure - Front Right",
-            "vehicleStatus.tirePressureLamp.tirePressureLampFR",
-            "mdi:car-tire-alert",
-            "mdi:car-tire-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "tirePressureLampRL",
-            "Tire Pressure - Rear Left",
-            "vehicleStatus.tirePressureLamp.tirePressureLampRL",
-            "mdi:car-tire-alert",
-            "mdi:car-tire-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "tirePressureLampRR",
-            "Tire Pressure - Rear Right",
-            "vehicleStatus.tirePressureLamp.tirePressureLampRR",
-            "mdi:car-tire-alert",
-            "mdi:car-tire-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "smartKeyBatteryWarning",
-            "Smart Key Battery Warning",
-            "vehicleStatus.smartKeyBatteryWarning",
-            "mdi:battery",
-            "mdi:battery-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "washerFluidStatus",
-            "Washer Fluid Warning",
-            "vehicleStatus.washerFluidStatus",
-            "mdi:wiper-wash",
-            "mdi:wiper-wash-alert",
-            DEVICE_CLASS_PROBLEM,
-        ),
-        (
-            "airConditioner",
-            "Air Conditioner",
-            "vehicleStatus.airCtrlOn",
-            "mdi:air-conditioner",
-            "mdi:air-conditioner",
-            DEVICE_CLASS_POWER,
-        ),
-        (
-            "defrost",
-            "Defroster",
-            "vehicleStatus.defrost",
-            "mdi:car-defrost-front",
-            "mdi:car-defrost-front",
-            None,
-        ),
-        (
-            "backWindowHeater",
-            "Back Window Heater",
-            "vehicleStatus.sideBackWindowHeat",
-            "mdi:car-defrost-rear",
-            "mdi:car-defrost-rear",
-            None,
-        ),
-        (
-            "sideMirrorHeater",
-            "Side Mirror Heater",
-            "vehicleStatus.sideMirrorHeat",
-            "mdi:car-side",
-            "mdi:car-side",
-            None,
-        ),
-        (
-            "steeringWheelHeater",
-            "Steering Wheel Heater",
-            "vehicleStatus.steerWheelHeat",
-            "mdi:steering",
-            "mdi:steering",
-            None,
-        ),
-        (
-            "frSeatHeatState",
-            "Front Right Seat Heater",
-            "vehicleStatus.seatHeaterVentState.frSeatHeatState",
-            "mdi:car-seat-heater",
-            "mdi:car-seat-heater",
-            None,
-        ),
-        (
-            "flSeatHeatState",
-            "Front Left Seat Heater",
-            "vehicleStatus.seatHeaterVentState.flSeatHeatState",
-            "mdi:car-seat-heater",
-            "mdi:car-seat-heater",
-            None,
-        ),
-        (
-            "rrSeatHeatState",
-            "Rear Right Seat Heater",
-            "vehicleStatus.seatHeaterVentState.rrSeatHeatState",
-            "mdi:car-seat-heater",
-            "mdi:car-seat-heater",
-            None,
-        ),
-        (
-            "rlSeatHeatState",
-            "Rear Left Seat Heater",
-            "vehicleStatus.seatHeaterVentState.rlSeatHeatState",
-            "mdi:car-seat-heater",
-            "mdi:car-seat-heater",
-            None,
-        ),
-        (
-            "lowFuelLight",
-            "Low Fuel Light",
-            "vehicleStatus.lowFuelLight",
-            "mdi:gas-station-off",
-            "mdi:gas-station",
-            None,
-        ),
-    ]
+    is_on: Callable[[Vehicle], bool] | None = None
+    on_icon: str | None = None
+    off_icon: str | None = None
 
-    if (
-        vehicle.engine_type is VEHICLE_ENGINE_TYPE.EV
-        or vehicle.engine_type is VEHICLE_ENGINE_TYPE.PHEV
-    ):
-        BINARY_INSTRUMENTS.append(
-            (
-                "charging",
-                "Charging",
-                "vehicleStatus.evStatus.batteryCharge",
-                None,
-                None,
-                DEVICE_CLASS_BATTERY_CHARGING,
-            )
-        )
-        BINARY_INSTRUMENTS.append(
-            (
-                "batteryPreconditioning",
-                "Battery Preconditioning",
-                "vehicleStatus.evStatus.batteryPreconditioning",
-                None,
-                None,
-                DEVICE_CLASS_PLUG,
-            )
-        )
-        BINARY_INSTRUMENTS.append(
-            (
-                "pluggedIn",
-                "Plugged In",
-                "vehicleStatus.evStatus.batteryPlugin",
-                None,
-                None,
-                DEVICE_CLASS_PLUG,
-            )
-        )
-        BINARY_INSTRUMENTS.append(
-            (
-                "chargingPortDoor",
-                "Charging Port Door",
-                "vehicleStatus.evStatus.chargePortDoorOpenStatus",
-                "mdi:ev-plug-type2",
-                "mdi:ev-plug-type2",
-                DEVICE_CLASS_DOOR,
-            )
-        )
 
-    binary_sensors = []
+SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] = (
+    HyundaiKiaBinarySensorEntityDescription(
+        key="engine_is_running",
+        name="Engine",
+        is_on=lambda vehicle: vehicle.engine_is_running,
+        on_icon="mdi:engine",
+        off_icon="mdi:engine-off",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="defrost_is_on",
+        name="Defrost",
+        is_on=lambda vehicle: vehicle.defrost_is_on,
+        on_icon="mdi:car-defrost-front",
+        off_icon="mdi:car-defrost-front",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="steering_wheel_heater_is_on",
+        name="Steering Wheel Heater",
+        is_on=lambda vehicle: vehicle.steering_wheel_heater_is_on,
+        on_icon="mdi:steering",
+        off_icon="mdi:steering",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_window_heater_is_on",
+        name="Back Window Heater",
+        is_on=lambda vehicle: vehicle.back_window_heater_is_on,
+        on_icon="mdi:car-defrost-rear",
+        off_icon="mdi:car-defrost-rear",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="side_mirror_heater_is_on",
+        name="Side Mirror Heater",
+        is_on=lambda vehicle: vehicle.side_mirror_heater_is_on,
+        on_icon="mdi:car-side",
+        off_icon="mdi:car-side",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_left_door_is_open",
+        name="Front Left Door",
+        is_on=lambda vehicle: vehicle.front_left_door_is_open,
+        on_icon="mdi:car-door",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_right_door_is_open",
+        name="Front Right Door",
+        is_on=lambda vehicle: vehicle.front_right_door_is_open,
+        on_icon="mdi:car-door",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_left_door_is_open",
+        name="Back Left Door",
+        is_on=lambda vehicle: vehicle.back_left_door_is_open,
+        on_icon="mdi:car-door",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_right_door_is_open",
+        name="Back Right Door",
+        is_on=lambda vehicle: vehicle.back_right_door_is_open,
+        on_icon="mdi:car-door",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="trunk_is_open",
+        name="Trunk",
+        is_on=lambda vehicle: vehicle.trunk_is_open,
+        on_icon="mdi:car-back",
+        off_icon="mdi:car-back",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="hood_is_open",
+        name="Hood",
+        is_on=lambda vehicle: vehicle.hood_is_open,
+        on_icon="mdi:car",
+        off_icon="mdi:car",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_battery_is_charging",
+        name="EV Battery Charge",
+        is_on=lambda vehicle: vehicle.ev_battery_is_charging,
+        device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_battery_is_plugged_in",
+        name="EV Battery Plug",
+        is_on=lambda vehicle: vehicle.ev_battery_is_plugged_in,
+        device_class=BinarySensorDeviceClass.PLUG,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="fuel_level_is_low",
+        name="Fuel Low Level",
+        is_on=lambda vehicle: vehicle.fuel_level_is_low,
+        on_icon="mdi:gas-station-off",
+        off_icon="mdi:gas-station",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="smart_key_battery_warning_is_on",
+        name="Smart Key Battery Warning",
+        is_on=lambda vehicle: vehicle.smart_key_battery_warning_is_on,
+        on_icon="mdi:battery-alert",
+        off_icon="mdi:battery",
+        device_class=BinarySensorDeviceClass.BATTERY,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="washer_fluid_warning_is_on",
+        name="Washer Fluid Warning",
+        is_on=lambda vehicle: vehicle.washer_fluid_warning_is_on,
+        on_icon="mdi:wiper-wash-alert",
+        off_icon="mdi:wiper-wash",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_all_warning_is_on",
+        name="Tire Pressure - All",
+        is_on=lambda vehicle: vehicle.tire_pressure_all_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_rear_left_warning_is_on",
+        name="Tire Pressure - Rear Left",
+        is_on=lambda vehicle: vehicle.tire_pressure_rear_left_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_front_left_warning_is_on",
+        name="Tire Pressure - Front Left",
+        is_on=lambda vehicle: vehicle.tire_pressure_front_left_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_front_right_warning_is_on",
+        name="Tire Pressure - Front right",
+        is_on=lambda vehicle: vehicle.tire_pressure_front_right_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="tire_pressure_rear_right_warning_is_on",
+        name="Tire Pressure - Rear Right",
+        is_on=lambda vehicle: vehicle.tire_pressure_rear_right_warning_is_on,
+        on_icon="mdi:car-tire-alert",
+        off_icon="mdi:car-tire-alert",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="air_control_is_on",
+        name="Air Conditioner",
+        is_on=lambda vehicle: vehicle.air_control_is_on,
+        on_icon="mdi:air-conditioner",
+        off_icon="mdi:air-conditioner",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_charge_port_door_is_open",
+        name="EV Charge Port",
+        is_on=lambda vehicle: vehicle.ev_charge_port_door_is_open,
+        on_icon="mdi:ev-station",
+        off_icon="mdi:ev-station",
+        device_class=BinarySensorDeviceClass.DOOR,
+    ),
+)
 
-    for id, description, key, on_icon, off_icon, device_class in BINARY_INSTRUMENTS:
-        if vehicle.get_child_value(key) != None:
-            binary_sensors.append(
-                InstrumentSensor(
-                    hass,
-                    config_entry,
-                    vehicle,
-                    id,
-                    description,
-                    key,
-                    on_icon,
-                    off_icon,
-                    device_class,
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up binary_sensor platform."""
+    coordinator = hass.data[DOMAIN][config_entry.unique_id]
+    entities: list[HyundaiKiaConnectBinarySensor] = []
+    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        for description in SENSOR_DESCRIPTIONS:
+            if getattr(vehicle, description.key, None) is not None:
+                entities.append(
+                    HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
-            )
-
-    async_add_entities(binary_sensors, True)
-    async_add_entities([VehicleEntity(hass, config_entry, vehicle)], True)
+    async_add_entities(entities)
+    return True
 
 
-class InstrumentSensor(KiaUvoEntity):
+class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
+    """Hyundai / Kia Connect binary sensor class."""
+
     def __init__(
         self,
-        hass,
-        config_entry,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        description: HyundaiKiaBinarySensorEntityDescription,
         vehicle: Vehicle,
-        id,
-        description,
-        key,
-        on_icon,
-        off_icon,
-        device_class,
-    ):
-        super().__init__(hass, config_entry, vehicle)
-        self.id = id
-        self.description = description
-        self.key = key
-        self.on_icon = on_icon
-        self.off_icon = off_icon
-        self._device_class = device_class
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator, vehicle)
+        self.entity_description: HyundaiKiaBinarySensorEntityDescription = description
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
+        self._attr_name = f"{vehicle.name} {description.name}"
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if self.entity_description.is_on is not None:
+            return self.entity_description.is_on(self.vehicle)
+        return None
 
     @property
     def icon(self):
-        return self.on_icon if self.is_on else self.off_icon
-
-    @property
-    def is_on(self) -> bool:
-        if self.id == "chargingPortDoor":
-            return True if self.vehicle.get_child_value(self.key) == 1 else False
-        else:
-            return bool(self.vehicle.get_child_value(self.key))
-
-    @property
-    def state(self):
-        if self._device_class == DEVICE_CLASS_LOCK:
-            return "off" if self.is_on else "on"
-        return "on" if self.is_on else "off"
-
-    @property
-    def device_class(self):
-        return self._device_class
-
-    @property
-    def name(self):
-        return f"{self.vehicle.name} {self.description}"
-
-    @property
-    def unique_id(self):
-        return f"{DOMAIN}-{self.id}-{self.vehicle.id}"
-
-
-class VehicleEntity(KiaUvoEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def state(self):
-        return "on"
-
-    @property
-    def is_on(self) -> bool:
-        return True
-
-    @property
-    def state_attributes(self):
-        return {
-            "vehicle_data": self.vehicle.vehicle_data,
-            "vehicle_name": self.vehicle.name,
-        }
-
-    @property
-    def name(self):
-        return f"{self.vehicle.name} Data"
-
-    @property
-    def unique_id(self):
-        return f"{DOMAIN}-all-data-{self.vehicle.id}"
+        """Return the icon to use in the frontend, if any."""
+        if (
+            self.entity_description.on_icon == self.entity_description.off_icon
+        ) is None:
+            return BinarySensorEntity.icon
+        return (
+            self.entity_description.on_icon
+            if self.is_on
+            else self.entity_description.off_icon
+        )

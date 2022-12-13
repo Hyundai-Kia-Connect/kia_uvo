@@ -1,46 +1,58 @@
+"""Device Tracker for Hyundai / Kia Connect integration."""
+from __future__ import annotations
+
 import logging
+
+from hyundai_kia_connect_api import Vehicle
 
 from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .Vehicle import Vehicle
-from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE
+from .const import DOMAIN
+from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-    async_add_entities([LocationTracker(hass, config_entry, vehicle)], True)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    coordinator = hass.data[DOMAIN][config_entry.unique_id]
+    entities = []
+    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        if vehicle.location is not None:
+            entities.append(HyundaiKiaConnectTracker(coordinator, vehicle))
+
+    async_add_entities(entities)
+    return True
 
 
-class LocationTracker(KiaUvoEntity, TrackerEntity):
-    def __init__(self, hass, config_entry, vehicle: Vehicle):
-        super().__init__(hass, config_entry, vehicle)
+class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ):
+        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_location"
+        self._attr_name = f"{vehicle.name} Location"
+        self._attr_icon = "mdi:map-marker-outline"
 
     @property
     def latitude(self):
-        return self.vehicle.get_child_value("vehicleLocation.coord.lat")
+        return self.vehicle.location_latitude
 
     @property
     def longitude(self):
-        return self.vehicle.get_child_value("vehicleLocation.coord.lon")
-
-    @property
-    def icon(self):
-        return "mdi:map-marker-outline"
+        return self.vehicle.location_longitude
 
     @property
     def source_type(self):
         return SOURCE_TYPE_GPS
-
-    @property
-    def name(self):
-        return f"{self.vehicle.name} Location"
-
-    @property
-    def unique_id(self):
-        return f"kia_uvo-location-{self.vehicle.id}"

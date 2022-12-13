@@ -1,46 +1,54 @@
+"""Lock for Hyundai / Kia Connect integration."""
+from __future__ import annotations
+
 import logging
 
 from homeassistant.components.lock import LockEntity
 
-from .Vehicle import Vehicle
-from .KiaUvoEntity import KiaUvoEntity
-from .const import DOMAIN, DATA_VEHICLE_INSTANCE, VEHICLE_LOCK_ACTION
+from hyundai_kia_connect_api import Vehicle
+from .const import DOMAIN
+from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .entity import HyundaiKiaConnectEntity
+
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    vehicle: Vehicle = hass.data[DOMAIN][DATA_VEHICLE_INSTANCE]
-    async_add_entities([Lock(hass, config_entry, vehicle)], True)
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    coordinator = hass.data[DOMAIN][config_entry.unique_id]
+    entities = []
+    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        entities.append(HyundaiKiaConnectLock(coordinator, vehicle))
+
+    async_add_entities(entities)
+    return True
 
 
-class Lock(KiaUvoEntity, LockEntity):
+class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
-        hass,
-        config_entry,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ):
-        super().__init__(hass, config_entry, vehicle)
-
-    @property
-    def name(self):
-        return f"{self.vehicle.name} Door Lock"
-
-    @property
-    def unique_id(self):
-        return f"{DOMAIN}-doorLock-{self.vehicle.id}"
-
-    @property
-    def is_locked(self):
-        return self.vehicle.vehicle_data["vehicleStatus"]["doorLock"]
+        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_door_lock"
+        self._attr_name = f"{vehicle.name} Door Lock"
 
     @property
     def icon(self):
         return "mdi:lock" if self.is_locked else "mdi:lock-open-variant"
 
+    @property
+    def is_locked(self):
+        return getattr(self.vehicle, "is_locked")
+
     async def async_lock(self):
-        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.LOCK)
+        await self.coordinator.async_lock_vehicle(self.vehicle.id)
 
     async def async_unlock(self):
-        await self.vehicle.lock_action(VEHICLE_LOCK_ACTION.UNLOCK)
+        await self.coordinator.async_unlock_vehicle(self.vehicle.id)

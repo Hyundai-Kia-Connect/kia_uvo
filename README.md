@@ -1,23 +1,18 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
-Version 2.0 is currently in testing / beta phase.  This can be downloaded in HACS be enabling beta releases.  Please test this out if willing to provide debug logs.   In the next month or so if issue reports are solved I will promote it to the main release.   So testing is appreciated.  This new version supports multi car multi brand as well as fixes core architecture that allows us to do things like set seat heat level and display this easily. Only large bug fixes will go to 1.X going forward.  New features and PRs are requested to go to the 2.0 branch as well. 
 
+I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This now uses our underlying python package: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api. 
 
-Warning: please do not set very low values for force sync because it will drain your battery. 
-This integration is mimicking mobile app and you can face the same issue in the mobile app too.
-
-I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo).  This integration also consumes and models items after [Bluelinky](https://github.com/Hacksore/bluelinky), it uses stamps they have been able to create for EU.  We thank them for being pioneers on this journey. 
+Warning ahead; this is pre-alpha phase, please do not expect something fully functional, I will improve the integration by time.
 
 ## Installation ##
-You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing!). 
-
-- Region support has been added, you can test initial set of functionality for Canada and USA regions and share your findings.
-- It will only fetch values for the first car, I am not sure if there are people outside using Kia Uvo / Hyundai Bluelink with multiple cars :)
+You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing, a PR for this would be great!). 
+- EU, CAD and US is supported by this.  USA support is limited. 
+- Multiple cars and accounts are supported. To add additional accounts just go through setup a second time. 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
 - It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure the integration if you want to change the distance unit.
-- API to the cloud uses port 8080
 
 ## Supported entities ##
 - Air Conditioner Status, Defroster Status, Set Temperature
@@ -38,9 +33,19 @@ You can install this either manually copying files or using HACS. Configuration 
 ## Supported services ##
 - update: get latest **cached** vehicle data
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
-- start_climate / stop_climate: Either starts the ICE engine or warms the car if Electric.
+- start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate. 
 - start_charge / stop_charge: You can control your charging using these services
-- set_charge_limits: You can control your charging capacity limits using this services (USA Kia and EU Only)
+- set_charge_limits: You can control your charging capacity limits using this services 
+- open_charge_port / close_charge_port:  Open or close the charge port.
+
+| Service       | EU        | CA        | USA Kia        | USA Hyundai        |
+| ------------- | --        | --        | --------       | ------------       |
+| Update        | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| Force Update  | &#10004;  | &#10004;  | &#10004;       |           |
+| start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| start stop charge  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| set charge limits  | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
+| open and close charge port  | &#10004;  |   | |          |
 
 I have posted an example screenshot from my own car.
 
@@ -59,5 +64,6 @@ logger:
   default: warning
   logs:
     custom_components.kia_uvo: debug
+    hyundai_kia_connect_api: debug
 ```
 

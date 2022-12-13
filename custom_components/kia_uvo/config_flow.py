@@ -1,92 +1,108 @@
-import logging
+"""Config flow for Hyundai / Kia Connect integration."""
+from __future__ import annotations
 
+import hashlib
+import logging
+from typing import Any
+
+from hyundai_kia_connect_api import Token, VehicleManager
 import voluptuous as vol
-import uuid
-import requests
-from urllib.parse import parse_qs, urlparse
-import traceback
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONF_PASSWORD,
-    CONF_USERNAME,
-    CONF_UNIT_OF_MEASUREMENT,
-    CONF_UNIT_SYSTEM,
+    CONF_PIN,
     CONF_REGION,
+    CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
 )
-from homeassistant.core import callback
-import homeassistant.helpers.config_validation as cv
-
-from .utils import get_default_distance_unit
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import FlowResult
+from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
-    DISTANCE_UNITS,
-    CONF_SCAN_INTERVAL,
-    DEFAULT_SCAN_INTERVAL,
-    CONF_PIN,
-    DEFAULT_PIN,
-    CONF_FORCE_SCAN_INTERVAL,
-    DEFAULT_FORCE_SCAN_INTERVAL,
-    CONF_NO_FORCE_SCAN_HOUR_START,
-    DEFAULT_NO_FORCE_SCAN_HOUR_START,
-    CONF_NO_FORCE_SCAN_HOUR_FINISH,
-    DEFAULT_NO_FORCE_SCAN_HOUR_FINISH,
-    CONF_ENABLE_GEOLOCATION_ENTITY,
-    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
-    CONF_USE_EMAIL_WITH_GEOCODE_API,
-    DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
-    CONF_BRAND,
-    CONF_STORED_CREDENTIALS,
-    DOMAIN,
-    CONFIG_FLOW_VERSION,
-    REGIONS,
-    DEFAULT_REGION,
     BRANDS,
-    DEFAULT_BRAND,
+    CONF_BRAND,
+    CONF_FORCE_REFRESH_INTERVAL,
+    CONF_NO_FORCE_REFRESH_HOUR_FINISH,
+    CONF_NO_FORCE_REFRESH_HOUR_START,
+    DEFAULT_FORCE_REFRESH_INTERVAL,
+    DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
+    DEFAULT_NO_FORCE_REFRESH_HOUR_START,
+    DEFAULT_PIN,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    REGIONS,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+    DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
 )
-from .KiaUvoApiImpl import KiaUvoApiImpl
-from .Token import Token
-from .utils import get_implementation_by_region_brand
 
 _LOGGER = logging.getLogger(__name__)
 
+STEP_USER_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_USERNAME): str,
+        vol.Required(CONF_PASSWORD): str,
+        vol.Optional(CONF_PIN, default=DEFAULT_PIN): str,
+        vol.Required(CONF_REGION): vol.In(REGIONS),
+        vol.Required(CONF_BRAND): vol.In(BRANDS),
+    }
+)
 
-class KiaUvoOptionFlowHandler(config_entries.OptionsFlow):
-    def __init__(self, config_entry):
+
+async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token:
+    """Validate the user input allows us to connect."""
+    api = VehicleManager.get_implementation_by_region_brand(
+        user_input[CONF_REGION],
+        user_input[CONF_BRAND],
+    )
+    token: Token = await hass.async_add_executor_job(
+        api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+    )
+
+    if token is None:
+        raise InvalidAuth
+
+    return token
+
+
+class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
+    """Handle an option flow for Hyundai / Kia Connect."""
+
+    def __init__(self, config_entry: ConfigEntry) -> None:
+        """Initialize option flow instance."""
         self.config_entry = config_entry
         self.schema = vol.Schema(
             {
-                vol.Optional(
-                    CONF_UNIT_OF_MEASUREMENT,
-                    default=self.config_entry.options.get(
-                        CONF_UNIT_OF_MEASUREMENT, get_default_distance_unit()
-                    ),
-                ): vol.In(DISTANCE_UNITS),
-                vol.Optional(
+                vol.Required(
                     CONF_SCAN_INTERVAL,
                     default=self.config_entry.options.get(
                         CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=999)),
-                vol.Optional(
-                    CONF_FORCE_SCAN_INTERVAL,
+                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=999)),
+                vol.Required(
+                    CONF_FORCE_REFRESH_INTERVAL,
                     default=self.config_entry.options.get(
-                        CONF_FORCE_SCAN_INTERVAL, DEFAULT_FORCE_SCAN_INTERVAL
+                        CONF_FORCE_REFRESH_INTERVAL, DEFAULT_FORCE_REFRESH_INTERVAL
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=999)),
-                vol.Optional(
-                    CONF_NO_FORCE_SCAN_HOUR_START,
+                ): vol.All(vol.Coerce(int), vol.Range(min=30, max=999)),
+                vol.Required(
+                    CONF_NO_FORCE_REFRESH_HOUR_START,
                     default=self.config_entry.options.get(
-                        CONF_NO_FORCE_SCAN_HOUR_START, DEFAULT_NO_FORCE_SCAN_HOUR_START
+                        CONF_NO_FORCE_REFRESH_HOUR_START,
+                        DEFAULT_NO_FORCE_REFRESH_HOUR_START,
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=23)),
-                vol.Optional(
-                    CONF_NO_FORCE_SCAN_HOUR_FINISH,
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+                vol.Required(
+                    CONF_NO_FORCE_REFRESH_HOUR_FINISH,
                     default=self.config_entry.options.get(
-                        CONF_NO_FORCE_SCAN_HOUR_FINISH,
-                        DEFAULT_NO_FORCE_SCAN_HOUR_FINISH,
+                        CONF_NO_FORCE_REFRESH_HOUR_FINISH,
+                        DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=1, max=23)),
+                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
                 vol.Optional(
                     CONF_ENABLE_GEOLOCATION_ENTITY,
                     default=self.config_entry.options.get(
@@ -104,76 +120,58 @@ class KiaUvoOptionFlowHandler(config_entries.OptionsFlow):
             }
         )
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, user_input=None) -> FlowResult:
+        """Handle options init setup."""
         if user_input is not None:
-            _LOGGER.debug(f"{DOMAIN} user input in option flow : %s", user_input)
-            return self.async_create_entry(title="", data=user_input)
+            return self.async_create_entry(
+                title=self.config_entry.title, data=user_input
+            )
 
         return self.async_show_form(step_id="init", data_schema=self.schema)
 
 
-class KiaUvoConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
+class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Hyundai / Kia Connect."""
 
-    VERSION = CONFIG_FLOW_VERSION
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
+    VERSION = 2
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
-        return KiaUvoOptionFlowHandler(config_entry)
+    def async_get_options_flow(config_entry: ConfigEntry):
+        """Initiate options flow instance."""
+        return HyundaiKiaConnectOptionFlowHandler(config_entry)
 
-    def __init__(self):
-        self.schema = vol.Schema(
-            {
-                vol.Required(CONF_USERNAME): str,
-                vol.Required(CONF_PASSWORD): str,
-                vol.Optional(CONF_PIN): str,
-                vol.Optional(CONF_REGION, default=DEFAULT_REGION): vol.In(REGIONS),
-                vol.Optional(CONF_BRAND, default=DEFAULT_BRAND): vol.In(BRANDS),
-            }
-        )
-        self.kia_uvo_api = None
-        self.token = None
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
 
-    async def async_step_user(self, user_input=None):
-        await self.async_set_unique_id(DOMAIN)
-        self._abort_if_unique_id_configured()
-        errors = None
-
-        if user_input is not None:
-            username = user_input[CONF_USERNAME]
-            password = user_input[CONF_PASSWORD]
-            region = user_input[CONF_REGION]
-            pin = user_input.get(CONF_PIN, "")
-            brand = user_input[CONF_BRAND]
-
-            self.kia_uvo_api: KiaUvoApiImpl = get_implementation_by_region_brand(
-                region, brand, username, password
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
             )
 
-            try:
-                self.token = await self.hass.async_add_executor_job(
-                    self.kia_uvo_api.login
-                )
-                return self.async_create_entry(
-                    title=username,
-                    data={
-                        CONF_USERNAME: username,
-                        CONF_PASSWORD: password,
-                        CONF_REGION: region,
-                        CONF_PIN: pin,
-                        CONF_BRAND: brand,
-                        CONF_STORED_CREDENTIALS: vars(self.token),
-                    },
-                )
-            except Exception as ex:
-                _LOGGER.error(
-                    f"{DOMAIN} Exception in kia_uvo login : %s - traceback: %s",
-                    ex,
-                    traceback.format_exc(),
-                )
-                errors = {"base": "auth"}
+        errors = {}
+
+        try:
+            await validate_input(self.hass, user_input)
+        except InvalidAuth:
+            errors["base"] = "invalid_auth"
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unexpected exception")
+            errors["base"] = "unknown"
+        else:
+            title = f"{BRANDS[user_input[CONF_BRAND]]} {REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+            await self.async_set_unique_id(
+                hashlib.sha256(title.encode("utf-8")).hexdigest()
+            )
+            self._abort_if_unique_id_configured()
+            return self.async_create_entry(title=title, data=user_input)
 
         return self.async_show_form(
-            step_id="user", data_schema=self.schema, errors=errors
+            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
+
+
+class InvalidAuth(HomeAssistantError):
+    """Error to indicate there is invalid auth."""
