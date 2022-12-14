@@ -41,7 +41,6 @@ PLATFORMS: list[str] = [
 
 
 async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
-    
 
     return True
 
