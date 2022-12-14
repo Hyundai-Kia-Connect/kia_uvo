@@ -41,7 +41,6 @@ PLATFORMS: list[str] = [
 
 
 async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
-    async_setup_services(hass)
 
     return True
 
@@ -56,7 +55,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
     hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
-
+    async_setup_services(hass)
     return True
 
 
