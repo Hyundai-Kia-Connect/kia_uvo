@@ -131,14 +131,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=TIME_MINUTES,
     ),
     SensorEntityDescription(
-        key="_ev_target_range_charge_AC",
+        key="ev_target_range_charge_AC",
         name="Target Range of Charge AC",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="_ev_target_range_charge_DC",
+        key="ev_target_range_charge_DC",
         name="Target Range of Charge DC",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
@@ -204,6 +204,10 @@ async def async_setup_entry(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
     async_add_entities(entities)
+    async_add_entities(
+        [VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])],
+        True,
+    )
     return True
 
 
@@ -240,3 +244,31 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
+
+
+class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+
+    @property
+    def state(self):
+        return "on"
+
+    @property
+    def is_on(self) -> bool:
+        return True
+
+    @property
+    def state_attributes(self):
+        return {
+            "vehicle_data": self.vehicle.data,
+            "vehicle_name": self.vehicle.name,
+        }
+
+    @property
+    def name(self):
+        return f"{self.vehicle.name} Data"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-all-data-{self.vehicle.id}"
