@@ -204,7 +204,10 @@ async def async_setup_entry(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
     async_add_entities(entities)
-    async_add_entities([VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])], True)
+    async_add_entities(
+        [VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])],
+        True,
+    )
     return True
 
 
@@ -241,13 +244,11 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
-            
-class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
-    def __init__(
-        self, coordinator, vehicle: Vehicle
-    ):
-        super().__init__(coordinator, vehicle)
 
+
+class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
 
     @property
     def state(self):
