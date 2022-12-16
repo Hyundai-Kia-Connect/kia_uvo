@@ -131,14 +131,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=TIME_MINUTES,
     ),
     SensorEntityDescription(
-        key="ev_target_range_charge_AC",
+        key="_ev_target_range_charge_AC",
         name="Target Range of Charge AC",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
-        key="ev_target_range_charge_DC",
+        key="_ev_target_range_charge_DC",
         name="Target Range of Charge DC",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
