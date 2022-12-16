@@ -202,7 +202,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_start_charge(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_charge, vehicle_id
+            self.vehicle_manager.start_charge, vehicle_id
         )
         await self.async_request_refresh()
 
