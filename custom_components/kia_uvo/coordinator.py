@@ -161,9 +161,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def async_wait_for_action_completed(
-        self, vehicle_id: int, action_id: str, interval:int=5, max_count:int=6
+        self, vehicle_id: int, action_id: str, interval: int = 5, max_count: int = 6
     ):
-        for count in range(1, max_count+1):
+        for count in range(1, max_count + 1):
             _LOGGER.debug(f"Last action check: waiting {interval} seconds")
             await asyncio.sleep(interval)
             _LOGGER.debug(f"Last action check: attempt {count} of {max_count}")
@@ -178,12 +178,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(self.vehicle_manager.lock, vehicle_id)
+        action_id = await self.hass.async_add_executor_job(
+            self.vehicle_manager.lock, vehicle_id
+        )
         await self.async_wait_for_action_completed(vehicle_id, action_id)
 
     async def async_unlock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(self.vehicle_manager.unlock, vehicle_id)
+        action_id = await self.hass.async_add_executor_job(
+            self.vehicle_manager.unlock, vehicle_id
+        )
         await self.async_wait_for_action_completed(vehicle_id, action_id)
 
     async def async_open_charge_port(self, vehicle_id: str):
