@@ -1,0 +1,40 @@
+{
+    "title": "Hyundai / Kia Connect",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Hyundai / Kia Connect: Anmelden",
+                "description": "Hyundai Bluelink / Kia Uvo Connect Login für Home Assistant.",
+                "data": {
+                    "username": "Benutzername",
+                    "password": "Passwort",
+                    "region": "Region",
+                    "brand": "Marke",
+                    "pin": "PIN (notwendig für CA)"
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "Dein Fahrzeug ist bereits konfiguriert"
+        },
+        "error": {
+            "invalid_auth": "Login für Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde Dich in Deiner Hyundai/Kia-App ab, logge Dich dort neu ein und versuche es erneut!",
+            "unknown": "Unbekannter Fehler"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Hyundai / Kia Connect: Konfiguration",
+                "data": {
+                    "scan_interval": "Scan-Intervall (Min.)",
+                    "force_refresh": "Force-Refresh-Intervall (Min.)",
+                    "no_force_refresh_hour_start": "Force Refresh anhalten ab",
+                    "no_force_refresh_hour_finish": "Force Refresh zulassen ab",
+                    "enable_geolocation_entity": "Geolocation Entität über OpenStreetMap aktivieren",
+                    "use_email_with_geocode_api": "Verwende Deine Kia E-Mail Adresse für die Geocode API - für weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+                }
+            }
+        }
+    }
+}
