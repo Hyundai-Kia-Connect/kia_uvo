@@ -135,7 +135,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 2
     reauth_entry: ConfigEntry | None = None
-    
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry: ConfigEntry):
@@ -172,6 +172,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
+
     async def async_step_reauth(self, user_input=None):
         """Perform reauth upon an API authentication error."""
         self.reauth_entry = self.hass.config_entries.async_get_entry(
