@@ -185,6 +185,11 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Geocoded Location",
         icon="mdi:map",
     ),
+    SensorEntityDescription(
+        key="dtc_count",
+        name="DTC Count",
+        icon="mdi:alert-circle",
+    ),
 )
 
 
@@ -244,6 +249,8 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
+        elif self._description.key == "dtc_count":
+            return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
