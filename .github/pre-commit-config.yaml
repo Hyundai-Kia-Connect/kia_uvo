@@ -23,7 +23,7 @@ repos:
         stages: [manual]
         args:
           - --quiet-level=2
-          - --ignore-words-list=hass,ba,fo,ist,Deine,Adresse
+          - --ignore-words-list="hass,ba,fo,ist,Deine,Adresse"
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.3.0
