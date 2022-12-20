@@ -9,6 +9,10 @@
           "brand": "[%key:component::hyundai_kia_connect::config::step::user::data::brand%]",
           "pin": "[%key:common::config_flow::data::pin%]"
         }
+      },
+      "reauth_confirm": {
+        "title": "[%key:common::config_flow::title::reauth%]",
+        "description": "The Hyundai / Kia Connect integration needs to re-authenticate your account"
       }
     },
     "error": {
@@ -16,7 +20,8 @@
       "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
     }
   },
   "options": {
