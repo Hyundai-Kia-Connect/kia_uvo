@@ -61,6 +61,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             geocode_api_use_email=config_entry.options.get(
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
+            language=hass.config.language,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
