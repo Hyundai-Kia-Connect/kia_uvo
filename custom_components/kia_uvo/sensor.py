@@ -250,7 +250,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
         elif self._description.key == "dtc_count":
-             return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
+            return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
