@@ -29,6 +29,8 @@ You can install this either manually copying files or using HACS. Configuration 
 - cache update interval, force update interval, blackout start and finish hours
 
 ## Supported services ##
+These can be access by going to the developer menu followed by services. 
+
 - update: get latest **cached** vehicle data
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
 - start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate. 
@@ -44,7 +46,7 @@ You can install this either manually copying files or using HACS. Configuration 
 | start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
 | start stop charge  | &#10004;  | &#10004;  | &#10004;       |            |
 | set charge limits  | &#10004;  | &#10004;  | &#10004;       |            |
-| open and close charge port  | &#10004;  |   | |          |
+| open and close charge port(None functional, needs testing)  | &#10004;  |   | |          |
 
 I have posted an example screenshot from my own car.
 
