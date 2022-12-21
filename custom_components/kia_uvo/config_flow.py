@@ -58,6 +58,7 @@ async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Tok
     api = VehicleManager.get_implementation_by_region_brand(
         user_input[CONF_REGION],
         user_input[CONF_BRAND],
+        language=hass.config.language,
     )
     token: Token = await hass.async_add_executor_job(
         api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
