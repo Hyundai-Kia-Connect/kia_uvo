@@ -190,6 +190,26 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="DTC Count",
         icon="mdi:alert-circle",
     ),
+    SensorEntityDescription(
+        key="ev_first_departure_time",
+        name="EV First Scheduled Depature Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_second_departure_time",
+        name="EV Second Scheduled Depature Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_off_peak_start_time",
+        name="EV Off Peak Start Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_off_peak_end_time",
+        name="EV Off Peak End Time",
+        icon="mdi:clock-outline",
+    ),
 )
 
 
