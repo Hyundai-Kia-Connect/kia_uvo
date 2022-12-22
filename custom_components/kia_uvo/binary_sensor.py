@@ -207,6 +207,20 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         off_icon="mdi:ev-station",
         device_class=BinarySensorDeviceClass.DOOR,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_first_departure_enabled",
+        name="EV First Scheduled Departure",
+        is_on=lambda vehicle: vehicle.ev_first_departure_enabled,
+        on_icon="mdi:clock-outline",
+        off_icon="mdi:clock-outline",
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_second_departure_enabled",
+        name="EV First Scheduled Departure",
+        is_on=lambda vehicle: vehicle.ev_second_departure_enabled,
+        on_icon="mdi:clock-outline",
+        off_icon="mdi:clock-outline",
+    ),
 )
 
 
