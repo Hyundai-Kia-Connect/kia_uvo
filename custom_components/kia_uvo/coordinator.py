@@ -126,7 +126,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
                     _LOGGER.exception(
-                        "Force update failed, falling back to cached: {err}"
+                        f"Force update failed, falling back to cached: {err}"
                     )
                 except Exception as err_nested:
                     raise UpdateFailed(f"Error communicating with API: {err_nested}")
