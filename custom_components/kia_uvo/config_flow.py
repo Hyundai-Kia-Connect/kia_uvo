@@ -58,6 +58,7 @@ async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Tok
     api = VehicleManager.get_implementation_by_region_brand(
         user_input[CONF_REGION],
         user_input[CONF_BRAND],
+        language=hass.config.language,
     )
     token: Token = await hass.async_add_executor_job(
         api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
@@ -134,6 +135,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Hyundai / Kia Connect."""
 
     VERSION = 2
+    reauth_entry: ConfigEntry | None = None
 
     @staticmethod
     @callback
@@ -171,6 +173,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
+
+    async def async_step_reauth(self, user_input=None):
+        """Perform reauth upon an API authentication error."""
+        self.reauth_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(self, user_input=None):
+        """Dialog that informs the user that reauth is required."""
+        if user_input is None:
+            return self.async_show_form(
+                step_id="reauth_confirm",
+                data_schema=vol.Schema({}),
+            )
+        self._reauth = True
+        return await self.async_step_user()
 
 
 class InvalidAuth(HomeAssistantError):

@@ -185,6 +185,31 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Geocoded Location",
         icon="mdi:map",
     ),
+    SensorEntityDescription(
+        key="dtc_count",
+        name="DTC Count",
+        icon="mdi:alert-circle",
+    ),
+    SensorEntityDescription(
+        key="ev_first_departure_time",
+        name="EV First Scheduled Depature Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_second_departure_time",
+        name="EV Second Scheduled Depature Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_off_peak_start_time",
+        name="EV Off Peak Start Time",
+        icon="mdi:clock-outline",
+    ),
+    SensorEntityDescription(
+        key="ev_off_peak_end_time",
+        name="EV Off Peak End Time",
+        icon="mdi:clock-outline",
+    ),
 )
 
 
@@ -244,6 +269,8 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
+        elif self._description.key == "dtc_count":
+            return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
