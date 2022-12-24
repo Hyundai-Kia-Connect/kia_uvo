@@ -216,7 +216,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="ev_second_departure_enabled",
-        name="EV First Scheduled Departure",
+        name="EV Second Scheduled Departure",
         is_on=lambda vehicle: vehicle.ev_second_departure_enabled,
         on_icon="mdi:clock-outline",
         off_icon="mdi:clock-outline",
