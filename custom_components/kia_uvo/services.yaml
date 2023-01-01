@@ -23,8 +23,8 @@ start_climate:
   fields: 
     device_id:
       name: Vehicle
-      description: Target vehicle
-      required: true
+      description: Target vehicle, if a single vehicle will use that by default.
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -182,7 +182,7 @@ stop_climate:
     device_id: 
       name: Vehicle
       description: Target vehicle 
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -192,7 +192,7 @@ start_charge:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -202,7 +202,7 @@ stop_charge:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -212,7 +212,7 @@ lock:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -222,7 +222,7 @@ unlock:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -232,7 +232,7 @@ close_charge_port:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -242,7 +242,7 @@ open_charge_port:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo        
@@ -252,7 +252,7 @@ set_charge_limits:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
