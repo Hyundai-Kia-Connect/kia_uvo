@@ -145,25 +145,28 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
             vehicle_id = entry[1]
     return vehicle_id
 
-
 def _get_coordinator_from_device(
     hass: HomeAssistant, call: ServiceCall
 ) -> HyundaiKiaConnectDataUpdateCoordinator:
-    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
-    config_entry_ids = device_entry.config_entries
-    config_entry_id = next(
-        (
+    vehicle_identifiers = list(hass.data[DOMAIN].keys())
+    if len(vehicle_identifiers) == 1:
+        return hass.data[DOMAIN][vehicle_identifiers[0]]
+    else:
+        device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
+        config_entry_ids = device_entry.config_entries
+        config_entry_id = next(
+            (
+                config_entry_id
+                for config_entry_id in config_entry_ids
+                if cast(
+                    ConfigEntry,
+                    hass.config_entries.async_get_entry(config_entry_id),
+                ).domain
+                == DOMAIN
+            ),
+            None,
+        )
+        config_entry_unique_id = hass.config_entries.async_get_entry(
             config_entry_id
-            for config_entry_id in config_entry_ids
-            if cast(
-                ConfigEntry,
-                hass.config_entries.async_get_entry(config_entry_id),
-            ).domain
-            == DOMAIN
-        ),
-        None,
-    )
-    config_entry_unique_id = hass.config_entries.async_get_entry(
-        config_entry_id
-    ).unique_id
-    return hass.data[DOMAIN][config_entry_unique_id]
+        ).unique_id
+        return hass.data[DOMAIN][config_entry_unique_id]
