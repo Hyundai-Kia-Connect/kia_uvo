@@ -4,7 +4,7 @@ force_update:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
@@ -14,7 +14,7 @@ update:
     device_id: 
       name: Vehicle
       description: Target vehicle
-      required: true
+      required: false
       selector: 
         device: 
           integration: kia_uvo
