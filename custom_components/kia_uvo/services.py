@@ -145,6 +145,7 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
             vehicle_id = entry[1]
     return vehicle_id
 
+
 def _get_coordinator_from_device(
     hass: HomeAssistant, call: ServiceCall
 ) -> HyundaiKiaConnectDataUpdateCoordinator:
@@ -152,7 +153,9 @@ def _get_coordinator_from_device(
     if len(vehicle_identifiers) == 1:
         return hass.data[DOMAIN][vehicle_identifiers[0]]
     else:
-        device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
+        device_entry = device_registry.async_get(hass).async_get(
+            call.data[ATTR_DEVICE_ID]
+        )
         config_entry_ids = device_entry.config_entries
         config_entry_id = next(
             (
