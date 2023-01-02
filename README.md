@@ -50,13 +50,13 @@ These can be access by going to the developer menu followed by services.
 
 I have posted an example screenshot from my own car.
 
-![Device Details](https://github.com/fuatakgun/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
-![Configuration](https://github.com/fuatakgun/kia_uvo/blob/master/Configuration.PNG?raw=true)
+![Device Details](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
+![Configuration](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Configuration.PNG?raw=true)
 
 ## Troubleshooting ##
 If you receive an error while trying to login, please go through these steps;
 1. As of now, integration only supports USA, EU and CAD region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA coverage isn't complete. 
-2. If you are in EU, please log out from UVO app and login again. While logging in, if your account was created in legacy UVO servers, they will be migrated to new Kia Uvo / Hyundai Bluelink servers. Related Issue: https://github.com/fuatakgun/kia_uvo/issues/22
+2. If you are in EU, please log out from UVO app and login again. While logging in, if your account was created in legacy UVO servers, they will be migrated to new Kia Uvo / Hyundai Bluelink servers. Related Issue: https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/22
 3. If you have migrated recently, you might need to wait one day to try again. Related Issue: https://community.home-assistant.io/t/kia-uvo-integration-pre-alpha/297927/12?u=fuatakgun
 4. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
 5. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging, update your `configuration.yaml` like this, we can get more information in Configuration -> Logs page
