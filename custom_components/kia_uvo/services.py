@@ -110,8 +110,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         ac = call.data.get("ac_limit")
         dc = call.data.get("dc_limit")
 
-        if ac is not None or dc is not None:
-            await coordinator.set_charge_limits(vehicle_id, ac, dc)
+        if ac is not None and dc is not None:
+            await coordinator.set_charge_limits(vehicle_id, int(ac), int(dc))
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
