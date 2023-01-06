@@ -11,8 +11,8 @@
         }
       },
       "reauth_confirm": {
-        "title": "[%key:common::config_flow::title::reauth%]",
-        "description": "The Hyundai / Kia Connect integration needs to re-authenticate your account"
+        "title": "[%key:common::config_flow::reauth::title%]",
+        "description": "[%key:common::config_flow::reauth::title%]"
       }
     },
     "error": {
@@ -31,7 +31,9 @@
           "scan_interval": "[%key:component::hyundai_kia_connect::options::step::init::data::scan_interval%]",
           "force_refresh": "[%key:component::hyundai_kia_connect::options::step::init::data::force_refresh%]",
           "no_force_refresh_hour_start": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_start%]",
-          "no_force_refresh_hour_finish": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_finish%]"
+          "no_force_refresh_hour_finish": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_finish%]",
+          "enable_geolocation_entity": "[%key:component::hyundai_kia_connect::options::step::init::data::enable_geolocation_entity%]",
+          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]"
         }
       }
     }
