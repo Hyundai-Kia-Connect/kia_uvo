@@ -11,8 +11,8 @@
         }
       },
       "reauth_confirm": {
-        "title": "[%key:common::config_flow::reauth::title%]",
-        "description": "[%key:common::config_flow::reauth::title%]"
+        "title": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::title%]",
+        "description": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::description%]"
       }
     },
     "error": {
