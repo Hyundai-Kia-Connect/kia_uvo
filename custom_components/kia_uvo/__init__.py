@@ -51,8 +51,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()
-    except AuthenticationError as AuthError:
-        raise ConfigEntryAuthFailed(AuthError) from AuthError
     except Exception as ex:
         raise ConfigEntryNotReady(f"Config Not Ready: {ex}")
 
