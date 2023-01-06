@@ -10,7 +10,8 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryNotReady, AuthenticationError
+from hyundai_kia_connect_api.exceptions import *
 import hashlib
 
 from .const import (
@@ -50,8 +51,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()
+    except AuthenticationError as AuthError:
+        raise ConfigEntryAuthFailed(AuthError) from AuthError
     except Exception as ex:
         raise ConfigEntryNotReady(f"Config Not Ready: {ex}")
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
     hass.config_entries.async_setup_platforms(config_entry, PLATFORMS)
