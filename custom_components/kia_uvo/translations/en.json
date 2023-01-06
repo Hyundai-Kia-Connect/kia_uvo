@@ -1,40 +1,44 @@
 {
-    "title": "Hyundai / Kia Connect",
-    "config": {
-        "step": {
-            "user": {
-                "title": "Hyundai / Kia Connect - Authentication",
-                "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
-                "data": {
-                    "username": "Username",
-                    "password": "Password",
-                    "region": "Region",
-                    "brand": "Brand",
-                    "pin": "Pin (Required for CA)"
-                }
-            }
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - Authentication",
+             "description":"Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
+             "data":{
+                "username":"Username",
+                "password":"Password",
+                "region":"Region",
+                "brand":"Brand",
+                "pin":"Pin (Required for CA)"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - Reauthentication",
+             "description":"Your account is unable to authenticate.  Click Submit to re-setup."
+          }
+       },
+       "abort":{
+          "already_configured":"Device is already configured"
         },
-        "abort": {
-            "already_configured": "Device is already configured"
-        },
-        "error": {
-            "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect Servers. Please use official app to logout and log back in and try again!",
-            "unknown": "Unexpected error"
-        }
+       "error":{
+          "invalid_auth":"Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect Servers. Please use official app to logout and log back in and try again!",
+          "unknown":"Unexpected error"
+       }
     },
-    "options": {
-        "step": {
-            "init": {
-                "title": "Hyundai / Kia Connect - Configuration",
-                "data": {
-                    "scan_interval": "Scan Interval (min)",
-                    "force_refresh": "Force Refresh Interval (min)",
-                    "no_force_refresh_hour_start": "No Force Refresh Start Hour",
-                    "no_force_refresh_hour_finish": "No Force Refresh Finish Hour",
-                    "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
-                    "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-                }
-            }
-        }
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Configuration",
+             "data":{
+                "scan_interval":"Scan Interval (min)",
+                "force_refresh":"Force Refresh Interval (min)",
+                "no_force_refresh_hour_start":"No Force Refresh Start Hour",
+                "no_force_refresh_hour_finish":"No Force Refresh Finish Hour",
+                "enable_geolocation_entity":"Enable Geolocation Entity using OpenStreetMap",
+                "use_email_with_geocode_api":"Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
     }
-}
+ }
