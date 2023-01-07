@@ -10,6 +10,8 @@ from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
 )
+from hyundai_kia_connect_api.exceptions import *
+
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from homeassistant.config_entries import ConfigEntry
