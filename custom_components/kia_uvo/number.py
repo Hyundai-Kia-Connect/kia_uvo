@@ -6,7 +6,11 @@ from typing import Final
 
 from hyundai_kia_connect_api import Vehicle, VehicleManager
 
-from homeassistant.components.number import NumberEntity, NumberEntityDescription
+from homeassistant.components.number import (
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
 from homeassistant.const import PERCENTAGE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -74,6 +78,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         self._key = self._description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = self._description.icon
+        self._attr_mode = NumberMode.BOX
         self._attr_name = f"{vehicle.name} {self._description.name}"
         self._attr_device_class = self._description.device_class
 
