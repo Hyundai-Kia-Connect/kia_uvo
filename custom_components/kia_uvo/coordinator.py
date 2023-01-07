@@ -10,6 +10,9 @@ from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
 )
+from hyundai_kia_connect_api.exceptions import *
+
+from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -19,6 +22,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
 )
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -99,7 +103,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
-        await self.async_check_and_refresh_token()
+        try:
+            await self.async_check_and_refresh_token()
+        except AuthenticationError as AuthError:
+            raise ConfigEntryAuthFailed(AuthError) from AuthError
         current_hour = dt_util.now().hour
 
         if (
