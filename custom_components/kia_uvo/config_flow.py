@@ -163,12 +163,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            title = f"{BRANDS[user_input[CONF_BRAND]]} {REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
-            await self.async_set_unique_id(
-                hashlib.sha256(title.encode("utf-8")).hexdigest()
-            )
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(title=title, data=user_input)
+            if self._reauth_entry is False: 
+                title = f"{BRANDS[user_input[CONF_BRAND]]} {REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+                await self.async_set_unique_id(
+                    hashlib.sha256(title.encode("utf-8")).hexdigest()
+                )
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(title=title, data=user_input)
+            else: 
+                self.hass.config_entries.async_update_entry(self.reauth_entry, data=user_input)
+                await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                return self.async_abort(reason="reauth_successful")
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
