@@ -163,7 +163,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
-            if self._reauth_entry is False:
+            if self.reauth_entry is None:
                 title = f"{BRANDS[user_input[CONF_BRAND]]} {REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
                 await self.async_set_unique_id(
                     hashlib.sha256(title.encode("utf-8")).hexdigest()
@@ -195,7 +195,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="reauth_confirm",
                 data_schema=vol.Schema({}),
             )
-        self._reauth = True
+        self._reauth_config = True
         return await self.async_step_user()
 
 
