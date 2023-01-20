@@ -83,13 +83,13 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
                     default=self.config_entry.options.get(
                         CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=5, max=999)),
+                ): vol.All(vol.Coerce(int), vol.Range(min=15, max=999)),
                 vol.Required(
                     CONF_FORCE_REFRESH_INTERVAL,
                     default=self.config_entry.options.get(
                         CONF_FORCE_REFRESH_INTERVAL, DEFAULT_FORCE_REFRESH_INTERVAL
                     ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=30, max=999)),
+                ): vol.All(vol.Coerce(int), vol.Range(min=45, max=999)),
                 vol.Required(
                     CONF_NO_FORCE_REFRESH_HOUR_START,
                     default=self.config_entry.options.get(
