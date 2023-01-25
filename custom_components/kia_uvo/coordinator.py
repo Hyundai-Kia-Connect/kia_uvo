@@ -179,65 +179,61 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.lock, vehicle_id
-        )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.hass.async_add_executor_job(self.vehicle_manager.lock, vehicle_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_unlock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.unlock, vehicle_id
-        )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.hass.async_add_executor_job(self.vehicle_manager.unlock, vehicle_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_open_charge_port(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.open_charge_port, vehicle_id
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_close_charge_port(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.close_charge_port, vehicle_id
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.start_climate, vehicle_id, climate_options
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_stop_climate(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_climate, vehicle_id
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_start_charge(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.start_charge, vehicle_id
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def async_stop_charge(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.stop_charge, vehicle_id
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
 
     async def set_charge_limits(self, vehicle_id: str, ac: int, dc: int):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
+        await self.hass.async_add_executor_job(
             self.vehicle_manager.set_charge_limits, vehicle_id, ac, dc
         )
-        await self.async_wait_for_action_completed(vehicle_id, action_id)
+        await self.async_wait_for_action_completed(vehicle_id)
