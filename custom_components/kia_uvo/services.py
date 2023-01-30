@@ -112,6 +112,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
         if ac is not None and dc is not None:
             await coordinator.set_charge_limits(vehicle_id, int(ac), int(dc))
+        else: 
+            _LOGGER.error(f"{DOMAIN} - Enable to set charge limits.  Both AC and DC value required, but not provided.")
+
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
