@@ -19,7 +19,7 @@ You can install this either manually copying files or using HACS. Configuration 
 - Tire Pressure Warnings (individual and all)
 - Charge Status and Plugged In Status
 - Low Fuel Light Status (for PHEV and IC)
-- Doors, Trunk and Hood Open/Close Status
+- Doors, Trunk, Window and Hood Open/Close Status
 - Locking and Unlocking
 - Engine Status
 - Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap (optional, disabled by default)
