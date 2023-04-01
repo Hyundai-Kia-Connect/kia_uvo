@@ -1,0 +1,44 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+        "step":{
+            "user":{
+                "title":"Hyundai / Kia Connect - Autenticazione",
+                "description":"Configura il tuo Hyundai (Bluelink) / Kia (Uvo) Connect per integrarlo con Home Assistant.",
+                "data":{
+                    "username":"Nome utente",
+                    "password":"Password",
+                    "region":"Regione",
+                    "brand":"Marca",
+                    "pin":"Pin (richiesto per CA)"
+                }
+            },
+            "reauth_confirm":{
+                "title":"Hyundai / Kia Connect - Riautenticazione",
+                "description":"Il tuo account non può essere autenticato. Fai clic su Invia per configurarlo di nuovo."
+            }
+        },
+        "abort":{
+            "already_configured":"Il dispositivo è già configurato"
+        },
+        "error":{
+            "invalid_auth":"Impossibile effettuare il login nei server Hyundai (Bluelink) / Kia (Uvo) Connect. Utilizza l'app ufficiale per effettuare il logout, accedere nuovamente e riprovare!",
+            "unknown":"Errore imprevisto"
+        }
+    },
+    "options":{
+        "step":{
+            "init":{
+                "title":"Hyundai / Kia Connect - Configurazione",
+                "data":{
+                    "scan_interval":"Intervallo di scansione (min)",
+                    "force_refresh":"Intervallo di aggiornamento forzato (min)",
+                    "no_force_refresh_hour_start":"Ora di inizio senza aggiornamenti forzati",
+                    "no_force_refresh_hour_finish":"Ora di fine senza aggiornamenti forzati",
+                    "enable_geolocation_entity":"Abilita l'entità di geolocalizzazione usando OpenStreetMap",
+                    "use_email_with_geocode_api":"Utilizza il tuo indirizzo email Kia per l'API di geocodifica - Maggiori informazioni: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+                }
+            }
+        }
+    }
+}
