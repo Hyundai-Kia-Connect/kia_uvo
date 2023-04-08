@@ -1,0 +1,44 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - Hitelesítés",
+             "description":"Állítsd be a Hyundai (Bluelink) / Kia (Uvo) Connect Home Assistant integrációt.",
+             "data":{
+                "username":"Felhasználónév",
+                "password":"Jelszó",
+                "region":"Régió",
+                "brand":"Márka",
+                "pin":"Pin (csak Kanadában)"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - Újrahitelesítés",
+             "description":"Fiókja nem hitelesíthető. Az újrabeállításhoz kattintson a Küldés gombra."
+          }
+       },
+       "abort":{
+          "already_configured":"Az eszköz már konfigurálva van"
+        },
+       "error":{
+          "invalid_auth":"Nem sikerült bejelentkezni a Hyundai (Bluelink) / Kia (Uvo) Connect szerverekre. Kérjük, használja a hivatalos alkalmazást a kijelentkezéshez és a bejelentkezéshez, majd próbálja újra!",
+          "unknown":"Váratlan hiba"
+       }
+    },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Beállítások",
+             "data":{
+                "scan_interval":"Frissítési időköz (perc)",
+                "force_refresh":"Kényszerített frissítési időköz (perc)",
+                "no_force_refresh_hour_start":"Kényszerített frissítés mentes időszak kezdete (óra)",
+                "no_force_refresh_hour_finish":"Kényszerített frissítés mentes időszak vége (óra)",
+                "enable_geolocation_entity":"A földrajzi helymeghatározási entitás engedélyezése az OpenStreetMap segítségével",
+                "use_email_with_geocode_api":"Használja a Kia e-mail címét a Geocode API-hoz - Több információ: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    }
+ }
