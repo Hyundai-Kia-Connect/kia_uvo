@@ -46,7 +46,7 @@ These can be access by going to the developer menu followed by services.
 | start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |
 | start stop charge  | &#10004;  | &#10004;  | &#10004;       |            |
 | set charge limits  | &#10004;  | &#10004;  | &#10004;       |            |
-| open and close charge port(None functional, needs testing)  | &#10004;  |   | |          |
+| open and close charge port(None functional, needs testing)  |  |   | |          |
 
 I have posted an example screenshot from my own car.
 
