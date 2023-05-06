@@ -1,0 +1,44 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - 登录账号",
+             "description":"添加您的现代汽车（Bluelink）/起亚汽车（Kia Connect）账号到Home Assistant",
+             "data":{
+                "username":"账号",
+                "password":"密码",
+                "region":"国家/地区",
+                "brand":"品牌",
+                "pin":"Pin服务口令 (CA必选)"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - 重新登录账号",
+             "description":"您的账户验证失败。点击提交重新登录授权。"
+          }
+       },
+       "abort":{
+          "already_configured":"设备已配置"
+        },
+       "error":{
+          "invalid_auth":"连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",
+          "unknown":"未知错误"
+       }
+    },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - 配置",
+             "data":{
+                "scan_interval":"更新时间间隔（分钟）",
+                "force_refresh":"强制更新时间间隔（分钟）",
+                "no_force_refresh_hour_start":"取消强制更新 - 起始时间",
+                "no_force_refresh_hour_finish":"取消强制更新 - 结束时间",
+                "enable_geolocation_entity":"使用 OpenStreetMap 开启地理定位实体",
+                "use_email_with_geocode_api":"使用您的 Kia 电子邮件地址获取 Geocode API - 更多信息：https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    }
+ }
