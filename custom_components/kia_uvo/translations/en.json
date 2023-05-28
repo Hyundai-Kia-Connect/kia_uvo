@@ -10,7 +10,7 @@
                 "password":"Password",
                 "region":"Region",
                 "brand":"Brand",
-                "pin":"Pin (Required for CA)"
+                "pin":"Pin"
              }
           },
           "reauth_confirm":{
