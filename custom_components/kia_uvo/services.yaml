@@ -1,29 +1,20 @@
 force_update: 
-  description: Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 update: 
-  description: Update vehicle data from service cache
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 start_climate:
-  description: Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your cars mobile app as a guide and match the options available in your car. 
   fields: 
     device_id:
-      name: Vehicle
-      description: Target vehicle, if a single vehicle will use that by default.
       required: false
       selector: 
         device: 
@@ -180,8 +171,6 @@ stop_climate:
   description: Please use cautiously - stop car and climate
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle 
       required: false
       selector: 
         device: 
@@ -190,48 +179,34 @@ start_charge:
   description: Start charging
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 stop_charge:
-  description: Stop charging
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 lock:
-  description: Lock the vehicle
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 unlock:
-  description: Unlock the vehicle
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
           integration: kia_uvo
 close_charge_port:
-  description: Close Charge Port
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
@@ -240,8 +215,6 @@ open_charge_port:
   description: Open Charge Port
   fields: 
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
@@ -250,8 +223,6 @@ set_charge_limits:
   description: sets ac and dc charge capacity limits
   fields:
     device_id: 
-      name: Vehicle
-      description: Target vehicle
       required: false
       selector: 
         device: 
