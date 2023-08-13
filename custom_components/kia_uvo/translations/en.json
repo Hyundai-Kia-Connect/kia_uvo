@@ -32,7 +32,7 @@
         "description": "Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.",
         "fields": {
           "device_id": {
-            "name": "Speed",
+            "name": "Vehicle",
             "description": "Target vehicle"
           }
         }
