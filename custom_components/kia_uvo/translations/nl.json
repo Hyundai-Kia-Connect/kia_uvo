@@ -1,0 +1,44 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - Authenticatie",
+             "description":"Stel uw Hyundai (Bluelink) / Kia (Uvo) Connect in om te integreren met Home Assistant.",
+             "data":{
+                "username":"Gebruikersnaam",
+                "password":"Wachtwoord",
+                "region":"Regio",
+                "brand":"Merk",
+                "pin":"Pin (vereist voor CA)"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - Opnieuw Authenticeren",
+             "description":"Uw account kan zich niet authenticeren. Klik Submit om het opnieuw te proberen."
+          }
+       },
+       "abort":{
+          "already_configured":"Het device is al geconfigureerd"
+        },
+       "error":{
+          "invalid_auth":"Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiële app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",
+          "unknown":"Onverwachte foutsituatie"
+       }
+    },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Instellingen",
+             "data":{
+                "scan_interval":"Scan Interval (min)",
+                "force_refresh":"Forceer Refresh Interval (min)",
+                "no_force_refresh_hour_start":"Force Refresh niet toelaten na (begin-uur)",
+                "no_force_refresh_hour_finish":"Force Refresh weer toelaten na (eind-uur",
+                "enable_geolocation_entity":"Schakel Geolocation Entity m.b.v. OpenStreetMap in",
+                "use_email_with_geocode_api":"Gebruik uw Kia email adres voor Geocode API - Meer informatie: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    }
+ }
