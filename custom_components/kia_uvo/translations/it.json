@@ -32,7 +32,7 @@
         "description": "Forza il veicolo a aggiornare i suoi dati. Tutti i veicoli nello stesso account del veicolo selezionato verranno aggiornati.",
         "fields": {
           "device_id": {
-            "name": "Velocità",
+            "name": "Veicolo",
             "description": "Veicolo di destinazione"
           }
         }
