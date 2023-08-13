@@ -22,7 +22,7 @@
           "already_configured":"Het device is al geconfigureerd"
         },
        "error":{
-          "invalid_auth":"Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiële app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",
+          "invalid_auth":"Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiÃ«le app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",
           "unknown":"Onverwachte foutsituatie"
        }
     },
