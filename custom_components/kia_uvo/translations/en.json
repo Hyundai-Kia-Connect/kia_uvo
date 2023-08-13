@@ -26,6 +26,18 @@
           "unknown":"Unexpected error"
        }
     },
+    "services": {
+      "force_update ": {
+        "name": "Force Update",
+        "description": "Calls the car for an update to data.",
+        "fields": {
+          "device_id": {
+            "name": "Speed",
+            "description": "Target vehicle"
+          }
+        }
+      }
+    },
     "options":{
        "step":{
           "init":{
