@@ -51,8 +51,6 @@ start_climate:
       selector:
         boolean:
     heating:
-      name: Heating
-      description: Heated features like the steering wheel and rear window
       required: true
       example: false
       default: false  
@@ -68,8 +66,6 @@ start_climate:
             - label: "Steering Wheel Only"
               value: "3"
     flseat:
-      name: Front Left Seat
-      description: Front Left Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -154,7 +150,6 @@ start_climate:
             - label: "High Heat"
               value: "8" 
 stop_climate:
-  description: Please use cautiously - stop car and climate
   fields: 
     device_id: 
       required: false
@@ -162,7 +157,6 @@ stop_climate:
         device: 
           integration: kia_uvo
 start_charge:
-  description: Start charging
   fields: 
     device_id: 
       required: false
