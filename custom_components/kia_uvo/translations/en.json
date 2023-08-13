@@ -27,7 +27,7 @@
        }
     },
     "services": {
-      "force_update ": {
+      "force_update": {
         "name": "Force Update",
         "description": "Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.",
         "fields": {
@@ -37,7 +37,7 @@
           }
         }
       },
-      "update  ": {
+      "update": {
          "name": "Update",
          "description": "Update vehicle data from service cache",
          "fields": {
@@ -47,7 +47,7 @@
            }
          }
        },
-       "start_climate ": {
+       "start_climate": {
          "name": "Start Climate",
          "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your cars mobile app as a guide and match the options available in your car. ",
          "fields": {
@@ -58,7 +58,7 @@
          }
        }
        ,
-       "stop_climate ": {
+       "stop_climate": {
          "name": "Stop Climate",
          "description": "Please use cautiously - stop car and climate",
          "fields": {
@@ -68,7 +68,7 @@
            }
          }
        },
-       "stop_charge ": {
+       "stop_charge": {
          "name": "Stop Charge",
          "description": "Stop charging",
          "fields": {
@@ -78,7 +78,7 @@
            }
          }
        },
-       "start_charge ": {
+       "start_charge": {
          "name": "Start charge",
          "description": "Start charging",
          "fields": {
@@ -88,7 +88,7 @@
            }
          }
        },
-      "lock ": {
+      "lock": {
          "name": "Lock",
          "description": "Lock the vehicle",
          "fields": {
@@ -98,7 +98,7 @@
            }
          }
        },       
-       "unlock ": {
+       "unlock": {
          "name": "Unlock",
          "description": "Unlock the vehicle",
          "fields": {
@@ -108,7 +108,7 @@
            }
          }
        },
-       "close_charge_port ": {
+       "close_charge_port": {
          "name": "Close Charge Port",
          "description": "Close Charging Port",
          "fields": {
@@ -118,7 +118,7 @@
            }
          }
        },
-       "open_charge_port ": {
+       "open_charge_port": {
          "name": "Open Charging Port",
          "description": "Open Charge Port",
          "fields": {
@@ -128,7 +128,7 @@
            }
          }
        },
-       "set_charge_limits ": {
+       "set_charge_limits": {
          "name": "Set Charge Limits",
          "description": "sets ac and dc charge capacity limits",
          "fields": {
