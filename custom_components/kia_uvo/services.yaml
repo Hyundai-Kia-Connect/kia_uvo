@@ -20,8 +20,6 @@ start_climate:
         device: 
           integration: kia_uvo
     duration:
-      name: Duration
-      description: On Duration
       required: false
       example: 5
       default: 5
@@ -32,15 +30,11 @@ start_climate:
             step: 1
             unit_of_measurement: minutes
     climate:
-      name: Climate
-      description: Enable the HVAC System
       required: true
       default: true  
       selector:
         boolean: 
     temperature:
-      name: Temperature
-      description: Set temperature of climate control. Unit is specific to region.
       required: true
       example: 21.5
       default: 21
@@ -52,8 +46,6 @@ start_climate:
             mode: box
             unit_of_measurement: Degrees
     defrost:
-      name: Defrost
-      description: Front Windshield Defrost
       required: false
       default: false
       selector:
@@ -99,8 +91,6 @@ start_climate:
             - label: "High Heat"
               value: "8" 
     frseat:
-      name: Front Right Seat
-      description: Front Right Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -122,8 +112,6 @@ start_climate:
             - label: "High Heat"
               value: "8"  
     rlseat:
-      name: Rear Left Seat
-      description: Rear Left Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -145,8 +133,6 @@ start_climate:
             - label: "High Heat"
               value: "8" 
     rrseat:
-      name: Rear Right Seat
-      description: Rear Rear Seat Heat Cool Setting
       required: false
       selector:
         select:
@@ -220,7 +206,6 @@ open_charge_port:
         device: 
           integration: kia_uvo        
 set_charge_limits:
-  description: sets ac and dc charge capacity limits
   fields:
     device_id: 
       required: false
@@ -228,8 +213,6 @@ set_charge_limits:
         device: 
           integration: kia_uvo
     dc_limit:
-      name: DC Charge limit
-      description: max charge capacity using DC charger
       required: false
       example: 50
       default: 90
@@ -240,8 +223,6 @@ set_charge_limits:
             step: 10
             unit_of_measurement: '%'
     ac_limit:
-      name: AC Charge limit
-      description: max charge capacity using AC charger
       required: false
       example: 50
       default: 90
