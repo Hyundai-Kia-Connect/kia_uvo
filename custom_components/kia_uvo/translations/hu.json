@@ -14,8 +14,8 @@
              }
           },
           "reauth_confirm":{
-             "title":"Hyundai / Kia Connect - Újrahitelesítés",
-             "description":"Fiókja nem hitelesíthető. Az újrabeállításhoz kattintson a Küldés gombra."
+             "title":"Hyundai / Kia Connect - Újra hitelesítés",
+             "description":"Fiókja nem hitelesíthető. Az újra beállításhoz kattintson a Küldés gombra."
           }
        },
        "abort":{
@@ -24,6 +24,119 @@
        "error":{
           "invalid_auth":"Nem sikerült bejelentkezni a Hyundai (Bluelink) / Kia (Uvo) Connect szerverekre. Kérjük, használja a hivatalos alkalmazást a kijelentkezéshez és a bejelentkezéshez, majd próbálja újra!",
           "unknown":"Váratlan hiba"
+       }
+    },
+    "services": {
+      "force_update": {
+        "name": "Kényszerített frissítés",
+        "description": "Kényszerítse járművét az adatok frissítésére. A kiválasztott járművel azonos fiókban lévő összes jármű frissítésre kerül.",
+        "fields": {
+          "device_id": {
+            "name": "Jármű",
+            "description": "Válassza ki melyik jármű adatait szeretné kényszerítetten frissíteni"
+          }
+        }
+      },
+      "update": {
+         "name": "Frissítés",
+         "description": "Járműadatok frissítése a gyári szolgáltatás gyorsítótárból",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki melyik jármű adatait szeretné frissíteni"
+           }
+         }
+       },
+       "start_climate": {
+         "name": "Légkondicionálás bekapcsolása",
+         "description": "Kérjük, óvatosan használja - beindítja a klímát és a motort. Nem minden lehetőség érhető el minden autóban vagy régióban. Használja az autós mobilalkalmazását útmutatóként, és vegye figyelembe az ott elérhető lehetőségeket.",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű légkondicionálását szeretné elindítani"
+           }
+         }
+       }
+       ,
+       "stop_climate": {
+         "name": "Légkondicionálás kikapcsolása",
+         "description": "Kérjük, óvatosan használja - leállítja a klímát és a motort!",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű légkondicionálását szeretné kikapcsolni!"
+           }
+         }
+       },
+       "stop_charge": {
+         "name": "Töltés leállítása",
+         "description": "A kiválasztott jármű töltésének leállítása.",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű töltését szeretné leállítani!"
+           }
+         }
+       },
+       "start_charge": {
+         "name": "Töltés indítása",
+         "description": "A kiválasztott jármű töltésének indítása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű töltését szeretné elindítani!"
+           }
+         }
+       },
+      "lock": {
+         "name": "Zárás",
+         "description": "Jármű bezárása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik járművet szeretné bezárni!"
+           }
+         }
+       },
+       "unlock": {
+         "name": "Nyítás",
+         "description": "Jármű nyítása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik járművet szeretné kinyitni!"
+           }
+         }
+       },
+       "close_charge_port": {
+         "name": "Töltőajtó zárása",
+         "description": "A jármű töltőajtajának zárása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű töltőajtaját szeretné bezárni!"
+           }
+         }
+       },
+       "open_charge_port": {
+         "name": "Töltőajtó nyítása",
+         "description": "A jármű töltőajtajának nyítása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű töltőajtaját szeretné nyítni!"
+           }
+         }
+       },
+       "set_charge_limits": {
+         "name": "Töltés korlátozása",
+         "description": "Az AC és DC töltés szintjének korlátozásának beállítása",
+         "fields": {
+           "device_id": {
+             "name": "Jármű",
+             "description": "Válassza ki a melyik jármű töltési szintjének korlátozását szeretnéd beállítani!"
+           }
+         }
        }
     },
     "options":{
