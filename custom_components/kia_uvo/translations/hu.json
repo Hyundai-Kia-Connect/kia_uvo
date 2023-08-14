@@ -26,6 +26,21 @@
           "unknown":"Váratlan hiba"
        }
     },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Beállítások",
+             "data":{
+                "scan_interval":"Frissítési időköz (perc)",
+                "force_refresh":"Kényszerített frissítési időköz (perc)",
+                "no_force_refresh_hour_start":"Kényszerített frissítés mentes időszak kezdete (óra)",
+                "no_force_refresh_hour_finish":"Kényszerített frissítés mentes időszak vége (óra)",
+                "enable_geolocation_entity":"A földrajzi helymeghatározási entitás engedélyezése az OpenStreetMap segítségével",
+                "use_email_with_geocode_api":"Használja a Kia e-mail címét a Geocode API-hoz - Több információ: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    },
     "services": {
       "force_update": {
         "name": "Kényszerített frissítés",
@@ -41,10 +56,46 @@
          "name": "Frissítés",
          "description": "Járműadatok frissítése a gyári szolgáltatás gyorsítótárból",
          "fields": {
-           "device_id": {
-             "name": "Jármű",
-             "description": "Válassza ki melyik jármű adatait szeretné frissíteni"
-           }
+             "device_id": {
+               "name": "Jármű",
+               "description": "Válassza ki melyik jármű adatait szeretné frissíteni"
+             },
+             "duration": {
+              "name": "Időtartam",
+              "description": "Bekapcsolás időtartama"
+            },
+            "climate": {
+              "name": "Hűtés",
+              "description": "Hűtés engedélyezése a légkondicionáló segítségével"
+            },
+            "temperature": {
+              "name": "Hőmérséklet",
+              "description": "Állítsd be a kívánt hőmérsékletet. A mértékegység régióspecifikus."
+            },
+            "defrost": {
+              "name": "Leolvasztás, melegítás",
+              "description": "Szélvédő leolvasztása/melegítésa"
+            },
+            "heating": {
+              "name": "Melegítás",
+              "description": "Melegítési funkciók engedélyezése (pl kormány- vagy hátsóablakfűtés)"
+            },
+            "flseat": {
+              "name": "Első bal ülés",
+              "description": "Első bal ülés fűtése/hűtése"
+            },
+            "frseat": {
+              "name": "Első jobb ülés",
+              "description": "Első jobb ülés fűtése/hűtése"
+            },
+            "rlseat": {
+              "name": "Hátsó bal ülés",
+              "description": "Hátsó bal ülés fűtése/hűtése"
+            },
+            "rrseat": {
+              "name": "Hátsó jobb ülés",
+              "description": "Hátsóő jobb ülés fűtése/hűtése"
+            }
          }
        },
        "start_climate": {
@@ -135,23 +186,16 @@
            "device_id": {
              "name": "Jármű",
              "description": "Válassza ki a melyik jármű töltési szintjének korlátozását szeretnéd beállítani!"
-           }
+           },
+             "dc_limit": {
+              "name": "DC töltés határértéke",
+              "description": "A DC töltés befejeződik a megadott töltési szint elérésekor"
+            },
+            "ac_limit": {
+              "name": "AC töltés határértéke",
+              "description": "Az AC töltés befejeződik a megadott töltési szint elérésekor"
+            }
          }
-       }
-    },
-    "options":{
-       "step":{
-          "init":{
-             "title":"Hyundai / Kia Connect - Beállítások",
-             "data":{
-                "scan_interval":"Frissítési időköz (perc)",
-                "force_refresh":"Kényszerített frissítési időköz (perc)",
-                "no_force_refresh_hour_start":"Kényszerített frissítés mentes időszak kezdete (óra)",
-                "no_force_refresh_hour_finish":"Kényszerített frissítés mentes időszak vége (óra)",
-                "enable_geolocation_entity":"A földrajzi helymeghatározási entitás engedélyezése az OpenStreetMap segítségével",
-                "use_email_with_geocode_api":"Használja a Kia e-mail címét a Geocode API-hoz - Több információ: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-             }
-          }
        }
     }
  }
