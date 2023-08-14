@@ -26,13 +26,28 @@
           "unknown":"Unexpected error"
        }
     },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Configuration",
+             "data":{
+                "scan_interval":"Scan Interval (min)",
+                "force_refresh":"Force Refresh Interval (min)",
+                "no_force_refresh_hour_start":"No Force Refresh Start Hour",
+                "no_force_refresh_hour_finish":"No Force Refresh Finish Hour",
+                "enable_geolocation_entity":"Enable Geolocation Entity using OpenStreetMap",
+                "use_email_with_geocode_api":"Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    },
     "services": {
       "force_update": {
         "name": "Force Update",
         "description": "Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.",
         "fields": {
           "device_id": {
-            "name": "Speed",
+            "name": "Vehicle",
             "description": "Target vehicle"
           }
         }
@@ -54,7 +69,43 @@
            "device_id": {
              "name": "Vehicle",
              "description": "Target vehicle"
-           }
+           },
+           "duration": {
+            "name": "Duration",
+            "description": "On Duration"
+          },
+          "climate": {
+            "name": "Climate",
+            "description": "Enable the HVAC System"
+          },
+          "temperature": {
+            "name": "Temperature",
+            "description": "Set temperature of climate control. Unit is specific to region."
+          },
+          "defrost": {
+            "name": "Defrost",
+            "description": "Front Windshield Defrost"
+          },
+          "heating": {
+            "name": "Heating",
+            "description": "Heated features like the steering wheel and rear window"
+          },
+          "flseat": {
+            "name": "Front Left Seat",
+            "description": "Front Left Seat Heat Cool Setting"
+          },
+          "frseat": {
+            "name": "Front Right Seat",
+            "description": "Front Right Seat Heat Cool Setting"
+          },
+          "rlseat": {
+            "name": "Rear Left Seat",
+            "description": "Rear Left Seat Heat Cool Setting"
+          },
+          "rrseat": {
+            "name": "Rear Right Seat",
+            "description": "Rear Right Seat Heat Cool Setting"
+          }
          }
        }
        ,
@@ -135,23 +186,16 @@
            "device_id": {
              "name": "Vehicle",
              "description": "Target vehicle"
-           }
-         }
-       }
-    },
-    "options":{
-       "step":{
-          "init":{
-             "title":"Hyundai / Kia Connect - Configuration",
-             "data":{
-                "scan_interval":"Scan Interval (min)",
-                "force_refresh":"Force Refresh Interval (min)",
-                "no_force_refresh_hour_start":"No Force Refresh Start Hour",
-                "no_force_refresh_hour_finish":"No Force Refresh Finish Hour",
-                "enable_geolocation_entity":"Enable Geolocation Entity using OpenStreetMap",
-                "use_email_with_geocode_api":"Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-             }
+           },
+           "dc_limit": {
+            "name": "DC Charge limit",
+            "description": "max charge capacity using DC charger"
+          },
+          "ac_limit": {
+            "name": "AC Charge limit",
+            "description": "max charge capacity using AC charger"
           }
+         }
        }
     }
  }
