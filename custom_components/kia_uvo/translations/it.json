@@ -10,7 +10,7 @@
                     "password":"Password",
                     "region":"Regione",
                     "brand":"Marca",
-                    "pin":"Pin (richiesto per CA)"
+                    "pin":"Pin"
                 }
             },
             "reauth_confirm":{
@@ -25,6 +25,119 @@
             "invalid_auth":"Impossibile effettuare il login nei server Hyundai (Bluelink) / Kia (Uvo) Connect. Utilizza l'app ufficiale per effettuare il logout, accedere nuovamente e riprovare!",
             "unknown":"Errore imprevisto"
         }
+    },
+    "services": {
+      "force_update": {
+        "name": "Aggiornamento forzato",
+        "description": "Forza il veicolo a aggiornare i suoi dati. Tutti i veicoli nello stesso account del veicolo selezionato verranno aggiornati.",
+        "fields": {
+          "device_id": {
+            "name": "Veicolo",
+            "description": "Veicolo di destinazione"
+          }
+        }
+      },
+      "update": {
+         "name": "Aggiorna",
+         "description": "Aggiorna i dati del veicolo dalla cache del servizio",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "start_climate": {
+         "name": "Avvia Climatizzazione",
+         "description": "Usa con cautela - Avvia climatizzazione e motore. Non tutte le opzioni sono disponibili su tutte le auto o regioni. Usa l'app mobile della tua auto come guida e abbinale alle opzioni disponibili nella tua auto.",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       }
+       ,
+       "stop_climate": {
+         "name": "Arresta Climatizzazione",
+         "description": "Usa con cautela - arresta l'auto e la climatizzazione",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "stop_charge": {
+         "name": "Arresta Ricarica",
+         "description": "Arresta la ricarica",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "start_charge": {
+         "name": "Avvia Ricarica",
+         "description": "Avvia la ricarica",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+      "lock": {
+         "name": "Blocca",
+         "description": "Blocca il veicolo",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },       
+       "unlock": {
+         "name": "Sblocca",
+         "description": "Sblocca il veicolo",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "close_charge_port": {
+         "name": "Chiudi Porta di Ricarica",
+         "description": "Chiudi la porta di ricarica",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "open_charge_port": {
+         "name": "Apri Porta di Ricarica",
+         "description": "Apri la porta di ricarica",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       },
+       "set_charge_limits": {
+         "name": "Imposta Limiti di Ricarica",
+         "description": "Imposta i limiti di capacità di ricarica CA e CC",
+         "fields": {
+           "device_id": {
+             "name": "Veicolo",
+             "description": "Veicolo di destinazione"
+           }
+         }
+       }
     },
     "options":{
         "step":{

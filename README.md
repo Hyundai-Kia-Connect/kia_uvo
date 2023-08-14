@@ -5,7 +5,8 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 ## Installation ##
 You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing, a PR for this would be great!). 
-- EU, CA and US is supported by this.  USA and China support is limited. 
+- AU, EU, CA and US is supported by this.  USA and China support is limited.
+- Genesis Support hasn't been tested and has just been added for Canada only.  Feedback would be appreciated! 
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time. 
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
 - force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
