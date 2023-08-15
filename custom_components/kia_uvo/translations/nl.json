@@ -40,7 +40,7 @@
              }
           }
        }
-    }
+    },
     "services": {
       "force_update": {
         "name": "Forceer update",
