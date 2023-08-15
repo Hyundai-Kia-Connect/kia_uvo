@@ -64,7 +64,7 @@
        },
        "start_climate": {
          "name": "Start Climate",
-         "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your cars mobile app as a guide and match the options available in your car. ",
+         "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car. ",
          "fields": {
            "device_id": {
              "name": "Vehicle",
