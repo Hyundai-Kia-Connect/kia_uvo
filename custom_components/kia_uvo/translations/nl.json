@@ -120,80 +120,80 @@
          }
        },
        "stop_charge": {
-         "name": "Stop Charge",
-         "description": "Stop charging",
+         "name": "Stop Laden",
+         "description": "Stop Laden",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },
        "start_charge": {
-         "name": "Start charge",
-         "description": "Start charging",
+         "name": "Start laden",
+         "description": "Start laden",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },
       "lock": {
-         "name": "Lock",
-         "description": "Lock the vehicle",
+         "name": "Sluiten",
+         "description": "Voertuig op slot doen",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },       
        "unlock": {
-         "name": "Unlock",
-         "description": "Unlock the vehicle",
+         "name": "Openen",
+         "description": "Voertuig van het slot halen",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },
        "close_charge_port": {
-         "name": "Close Charge Port",
-         "description": "Close Charging Port",
+         "name": "Laadpoort sluiten",
+         "description": "Sluit de laadpoort",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },
        "open_charge_port": {
-         "name": "Open Charging Port",
-         "description": "Open Charge Port",
+         "name": "Laadpoort openen",
+         "description": "Open de laadpoort",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            }
          }
        },
        "set_charge_limits": {
-         "name": "Set Charge Limits",
-         "description": "sets ac and dc charge capacity limits",
+         "name": "Stel de oplaadbegrenzing in",
+         "description": "Stel de AC en DC oplaadbegrenzing in",
          "fields": {
            "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
            },
            "dc_limit": {
-            "name": "DC Charge limit",
-            "description": "max charge capacity using DC charger"
+            "name": "DC Oplaadbegrenzing",
+            "description": "max oplaadcapaciteit bij gebruik van DC oplader"
           },
           "ac_limit": {
-            "name": "AC Charge limit",
-            "description": "max charge capacity using AC charger"
+            "name": "AC Oplaadbegrenzing",
+            "description": "max oplaadcapaciteit bij gebruik van DC oplader"
           }
          }
        }
