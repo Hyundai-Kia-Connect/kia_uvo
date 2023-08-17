@@ -33,8 +33,8 @@
                 "data": {
                     "scan_interval": "Scan-Intervall (Min.)",
                     "force_refresh": "Force-Refresh-Intervall (Min.)",
-                    "no_force_refresh_hour_start": "Force Refresh zulassen ab",
-                    "no_force_refresh_hour_finish": "Force Refresh zulassen bis",
+                    "no_force_refresh_hour_start": "Kein Force Refresh zulassen ab",
+                    "no_force_refresh_hour_finish": "Kein Force Refresh zulassen bis",
                     "enable_geolocation_entity": "Geolokations-Entität über OpenStreetMap aktivieren",
                     "use_email_with_geocode_api": "Verwende deine Kia E-Mail-Adresse für die Geocode API - Weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other"
                 }
