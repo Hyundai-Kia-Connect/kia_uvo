@@ -39,15 +39,15 @@ These can be access by going to the developer menu followed by services.
 - set_charge_limits: You can control your charging capacity limits using this services 
 - open_charge_port / close_charge_port:  Open or close the charge port.
 
-| Service       | EU        | CA        | USA Kia        | USA Hyundai        | China |
-| ------------- | --        | --        | --------       | ------------       |--------|
-| Update        | &#10004;  | &#10004;  | &#10004;       | &#10004;           |&#10004;|
-| Force Update  | &#10004;  | &#10004;  | &#10004;       |           |&#10004;|
-| Lock Unlock   | &#10004;  | &#10004;  | &#10004;       | &#10004;           |&#10004;|
-| start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;           |&#10004;|
-| start stop charge  | &#10004;  | &#10004;  | &#10004;       |            ||
-| set charge limits  | &#10004;  | &#10004;  | &#10004;       |            ||
-| open and close charge port(None functional, needs testing)  |  |   | |          ||
+| Service       | EU        | CA        | USA Kia        | USA Hyundai        | USA Genesis        | China |
+| ------------- | --        | --        | --------       | ------------       | -----------        |--------|
+| Update        | &#10004;  | &#10004;  | &#10004;       | &#10004;           | &#10004;           |&#10004;|
+| Force Update  | &#10004;  | &#10004;  | &#10004;       |                    |                    |&#10004;|
+| Lock Unlock   | &#10004;  | &#10004;  | &#10004;       | &#10004;           | &#10004;           |&#10004;|
+| start stop climate | &#10004;  | &#10004;  | &#10004;       | &#10004;      |                    |&#10004;|
+| start stop charge  | &#10004;  | &#10004;  | &#10004;       |            |||
+| set charge limits  | &#10004;  | &#10004;  | &#10004;       |            |||
+| open and close charge port(None functional, needs testing)  |  |   | |          |||
 
 
 I have posted an example screenshot from my own car.
