@@ -228,11 +228,10 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
+        entities.append(
+            VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
+        )
     async_add_entities(entities)
-    async_add_entities(
-        [VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])],
-        True,
-    )
     return True
 
 
