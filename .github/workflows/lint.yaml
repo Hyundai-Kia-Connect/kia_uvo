@@ -15,7 +15,6 @@ jobs:
         checks:
           - pyupgrade
           - black
-          - codespell
           - check-executables-have-shebangs
           - check-json
           - requirements-txt-fixer
@@ -23,7 +22,7 @@ jobs:
           - mixed-line-ending
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
@@ -41,6 +40,6 @@ jobs:
         run: pre-commit run --hook-stage manual ${{ matrix.checks }} --all-files --config .github/pre-commit-config.yaml
       - name: Commit Changes
         if: failure()
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "fix: ${{ matrix.checks }} action"

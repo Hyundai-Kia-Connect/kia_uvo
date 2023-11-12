@@ -3,22 +3,26 @@
     "config": {
         "step": {
             "user": {
-                "title": "Hyundai / Kia Connect: Anmelden",
-                "description": "Hyundai Bluelink / Kia Uvo Connect Login für Home Assistant.",
+                "title": "Hyundai / Kia Connect - Anmelden",
+                "description": "Hyundai Bluelink / Kia Uvo Connect Anmeldung für Home Assistant.",
                 "data": {
                     "username": "Benutzername",
                     "password": "Passwort",
                     "region": "Region",
                     "brand": "Marke",
-                    "pin": "PIN (notwendig für CA)"
+                    "pin": "PIN (erforderlich für CA)"
                 }
+            },
+            "reauth_confirm": {
+                "title": "Hyundai / Kia Connect - Reauthentifizierung",
+                "description": "Dein Konto kann nicht authentifiziert werden. Klicke auf Senden, um die Neukonfiguration durchzuführen."
             }
         },
         "abort": {
             "already_configured": "Dein Fahrzeug ist bereits konfiguriert"
         },
         "error": {
-            "invalid_auth": "Login für Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde Dich in Deiner Hyundai/Kia-App ab, logge Dich dort neu ein und versuche es erneut!",
+            "invalid_auth": "Anmeldung bei Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde dich von deiner Hyundai/Kia-App ab, melde dich erneut an und versuche es erneut!",
             "unknown": "Unbekannter Fehler"
         }
     },
@@ -29,10 +33,166 @@
                 "data": {
                     "scan_interval": "Scan-Intervall (Min.)",
                     "force_refresh": "Force-Refresh-Intervall (Min.)",
-                    "no_force_refresh_hour_start": "Force Refresh anhalten ab",
-                    "no_force_refresh_hour_finish": "Force Refresh zulassen ab",
-                    "enable_geolocation_entity": "Geolocation Entität über OpenStreetMap aktivieren",
-                    "use_email_with_geocode_api": "Verwende Deine Kia E-Mail Adresse für die Geocode API - für weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+                    "no_force_refresh_hour_start": "Kein Force Refresh zulassen ab",
+                    "no_force_refresh_hour_finish": "Kein Force Refresh zulassen bis",
+                    "enable_geolocation_entity": "Geolokations-Entität über OpenStreetMap aktivieren",
+                    "use_email_with_geocode_api": "Verwende deine Kia E-Mail-Adresse für die Geocode API - Weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+                }
+            }
+        }
+    },
+    "services": {
+        "force_update": {
+            "name": "Aktualisierung erzwingen",
+            "description": "Zwingt dein Fahrzeug, seine Daten zu aktualisieren. Alle Fahrzeuge im gleichen Konto wie das ausgewählte Fahrzeug werden aktualisiert.",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "update": {
+            "name": "Aktualisierung",
+            "description": "Aktualisiert die Fahrzeugdaten mithilfe des Service-Caches",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "start_climate": {
+            "name": "Klimaanlage und Fahrzeug starten",
+            "description": "Bitte vorsichtig verwenden - Startet Klimaanlage und Motor. Nicht alle Optionen sind in allen Fahrzeugen oder Regionen verfügbar. Verwende die mobile App deines Autos als Anleitung und gleiche die verfügbaren Optionen in deinem Auto ab.",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                },
+                "duration": {
+                    "name": "Dauer",
+                    "description": "Aktivierungsdauer"
+                },
+                "climate": {
+                    "name": "Klimaanlage",
+                    "description": "Klimaanlage starten"
+                },
+                "temperature": {
+                    "name": "Temperatur",
+                    "description": "Einstellen der Temperatur der Klimasteuerung. Die Einheit ist regionsabhängig."
+                },
+                "defrost": {
+                    "name": "Entfrosten",
+                    "description": "Frontscheibenentfrostung"
+                },
+                "heating": {
+                    "name": "Heizung",
+                    "description": "Beheizte Funktionen wie Lenkrad und Heckscheibe"
+                },
+                "flseat": {
+                    "name": "Vordersitz links",
+                    "description": "Einstellung für Beheizung und Kühlung des linken Vordersitzes"
+                },
+                "frseat": {
+                    "name": "Vordersitz rechts",
+                    "description": "Einstellung für Beheizung und Kühlung des rechten Vordersitzes"
+                },
+                "rlseat": {
+                    "name": "Rücksitz links",
+                    "description": "Einstellung für Beheizung und Kühlung des linken Rücksitzes"
+                },
+                "rrseat": {
+                    "name": "Rücksitz rechts",
+                    "description": "Einstellung für Beheizung und Kühlung des rechten Rücksitzes"
+                }
+            }
+        },
+        "stop_climate": {
+            "name": "Klimaanlage stoppen",
+            "description": "Bitte vorsichtig verwenden - Fahrzeug und Klimaanlage stoppen",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "stop_charge": {
+            "name": "Laden stoppen",
+            "description": "Laden stoppen",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "start_charge": {
+            "name": "Laden starten",
+            "description": "Laden starten",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "lock": {
+            "name": "Verriegeln",
+            "description": "Fahrzeug verriegeln",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "unlock": {
+            "name": "Entriegeln",
+            "description": "Fahrzeug entriegeln",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "close_charge_port": {
+            "name": "Ladeanschluss schließen",
+            "description": "Ladeanschluss schließen",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "open_charge_port": {
+            "name": "Ladeanschluss öffnen",
+            "description": "Ladeanschluss öffnen",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                }
+            }
+        },
+        "set_charge_limits": {
+            "name": "Ladebegrenzungen festlegen",
+            "description": "Legt AC- und DC-Ladekapazitätsgrenzen fest",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                },
+                "dc_limit": {
+                    "name": "DC-Ladebegrenzung",
+                    "description": "Maximale Ladekapazität bei Verwendung von DC-Ladegeräten"
+                },
+                "ac_limit": {
+                    "name": "AC-Ladebegrenzung",
+                    "description": "Maximale Ladekapazität bei Verwendung von AC-Ladegeräten"
                 }
             }
         }

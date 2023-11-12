@@ -1,0 +1,201 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - Authenticatie",
+             "description":"Stel uw Hyundai (Bluelink) / Kia (Uvo) Connect in om te integreren met Home Assistant.",
+             "data":{
+                "username":"Gebruikersnaam",
+                "password":"Wachtwoord",
+                "region":"Regio",
+                "brand":"Merk",
+                "pin":"Pin (vereist voor CA)"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - Opnieuw Authenticeren",
+             "description":"Uw account kan zich niet authenticeren. Klik Submit om het opnieuw te proberen."
+          }
+       },
+       "abort":{
+          "already_configured":"Het device is al geconfigureerd"
+        },
+       "error":{
+          "invalid_auth":"Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiële app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",
+          "unknown":"Onverwachte foutsituatie"
+       }
+    },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Instellingen",
+             "data":{
+                "scan_interval":"Scan Interval (min)",
+                "force_refresh":"Forceer Refresh Interval (min)",
+                "no_force_refresh_hour_start":"Force Refresh niet toelaten na (begin-uur)",
+                "no_force_refresh_hour_finish":"Force Refresh weer toelaten na (eind-uur",
+                "enable_geolocation_entity":"Schakel Geolocation Entity m.b.v. OpenStreetMap in",
+                "use_email_with_geocode_api":"Gebruik uw Kia email adres voor Geocode API - Meer informatie: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    },
+    "services": {
+      "force_update": {
+        "name": "Forceer update",
+        "description": "Forceer dat de data van je voertuig wordt bijgewerkt. Alle voertuigen op hetzelfde account als het geselecteerde voertuig zullen worden bijgewerkt.",
+        "fields": {
+          "device_id": {
+            "name": "Voertuig",
+            "description": "Gewenste voertuig"
+          }
+        }
+      },
+      "update": {
+         "name": "Update",
+         "description": "Werk de data van het voertuig bij uit de buffer van de dienst",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "start_climate": {
+         "name": "Start Klimaat",
+         "description": "Gebruik dit voorzichtig - Start klimaat en motor.  Niet alle opties zijn beschikbaar voor alle auto's of regio's. Gebruik de mobiele app van je auto als hulpmiddel and vergelijk de beschikbare opties van je auto.",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           },
+           "duration": {
+            "name": "Tijdsduur",
+            "description": "Ingeschakelde tijdsduur"
+          },
+          "climate": {
+            "name": "Klimaat",
+            "description": "Activeer het HVAC systeem"
+          },
+          "temperature": {
+            "name": "Temperatuur",
+            "description": "Stel de temperatuur van de klimaatcontrole in. De eenheid is specifiek voor de regio."
+          },
+          "defrost": {
+            "name": "Ontdooien",
+            "description": "Voorruit ontdooien"
+          },
+          "heating": {
+            "name": "Verwarmen",
+            "description": "Verwarmde onderdelen zoals het stuur en het achterraam"
+          },
+          "flseat": {
+            "name": "Stoel Linksvoor",
+            "description": "Stoel linksvoor Verwarmen Koelen instellingen"
+          },
+          "frseat": {
+            "name": "Stoel Rechtsvoor",
+            "description": "Stoel rechtsvoor Verwarmen Koelen instellingen"
+          },
+          "rlseat": {
+            "name": "Stoel Linksachter",
+            "description": "Stoel linksachter Verwarmen Koelen instellingen"
+          },
+          "rrseat": {
+            "name": "Stoel Rechtsachter",
+            "description": "Stoel rechtsachter Verwarmen Koelen instellingen"
+          }
+         }
+       }
+       ,
+       "stop_climate": {
+         "name": "Stop Klimaat",
+         "description": "Gebruik dit voorzichtig - Stop klimaat en motor",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "stop_charge": {
+         "name": "Stop Laden",
+         "description": "Stop Laden",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "start_charge": {
+         "name": "Start laden",
+         "description": "Start laden",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+      "lock": {
+         "name": "Sluiten",
+         "description": "Voertuig op slot doen",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },       
+       "unlock": {
+         "name": "Openen",
+         "description": "Voertuig van het slot halen",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "close_charge_port": {
+         "name": "Laadpoort sluiten",
+         "description": "Sluit de laadpoort",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "open_charge_port": {
+         "name": "Laadpoort openen",
+         "description": "Open de laadpoort",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           }
+         }
+       },
+       "set_charge_limits": {
+         "name": "Stel de oplaadbegrenzing in",
+         "description": "Stel de AC en DC oplaadbegrenzing in",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           },
+           "dc_limit": {
+            "name": "DC Oplaadbegrenzing",
+            "description": "max oplaadcapaciteit bij gebruik van DC oplader"
+          },
+          "ac_limit": {
+            "name": "AC Oplaadbegrenzing",
+            "description": "max oplaadcapaciteit bij gebruik van DC oplader"
+          }
+         }
+       }
+    }
+ }

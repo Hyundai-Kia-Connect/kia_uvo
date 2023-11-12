@@ -253,6 +253,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         on_icon="mdi:clock-outline",
         off_icon="mdi:clock-outline",
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="brake_fluid_warning_is_on",
+        name="Brake Fluid Warning",
+        is_on=lambda vehicle: vehicle.brake_fluid_warning_is_on,
+        on_icon="mdi:car-brake-alert",
+        off_icon="mdi:car-brake-fluid-level",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
 )
 
 

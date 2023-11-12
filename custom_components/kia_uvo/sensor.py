@@ -192,12 +192,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="ev_first_departure_time",
-        name="EV First Scheduled Depature Time",
+        name="EV First Scheduled Departure Time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
         key="ev_second_departure_time",
-        name="EV Second Scheduled Depature Time",
+        name="EV Second Scheduled Departure Time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
