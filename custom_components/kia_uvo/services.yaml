@@ -60,11 +60,11 @@ start_climate:
             - label: "Off"
               value: "0"
             - label: "Steering Wheel, Side and Back Defroster"
-              value: "1"
+              value: "4"
             - label: "Rear Window Only"
               value: "2"
             - label: "Steering Wheel Only"
-              value: "3"
+              value: "1"
     flseat:
       required: false
       selector:
