@@ -64,7 +64,7 @@ start_climate:
             - label: "Rear Window Only"
               value: "2"
             - label: "Steering Wheel Only"
-              value: "1"
+              value: "3"
     flseat:
       required: false
       selector:
