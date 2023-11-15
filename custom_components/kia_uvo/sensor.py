@@ -16,6 +16,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     PERCENTAGE,
     TIME_MINUTES,
+    TIME_DAYS,
     ENERGY_WATT_HOUR,
     ENERGY_KILO_WATT_HOUR,
 )
@@ -229,6 +230,11 @@ async def async_setup_entry(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
         entities.append(
+            DailyDrivingStatsEntity(
+                coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+            )
+        )
+        entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
     async_add_entities(entities)
@@ -298,3 +304,41 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
+
+
+class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+
+    @property
+    def state(self):
+        return len(self.vehicle.daily_stats)
+
+    @property
+    def state_attributes(self):
+        m = {}
+        for day in self.vehicle.daily_stats:
+            key = day.date.date()
+            value = {
+                "total_consumed": day.total_consumed,
+                "engine_consumption": day.engine_consumption,
+                "climate_consumption": day.climate_consumption,
+                "onboard_electronics_consumption": day.onboard_electronics_consumption,
+                "battery_care_consumption": day.battery_care_consumption,
+                "regenerated_energy": day.regenerated_energy,
+                "distance": day.distance,
+            }
+            m[key] = value
+        return m
+
+    @property
+    def name(self):
+        return f"{self.vehicle.name} Daily Driving Stats"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-daily-driving-stats-{self.vehicle.id}"
+
+    @property
+    def unit_of_measurement(self):
+        return TIME_DAYS
