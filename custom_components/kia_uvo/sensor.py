@@ -230,7 +230,9 @@ async def async_setup_entry(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
         entities.append(
-            DailyDrivingStatsEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
+            DailyDrivingStatsEntity(
+                coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+            )
         )
     async_add_entities(entities)
     async_add_entities(
@@ -304,6 +306,7 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
     def unique_id(self):
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
 
+
 class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
@@ -340,4 +343,3 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unit_of_measurement(self):
         return TIME_DAYS
-
