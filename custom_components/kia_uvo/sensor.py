@@ -146,7 +146,15 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="total_power_consumed",
-        name="Monthly Energy Consumption",
+        name="Total Energy Consumption",
+        icon="mdi:car-electric",
+        native_unit_of_measurement=ENERGY_WATT_HOUR,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+    ),
+    SensorEntityDescription(
+        key="total_power_regenerated",
+        name="Total Energy Regeneration",
         icon="mdi:car-electric",
         native_unit_of_measurement=ENERGY_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
