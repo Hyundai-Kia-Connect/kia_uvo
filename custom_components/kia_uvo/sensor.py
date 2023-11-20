@@ -326,7 +326,7 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     def state_attributes(self):
         m = {}
         for day in self.vehicle.daily_stats:
-            key = day.date.date()
+            key = day.date.strftime("%Y-%m-%d")
             value = {
                 "total_consumed": day.total_consumed,
                 "engine_consumption": day.engine_consumption,
