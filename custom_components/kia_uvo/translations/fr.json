@@ -1,0 +1,200 @@
+{
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai / Kia Connect - Authentification",
+        "description": "Configurez votre Hyundai (Bluelink) / Kia (Uvo) Connect pour l'intégrer à Home Assistant.",
+        "data": {
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "region": "Région",
+          "brand": "Marque",
+          "pin": "Code pin"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - Ré-authentification",
+        "description": "Echec d'authentification. Clickez Soumettre pour recommencer la configuration."
+      }
+    },
+    "abort": {
+      "already_configured": "Périférique déjà configuré"
+    },
+    "error": {
+      "invalid_auth": "Authentification échouée aux serveurs Hyundai (Bluelink) / Kia (Uvo) Connect. Déconnectez-vous et reconnectez-vous sur l'application officielle puis ré-essayez!",
+      "unknown": "Erreur non gérée"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - Configuration",
+        "data": {
+          "scan_interval": "Intervale de scan (min)",
+          "force_refresh": "Intervale de rafraichissement forcé (min) -- Attention, une valeur trop petite consomme davantage de batterie 12v.",
+          "no_force_refresh_hour_start": "Heure de début de la désactivation de l'Intervale de rafraichissement forcé",
+          "no_force_refresh_hour_finish": "Heure de fin de la désactivation de l'Intervale de rafraichissement forcé",
+          "enable_geolocation_entity": "Activer l'entité Geolocation (utilise OpenStreetMap)",
+          "use_email_with_geocode_api": "Utilisez votre adresse email Kia avec l'API Geocode - Plus d'information: https://nominatim.org/release-docs/develop/api/Reverse/#other (eng)"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Forcer mise à jour",
+      "description": "Forcer votre véhicule de mettre à jour ses données. Tous les véhicules du même compte étant sélectionnés sont concernés.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "update": {
+      "name": "Mise à jour",
+      "description": "Mettre à jour les données du Véhicule depuis le cache service",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Démarrer climatisation",
+      "description": "À utiliser avec prudence - Démarre à la fois la climatisation et le moteur. Toutes les options ne sont pas disponibles sur tous les véhicules et régions.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        },
+        "duration": {
+          "name": "Durée",
+          "description": "Durée d'activation"
+        },
+        "climate": {
+          "name": "Climatisation",
+          "description": "Activer le système HVAC (chauffage, ventilation et air conditionné)."
+        },
+        "temperature": {
+          "name": "Température",
+          "description": "Détermine la température cible. L'unité dépend de la région."
+        },
+        "defrost": {
+          "name": "Dégivrage",
+          "description": "Pare-brise (avant)"
+        },
+        "heating": {
+          "name": "Chauffage",
+          "description": "Fonctionnalités de chauffage telles que le volant chauffant ou lunette arrière."
+        },
+        "flseat": {
+          "name": "Siège avant gauche",
+          "description": "Paramètre de climatisation du siège avant gauche."
+        },
+        "frseat": {
+          "name": "Siège avant droit",
+          "description": "Paramètre de climatisation du siège avant droit."
+        },
+        "rlseat": {
+          "name": "Siège arrière gauche",
+          "description": "Paramètre de climatisation du siège arrière gauche."
+        },
+        "rrseat": {
+          "name": "Siège arrière droit",
+          "description": "Paramètre de climatisation du siège arrière droit."
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Arrêter climatisation",
+      "description": "À utiliser avec prudence - Arrête la climatisation et le moteur.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Arrêter la charge",
+      "description": "Arrête la charge du véhicule.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Démarrer la charge",
+      "description": "Démarre la charge du véhicule.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "lock": {
+      "name": "Vérouiller",
+      "description": "Vérouiller le Véhicule",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Dévérouiller",
+      "description": "Dévérouiller le Véhicule",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Fermer la trappe de charge",
+      "description": "Ferme la trappe de charge.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Ouvrir la trappe de charge",
+      "description": "Ouvre la trappe de charge",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Définir la limite de charge",
+      "description": "Défimir la limite de capacité de charge AC et DC.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        },
+        "dc_limit": {
+          "name": "Limite de charge DC (courrant continu)",
+          "description": "Capacité maximale de charge avec chargeur DC (courrant continu)."
+        },
+        "ac_limit": {
+          "name": "Limite de charge DC (courrant alternatif)",
+          "description": "Capacité maximale de charge avec chargeur AC (courrant alternatif)."
+        }
+      }
+    }
+  }
+}
