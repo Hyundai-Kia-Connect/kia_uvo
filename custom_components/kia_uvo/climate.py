@@ -8,15 +8,9 @@ from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle, VehicleManag
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
-    CURRENT_HVAC_COOL,
-    CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_IDLE,
-    CURRENT_HVAC_OFF,
-    HVAC_MODE_AUTO,
-    HVAC_MODE_COOL,
-    HVAC_MODE_HEAT,
-    HVAC_MODE_OFF,
-    SUPPORT_TARGET_TEMPERATURE,
+    ClimateEntityFeature,
+    HVACAction,
+    HVACMode,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -143,18 +137,18 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         """Get the configured climate control operation mode."""
 
         if not self.vehicle.air_control_is_on:
-            return HVAC_MODE_OFF
+            return HVACMode.OFF
 
         # Cheating: there is no perfect mapping to either heat or cool,
         # as the API can only set target temp and then decides: so we
         # just derive the same by temperature change direction.
         if self.current_temperature > self.climate_config.set_temp:
-            return HVAC_MODE_COOL
+            return HVACMode.COOL
         if self.current_temperature < self.climate_config.set_temp:
-            return HVAC_MODE_HEAT
+            return HVACMode.HEAT
 
         # TODO: what could be a sensible answer if target temp is reached?
-        return HVAC_MODE_AUTO
+        return HVACMode.AUTO
 
     @property
     def hvac_action(self) -> str | None:
@@ -165,43 +159,43 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         Computed value based on current and desired temp and configured operation mode.
         """
         if not self.vehicle.air_control_is_on:
-            return CURRENT_HVAC_OFF
+            return HVACAction.OFF
 
         # if temp is lower than target, it HEATs
         if self.current_temperature < self.climate_config.set_temp:
-            return CURRENT_HVAC_HEAT
+            return HVACAction.HEATING
 
         # if temp is higher than target, it COOLs
         if self.current_temperature > self.climate_config.set_temp:
-            return CURRENT_HVAC_COOL
+            return HVACAction.COOLING
 
         # target temp reached
         if self.current_temperature == self.climate_config.set_temp:
-            return CURRENT_HVAC_IDLE
+            return HVACAction.IDLE
 
         # should not happen, fallback
-        return CURRENT_HVAC_OFF
+        return HVACAction.OFF
 
     @property
     def hvac_modes(self) -> list[str]:
         """Supported in-car climate control modes."""
         return [
-            HVAC_MODE_OFF,
+            HVACMode.OFF,
             # if only heater is activated
-            HVAC_MODE_HEAT,
+            HVACMode.HEAT,
             # if only AC is activated
-            HVAC_MODE_COOL,
+            HVACMode.COOL,
         ]
 
     @property
     def supported_features(self) -> int:
         """Supported in-car climate control features."""
-        return SUPPORT_TARGET_TEMPERATURE
+        return ClimateEntityFeature.TARGET_TEMPERATURE
 
     async def async_set_hvac_mode(self, hvac_mode):
         """Set the operation mode of the in-car climate control."""
 
-        if hvac_mode == HVAC_MODE_OFF:
+        if hvac_mode == HVACMode.OFF:
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.stop_climate,
                 self.vehicle.id,
@@ -224,7 +218,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
         # activation is controlled separately, but if system is turned on
         # and temp has changed, send update to car
-        if self.hvac_mode != HVAC_MODE_OFF and old_temp != self.climate_config.set_temp:
+        if self.hvac_mode != HVACMode.OFF and old_temp != self.climate_config.set_temp:
             # Car does not accept changing the temp after starting the heating. So we have to turn off first
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.stop_climate,

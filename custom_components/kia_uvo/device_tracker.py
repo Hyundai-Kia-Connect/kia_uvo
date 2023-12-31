@@ -5,7 +5,7 @@ import logging
 
 from hyundai_kia_connect_api import Vehicle
 
-from homeassistant.components.device_tracker import SOURCE_TYPE_GPS
+from homeassistant.components.device_tracker import SourceType
 from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -55,4 +55,4 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
 
     @property
     def source_type(self):
-        return SOURCE_TYPE_GPS
+        return SourceType.GPS
