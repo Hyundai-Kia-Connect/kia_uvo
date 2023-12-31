@@ -15,10 +15,8 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.const import (
     PERCENTAGE,
-    TIME_MINUTES,
-    TIME_DAYS,
-    ENERGY_WATT_HOUR,
-    ENERGY_KILO_WATT_HOUR,
+    UnitOfEnergy,
+    UnitOfTime,
 )
 
 from homeassistant.config_entries import ConfigEntry
@@ -111,25 +109,25 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="ev_estimated_current_charge_duration",
         name="Estimated Charge Duration",
         icon="mdi:ev-station",
-        native_unit_of_measurement=TIME_MINUTES,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_fast_charge_duration",
         name="Estimated Fast Charge Duration",
         icon="mdi:ev-station",
-        native_unit_of_measurement=TIME_MINUTES,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_portable_charge_duration",
         name="Estimated portable Charge Duration",
         icon="mdi:ev-station",
-        native_unit_of_measurement=TIME_MINUTES,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_station_charge_duration",
         name="Estimated Station Charge Duration",
         icon="mdi:ev-station",
-        native_unit_of_measurement=TIME_MINUTES,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="_ev_target_range_charge_AC",
@@ -149,7 +147,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="total_power_consumed",
         name="Total Energy Consumption",
         icon="mdi:car-electric",
-        native_unit_of_measurement=ENERGY_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
@@ -157,7 +155,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="total_power_regenerated",
         name="Total Energy Regeneration",
         icon="mdi:car-electric",
-        native_unit_of_measurement=ENERGY_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
     ),
@@ -167,7 +165,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Average Energy Consumption",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=f"{ENERGY_WATT_HOUR}/km",
+        native_unit_of_measurement=f"{UnitOfEnergy.WATT_HOUR}/km",
     ),
     SensorEntityDescription(
         key="front_left_seat_status",
@@ -349,4 +347,4 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def unit_of_measurement(self):
-        return TIME_DAYS
+        return UnitOfTime.DAYS
