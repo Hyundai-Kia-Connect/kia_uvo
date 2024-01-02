@@ -56,16 +56,36 @@ def async_setup_services(hass: HomeAssistant) -> bool:
     async def async_handle_start_climate(call):
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
+        duration=call.data.get("duration")
+        set_temp=call.data.get("temperature")
+        climate=call.data.get("climate")
+        heating=call.data.get("heating")
+        defrost=call.data.get("defrost")
+        front_left_seat=call.data.get("flseat")
+        front_right_seat=call.data.get("frseat")
+        rear_left_seat=call.data.get("rlseat")
+        rear_right_seat=call.data.get("rrseat") 
+
+        # Confirm values are correct datatype
+        if front_left_seat is not none:
+            front_left_seat = int(front_left_seat)
+        if front_right_seat is not none:
+            front_right_seat = int(front_right_seat)
+        if rear_left_seat is not none:
+            rear_left_seat = int(rear_left_seat)
+        if rear_right_seat is not none:
+            rear_right_seat = int(rear_right_seat)
+            
         climate_request_options = ClimateRequestOptions(
-            duration=call.data.get("duration"),
-            set_temp=call.data.get("temperature"),
-            climate=call.data.get("climate"),
-            heating=call.data.get("heating"),
-            defrost=call.data.get("defrost"),
-            front_left_seat=call.data.get("flseat"),
-            front_right_seat=call.data.get("frseat"),
-            rear_left_seat=call.data.get("rlseat"),
-            rear_right_seat=call.data.get("rrseat"),
+            duration=duration,
+            set_temp=set_temp,
+            climate=climate,
+            heating=heating,
+            defrost=defrost,
+            front_left_seat=front_left_seat,
+            front_right_seat=front_right_seat,
+            rear_left_seat=rear_left_seat,
+            rear_right_seat=rear_right_seat,
         )
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
 
