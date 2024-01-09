@@ -67,13 +67,13 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         rear_right_seat = call.data.get("rrseat")
 
         # Confirm values are correct datatype
-        if front_left_seat is not none:
+        if front_left_seat is not None:
             front_left_seat = int(front_left_seat)
-        if front_right_seat is not none:
+        if front_right_seat is not None:
             front_right_seat = int(front_right_seat)
-        if rear_left_seat is not none:
+        if rear_left_seat is not None:
             rear_left_seat = int(rear_left_seat)
-        if rear_right_seat is not none:
+        if rear_right_seat is not None:
             rear_right_seat = int(rear_right_seat)
 
         climate_request_options = ClimateRequestOptions(
