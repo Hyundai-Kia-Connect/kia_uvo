@@ -133,7 +133,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="ev_estimated_portable_charge_duration",
-        name="Estimated portable Charge Duration",
+        name="Estimated Portable Charge Duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
