@@ -79,6 +79,20 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
+        key="ev_battery_soh_percentage",
+        name="EV State of Health Battery",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.BATTERY,
+    ),
+    SensorEntityDescription(
+        key="ev_battery_remain",
+        name="EV Battery Level",
+    ),
+    SensorEntityDescription(
+        key="ev_battery_capacity",
+        name="EV Battery Capacity",
+    ),
+    SensorEntityDescription(
         key="_ev_driving_range",
         name="EV Range",
         icon="mdi:road-variant",
