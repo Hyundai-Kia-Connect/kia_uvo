@@ -47,7 +47,7 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     ),
     NumberEntityDescription(
         key=V2L_DISCHARGE_LIMIT_KEY,
-        name="Vehcile2Load Discharge Limit",
+        name="V2L Discharge Limit",
         icon="mdi:ev-plug-ccs2",
         native_min_value=20,
         native_max_value=80,
@@ -112,6 +112,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
             self._description.key == DC_CHARGING_LIMIT_KEY
             and self.vehicle.ev_charge_limits_dc == int(value)
         ):
+            return
         if (
             self._description.key == V2L_DISCHARGE_LIMIT_KEY
             and self.vehicle.ev_v2l_discharge_limit == int(value)
