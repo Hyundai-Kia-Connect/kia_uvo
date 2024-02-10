@@ -231,6 +231,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="EV Off Peak End Time",
         icon="mdi:clock-outline",
     ),
+    SensorEntityDescription(
+        key="ev_v2l_discharge_limit",
+        name="V2L Discharge Limit",
+        native_unit_of_measurement=PERCENTAGE,
+        device_class=SensorDeviceClass.BATTERY,
+    ),
 )
 
 
