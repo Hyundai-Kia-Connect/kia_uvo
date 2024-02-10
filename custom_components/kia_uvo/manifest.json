@@ -1,6 +1,6 @@
 {
   "domain": "kia_uvo",
-  "name": "Kia Uvo / Hyundai Bluelink",
+  "name": "Kia Uvo / Hyundai Bluelink (AUSTRALIA TEST)",
   "codeowners": ["@fuatakgun"],
   "config_flow": true,
   "documentation": "https://github.com/Hyundai-Kia-Connect/kia_uvo",
