@@ -1,0 +1,201 @@
+{
+    "title":"Hyundai / Kia Connect",
+    "config":{
+       "step":{
+          "user":{
+             "title":"Hyundai / Kia Connect - Todennus",
+             "description":"Määritä Hyundai (Bluelink) / Kia (Uvo) Connect integroidaksesi sen Home Assistantiin.",
+             "data":{
+                "username":"Käyttäjätunnus",
+                "password":"Salasana",
+                "region":"Alue",
+                "brand":"Merkki",
+                "pin":"Pin"
+             }
+          },
+          "reauth_confirm":{
+             "title":"Hyundai / Kia Connect - Uudelleentodennus",
+             "description":"Tiliäsi ei voitu todentaa.  Napsauta lähetä yrittääksesi uudelleen."
+          }
+       },
+       "abort":{
+          "already_configured":"Laite on jo määritetty"
+        },
+       "error":{
+          "invalid_auth":"Kirjautuminen Hyundai (Bluelink) / Kia (Uvo) Connect -palvelimille epäonnistui. Kirjaudu virallisella sovelluksella ulos ja sisään ja yritä uudelleen!",
+          "unknown":"Odottamaton virhe"
+       }
+    },
+    "options":{
+       "step":{
+          "init":{
+             "title":"Hyundai / Kia Connect - Asetukset",
+             "data":{
+                "scan_interval":"Päivitysväli (min)",
+                "force_refresh":"Pakotetun päivityksen väli (min), älä aseta liian pientä arvoa, sillä tämä kuluttaa 12v akkua sekä lukitsee käyttöoikeuden",
+                "no_force_refresh_hour_start":"Ei pakotettuja päivityksiä alkaen",
+                "no_force_refresh_hour_finish":"Ei pakotettuja päivityksiä päättyen",
+                "enable_geolocation_entity":"Maantieteellisen sijainnin määritys OpenStreetMapilla päälle ",
+                "use_email_with_geocode_api":"Kia/Hyundai sähköpostiosoitteen käyttö Geocode-rajapinnassa - lisätietoja: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+             }
+          }
+       }
+    },
+    "services": {
+      "force_update": {
+        "name": "Pakota päivitys",
+        "description": "Pakota ajoneuvon tietojen päivitys. Kaikkien tiliin kytkettyjen ajoneuvojen tiedot päivitetään samalla",
+        "fields": {
+          "device_id": {
+            "name": "Ajoneuvo",
+            "description": "Kohdeajoneuvo"
+          }
+        }
+      },
+      "update": {
+         "name": "Päivitä",
+         "description": "Päivitä ajoneuvon tiedot palvelimen välimuistista",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "start_climate": {
+         "name": "Käynnistä ilmastointi",
+         "description": "Käytä varoen - Käynnistää ilmastoinnin ja moottorin.  Kaikki asetukset eivät ole käytettävissä kaikissa autoissa tai alueilla. Käytä autosi mobiiliapplikaatiota apuna autosi toimintojen selvittelyssä.",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           },
+           "duration": {
+            "name": "Kesto",
+            "description": "Päällä olon kesto"
+          },
+          "climate": {
+            "name": "Ilmastointi",
+            "description": "Ilmastointi päälle"
+          },
+          "temperature": {
+            "name": "Lämpötila",
+            "description": "Aseta ilmastoinnin lämpötila. Yksikkö riippuu alueesta."
+          },
+          "defrost": {
+            "name": "Sulatus",
+            "description": "Tuulilasun sulatus"
+          },
+          "heating": {
+            "name": "Lämmitys",
+            "description": "Esimerkiksi ratin ja takaikkunan lämmitys"
+          },
+          "flseat": {
+            "name": "Vasen etuistuin",
+            "description": "Vasemman etuistuimen lämmitys/jäähdytys"
+          },
+          "frseat": {
+            "name": "Oikea etuistuin",
+            "description": "Oikean etuistuimen lämmitys/jäähdytys"
+          },
+          "rlseat": {
+            "name": "Vasen takaistuin",
+            "description": "Vasemman takaistuimen lämmitys/jäähdytys"
+          },
+          "rrseat": {
+            "name": "Oikea takaistuin",
+            "description": "Oikean takaistuimen lämmitys/jäähdytys"
+          }
+         }
+       }
+       ,
+       "stop_climate": {
+         "name": "Sammuta ilmastointi",
+         "description": "Käytä varoen - sammuta auto ja ilmastointi",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "stop_charge": {
+         "name": "Keskeytä lataus",
+         "description": "Keskeytä lataus",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "start_charge": {
+         "name": "Käynnistä lataus",
+         "description": "Käynnistä lataus",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+      "lock": {
+         "name": "Lukitse",
+         "description": "Lukitse ajoneuvo",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "unlock": {
+         "name": "Avaa lukitus",
+         "description": "Avaa ajoneuvon lukituksen",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "close_charge_port": {
+         "name": "Sulje latausluukku",
+         "description": "Sulje latausluukku",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "open_charge_port": {
+         "name": "Avaa latausluukku",
+         "description": "Avaa latausluukku",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           }
+         }
+       },
+       "set_charge_limits": {
+         "name": "Aseta latausrajat",
+         "description": "Aseta AC/DC latausrajat",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           },
+           "dc_limit": {
+            "name": "DC Latausraja",
+            "description": "maksimi varaustaso DC-latauksella"
+          },
+          "ac_limit": {
+            "name": "AC Latausraja",
+            "description": "maksimi varaustaso AC-latauksella"
+          }
+         }
+       }
+    }
+ }
