@@ -88,12 +88,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(
         key="ev_battery_remain",
         name="EV Battery Level",
-        state_class=SensorStateClass.MEASUREMENT
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_capacity",
         name="EV Battery Capacity",
-        state_class=SensorStateClass.MEASUREMENT
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_ev_driving_range",
