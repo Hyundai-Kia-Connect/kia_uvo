@@ -258,7 +258,7 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
-        if self.vehicle.daily_stats:
+        if vehicle.daily_stats:
             entities.append(
                 DailyDrivingStatsEntity(
                     coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
