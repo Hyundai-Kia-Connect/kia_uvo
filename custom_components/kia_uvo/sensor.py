@@ -249,6 +249,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
 )
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -378,6 +379,7 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unit_of_measurement(self):
         return UnitOfTime.DAYS
+
 
 def charging_current_mapper(value):
     mapping = {1: 100, 2: 90, 3: 60}
