@@ -195,6 +195,20 @@
                     "description": "capacità di carica massima utilizzando un caricabatterie CA"
                 }
             }
+        },
+        "set_charging_current": {
+            "name": "Imposta corrente di ricarica AC",
+            "description": "Imposta la capacità della corrente di ricarica AC",
+            "fields": {
+                "device_id": {
+                    "name": "Veicolo",
+                    "description": "Veicolo di destinazione"
+                },
+                "level": {
+                    "name": "Corrente di ricarica",
+                    "description": "Capacità della corrente di ricarica in percentuale"
+                }
+            }
         }
     }
 }

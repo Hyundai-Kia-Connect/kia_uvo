@@ -196,6 +196,20 @@
             "description": "max charge capacity using AC charger"
           }
          }
+       },
+       "set_charging_current": {
+         "name": "Set AC charging current",
+         "description": "Sets the AC charging current capacity",
+         "fields": {
+           "device_id": {
+             "name": "Vehicle",
+             "description": "Target vehicle"
+           },
+           "level": {
+             "name": "Charging current",
+             "description": "Charging current capacity percentage"
+           }
+         }
        }
     }
  }

@@ -195,6 +195,20 @@
           "description": "Az AC töltés befejeződik a megadott töltési szint elérésekor"
         }
       }
+    },
+    "set_charging_current": {
+      "name": "AC töltési áram beállítása",
+      "description": "AC töltési áram kapacitásának beállítása",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Céljármű"
+        },
+        "level": {
+          "name": "Töltési áram",
+          "description": "Töltési áram kapacitása százalékban"
+        }
+      }
     }
   }
 }

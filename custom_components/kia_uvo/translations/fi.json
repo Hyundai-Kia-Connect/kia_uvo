@@ -196,6 +196,20 @@
             "description": "maksimi varaustaso AC-latauksella"
           }
          }
+       },
+       "set_charging_current": {
+         "name": "Aseta AC-latausvirta",
+         "description": "Aseta AC-latausvirran kapasiteetti",
+         "fields": {
+           "device_id": {
+             "name": "Ajoneuvo",
+             "description": "Kohdeajoneuvo"
+           },
+           "level": {
+             "name": "Latausvirta",
+             "description": "Latausvirran kapasiteetti prosentteina"
+           }
+         }
        }
     }
  }

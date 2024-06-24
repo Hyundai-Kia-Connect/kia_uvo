@@ -195,6 +195,20 @@
           "description": "Capacidad máxima de carga utilizando cargador AC"
         }
       }
+    },
+    "set_charging_current": {
+      "name": "Establecer corriente de carga AC",
+      "description": "Establece la capacidad de corriente de carga AC",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        },
+        "level": {
+          "name": "Corriente de carga",
+          "description": "Capacidad de corriente de carga en porcentaje"
+        }
+      }
     }
   }
 }

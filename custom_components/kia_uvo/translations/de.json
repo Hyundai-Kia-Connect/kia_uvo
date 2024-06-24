@@ -195,6 +195,20 @@
                     "description": "Maximale Ladekapazität bei Verwendung von AC-Ladegeräten"
                 }
             }
+        },
+        "set_charging_current": {
+            "name": "AC-Ladestrom einstellen",
+            "description": "Stellt die Kapazität des AC-Ladestroms ein",
+            "fields": {
+                "device_id": {
+                    "name": "Fahrzeug",
+                    "description": "Zielfahrzeug"
+                },
+                "level": {
+                    "name": "Ladestrom",
+                    "description": "Kapazität des Ladestroms in Prozent"
+                }
+            }
         }
     }
 }
