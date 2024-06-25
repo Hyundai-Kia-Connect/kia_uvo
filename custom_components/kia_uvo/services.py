@@ -20,6 +20,7 @@ SERVICE_START_CLIMATE = "start_climate"
 SERVICE_START_CHARGE = "start_charge"
 SERVICE_STOP_CHARGE = "stop_charge"
 SERVICE_SET_CHARGE_LIMIT = "set_charge_limits"
+SERVICE_SET_CHARGING_CURRENT = "set_charging_current"
 SERVICE_OPEN_CHARGE_PORT = "open_charge_port"
 SERVICE_CLOSE_CHARGE_PORT = "close_charge_port"
 
@@ -33,6 +34,7 @@ SUPPORTED_SERVICES = (
     SERVICE_START_CHARGE,
     SERVICE_STOP_CHARGE,
     SERVICE_SET_CHARGE_LIMIT,
+    SERVICE_SET_CHARGING_CURRENT,
     SERVICE_OPEN_CHARGE_PORT,
     SERVICE_CLOSE_CHARGE_PORT,
 )
@@ -135,6 +137,18 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         else:
             _LOGGER.error(
                 f"{DOMAIN} - Enable to set charge limits.  Both AC and DC value required, but not provided."
+            )
+
+    async def async_handle_set_charging_current(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        current_level = call.data.get("level")
+
+        if current_level is not None:
+            await coordinator.set_charging_current(vehicle_id, int(current_level))
+        else:
+            _LOGGER.error(
+                f"{DOMAIN} - Enable to set charging current.  Level required, but not provided."
             )
 
     services = {

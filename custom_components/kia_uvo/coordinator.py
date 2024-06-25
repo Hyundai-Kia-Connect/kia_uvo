@@ -261,3 +261,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
+
+    async def set_charging_current(self, vehicle_id: str, level: int):
+        await self.async_check_and_refresh_token()
+        action_id = await self.hass.async_add_executor_job(
+            self.vehicle_manager.set_charging_current, vehicle_id, level
+        )
+        self.hass.async_create_task(
+            self.async_await_action_and_refresh(vehicle_id, action_id)
+        )

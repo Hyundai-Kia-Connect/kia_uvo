@@ -40,7 +40,8 @@ These can be access by going to the developer menu followed by services.
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
 - start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate. 
 - start_charge / stop_charge: You can control your charging using these services
-- set_charge_limits: You can control your charging capacity limits using this services 
+- set_charge_limits: You can control your charging capacity limits using this services
+- set_charging_current: You can control the charging current level (100%, 90% or 60%)
 - open_charge_port / close_charge_port:  Open or close the charge port.
 
 | Service                                                    | EU | EU(>2023)  | CA | USA Kia | USA Hyundai | USA Genesis | China |

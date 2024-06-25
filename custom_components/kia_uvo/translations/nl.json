@@ -196,6 +196,20 @@
             "description": "max oplaadcapaciteit bij gebruik van DC oplader"
           }
          }
+       },
+       "set_charging_current": {
+         "name": "AC-laadstroom instellen",
+         "description": "Stel de capaciteit van de AC-laadstroom in",
+         "fields": {
+           "device_id": {
+             "name": "Voertuig",
+             "description": "Gewenste voertuig"
+           },
+           "level": {
+             "name": "Laadstroom",
+             "description": "Capaciteit van de laadstroom in procenten"
+           }
+         }
        }
     }
  }

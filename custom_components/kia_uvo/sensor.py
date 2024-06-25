@@ -23,7 +23,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, DYNAMIC_UNIT
+from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -240,6 +240,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
     ),
+    SensorEntityDescription(
+        key="ev_charging_current",
+        name="Charging Current Limit",
+        icon="mdi:lightning-bolt-circle",
+        native_unit_of_measurement=PERCENTAGE,
+        value_fn=charging_current_mapper,
+    ),
 )
 
 
@@ -372,3 +379,7 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unit_of_measurement(self):
         return UnitOfTime.DAYS
+
+
+def charging_current_mapper(value):
+    return CHARGING_CURRENTS.get(value, None)

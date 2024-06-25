@@ -226,3 +226,21 @@ set_charge_limits:
             max: 100
             step: 10
             unit_of_measurement: '%'
+set_charging_current:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+    level:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "100%"
+              value: "1"
+            - label: "90%"
+              value: "2"
+            - label: "60%"
+              value: "3"
