@@ -23,7 +23,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, DYNAMIC_UNIT
+from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -382,5 +382,4 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
 
 def charging_current_mapper(value):
-    mapping = {1: 100, 2: 90, 3: 60}
-    return mapping.get(value, None)
+    return CHARGING_CURRENTS.get(value, None)
