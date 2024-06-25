@@ -242,7 +242,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="ev_charging_current",
-        name="Charging current limit",
+        name="Charging Current Limit",
         icon="mdi:lightning-bolt-circle",
         native_unit_of_measurement=PERCENTAGE,
         value_fn=charging_current_mapper,
