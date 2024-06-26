@@ -245,10 +245,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="Charging Current Limit",
         icon="mdi:lightning-bolt-circle",
         native_unit_of_measurement=PERCENTAGE,
-        value_fn=charging_current_mapper,
+        device_class=SensorDeviceClass.POWER_FACTOR,
     ),
 )
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -297,7 +296,10 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def native_value(self):
         """Return the value reported by the sensor."""
-        return getattr(self.vehicle, self._key)
+        value = getattr(self.vehicle, self._key)
+        if (self._key == "ev_charging_current"):
+           return CHARGING_CURRENTS.get(value, None)
+        return value
 
     @property
     def native_unit_of_measurement(self):
@@ -379,7 +381,3 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unit_of_measurement(self):
         return UnitOfTime.DAYS
-
-
-def charging_current_mapper(value):
-    return CHARGING_CURRENTS.get(value, None)
