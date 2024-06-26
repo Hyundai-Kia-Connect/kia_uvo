@@ -249,6 +249,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
 )
 
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -297,8 +298,8 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     def native_value(self):
         """Return the value reported by the sensor."""
         value = getattr(self.vehicle, self._key)
-        if (self._key == "ev_charging_current"):
-           return CHARGING_CURRENTS.get(value, None)
+        if self._key == "ev_charging_current":
+            return CHARGING_CURRENTS.get(value, None)
         return value
 
     @property
