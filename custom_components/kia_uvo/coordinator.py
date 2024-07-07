@@ -136,6 +136,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         f"Force update failed, falling back to cached: {err}"
                     )
                 except Exception as err_nested:
+                    _LOGGER.debug(f"{DOMAIN} - Failed Fall Back Update. {err_nested}")
                     raise UpdateFailed(f"Error communicating with API: {err_nested}")
 
         else:
