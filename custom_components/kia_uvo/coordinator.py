@@ -136,7 +136,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         f"Force update failed, falling back to cached: {traceback.format_exc()}"
                     )
                 except Exception as err_nested:
-                    raise UpdateFailed(f"Error communicating with API: {traceback.format_exc()}")
+                    raise UpdateFailed(
+                        f"Error communicating with API: {traceback.format_exc()}"
+                    )
 
         else:
             await self.hass.async_add_executor_job(
