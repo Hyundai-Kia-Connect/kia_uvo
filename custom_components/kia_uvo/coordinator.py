@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-
+import traceback
 import logging
 from site import venv
 
@@ -133,10 +133,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
                     _LOGGER.exception(
-                        f"Force update failed, falling back to cached: {err}"
+                        f"Force update failed, falling back to cached: {traceback.format_exc()}"
                     )
                 except Exception as err_nested:
-                    raise UpdateFailed(f"Error communicating with API: {err_nested}")
+                    raise UpdateFailed(
+                        f"Error communicating with API: {traceback.format_exc()}"
+                    )
 
         else:
             await self.hass.async_add_executor_job(
