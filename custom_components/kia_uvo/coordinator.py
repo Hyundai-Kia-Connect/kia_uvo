@@ -129,13 +129,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 )
             except Exception as err:
                 try:
-                    await self.hass.async_add_executor_job(
-                        self.vehicle_manager.update_all_vehicles_with_cached_state
-                    )
                     _LOGGER.exception(
                         f"Force update failed, falling back to cached: {traceback.format_exc()}"
                     )
+                    await self.hass.async_add_executor_job(
+                        self.vehicle_manager.update_all_vehicles_with_cached_state
+                    )
                 except Exception as err_nested:
+                    _LOGGER.exception(
+                        f"Cached update failed: {traceback.format_exc()}"
+                    )
                     raise UpdateFailed(
                         f"Error communicating with API: {traceback.format_exc()}"
                     )
