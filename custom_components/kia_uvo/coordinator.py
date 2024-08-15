@@ -136,9 +136,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
                 except Exception as err_nested:
-                    _LOGGER.exception(
-                        f"Cached update failed: {traceback.format_exc()}"
-                    )
+                    _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
                     raise UpdateFailed(
                         f"Error communicating with API: {traceback.format_exc()}"
                     )
