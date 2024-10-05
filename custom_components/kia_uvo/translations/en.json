@@ -64,7 +64,7 @@
        },
        "start_climate": {
          "name": "Start Climate",
-         "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car. ",
+         "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
          "fields": {
            "device_id": {
              "name": "Vehicle",
@@ -209,6 +209,72 @@
              "name": "Charging current",
              "description": "Charging current capacity percentage"
            }
+         }
+       },
+       "schedule_charging_and_climate": {
+         "name": "Schedule charging and climate",
+         "description": "Please use cautiously - Schedule charging and climate.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
+         "fields": {
+           "device_id": {
+             "name": "Vehicle",
+             "description": "Target vehicle"
+           },
+           "charging_enabled": {
+            "name": "Scheduled charging",
+            "description": "Enable scheduled Charging"
+          },
+          "first_departure_enabled": {
+            "name": "1st departure",
+            "description": "Enable first departure"
+          },
+          "first_departure_days": {
+            "name": "1st departure days",
+            "description": "Days which first departure applies to. Cannot be empty."
+          },
+          "first_departure_time": {
+            "name": "1st departure time",
+            "description": "First departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+          },
+          "second_departure_enabled": {
+            "name": "2nd departure",
+            "description": "Enable second departure"
+          },
+          "second_departure_days": {
+            "name": "2nd departure days",
+            "description": "Days which second departure applies to. Cannot be empty."
+          },
+          "second_departure_time": {
+            "name": "2nd departure time",
+            "description": "Second departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+          },
+          "off_peak_start_time": {
+            "name": "Off-peak start time",
+            "description": "Off-peak start time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+          },
+          "off_peak_end_time": {
+            "name": "Off-peak end time",
+            "description": "Off-peak end time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+          },
+          "off_peak_charge_only_enabled": {
+            "name": "Off-peak tariffs only",
+            "description": "If true, charge only during the defined off-peak time, otherwise, charging may start before the off-peak time"
+          },
+          "climate_enabled": {
+            "name": "Climate",
+            "description": "Enable the HVAC System prior to departure"
+          },
+          "temperature": {
+            "name": "Temperature",
+            "description": "Set temperature of climate control. Unit is specific to region."
+          },
+          "temperature_unit": {
+            "name": "Temperature Unit",
+            "description": "Set temperature unit of climate control. Unit is specific to region."
+          },
+          "defrost": {
+            "name": "Defrost",
+            "description": "Front Windshield Defrost prior to departure"
+          }
          }
        }
     }

@@ -25,10 +25,10 @@ start_climate:
       default: 5
       selector:
         number:
-            min: 1
-            max: 10
-            step: 1
-            unit_of_measurement: minutes
+          min: 1
+          max: 10
+          step: 1
+          unit_of_measurement: minutes
     climate:
       required: true
       default: true  
@@ -40,11 +40,11 @@ start_climate:
       default: 21
       selector:
         number:
-            min: 16
-            max: 85
-            step: 0.5
-            mode: box
-            unit_of_measurement: Degrees
+          min: 16
+          max: 85
+          step: 0.5
+          mode: box
+          unit_of_measurement: Degrees
     defrost:
       required: false
       default: false
@@ -212,20 +212,20 @@ set_charge_limits:
       default: 90
       selector:
         number:
-            min: 50
-            max: 100
-            step: 10
-            unit_of_measurement: '%'
+          min: 50
+          max: 100
+          step: 10
+          unit_of_measurement: '%'
     ac_limit:
       required: false
       example: 50
       default: 90
       selector:
         number:
-            min: 50
-            max: 100
-            step: 10
-            unit_of_measurement: '%'
+          min: 50
+          max: 100
+          step: 10
+          unit_of_measurement: '%'
 set_charging_current:
   fields:
     device_id:
@@ -244,3 +244,128 @@ set_charging_current:
               value: "2"
             - label: "60%"
               value: "3"
+schedule_charging_and_climate:
+  fields: 
+    device_id:
+      required: false
+      selector: 
+        device: 
+          integration: kia_uvo
+    charging_enabled:
+      required: false
+      default: false
+      selector:
+        boolean:
+    first_departure_enabled:
+      required: false
+      default: false
+      selector:
+        boolean:
+    first_departure_days:
+      required: false
+      example: '["0", "1"]'
+      default:
+        - "0"
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Sunday
+              value: "0"
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+    first_departure_time:
+      required: false
+      default: false
+      selector:
+        time:
+    second_departure_enabled:
+      required: false
+      default: false
+      selector:
+        boolean:
+    second_departure_days:
+      required: false
+      example: '["0", "1"]'
+      default:
+        - "0"
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Sunday
+              value: "0"
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+    second_departure_time:
+      required: false
+      default: false
+      selector:
+        time:
+    off_peak_start_time:
+      required: false
+      default: false
+      selector:
+        time:
+    off_peak_end_time:
+      required: false
+      default: false
+      selector:
+        time:
+    off_peak_charge_only_enabled:
+      required: false
+      default: false
+      selector:
+        boolean:
+    climate_enabled:
+      required: false
+      default: false
+      selector:
+        boolean:
+    temperature:
+      required: false
+      example: 21.5
+      default: 21
+      selector:
+        number:
+          min: 17
+          max: 85
+          step: 0.5
+          mode: box
+          unit_of_measurement: Degrees
+    temperature_unit:
+      required: false
+      example: "0"
+      default: "0"
+      selector:
+        select:
+          options:
+            - label: Celcius
+              value: "0"
+            - label: Fahrenheit
+              value: "1"
+    defrost:
+      required: false
+      default: false
+      selector:
+        boolean:
