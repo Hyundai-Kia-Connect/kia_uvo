@@ -9,6 +9,7 @@ from site import venv
 from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
+    ScheduleChargingClimateRequestOptions,
 )
 from hyundai_kia_connect_api.exceptions import *
 
@@ -269,6 +270,19 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.async_check_and_refresh_token()
         action_id = await self.hass.async_add_executor_job(
             self.vehicle_manager.set_charging_current, vehicle_id, level
+        )
+        self.hass.async_create_task(
+            self.async_await_action_and_refresh(vehicle_id, action_id)
+        )
+
+    async def async_schedule_charging_and_climate(
+        self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
+    ):
+        await self.async_check_and_refresh_token()
+        action_id = await self.hass.async_add_executor_job(
+            self.vehicle_manager.schedule_charging_and_climate,
+            vehicle_id,
+            schedule_options,
         )
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)

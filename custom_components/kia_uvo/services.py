@@ -1,5 +1,6 @@
 import logging
 from typing import Any, cast
+from datetime import datetime
 
 
 from homeassistant.const import ATTR_DEVICE_ID
@@ -7,7 +8,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import ServiceCall, callback, HomeAssistant
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
-from hyundai_kia_connect_api import ClimateRequestOptions
+from hyundai_kia_connect_api import (
+    ClimateRequestOptions,
+    ScheduleChargingClimateRequestOptions,
+)
 
 from .const import DOMAIN
 
@@ -23,6 +27,7 @@ SERVICE_SET_CHARGE_LIMIT = "set_charge_limits"
 SERVICE_SET_CHARGING_CURRENT = "set_charging_current"
 SERVICE_OPEN_CHARGE_PORT = "open_charge_port"
 SERVICE_CLOSE_CHARGE_PORT = "close_charge_port"
+SERVICE_SCHEDULE_CHARGING_AND_CLIMATE = "schedule_charging_and_climate"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -37,6 +42,7 @@ SUPPORTED_SERVICES = (
     SERVICE_SET_CHARGING_CURRENT,
     SERVICE_OPEN_CHARGE_PORT,
     SERVICE_CLOSE_CHARGE_PORT,
+    SERVICE_SCHEDULE_CHARGING_AND_CLIMATE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -151,6 +157,79 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 f"{DOMAIN} - Enable to set charging current.  Level required, but not provided."
             )
 
+    async def async_handle_schedule_charging_and_climate(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        first_departure_enabled = call.data.get("first_departure_enabled")
+        first_departure_days = call.data.get("first_departure_days")
+        first_departure_time = call.data.get("first_departure_time")
+        second_departure_enabled = call.data.get("second_departure_enabled")
+        second_departure_days = call.data.get("second_departure_days")
+        second_departure_time = call.data.get("second_departure_time")
+        charging_enabled = call.data.get("charging_enabled")
+        off_peak_start_time = call.data.get("off_peak_start_time")
+        off_peak_end_time = call.data.get("off_peak_end_time")
+        off_peak_charge_only_enabled = call.data.get("off_peak_charge_only_enabled")
+        climate_enabled = call.data.get("climate_enabled")
+        temperature = call.data.get("temperature")
+        temperature_unit = call.data.get("temperature_unit")
+        defrost = call.data.get("defrost")
+
+        # Confirm values are correct datatype
+        def initialize_departure_option(
+            departure_enabled, departure_days, departure_time
+        ):
+            return ScheduleChargingClimateRequestOptions.DepartureOptions(
+                enabled=None if departure_enabled is None else bool(departure_enabled),
+                days=None
+                if departure_days is None
+                else [int(day) for day in departure_days],
+                time=None
+                if departure_time is None
+                else datetime.strptime(departure_time, "%H:%M:%S").time(),
+            )
+
+        first_departure = initialize_departure_option(
+            first_departure_enabled, first_departure_days, first_departure_time
+        )
+        second_departure = initialize_departure_option(
+            second_departure_enabled, second_departure_days, second_departure_time
+        )
+        if charging_enabled is not None:
+            charging_enabled = bool(charging_enabled)
+        if off_peak_start_time is not None:
+            off_peak_start_time = datetime.strptime(
+                off_peak_start_time, "%H:%M:%S"
+            ).time()
+        if off_peak_end_time is not None:
+            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+        if off_peak_charge_only_enabled is not None:
+            off_peak_charge_only_enabled = bool(off_peak_charge_only_enabled)
+        if climate_enabled is not None:
+            climate_enabled = bool(climate_enabled)
+        if temperature is not None:
+            temperature = float(temperature)
+        if temperature_unit is not None:
+            temperature_unit = int(temperature_unit)
+        if defrost is not None:
+            defrost = bool(defrost)
+
+        schedule_options = ScheduleChargingClimateRequestOptions(
+            first_departure=first_departure,
+            second_departure=second_departure,
+            charging_enabled=charging_enabled,
+            off_peak_start_time=off_peak_start_time,
+            off_peak_end_time=off_peak_end_time,
+            off_peak_charge_only_enabled=off_peak_charge_only_enabled,
+            climate_enabled=climate_enabled,
+            temperature=temperature,
+            temperature_unit=temperature_unit,
+            defrost=defrost,
+        )
+        await coordinator.async_schedule_charging_and_climate(
+            vehicle_id, schedule_options
+        )
+
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
         SERVICE_UPDATE: async_handle_update,
@@ -164,6 +243,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_OPEN_CHARGE_PORT: async_handle_open_charge_port,
         SERVICE_CLOSE_CHARGE_PORT: async_handle_close_charge_port,
         SERVICE_SET_CHARGING_CURRENT: async_handle_set_charging_current,
+        SERVICE_SCHEDULE_CHARGING_AND_CLIMATE: async_handle_schedule_charging_and_climate,
     }
 
     for service in SUPPORTED_SERVICES:
