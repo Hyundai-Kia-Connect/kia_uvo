@@ -64,7 +64,6 @@ I have posted an example screenshot from my own car.
 ![Device Details](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
 ![Configuration](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Configuration.PNG?raw=true)
 
-
 ## Troubleshooting
 
 If you receive an error while trying to login, please go through these steps;
