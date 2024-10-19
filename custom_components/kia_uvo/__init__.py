@@ -11,7 +11,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
-from hyundai_kia_connect_api.exceptions import *
+
 import hashlib
 
 from .const import (
