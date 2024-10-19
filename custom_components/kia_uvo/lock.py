@@ -52,8 +52,8 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     def is_locked(self):
         return getattr(self.vehicle, "is_locked")
 
-    async def async_lock(self, **kwargs: Any):
+    async def async_lock(self, **kwargs):
         await self.coordinator.async_lock_vehicle(self.vehicle.id)
 
-    async def async_unlock(self, **kwargs: Any):
+    async def async_unlock(self, **kwargs):
         await self.coordinator.async_unlock_vehicle(self.vehicle.id)
