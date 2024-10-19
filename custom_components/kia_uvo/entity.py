@@ -1,4 +1,5 @@
 """Base Entity for Hyundai / Kia Connect integration."""
+
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import DeviceInfo
 

@@ -1,281 +1,280 @@
 {
-    "title":"Hyundai / Kia Connect",
-    "config":{
-       "step":{
-          "user":{
-             "title":"Hyundai / Kia Connect - Authentication",
-             "description":"Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
-             "data":{
-                "username":"Username",
-                "password":"Password",
-                "region":"Region",
-                "brand":"Brand",
-                "pin":"Pin"
-             }
-          },
-          "reauth_confirm":{
-             "title":"Hyundai / Kia Connect - Reauthentication",
-             "description":"Your account is unable to authenticate.  Click Submit to re-setup."
-          }
-       },
-       "abort":{
-          "already_configured":"Device is already configured"
-        },
-       "error":{
-          "invalid_auth":"Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect Servers. Please use official app to logout and log back in and try again!",
-          "unknown":"Unexpected error"
-       }
-    },
-    "options":{
-       "step":{
-          "init":{
-             "title":"Hyundai / Kia Connect - Configuration",
-             "data":{
-                "scan_interval":"Scan Interval (min)",
-                "force_refresh":"Force Refresh Interval (min), use caution setting this too low as it consumes 12v battery",
-                "no_force_refresh_hour_start":"No Force Refresh Start Hour",
-                "no_force_refresh_hour_finish":"No Force Refresh Finish Hour",
-                "enable_geolocation_entity":"Enable Geolocation Entity using OpenStreetMap",
-                "use_email_with_geocode_api":"Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-             }
-          }
-       }
-    },
-    "services": {
-      "force_update": {
-        "name": "Force Update",
-        "description": "Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.",
-        "fields": {
-          "device_id": {
-            "name": "Vehicle",
-            "description": "Target vehicle"
-          }
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai / Kia Connect - Authentication",
+        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
+        "data": {
+          "username": "Username",
+          "password": "Password",
+          "region": "Region",
+          "brand": "Brand",
+          "pin": "Pin"
         }
       },
-      "update": {
-         "name": "Update",
-         "description": "Update vehicle data from service cache",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "start_climate": {
-         "name": "Start Climate",
-         "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           },
-           "duration": {
-            "name": "Duration",
-            "description": "On Duration"
-          },
-          "climate": {
-            "name": "Climate",
-            "description": "Enable the HVAC System"
-          },
-          "temperature": {
-            "name": "Temperature",
-            "description": "Set temperature of climate control. Unit is specific to region."
-          },
-          "defrost": {
-            "name": "Defrost",
-            "description": "Front Windshield Defrost"
-          },
-          "heating": {
-            "name": "Heating",
-            "description": "Heated features like the steering wheel and rear window"
-          },
-          "flseat": {
-            "name": "Front Left Seat",
-            "description": "Front Left Seat Heat Cool Setting"
-          },
-          "frseat": {
-            "name": "Front Right Seat",
-            "description": "Front Right Seat Heat Cool Setting"
-          },
-          "rlseat": {
-            "name": "Rear Left Seat",
-            "description": "Rear Left Seat Heat Cool Setting"
-          },
-          "rrseat": {
-            "name": "Rear Right Seat",
-            "description": "Rear Right Seat Heat Cool Setting"
-          }
-         }
-       }
-       ,
-       "stop_climate": {
-         "name": "Stop Climate",
-         "description": "Please use cautiously - stop car and climate",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "stop_charge": {
-         "name": "Stop Charge",
-         "description": "Stop charging",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "start_charge": {
-         "name": "Start charge",
-         "description": "Start charging",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-      "lock": {
-         "name": "Lock",
-         "description": "Lock the vehicle",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },       
-       "unlock": {
-         "name": "Unlock",
-         "description": "Unlock the vehicle",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "close_charge_port": {
-         "name": "Close Charge Port",
-         "description": "Close Charging Port",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "open_charge_port": {
-         "name": "Open Charging Port",
-         "description": "Open Charge Port",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           }
-         }
-       },
-       "set_charge_limits": {
-         "name": "Set Charge Limits",
-         "description": "sets ac and dc charge capacity limits",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           },
-           "dc_limit": {
-            "name": "DC Charge limit",
-            "description": "max charge capacity using DC charger"
-          },
-          "ac_limit": {
-            "name": "AC Charge limit",
-            "description": "max charge capacity using AC charger"
-          }
-         }
-       },
-       "set_charging_current": {
-         "name": "Set AC charging current",
-         "description": "Sets the AC charging current capacity",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           },
-           "level": {
-             "name": "Charging current",
-             "description": "Charging current capacity percentage"
-           }
-         }
-       },
-       "schedule_charging_and_climate": {
-         "name": "Schedule charging and climate",
-         "description": "Please use cautiously - Schedule charging and climate.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
-         "fields": {
-           "device_id": {
-             "name": "Vehicle",
-             "description": "Target vehicle"
-           },
-           "charging_enabled": {
-            "name": "Scheduled charging",
-            "description": "Enable scheduled Charging"
-          },
-          "first_departure_enabled": {
-            "name": "1st departure",
-            "description": "Enable first departure"
-          },
-          "first_departure_days": {
-            "name": "1st departure days",
-            "description": "Days which first departure applies to. Cannot be empty."
-          },
-          "first_departure_time": {
-            "name": "1st departure time",
-            "description": "First departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
-          },
-          "second_departure_enabled": {
-            "name": "2nd departure",
-            "description": "Enable second departure"
-          },
-          "second_departure_days": {
-            "name": "2nd departure days",
-            "description": "Days which second departure applies to. Cannot be empty."
-          },
-          "second_departure_time": {
-            "name": "2nd departure time",
-            "description": "Second departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
-          },
-          "off_peak_start_time": {
-            "name": "Off-peak start time",
-            "description": "Off-peak start time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
-          },
-          "off_peak_end_time": {
-            "name": "Off-peak end time",
-            "description": "Off-peak end time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
-          },
-          "off_peak_charge_only_enabled": {
-            "name": "Off-peak tariffs only",
-            "description": "If true, charge only during the defined off-peak time, otherwise, charging may start before the off-peak time"
-          },
-          "climate_enabled": {
-            "name": "Climate",
-            "description": "Enable the HVAC System prior to departure"
-          },
-          "temperature": {
-            "name": "Temperature",
-            "description": "Set temperature of climate control. Unit is specific to region."
-          },
-          "temperature_unit": {
-            "name": "Temperature Unit",
-            "description": "Set temperature unit of climate control. Unit is specific to region."
-          },
-          "defrost": {
-            "name": "Defrost",
-            "description": "Front Windshield Defrost prior to departure"
-          }
-         }
-       }
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - Reauthentication",
+        "description": "Your account is unable to authenticate.  Click Submit to re-setup."
+      }
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    },
+    "error": {
+      "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect Servers. Please use official app to logout and log back in and try again!",
+      "unknown": "Unexpected error"
     }
- }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - Configuration",
+        "data": {
+          "scan_interval": "Scan Interval (min)",
+          "force_refresh": "Force Refresh Interval (min), use caution setting this too low as it consumes 12v battery",
+          "no_force_refresh_hour_start": "No Force Refresh Start Hour",
+          "no_force_refresh_hour_finish": "No Force Refresh Finish Hour",
+          "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
+          "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Force Update",
+      "description": "Force your vehicle to update its data. All vehicles on the same account as the vehicle selected will be updated.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "update": {
+      "name": "Update",
+      "description": "Update vehicle data from service cache",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Start Climate",
+      "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "On Duration"
+        },
+        "climate": {
+          "name": "Climate",
+          "description": "Enable the HVAC System"
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Set temperature of climate control. Unit is specific to region."
+        },
+        "defrost": {
+          "name": "Defrost",
+          "description": "Front Windshield Defrost"
+        },
+        "heating": {
+          "name": "Heating",
+          "description": "Heated features like the steering wheel and rear window"
+        },
+        "flseat": {
+          "name": "Front Left Seat",
+          "description": "Front Left Seat Heat Cool Setting"
+        },
+        "frseat": {
+          "name": "Front Right Seat",
+          "description": "Front Right Seat Heat Cool Setting"
+        },
+        "rlseat": {
+          "name": "Rear Left Seat",
+          "description": "Rear Left Seat Heat Cool Setting"
+        },
+        "rrseat": {
+          "name": "Rear Right Seat",
+          "description": "Rear Right Seat Heat Cool Setting"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Stop Climate",
+      "description": "Please use cautiously - stop car and climate",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Stop Charge",
+      "description": "Stop charging",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Start charge",
+      "description": "Start charging",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "lock": {
+      "name": "Lock",
+      "description": "Lock the vehicle",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Unlock",
+      "description": "Unlock the vehicle",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Close Charge Port",
+      "description": "Close Charging Port",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Open Charging Port",
+      "description": "Open Charge Port",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Set Charge Limits",
+      "description": "sets ac and dc charge capacity limits",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "dc_limit": {
+          "name": "DC Charge limit",
+          "description": "max charge capacity using DC charger"
+        },
+        "ac_limit": {
+          "name": "AC Charge limit",
+          "description": "max charge capacity using AC charger"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "Set AC charging current",
+      "description": "Sets the AC charging current capacity",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "level": {
+          "name": "Charging current",
+          "description": "Charging current capacity percentage"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Schedule charging and climate",
+      "description": "Please use cautiously - Schedule charging and climate.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "charging_enabled": {
+          "name": "Scheduled charging",
+          "description": "Enable scheduled Charging"
+        },
+        "first_departure_enabled": {
+          "name": "1st departure",
+          "description": "Enable first departure"
+        },
+        "first_departure_days": {
+          "name": "1st departure days",
+          "description": "Days which first departure applies to. Cannot be empty."
+        },
+        "first_departure_time": {
+          "name": "1st departure time",
+          "description": "First departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+        },
+        "second_departure_enabled": {
+          "name": "2nd departure",
+          "description": "Enable second departure"
+        },
+        "second_departure_days": {
+          "name": "2nd departure days",
+          "description": "Days which second departure applies to. Cannot be empty."
+        },
+        "second_departure_time": {
+          "name": "2nd departure time",
+          "description": "Second departure time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+        },
+        "off_peak_start_time": {
+          "name": "Off-peak start time",
+          "description": "Off-peak start time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+        },
+        "off_peak_end_time": {
+          "name": "Off-peak end time",
+          "description": "Off-peak end time. Use 00, 10, 20, 30, 40 or 50 for minute, and 00 for second"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Off-peak tariffs only",
+          "description": "If true, charge only during the defined off-peak time, otherwise, charging may start before the off-peak time"
+        },
+        "climate_enabled": {
+          "name": "Climate",
+          "description": "Enable the HVAC System prior to departure"
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Set temperature of climate control. Unit is specific to region."
+        },
+        "temperature_unit": {
+          "name": "Temperature Unit",
+          "description": "Set temperature unit of climate control. Unit is specific to region."
+        },
+        "defrost": {
+          "name": "Defrost",
+          "description": "Front Windshield Defrost prior to departure"
+        }
+      }
+    }
+  }
+}

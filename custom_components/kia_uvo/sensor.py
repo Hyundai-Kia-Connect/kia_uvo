@@ -1,7 +1,7 @@
 """Sensor for Hyundai / Kia Connect integration."""
+
 from __future__ import annotations
 
-from collections.abc import Callable
 import logging
 from typing import Final
 
@@ -24,7 +24,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
-from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
