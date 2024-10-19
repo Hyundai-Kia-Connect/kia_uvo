@@ -360,7 +360,7 @@ schedule_charging_and_climate:
       selector:
         select:
           options:
-            - label: Celcius
+            - label: Celsius
               value: "0"
             - label: Fahrenheit
               value: "1"
