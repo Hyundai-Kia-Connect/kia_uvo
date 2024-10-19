@@ -11,7 +11,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     ScheduleChargingClimateRequestOptions,
 )
-from hyundai_kia_connect_api.exceptions import *
+from hyundai_kia_connect_api.exceptions import AuthenticationError
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
