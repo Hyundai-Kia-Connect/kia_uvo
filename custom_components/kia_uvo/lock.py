@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import logging
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.lock import LockEntity
+from homeassistant.config_entries import ConfigEntry
+
 
 from hyundai_kia_connect_api import Vehicle
 from .const import DOMAIN
