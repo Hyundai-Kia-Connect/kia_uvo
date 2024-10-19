@@ -1,4 +1,5 @@
 """Sensor for Hyundai / Kia Connect integration."""
+
 from __future__ import annotations
 
 from collections.abc import Callable

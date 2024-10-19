@@ -1,17 +1,17 @@
 """Coordinator for Hyundai / Kia Connect integration."""
+
 from __future__ import annotations
 
 from datetime import timedelta
 import traceback
 import logging
-from site import venv
 
 from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
     ScheduleChargingClimateRequestOptions,
 )
-from hyundai_kia_connect_api.exceptions import *
+from hyundai_kia_connect_api.exceptions import AuthenticationError
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
@@ -23,7 +23,6 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
 )
-from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -128,7 +127,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     self.vehicle_manager.check_and_force_update_vehicles,
                     self.force_refresh_interval,
                 )
-            except Exception as err:
+            except Exception:
                 try:
                     _LOGGER.exception(
                         f"Force update failed, falling back to cached: {traceback.format_exc()}"
@@ -136,7 +135,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     await self.hass.async_add_executor_job(
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
-                except Exception as err_nested:
+                except Exception:
                     _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
                     raise UpdateFailed(
                         f"Error communicating with API: {traceback.format_exc()}"

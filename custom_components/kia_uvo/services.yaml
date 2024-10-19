@@ -1,23 +1,23 @@
-force_update: 
-  fields: 
-    device_id: 
-      required: false
-      selector: 
-        device: 
-          integration: kia_uvo
-update: 
-  fields: 
-    device_id: 
-      required: false
-      selector: 
-        device: 
-          integration: kia_uvo
-start_climate:
-  fields: 
+force_update:
+  fields:
     device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
+          integration: kia_uvo
+update:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+start_climate:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
           integration: kia_uvo
     duration:
       required: false
@@ -31,9 +31,9 @@ start_climate:
           unit_of_measurement: minutes
     climate:
       required: true
-      default: true  
+      default: true
       selector:
-        boolean: 
+        boolean:
     temperature:
       required: true
       example: 21.5
@@ -53,9 +53,9 @@ start_climate:
     heating:
       required: true
       example: false
-      default: false  
+      default: false
       selector:
-        select:  
+        select:
           options:
             - label: "Off"
               value: "0"
@@ -69,7 +69,7 @@ start_climate:
       required: false
       selector:
         select:
-          options:  
+          options:
             - label: "Off"
               value: "0"
             - label: "On"
@@ -85,12 +85,12 @@ start_climate:
             - label: "Medium Heat"
               value: "7"
             - label: "High Heat"
-              value: "8" 
+              value: "8"
     frseat:
       required: false
       selector:
         select:
-          options:  
+          options:
             - label: "Off"
               value: "0"
             - label: "On"
@@ -106,12 +106,12 @@ start_climate:
             - label: "Medium Heat"
               value: "7"
             - label: "High Heat"
-              value: "8"  
+              value: "8"
     rlseat:
       required: false
       selector:
         select:
-          options:  
+          options:
             - label: "Off"
               value: "0"
             - label: "On"
@@ -127,12 +127,12 @@ start_climate:
             - label: "Medium Heat"
               value: "7"
             - label: "High Heat"
-              value: "8" 
+              value: "8"
     rrseat:
       required: false
       selector:
         select:
-          options:  
+          options:
             - label: "Off"
               value: "0"
             - label: "On"
@@ -148,63 +148,63 @@ start_climate:
             - label: "Medium Heat"
               value: "7"
             - label: "High Heat"
-              value: "8" 
+              value: "8"
 stop_climate:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 start_charge:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 stop_charge:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 lock:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 unlock:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 close_charge_port:
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
 open_charge_port:
   description: Open Charge Port
-  fields: 
-    device_id: 
+  fields:
+    device_id:
       required: false
-      selector: 
-        device: 
-          integration: kia_uvo        
+      selector:
+        device:
+          integration: kia_uvo
 set_charge_limits:
   fields:
-    device_id: 
+    device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
     dc_limit:
       required: false
@@ -215,7 +215,7 @@ set_charge_limits:
           min: 50
           max: 100
           step: 10
-          unit_of_measurement: '%'
+          unit_of_measurement: "%"
     ac_limit:
       required: false
       example: 50
@@ -225,7 +225,7 @@ set_charge_limits:
           min: 50
           max: 100
           step: 10
-          unit_of_measurement: '%'
+          unit_of_measurement: "%"
 set_charging_current:
   fields:
     device_id:
@@ -245,11 +245,11 @@ set_charging_current:
             - label: "60%"
               value: "3"
 schedule_charging_and_climate:
-  fields: 
+  fields:
     device_id:
       required: false
-      selector: 
-        device: 
+      selector:
+        device:
           integration: kia_uvo
     charging_enabled:
       required: false
@@ -360,7 +360,7 @@ schedule_charging_and_climate:
       selector:
         select:
           options:
-            - label: Celcius
+            - label: Celsius
               value: "0"
             - label: Fahrenheit
               value: "1"

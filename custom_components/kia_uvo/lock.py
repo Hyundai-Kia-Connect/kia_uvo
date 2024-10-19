@@ -1,9 +1,14 @@
 """Lock for Hyundai / Kia Connect integration."""
+
 from __future__ import annotations
 
 import logging
 
+from homeassistant.core import HomeAssistant
 from homeassistant.components.lock import LockEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
 
 from hyundai_kia_connect_api import Vehicle
 from .const import DOMAIN
@@ -47,8 +52,8 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     def is_locked(self):
         return getattr(self.vehicle, "is_locked")
 
-    async def async_lock(self, **kwargs: Any):
+    async def async_lock(self, **kwargs):
         await self.coordinator.async_lock_vehicle(self.vehicle.id)
 
-    async def async_unlock(self, **kwargs: Any):
+    async def async_unlock(self, **kwargs):
         await self.coordinator.async_unlock_vehicle(self.vehicle.id)

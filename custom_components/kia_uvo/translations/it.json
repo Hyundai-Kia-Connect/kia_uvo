@@ -1,214 +1,214 @@
 {
-    "title":"Hyundai / Kia Connect",
-    "config":{
-        "step":{
-            "user":{
-                "title":"Hyundai / Kia Connect - Autenticazione",
-                "description":"Configura il tuo Hyundai (Bluelink) / Kia (Uvo) Connect per integrarlo con Home Assistant.",
-                "data":{
-                    "username":"Nome utente",
-                    "password":"Password",
-                    "region":"Regione",
-                    "brand":"Marca",
-                    "pin":"Pin"
-                }
-            },
-            "reauth_confirm":{
-                "title":"Hyundai / Kia Connect - Riautenticazione",
-                "description":"Il tuo account non può essere autenticato. Fai clic su Invia per configurarlo di nuovo."
-            }
-        },
-        "abort":{
-            "already_configured":"Il dispositivo è già configurato"
-        },
-        "error":{
-            "invalid_auth":"Impossibile effettuare il login nei server Hyundai (Bluelink) / Kia (Uvo) Connect. Utilizza l'app ufficiale per effettuare il logout, accedere nuovamente e riprovare!",
-            "unknown":"Errore imprevisto"
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai / Kia Connect - Autenticazione",
+        "description": "Configura il tuo Hyundai (Bluelink) / Kia (Uvo) Connect per integrarlo con Home Assistant.",
+        "data": {
+          "username": "Nome utente",
+          "password": "Password",
+          "region": "Regione",
+          "brand": "Marca",
+          "pin": "Pin"
         }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - Riautenticazione",
+        "description": "Il tuo account non può essere autenticato. Fai clic su Invia per configurarlo di nuovo."
+      }
     },
-    "options":{
-        "step":{
-            "init":{
-                "title":"Hyundai / Kia Connect - Configurazione",
-                "data":{
-                    "scan_interval":"Intervallo di scansione (min)",
-                    "force_refresh":"Intervallo di aggiornamento forzato (min), prestare attenzione impostando un valore troppo basso poiché consuma la batteria da 12 V",
-                    "no_force_refresh_hour_start":"Ora di inizio senza aggiornamenti forzati",
-                    "no_force_refresh_hour_finish":"Ora di fine senza aggiornamenti forzati",
-                    "enable_geolocation_entity":"Abilita l'entità di geolocalizzazione usando OpenStreetMap",
-                    "use_email_with_geocode_api":"Utilizza il tuo indirizzo email Kia per l'API di geocodifica - Maggiori informazioni: https://nominatim.org/release-docs/develop/api/Reverse/#other"
-                }
-            }
-        }
+    "abort": {
+      "already_configured": "Il dispositivo è già configurato"
     },
-    "services": {
-        "force_update": {
-            "name": "Aggiornamento forzato",
-            "description": "Forza il veicolo a aggiornare i suoi dati. Tutti i veicoli nello stesso account del veicolo selezionato verranno aggiornati.",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "update": {
-            "name": "Aggiorna",
-            "description": "Aggiorna i dati del veicolo dalla cache del servizio",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "start_climate": {
-            "name": "Avvia Climatizzazione",
-            "description": "Usa con cautela - Avvia climatizzazione e motore. Non tutte le opzioni sono disponibili su tutte le auto o regioni. Usa l'app mobile della tua auto come guida e abbinale alle opzioni disponibili nella tua auto.",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                },
-                "duration": {
-                    "name": "Durata",
-                    "description": "Durata accensione"
-                },
-                "climate": {
-                    "name": "Climatizzazione",
-                    "description": "Attiva il sistema di climatizzazione"
-                },
-                "temperature": {
-                    "name": "Temperatura",
-                    "description": "Imposta la temperatura del controllo climatico. L'unità è specifica per la regione."
-                },
-                "defrost": {
-                    "name": "Sbrinamento",
-                    "description": "Sbrinamento parabrezza anteriore"
-                },
-                "heating": {
-                    "name": "Riscaldamento",
-                    "description": "Funzioni riscaldate come il volante e il lunotto posteriore"
-                },
-                "flseat": {
-                    "name": "Sedile Anteriore Sinistro",
-                    "description": "Impostazione riscaldamento/raffreddamento sedile anteriore sinistro"
-                },
-                "frseat": {
-                    "name": "Sedile Anteriore Destro",
-                    "description": "Impostazione riscaldamento/raffreddamento sedile anteriore destro"
-                },
-                "rlseat": {
-                    "name": "Sedile Posteriore Sinistro",
-                    "description": "Impostazione riscaldamento/raffreddamento sedile posteriore sinistro"
-                },
-                "rrseat": {
-                    "name": "Sedile Posteriore Destro",
-                    "description": "Impostazione riscaldamento/raffreddamento sedile posteriore destro"
-                }
-            }
-        },
-        "stop_climate": {
-            "name": "Arresta Climatizzazione",
-            "description": "Usa con cautela - arresta l'auto e la climatizzazione",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "stop_charge": {
-            "name": "Arresta Ricarica",
-            "description": "Arresta la ricarica",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "start_charge": {
-            "name": "Avvia Ricarica",
-            "description": "Avvia la ricarica",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "lock": {
-            "name": "Blocca",
-            "description": "Blocca il veicolo",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },       
-        "unlock": {
-            "name": "Sblocca",
-            "description": "Sblocca il veicolo",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "close_charge_port": {
-            "name": "Chiudi Porta di Ricarica",
-            "description": "Chiudi la porta di ricarica",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "open_charge_port": {
-            "name": "Apri Porta di Ricarica",
-            "description": "Apri la porta di ricarica",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                }
-            }
-        },
-        "set_charge_limits": {
-            "name": "Imposta Limiti di Ricarica",
-            "description": "Imposta i limiti di capacità di ricarica CA e CC",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                },
-                "dc_limit": {
-                    "name": "Limite Carica CC",
-                    "description": "capacità di carica massima utilizzando un caricabatterie CC"
-                },
-                "ac_limit": {
-                    "name": "Limite Carica CA",
-                    "description": "capacità di carica massima utilizzando un caricabatterie CA"
-                }
-            }
-        },
-        "set_charging_current": {
-            "name": "Imposta corrente di ricarica AC",
-            "description": "Imposta la capacità della corrente di ricarica AC",
-            "fields": {
-                "device_id": {
-                    "name": "Veicolo",
-                    "description": "Veicolo di destinazione"
-                },
-                "level": {
-                    "name": "Corrente di ricarica",
-                    "description": "Capacità della corrente di ricarica in percentuale"
-                }
-            }
-        }
+    "error": {
+      "invalid_auth": "Impossibile effettuare il login nei server Hyundai (Bluelink) / Kia (Uvo) Connect. Utilizza l'app ufficiale per effettuare il logout, accedere nuovamente e riprovare!",
+      "unknown": "Errore imprevisto"
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - Configurazione",
+        "data": {
+          "scan_interval": "Intervallo di scansione (min)",
+          "force_refresh": "Intervallo di aggiornamento forzato (min), prestare attenzione impostando un valore troppo basso poiché consuma la batteria da 12 V",
+          "no_force_refresh_hour_start": "Ora di inizio senza aggiornamenti forzati",
+          "no_force_refresh_hour_finish": "Ora di fine senza aggiornamenti forzati",
+          "enable_geolocation_entity": "Abilita l'entità di geolocalizzazione usando OpenStreetMap",
+          "use_email_with_geocode_api": "Utilizza il tuo indirizzo email Kia per l'API di geocodifica - Maggiori informazioni: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Aggiornamento forzato",
+      "description": "Forza il veicolo a aggiornare i suoi dati. Tutti i veicoli nello stesso account del veicolo selezionato verranno aggiornati.",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "update": {
+      "name": "Aggiorna",
+      "description": "Aggiorna i dati del veicolo dalla cache del servizio",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Avvia Climatizzazione",
+      "description": "Usa con cautela - Avvia climatizzazione e motore. Non tutte le opzioni sono disponibili su tutte le auto o regioni. Usa l'app mobile della tua auto come guida e abbinale alle opzioni disponibili nella tua auto.",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        },
+        "duration": {
+          "name": "Durata",
+          "description": "Durata accensione"
+        },
+        "climate": {
+          "name": "Climatizzazione",
+          "description": "Attiva il sistema di climatizzazione"
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Imposta la temperatura del controllo climatico. L'unità è specifica per la regione."
+        },
+        "defrost": {
+          "name": "Sbrinamento",
+          "description": "Sbrinamento parabrezza anteriore"
+        },
+        "heating": {
+          "name": "Riscaldamento",
+          "description": "Funzioni riscaldate come il volante e il lunotto posteriore"
+        },
+        "flseat": {
+          "name": "Sedile Anteriore Sinistro",
+          "description": "Impostazione riscaldamento/raffreddamento sedile anteriore sinistro"
+        },
+        "frseat": {
+          "name": "Sedile Anteriore Destro",
+          "description": "Impostazione riscaldamento/raffreddamento sedile anteriore destro"
+        },
+        "rlseat": {
+          "name": "Sedile Posteriore Sinistro",
+          "description": "Impostazione riscaldamento/raffreddamento sedile posteriore sinistro"
+        },
+        "rrseat": {
+          "name": "Sedile Posteriore Destro",
+          "description": "Impostazione riscaldamento/raffreddamento sedile posteriore destro"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Arresta Climatizzazione",
+      "description": "Usa con cautela - arresta l'auto e la climatizzazione",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Arresta Ricarica",
+      "description": "Arresta la ricarica",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Avvia Ricarica",
+      "description": "Avvia la ricarica",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "lock": {
+      "name": "Blocca",
+      "description": "Blocca il veicolo",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Sblocca",
+      "description": "Sblocca il veicolo",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Chiudi Porta di Ricarica",
+      "description": "Chiudi la porta di ricarica",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Apri Porta di Ricarica",
+      "description": "Apri la porta di ricarica",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Imposta Limiti di Ricarica",
+      "description": "Imposta i limiti di capacità di ricarica CA e CC",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        },
+        "dc_limit": {
+          "name": "Limite Carica CC",
+          "description": "capacità di carica massima utilizzando un caricabatterie CC"
+        },
+        "ac_limit": {
+          "name": "Limite Carica CA",
+          "description": "capacità di carica massima utilizzando un caricabatterie CA"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "Imposta corrente di ricarica AC",
+      "description": "Imposta la capacità della corrente di ricarica AC",
+      "fields": {
+        "device_id": {
+          "name": "Veicolo",
+          "description": "Veicolo di destinazione"
+        },
+        "level": {
+          "name": "Corrente di ricarica",
+          "description": "Capacità della corrente di ricarica in percentuale"
+        }
+      }
+    }
+  }
 }

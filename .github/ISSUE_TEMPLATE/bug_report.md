@@ -1,17 +1,15 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: 'Bug'
-assignees: ''
-
+title: ""
+labels: "Bug"
+assignees: ""
 ---
 
 Please check Services, Known Bug / Issues and Troubleshooting over here first: https://github.com/fuatakgun/kia_uvo/blob/master/README.md
 **Region and Brand of car**
 
 **Version of the integration**
-
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -20,9 +18,7 @@ A clear and concise description of what the bug is.
 
 Outlined here: https://github.com/fuatakgun/kia_uvo/blob/master/README.md
 
-
 **To Reproduce**
-
 
 **Expected behavior**
 
