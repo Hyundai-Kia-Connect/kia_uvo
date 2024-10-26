@@ -364,8 +364,6 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         m = {}
         for day in self.vehicle.daily_stats:
             key = day.date.strftime("%Y-%m-%d")
-            today = date.today()
-            todayskey = today.strftime("%Y-%m-%d")
             value = {
                 "total_consumed": day.total_consumed,
                 "engine_consumption": day.engine_consumption,
@@ -375,18 +373,6 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
                 "regenerated_energy": day.regenerated_energy,
                 "distance": day.distance,
             }
-            if key == todayskey:
-                todayvalue = {
-                    "today_date": key,
-                    "total_consumed": day.total_consumed,
-                    "engine_consumption": day.engine_consumption,
-                    "climate_consumption": day.climate_consumption,
-                    "onboard_electronics_consumption": day.onboard_electronics_consumption,
-                    "battery_care_consumption": day.battery_care_consumption,
-                    "regenerated_energy": day.regenerated_energy,
-                    "distance": day.distance,
-                }
-                m["today"] = todayvalue
             m[key] = value
         return m
 
