@@ -412,7 +412,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
             "battery_care_consumption": 0,
             "regenerated_energy": 0,
             "distance": 0,
-            }
+        }
         for day in self.vehicle.daily_stats:
             key = day.date.strftime("%Y-%m-%d")
             if key == todayskey:
