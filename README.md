@@ -74,6 +74,7 @@ If you receive an error while trying to login, please go through these steps;
 4. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
 5. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging, update your `configuration.yaml` like this, we can get more information in Configuration -> Logs page
 
+
 ```
 logger:
   default: warning
