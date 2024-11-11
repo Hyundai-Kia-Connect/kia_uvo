@@ -28,6 +28,10 @@ SERVICE_SET_CHARGING_CURRENT = "set_charging_current"
 SERVICE_OPEN_CHARGE_PORT = "open_charge_port"
 SERVICE_CLOSE_CHARGE_PORT = "close_charge_port"
 SERVICE_SCHEDULE_CHARGING_AND_CLIMATE = "schedule_charging_and_climate"
+SERVICE_START_HAZARD_LIGHTS = "start_hazard_lights"
+SERVICE_START_HAZARD_LIGHTS_AND_HORN = "start_hazard_lights_and_horn"
+SERVICE_START_VALET_MODE = "start_valet_mode"
+SERVICE_STOP_VALET_MODE = "stop_valet_mode"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -43,6 +47,10 @@ SUPPORTED_SERVICES = (
     SERVICE_OPEN_CHARGE_PORT,
     SERVICE_CLOSE_CHARGE_PORT,
     SERVICE_SCHEDULE_CHARGING_AND_CLIMATE,
+    SERVICE_START_HAZARD_LIGHTS,
+    SERVICE_START_HAZARD_LIGHTS_AND_HORN,
+    SERVICE_START_VALET_MODE,
+    SERVICE_STOP_VALET_MODE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -230,6 +238,26 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             vehicle_id, schedule_options
         )
 
+    async def async_handle_start_hazard_lights(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_start_hazard_lights(vehicle_id)
+
+    async def async_handle_start_hazard_lights_and_horn(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_start_hazard_lights_and_horn(vehicle_id)
+
+    async def async_handle_start_valet_mode(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_start_valet_mode(vehicle_id)
+
+    async def async_handle_stop_valet_mode(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        await coordinator.async_stop_valet_mode(vehicle_id)
+
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
         SERVICE_UPDATE: async_handle_update,
@@ -244,6 +272,10 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_CLOSE_CHARGE_PORT: async_handle_close_charge_port,
         SERVICE_SET_CHARGING_CURRENT: async_handle_set_charging_current,
         SERVICE_SCHEDULE_CHARGING_AND_CLIMATE: async_handle_schedule_charging_and_climate,
+        SERVICE_START_HAZARD_LIGHTS: async_handle_start_hazard_lights,
+        SERVICE_START_HAZARD_LIGHTS_AND_HORN: async_handle_start_hazard_lights_and_horn,
+        SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
+        SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
     }
 
     for service in SUPPORTED_SERVICES:
