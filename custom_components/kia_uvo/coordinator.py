@@ -299,7 +299,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_start_hazard_lights_and_horn(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
         action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_hazard_lights_and_horn, vehicle_id, 
+            self.vehicle_manager.start_hazard_lights_and_horn,
+            vehicle_id,
         )
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
@@ -317,7 +318,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_stop_valet_mode(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
         action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_valet_mode, vehicle_id, 
+            self.vehicle_manager.stop_valet_mode,
+            vehicle_id,
         )
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
