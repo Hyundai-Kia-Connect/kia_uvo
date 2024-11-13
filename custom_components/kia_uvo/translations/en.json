@@ -275,6 +275,46 @@
           "description": "Front Windshield Defrost prior to departure"
         }
       }
+    },
+    "start_hazard_lights": {
+      "name": "Turn on the hazard lights",
+      "description": "Turn on the hazard lights for 30 seconds.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Turn on the hazard lights and horn",
+      "description": "Turn on the hazard lights and horn for 30 seconds.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Start valet mode",
+      "description": "Activate valet mode. If remote valet mode is activated while driving, the vehicle display screen is deactivated.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Stop valet mode",
+      "description": "Deactivate valet mode.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
     }
   }
 }

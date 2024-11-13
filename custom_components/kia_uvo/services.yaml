@@ -369,3 +369,31 @@ schedule_charging_and_climate:
       default: false
       selector:
         boolean:
+start_hazard_lights:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+start_hazard_lights_and_horn:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+start_valet_mode:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+stop_valet_mode:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
