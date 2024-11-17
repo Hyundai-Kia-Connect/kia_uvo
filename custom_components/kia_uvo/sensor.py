@@ -17,6 +17,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
+    UnitOfPower,
     UnitOfTime,
 )
 
@@ -236,16 +237,24 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="ev_v2l_discharge_limit",
-        name="V2L Discharge Limit",
+        name="EV V2L Discharge Limit",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
     ),
     SensorEntityDescription(
         key="ev_charging_current",
-        name="Charging Current Limit",
+        name="EV Charging Current Limit",
         icon="mdi:lightning-bolt-circle",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.POWER_FACTOR,
+    ),
+    SensorEntityDescription(
+        key="ev_charging_power",
+        name="EV Charging Power",
+        icon="mdi:flash",
+        native_unit_of_measurement=UnitOfPower.KILO_WATT,
+        device_class=SensorDeviceClass.POWER,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
 )
 
