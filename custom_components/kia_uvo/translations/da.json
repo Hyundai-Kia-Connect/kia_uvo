@@ -1,0 +1,320 @@
+{
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai / Kia Connect - Godkendelse",
+        "description": "Opsæt din Hyundai (Bluelink) / Kia (Uvo) Connect til integration med Home Assistant.",
+        "data": {
+          "username": "Brugernavn",
+          "password": "Adgangskode",
+          "region": "Region",
+          "brand": "Mærke",
+          "pin": "PIN"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - Genbekræftelse",
+        "description": "Din konto kan ikke godkendes. Klik på Indsend for at opsætte igen."
+      }
+    },
+    "abort": {
+      "already_configured": "Enheden er allerede konfigureret"
+    },
+    "error": {
+      "invalid_auth": "Login fejlede til Hyundai (Bluelink) / Kia (Uvo) Connect-servere. Brug den officielle app til at logge ud og logge ind igen, og prøv derefter igen!",
+      "unknown": "Uventet fejl"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - Konfiguration",
+        "data": {
+          "scan_interval": "Scaninterval (min)",
+          "force_refresh": "Tving opdateringsinterval (min). Brug med forsigtighed, da det forbruger 12V-batteriet",
+          "no_force_refresh_hour_start": "Ingen tvangsopdatering starttidspunkt",
+          "no_force_refresh_hour_finish": "Ingen tvangsopdatering sluttidspunkt",
+          "enable_geolocation_entity": "Aktivér geolokation ved hjælp af OpenStreetMap",
+          "use_email_with_geocode_api": "Brug din Kia-emailadresse til Geocode API - Mere information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Tving opdatering",
+      "description": "Tving dit køretøj til at opdatere sine data. Alle køretøjer på samme konto som det valgte køretøj vil blive opdateret.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "update": {
+      "name": "Opdater",
+      "description": "Opdater køretøjsdata fra tjenestens cache",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Start klimaanlæg",
+      "description": "Brug med forsigtighed - starter klimaanlæg og motor. Ikke alle muligheder er tilgængelige i alle biler eller regioner. Brug din bils mobilapp som guide og tilpas mulighederne til din bil.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        },
+        "duration": {
+          "name": "Varighed",
+          "description": "Varighed for aktivering"
+        },
+        "climate": {
+          "name": "Klimaanlæg",
+          "description": "Aktivér klimaanlæg"
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Indstil temperaturen på klimaanlægget. Enheden afhænger af regionen."
+        },
+        "defrost": {
+          "name": "Afisning",
+          "description": "Forrudeafisning"
+        },
+        "heating": {
+          "name": "Opvarmning",
+          "description": "Opvarmede funktioner som rat og bagrude"
+        },
+        "flseat": {
+          "name": "Forsæde venstre",
+          "description": "Indstilling for varme/køling i venstre forsæde"
+        },
+        "frseat": {
+          "name": "Forsæde højre",
+          "description": "Indstilling for varme/køling i højre forsæde"
+        },
+        "rlseat": {
+          "name": "Bagsæde venstre",
+          "description": "Indstilling for varme/køling i venstre bagsæde"
+        },
+        "rrseat": {
+          "name": "Bagsæde højre",
+          "description": "Indstilling for varme/køling i højre bagsæde"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Stop klimaanlæg",
+      "description": "Brug med forsigtighed - stop bil og klimaanlæg",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Stop opladning",
+      "description": "Stop opladning",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Start opladning",
+      "description": "Start opladning",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "lock": {
+      "name": "Lås",
+      "description": "Lås køretøjet",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Lås op",
+      "description": "Lås køretøjet op",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Luk ladeport",
+      "description": "Luk ladeporten",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Åbn ladeport",
+      "description": "Åbn ladeporten",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Indstil ladegrænser",
+      "description": "Indstil maks. opladningskapacitet for AC og DC",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        },
+        "dc_limit": {
+          "name": "DC-ladegrænse",
+          "description": "Maks. ladekapacitet ved brug af DC-lader"
+        },
+        "ac_limit": {
+          "name": "AC-ladegrænse",
+          "description": "Maks. ladekapacitet ved brug af AC-lader"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "Indstil AC-opladestrøm",
+      "description": "Indstil kapaciteten for AC-opladestrøm",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        },
+        "level": {
+          "name": "Opladestrøm",
+          "description": "Kapacitet for opladestrøm som procentdel"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Planlæg opladning og klimaanlæg",
+      "description": "Brug med forsigtighed - planlæg opladning og klimaanlæg. Ikke alle muligheder er tilgængelige i alle biler eller regioner. Brug din bils mobilapp som guide og tilpas mulighederne til din bil.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        },
+        "charging_enabled": {
+          "name": "Planlagt opladning",
+          "description": "Aktivér planlagt opladning"
+        },
+        "first_departure_enabled": {
+          "name": "1. afgang",
+          "description": "Aktivér første afgang"
+        },
+        "first_departure_days": {
+          "name": "1. afgangsdage",
+          "description": "Dage hvor første afgang gælder. Må ikke være tom."
+        },
+        "first_departure_time": {
+          "name": "1. afgangstid",
+          "description": "Tidspunkt for første afgang. Brug 00, 10, 20, 30, 40 eller 50 for minutter og 00 for sekunder"
+        },
+        "second_departure_enabled": {
+          "name": "2. afgang",
+          "description": "Aktivér anden afgang"
+        },
+        "second_departure_days": {
+          "name": "2. afgangsdage",
+          "description": "Dage hvor anden afgang gælder. Må ikke være tom."
+        },
+        "second_departure_time": {
+          "name": "2. afgangstid",
+          "description": "Tidspunkt for anden afgang. Brug 00, 10, 20, 30, 40 eller 50 for minutter og 00 for sekunder"
+        },
+        "off_peak_start_time": {
+          "name": "Lavprisstarttidspunkt",
+          "description": "Starttidspunkt for lavprisperiode. Brug 00, 10, 20, 30, 40 eller 50 for minutter og 00 for sekunder"
+        },
+        "off_peak_end_time": {
+          "name": "Lavprisslutttidspunkt",
+          "description": "Slutttidspunkt for lavprisperiode. Brug 00, 10, 20, 30, 40 eller 50 for minutter og 00 for sekunder"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Kun lavpristarif",
+          "description": "Hvis sandt, oplades kun i den definerede lavprisperiode, ellers kan opladningen starte før lavprisperioden"
+        },
+        "climate_enabled": {
+          "name": "Klimaanlæg",
+          "description": "Aktivér klimaanlæg inden afgang"
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Indstil temperaturen på klimaanlægget. Enheden afhænger af regionen."
+        },
+        "temperature_unit": {
+          "name": "Temperaturenhed",
+          "description": "Indstil temperaturenheden for klimaanlægget. Enheden afhænger af regionen."
+        },
+        "defrost": {
+          "name": "Afisning",
+          "description": "Forrudeafisning inden afgang"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Tænd katastrofelys",
+      "description": "Tænd katastrofelysene i 30 sekunder.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Tænd katastrofelys og horn",
+      "description": "Tænd katastrofelysene og hornet i 30 sekunder.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Start betjenttilstand",
+      "description": "Aktivér betjenttilstand. Hvis fjernbetjent betjenttilstand aktiveres under kørsel, deaktiveres bilens displayskærm.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Stop betjenttilstand",
+      "description": "Deaktiver betjenttilstand.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
+    }
+  }
+}
