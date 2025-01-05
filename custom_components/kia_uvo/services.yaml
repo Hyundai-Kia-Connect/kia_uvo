@@ -26,7 +26,7 @@ start_climate:
       selector:
         number:
           min: 1
-          max: 10
+          max: 15
           step: 1
           unit_of_measurement: minutes
     climate:
@@ -58,97 +58,97 @@ start_climate:
         select:
           options:
             - label: "Off"
-              value: "0"
-            - label: "Steering Wheel, Side and Back Defroster"
-              value: "4"
-            - label: "Rear Window Only"
-              value: "2"
+              value: 0
+            - label: "Steering Wheel, Side Mirrors and Rear Defroster"
+              value: 4
+            - label: "Side Mirrors and Rear Defroster"
+              value: 2
             - label: "Steering Wheel Only"
-              value: "3"
+              value: 3
     flseat:
       required: false
       selector:
         select:
           options:
             - label: "Off"
-              value: "0"
+              value: 0
             - label: "On"
-              value: "1"
+              value: 1
             - label: "Low Cool"
-              value: "3"
+              value: 3
             - label: "Medium Cool"
-              value: "4"
+              value: 4
             - label: "High Cool"
-              value: "5"
+              value: 5
             - label: "Low Heat"
-              value: "6"
+              value: 6
             - label: "Medium Heat"
-              value: "7"
+              value: 7
             - label: "High Heat"
-              value: "8"
+              value: 8
     frseat:
       required: false
       selector:
         select:
           options:
             - label: "Off"
-              value: "0"
+              value: 0
             - label: "On"
-              value: "1"
+              value: 1
             - label: "Low Cool"
-              value: "3"
+              value: 3
             - label: "Medium Cool"
-              value: "4"
+              value: 4
             - label: "High Cool"
-              value: "5"
+              value: 5
             - label: "Low Heat"
-              value: "6"
+              value: 6
             - label: "Medium Heat"
-              value: "7"
+              value: 7
             - label: "High Heat"
-              value: "8"
+              value: 8
     rlseat:
       required: false
       selector:
         select:
           options:
             - label: "Off"
-              value: "0"
+              value: 0
             - label: "On"
-              value: "1"
+              value: 1
             - label: "Low Cool"
-              value: "3"
+              value: 3
             - label: "Medium Cool"
-              value: "4"
+              value: 4
             - label: "High Cool"
-              value: "5"
+              value: 5
             - label: "Low Heat"
-              value: "6"
+              value: 6
             - label: "Medium Heat"
-              value: "7"
+              value: 7
             - label: "High Heat"
-              value: "8"
+              value: 8
     rrseat:
       required: false
       selector:
         select:
           options:
             - label: "Off"
-              value: "0"
+              value: 0
             - label: "On"
-              value: "1"
+              value: 1
             - label: "Low Cool"
-              value: "3"
+              value: 3
             - label: "Medium Cool"
-              value: "4"
+              value: 4
             - label: "High Cool"
-              value: "5"
+              value: 5
             - label: "Low Heat"
-              value: "6"
+              value: 6
             - label: "Medium Heat"
-              value: "7"
+              value: 7
             - label: "High Heat"
-              value: "8"
+              value: 8
 stop_climate:
   fields:
     device_id:
