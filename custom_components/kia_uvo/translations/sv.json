@@ -22,7 +22,7 @@
       "already_configured": "Enheten är redan konfigurerad"
     },
     "error": {
-      "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",      
+      "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",
       "unknown": "Oväntat fel"
     }
   },
