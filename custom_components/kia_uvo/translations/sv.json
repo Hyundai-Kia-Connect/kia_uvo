@@ -1,0 +1,320 @@
+{
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Hyundai / Kia Connect - Autentisering",
+        "description": "Konfigurera din Hyundai (Bluelink) / Kia (Uvo) Connect för integration med Home Assistant.",
+        "data": {
+          "username": "Användarnamn",
+          "password": "Lösenord",
+          "region": "Region",
+          "brand": "Märke",
+          "pin": "Pin"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - Reautentisering",
+        "description": "Kontot kan inte autentiseres. Klicka på Send för att sätta upp på nytt."
+      }
+    },
+    "abort": {
+      "already_configured": "Enheten är redan konfigurerad"
+    },
+    "error": {
+      "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",
+      "unknown": "Oväntat fel"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - Konfiguration",
+        "data": {
+          "scan_interval": "Scanningsintervall (min)",
+          "force_refresh": "Tvångsuppdateringsintervall (min), var försiktig med att sätte detta för lågt då det använder 12V-batteriet",
+          "no_force_refresh_hour_start": "Ingen tvångsuppdatering starttid",
+          "no_force_refresh_hour_finish": "Ingen tvångsuppdatering sluttid",
+          "enable_geolocation_entity": "Aktivar Geolokation object vid användning av OpenStreetMap",
+          "use_email_with_geocode_api": "Använd din Kia e-postadress för Geocode API - Mer information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Tvinga uppdatering",
+      "description": "Tvinga fordonet att uppdatera sin data. Alla fordon på samma konto som det valda fordonet kommer att uppdateras.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "update": {
+      "name": "Uppdatera",
+      "description": "Uppdatera fordonsdata från tjänstecache",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Starta Klimatanläggning",
+      "description": "Använd med försiktighet - Startar klimatanläggning och motor. Alla alternativ är inte tillgängliga på alla bilar eller i alla regioner. Använd bilens mobilapp som vägledning och matcha alternativ som är tillgängliga i ditt fordon.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        },
+        "duration": {
+          "name": "Varaktighet",
+          "description": "Varaktighet för aktivering"
+        },
+        "climate": {
+          "name": "Klimatanläggning",
+          "description": "Aktivera klimatanläggnig"
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+        },
+        "defrost": {
+          "name": "Avfrosning",
+          "description": "Fönsteravfrostning"
+        },
+        "heating": {
+          "name": "Uppvärmning",
+          "description": "Uppvärmande funktioner som ratt och bakruta"
+        },
+        "flseat": {
+          "name": "Vänster framsäte",
+          "description": "Vänster framsäte värme/kylinställning"
+        },
+        "frseat": {
+          "name": "Höger framsäte",
+          "description": "Höger framsäte värme/kylinställning"
+        },
+        "rlseat": {
+          "name": "Vänster baksäte",
+          "description": "Vänster baksäte värme/kylinställning"
+        },
+        "rrseat": {
+          "name": "Höger baksäte",
+          "description": "Höger baksäte värme/kylinställning"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Stoppa Klimatanläggning",
+      "description": "Använd med försiktighet - stoppar bilen och klimatanläggningen",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Stoppa Laddning",
+      "description": "Stoppar laddningen",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Starta Laddning",
+      "description": "Startar laddningen",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "lock": {
+      "name": "Lås",
+      "description": "Lås fordon",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Lås upp",
+      "description": "Lås upp fordon",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Lås laddlucka",
+      "description": "Lås laddlucka",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Öppna laddlucka",
+      "description": "Öppna laddlucka",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Sätt laddningsmål",
+      "description": "Sätter AC och DC laddningsgränser",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        },
+        "dc_limit": {
+          "name": "DC laddnivåmål",
+          "description": "Max laddning med DC-laddare"
+        },
+        "ac_limit": {
+          "name": "AC laddnivåmål",
+          "description": "Max laddning med AC-laddare"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "Sätt AC laddström",
+      "description": "Sätter AC laddströmskapacitet",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        },
+        "level": {
+          "name": "Ladeffekt",
+          "description": "Ladeffektskapacitet procent"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Schemalägg laddning och klimatanläggning",
+      "description": "Använd med försiktighet - Schedulera laddning och klimat. Alla alternativ är inte tillgängliga på alla bilar eller i alla regioner. Använd bilens mobilapp som vägledning och matcha alternativ som är tillgängliga i ditt fordon.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        },
+        "charging_enabled": {
+          "name": "Schemalägg laddning",
+          "description": "Aktiverar schemalagd laddning"
+        },
+        "first_departure_enabled": {
+          "name": "1. avresa",
+          "description": "Aktiverar första avresa"
+        },
+        "first_departure_days": {
+          "name": "1. avresedagar",
+          "description": "Dagar som första avresan gäller för. Kan inte vara tomt."
+        },
+        "first_departure_time": {
+          "name": "1. avresetid",
+          "description": "Tidpunkt för första avresan. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+        },
+        "second_departure_enabled": {
+          "name": "2. avresa",
+          "description": "Aktivera andra avresa"
+        },
+        "second_departure_days": {
+          "name": "2. avresedagar",
+          "description": "Dagar som andra avresan gäller för. Kan inte vara tomt."
+        },
+        "second_departure_time": {
+          "name": "2. avresetid",
+          "description": "Tidpunkt för andra avresan. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+        },
+        "off_peak_start_time": {
+          "name": "Starttid för lågtraffik",
+          "description": "Starttid för lågtraffik. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+        },
+        "off_peak_end_time": {
+          "name": "Slutttid för lågtraffik",
+          "description": "Slutttid för lågtraffik. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Endast lågpristariffer",
+          "description": "Om satt till sant, laddar enbart under definierat lågpristid, annars kan laddningen starta före lågpristiden"
+        },
+        "climate_enabled": {
+          "name": "Klimat",
+          "description": "Aktivera klimatanläggningen inför avresa"
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+        },
+        "temperature_unit": {
+          "name": "Temperaturenhet",
+          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+        },
+        "defrost": {
+          "name": "Avfrostning",
+          "description": "Framruteavfrostning inför avresa"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Slå på varningsblinkers",
+      "description": "Slå på varningsblinkers i 30 sekunder.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Slå på varningsblinkers och tuta",
+      "description": "Slå på varningsblinkers och tuta i 30 sekunder.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Start valet-läge",
+      "description": "Aktivera Valet-läge. Om valet-läge aktivers under körning, stängs bildkärmen av.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Stopp valet-läge",
+      "description": "Avaktiverar valet-läge.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        }
+      }
+    }
+  }
+}
