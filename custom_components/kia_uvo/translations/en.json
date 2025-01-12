@@ -88,7 +88,11 @@
         },
         "heating": {
           "name": "Heating",
-          "description": "Heated features like the steering wheel and rear window"
+          "description": "Heated features like front/rear windows and side mirrors"
+        },
+        "steeringWheelStep":{
+          "name": "Steering Wheel Heat",
+          "description": "Heating level for the steering wheel"
         },
         "flseat": {
           "name": "Front Left Seat",
