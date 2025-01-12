@@ -105,7 +105,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             front_right_seat=front_right_seat,
             rear_left_seat=rear_left_seat,
             rear_right_seat=rear_right_seat,
-            steeringWheel=steering_wheel
+            steeringWheel=steering_wheel,
         )
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
 

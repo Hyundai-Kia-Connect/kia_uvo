@@ -90,7 +90,7 @@
           "name": "Heating",
           "description": "Heated features like front/rear windows and side mirrors"
         },
-        "steeringWheelStep":{
+        "steeringWheelStep": {
           "name": "Steering Wheel Heat",
           "description": "Heating level for the steering wheel"
         },
