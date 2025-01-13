@@ -81,7 +81,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         front_right_seat = call.data.get("frseat")
         rear_left_seat = call.data.get("rlseat")
         rear_right_seat = call.data.get("rrseat")
-        steering_wheel = call.data.get("steeringWheel")
+        steering_wheel = call.data.get("steering_wheel")
 
         # Confirm values are correct datatype
         if front_left_seat is not None:
@@ -105,7 +105,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             front_right_seat=front_right_seat,
             rear_left_seat=rear_left_seat,
             rear_right_seat=rear_right_seat,
-            steeringWheel=steering_wheel,
+            steering_wheel=steering_wheel,
         )
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
 

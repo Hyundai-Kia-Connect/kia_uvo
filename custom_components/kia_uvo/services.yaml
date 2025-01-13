@@ -63,7 +63,7 @@ start_climate:
               value: "4"
             - label: "Rear Window Only"
               value: "2"
-    steeringWheel:
+    steering_wheel:
       required: false
       example: 1
       default: 0
