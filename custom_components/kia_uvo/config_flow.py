@@ -76,7 +76,6 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: ConfigEntry) -> None:
         """Initialize option flow instance."""
-        self.config_entry = config_entry
         self.schema = vol.Schema(
             {
                 vol.Required(
