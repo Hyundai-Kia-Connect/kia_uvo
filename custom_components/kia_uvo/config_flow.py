@@ -55,10 +55,9 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 OPTIONS_SCHEMA = vol.Schema(
     {
-        vol.Required(
-            CONF_SCAN_INTERVAL,
-            default=DEFAULT_SCAN_INTERVAL
-        ): vol.All(vol.Coerce(int), vol.Range(min=15, max=999)),
+        vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
+            vol.Coerce(int), vol.Range(min=15, max=999)
+        ),
         vol.Required(
             CONF_FORCE_REFRESH_INTERVAL,
             default=DEFAULT_FORCE_REFRESH_INTERVAL,
@@ -116,7 +115,8 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
-                OPTIONS_SCHEMA, self.config_entry.options)
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
         )
 
 
@@ -154,7 +154,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         else:
             if self.reauth_entry is None:
                 title = f"{BRANDS[user_input[CONF_BRAND]]} {
-                    REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+                    REGIONS[user_input[CONF_REGION]]
+                } {user_input[CONF_USERNAME]}"
                 await self.async_set_unique_id(
                     hashlib.sha256(title.encode("utf-8")).hexdigest()
                 )
