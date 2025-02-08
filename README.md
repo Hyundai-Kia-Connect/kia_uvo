@@ -53,9 +53,9 @@ These can be access by going to the developer menu followed by services.
 | -------------------------- | --- | ---------- | --- | ------- | ----------- | ----------- | ----- |
 | Update                     | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
 | Force Update               | ✔  | not tested | ✔  | ✔      |             |             | ✔    |
-| Lock Unlock                | ✔  | ✖         | ✔  | ✔      | ✔          | ✔          | ✔    |
-| start stop climate         | ✔  | ✖         | ✔  | ✔      | ✔          |             | ✔    |
-| start stop charge          | ✔  | ✖         | ✔  | ✔      | ✔          |             |       |
+| Lock Unlock                | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
+| start stop climate         | ✔  | ✔         | ✔  | ✔      | ✔          |             | ✔    |
+| start stop charge          | ✔  | ✔         | ✔  | ✔      | ✔          |             |       |
 | set charge limits          | ✔  | not tested | ✔  | ✔      | ✔          |             |       |
 | open and close charge port | ✖  | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
 
