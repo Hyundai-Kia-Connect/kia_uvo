@@ -39,7 +39,7 @@ You can install this either manually copying files or using HACS. Configuration 
 
 ## Supported services
 
-These can be access by going to the developer menu followed by services.
+These can be access by going to the developer tools followed by actions. These can also be called via automation.
 
 - update: get latest **cached** vehicle data
 - force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
