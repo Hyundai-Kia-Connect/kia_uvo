@@ -53,6 +53,34 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
+OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
+            vol.Coerce(int), vol.Range(min=15, max=999)
+        ),
+        vol.Required(
+            CONF_FORCE_REFRESH_INTERVAL,
+            default=DEFAULT_FORCE_REFRESH_INTERVAL,
+        ): vol.All(vol.Coerce(int), vol.Range(min=90, max=9999)),
+        vol.Required(
+            CONF_NO_FORCE_REFRESH_HOUR_START,
+            default=DEFAULT_NO_FORCE_REFRESH_HOUR_START,
+        ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+        vol.Required(
+            CONF_NO_FORCE_REFRESH_HOUR_FINISH,
+            default=DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
+        ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
+        vol.Optional(
+            CONF_ENABLE_GEOLOCATION_ENTITY,
+            default=DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+        ): bool,
+        vol.Optional(
+            CONF_USE_EMAIL_WITH_GEOCODE_API,
+            default=DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
+        ): bool,
+    }
+)
+
 
 async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token:
     """Validate the user input allows us to connect."""
@@ -74,62 +102,22 @@ async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Tok
 class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
     """Handle an option flow for Hyundai / Kia Connect."""
 
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize option flow instance."""
-        self.config_entry = config_entry
-        self.schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_SCAN_INTERVAL,
-                    default=self.config_entry.options.get(
-                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=15, max=999)),
-                vol.Required(
-                    CONF_FORCE_REFRESH_INTERVAL,
-                    default=self.config_entry.options.get(
-                        CONF_FORCE_REFRESH_INTERVAL, DEFAULT_FORCE_REFRESH_INTERVAL
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=90, max=9999)),
-                vol.Required(
-                    CONF_NO_FORCE_REFRESH_HOUR_START,
-                    default=self.config_entry.options.get(
-                        CONF_NO_FORCE_REFRESH_HOUR_START,
-                        DEFAULT_NO_FORCE_REFRESH_HOUR_START,
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
-                vol.Required(
-                    CONF_NO_FORCE_REFRESH_HOUR_FINISH,
-                    default=self.config_entry.options.get(
-                        CONF_NO_FORCE_REFRESH_HOUR_FINISH,
-                        DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
-                    ),
-                ): vol.All(vol.Coerce(int), vol.Range(min=0, max=23)),
-                vol.Optional(
-                    CONF_ENABLE_GEOLOCATION_ENTITY,
-                    default=self.config_entry.options.get(
-                        CONF_ENABLE_GEOLOCATION_ENTITY,
-                        DEFAULT_ENABLE_GEOLOCATION_ENTITY,
-                    ),
-                ): bool,
-                vol.Optional(
-                    CONF_USE_EMAIL_WITH_GEOCODE_API,
-                    default=self.config_entry.options.get(
-                        CONF_USE_EMAIL_WITH_GEOCODE_API,
-                        DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
-                    ),
-                ): bool,
-            }
-        )
-
-    async def async_step_init(self, user_input=None) -> FlowResult:
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Handle options init setup."""
+
         if user_input is not None:
             return self.async_create_entry(
                 title=self.config_entry.title, data=user_input
             )
 
-        return self.async_show_form(step_id="init", data_schema=self.schema)
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA, self.config_entry.options
+            ),
+        )
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -142,7 +130,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry: ConfigEntry):
         """Initiate options flow instance."""
-        return HyundaiKiaConnectOptionFlowHandler(config_entry)
+        return HyundaiKiaConnectOptionFlowHandler()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -165,7 +153,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "unknown"
         else:
             if self.reauth_entry is None:
-                title = f"{BRANDS[user_input[CONF_BRAND]]} {REGIONS[user_input[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+                title = f"{BRANDS[user_input[CONF_BRAND]]} {
+                    REGIONS[user_input[CONF_REGION]]
+                } {user_input[CONF_USERNAME]}"
                 await self.async_set_unique_id(
                     hashlib.sha256(title.encode("utf-8")).hexdigest()
                 )
