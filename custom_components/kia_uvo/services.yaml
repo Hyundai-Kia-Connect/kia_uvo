@@ -59,12 +59,25 @@ start_climate:
           options:
             - label: "Off"
               value: "0"
-            - label: "Steering Wheel, Side and Back Defroster"
+            - label: "Steering Wheel(not EU), Side and Back Defroster"
               value: "4"
             - label: "Rear Window Only"
               value: "2"
-            - label: "Steering Wheel Only"
+            - label: "Steering Wheel Only(None EU only)"
               value: "3"
+    steering_wheel:
+      required: false
+      example: 1
+      default: 0
+      selector:
+        select:
+          options:
+            - label: "Off"
+              value: "0"
+            - label: "Low"
+              value: "1"
+            - label: "High"
+              value: "2"
     flseat:
       required: false
       selector:
