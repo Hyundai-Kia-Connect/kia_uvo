@@ -10,7 +10,7 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 ## Installation
 
-You can install this either manually copying files or using HACS. Configuration can be done on UI, you need to enter your username and password, (I know, translations are missing, a PR for this would be great!).
+Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password (I know, translations are missing, a PR for this would be great!).
 
 - AU, EU, CA and US is supported by this. USA and China support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
