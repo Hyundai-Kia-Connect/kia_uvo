@@ -3,7 +3,7 @@ ci:
   autoupdate_commit_msg: "chore: pre-commit autoupdate"
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.9
+    rev: v0.11.0
     hooks:
       - id: ruff
         args:
@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: pyupgrade
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
+    rev: v1.36.2
     hooks:
       - id: yamllint
         exclude: (.github|.vscode|.devcontainer)
@@ -41,7 +41,7 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/cdce8p/python-typing-update
-    rev: v0.7.0
+    rev: v0.7.1
     hooks:
       # Run `python-typing-update` hook manually from time to time
       # to update python typing syntax.
