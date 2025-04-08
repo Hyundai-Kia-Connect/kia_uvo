@@ -25,6 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 
 AC_CHARGING_LIMIT_KEY = "ev_charge_limits_ac"
 DC_CHARGING_LIMIT_KEY = "ev_charge_limits_dc"
+V2L_LIMIT_KEY = "ev_v2l_discharge_limit"
 
 NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
@@ -42,6 +43,15 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         icon="mdi:ev-plug-ccs2",
         native_min_value=50,
         native_max_value=100,
+        native_step=10,
+        native_unit_of_measurement=PERCENTAGE,
+    ),
+    NumberEntityDescription(
+        key=V2L_LIMIT_KEY,
+        name="V2L Limit",
+        icon="mdi:fuel-cell",
+        native_min_value=20,
+        native_max_value=80,
         native_step=10,
         native_unit_of_measurement=PERCENTAGE,
     ),
@@ -109,10 +119,14 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         if self._description.key == AC_CHARGING_LIMIT_KEY:
             ac = value
             dc = self.vehicle.ev_charge_limits_dc
-        else:
+            await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
+        elif self._description.key == DC_CHARGING_LIMIT_KEY:
             ac = self.vehicle.ev_charge_limits_ac
             dc = value
-        await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
+            await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
+        elif self._description.key == V2L_LIMIT_KEY:
+            v2l = value
+            await self.coordinator.set_v2l_limit(self.vehicle.id, v2l)
 
         self.async_write_ha_state()
 
