@@ -92,7 +92,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         """Set new charging limit."""
         # force refresh of state so that we can get the value for the other charging limit
         # since we have to set both limits as compound API call.
-        await self.coordinator.async_force_update_all()
+        # await self.coordinator.async_force_update_all()
 
         if (
             self._description.key == AC_CHARGING_LIMIT_KEY
