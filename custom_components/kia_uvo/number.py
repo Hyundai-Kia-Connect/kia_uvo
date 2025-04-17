@@ -126,7 +126,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
             await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
         elif self._description.key == V2L_LIMIT_KEY:
             v2l = value
-            await self.coordinator.set_v2l_limit(self.vehicle.id, v2l)
+            await self.coordinator.async_set_v2l_limit(self.vehicle.id, v2l)
 
         self.async_write_ha_state()
 
