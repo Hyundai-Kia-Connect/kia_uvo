@@ -119,14 +119,14 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         if self._description.key == AC_CHARGING_LIMIT_KEY:
             ac = value
             dc = self.vehicle.ev_charge_limits_dc
-            await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
+            await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, dc)
         elif self._description.key == DC_CHARGING_LIMIT_KEY:
             ac = self.vehicle.ev_charge_limits_ac
             dc = value
-            await self.coordinator.set_charge_limits(self.vehicle.id, ac, dc)
+            await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, dc)
         elif self._description.key == V2L_LIMIT_KEY:
             v2l = value
-            await self.coordinator.set_v2l_limit(self.vehicle.id, v2l)
+            await self.coordinator.async_set_v2l_limit(self.vehicle.id, v2l)
 
         self.async_write_ha_state()
 
