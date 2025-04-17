@@ -329,8 +329,8 @@
         "v2l_limit": {
           "name": "V2L discharge limit",
           "description": "max discharge limit when using V2L"
-        },
+        }
       }
-    }
+    },
   }
 }
