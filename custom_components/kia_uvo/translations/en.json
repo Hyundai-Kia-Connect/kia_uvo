@@ -319,7 +319,7 @@
           "description": "Target vehicle"
     },
     "set_vehicle_to_load_discharge_limit": {
-      "name": "Set V2L Discharge Limits",
+      "name": "Set V2L Discharge Limit",
       "description": "sets V2L disharge limit",
       "fields": {
         "device_id": {
@@ -328,7 +328,7 @@
         },
         "v2l_limit": {
           "name": "V2L discharge limit",
-          "description": "max disccharge limit when using V2L"
+          "description": "max discharge limit when using V2L"
         }
       }
     }
