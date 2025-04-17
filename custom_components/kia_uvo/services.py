@@ -287,7 +287,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_START_HAZARD_LIGHTS_AND_HORN: async_handle_start_hazard_lights_and_horn,
         SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
         SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
-        SERVICE_SET_VEHICLE_TO_LOAD_DISCHARGE_LIMIT_MODE: async_handle_set_vehicle_to_load_discharge_limit,
+        SERVICE_SET_VEHICLE_TO_LOAD_DISCHARGE_LIMIT: async_handle_set_vehicle_to_load_discharge_limit,
     }
 
     for service in SUPPORTED_SERVICES:
