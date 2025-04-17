@@ -415,10 +415,14 @@ set_vehicle_to_load_discharge_limit:
     device_id:
       required: false
       selector:
+        device:
+          integration: kia_uvo
+    v2L_limit:
+      required: fale
+      selector:
         number:
           min: 20
           max: 80
           step: 10
           unit_of_measurement: "%"
-        device:
-          integration: kia_uvo
+
