@@ -317,6 +317,18 @@
         "device_id": {
           "name": "Vehicle",
           "description": "Target vehicle"
+    },
+    "set_vehicle_to_load_discharge_limit": {
+      "name": "Set V2L Discharge Limits",
+      "description": "sets V2L disharge limit",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "v2l_limit": {
+          "name": "V2L discharge limit",
+          "description": "max disccharge limit when using V2L"
         }
       }
     }
