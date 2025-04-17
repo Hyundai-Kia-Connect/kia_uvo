@@ -268,6 +268,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_set_vehicle_to_load_discharge_limit(vehicle_id)
+        v2l_discharge_limit = call.data.get("v2L_limit")
 
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
