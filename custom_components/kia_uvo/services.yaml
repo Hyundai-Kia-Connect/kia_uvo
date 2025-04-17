@@ -410,3 +410,15 @@ stop_valet_mode:
       selector:
         device:
           integration: kia_uvo
+set_vehicle_to_load_discharge_limit:
+  fields:
+    device_id:
+      required: false
+      selector:
+        number:
+          min: 20
+          max: 80
+          step: 10
+          unit_of_measurement: "%"
+        device:
+          integration: kia_uvo
