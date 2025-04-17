@@ -425,4 +425,3 @@ set_vehicle_to_load_discharge_limit:
           max: 80
           step: 10
           unit_of_measurement: "%"
-
