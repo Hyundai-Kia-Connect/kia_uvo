@@ -173,7 +173,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
-            asyncio.sleep(30)
+            await asyncio.sleep(5)
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.check_action_status,
                 vehicle_id,
