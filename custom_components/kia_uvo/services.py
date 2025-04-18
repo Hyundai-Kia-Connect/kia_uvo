@@ -11,6 +11,7 @@ from homeassistant.helpers import device_registry
 from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     ScheduleChargingClimateRequestOptions,
+    WindowRequestOptions,
 )
 
 from .const import DOMAIN
@@ -32,6 +33,7 @@ SERVICE_START_HAZARD_LIGHTS = "start_hazard_lights"
 SERVICE_START_HAZARD_LIGHTS_AND_HORN = "start_hazard_lights_and_horn"
 SERVICE_START_VALET_MODE = "start_valet_mode"
 SERVICE_STOP_VALET_MODE = "stop_valet_mode"
+SERVICE_SET_WINDOWS = "set_windows"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -51,6 +53,7 @@ SUPPORTED_SERVICES = (
     SERVICE_START_HAZARD_LIGHTS_AND_HORN,
     SERVICE_START_VALET_MODE,
     SERVICE_STOP_VALET_MODE,
+    SERVICE_SET_WINDOWS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -155,6 +158,24 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         else:
             _LOGGER.error(
                 f"{DOMAIN} - Enable to set charge limits.  Both AC and DC value required, but not provided."
+            )
+
+    async def async_handle_set_windows(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        window_options = WindowRequestOptions(
+            front_left = call.data.get("flwindow")
+            front_right  = call.data.get("frwindow")
+            back_left  = call.data.get("rlwindow")
+            back_right  = call.data.get("rrwindow")
+        )
+
+
+        if window_options.front_left is not None and window_options.front_right is not None and window_options.rear_left is not None and window_options.rear_right is not None:
+            await coordinator.async_set_windows(vehicle_id, window_options)
+        else:
+            _LOGGER.error(
+                f"{DOMAIN} -  All windows value required, but not provided."
             )
 
     async def async_handle_set_charging_current(call):
@@ -280,6 +301,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_START_HAZARD_LIGHTS_AND_HORN: async_handle_start_hazard_lights_and_horn,
         SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
         SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
+        SERVICE_SET_WINDOWS: async_handle_set_windows,
+
     }
 
     for service in SUPPORTED_SERVICES:
