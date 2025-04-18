@@ -164,10 +164,10 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         window_options = WindowRequestOptions(
-            front_left = call.data.get("flwindow")
-            front_right  = call.data.get("frwindow")
-            back_left  = call.data.get("rlwindow")
-            back_right  = call.data.get("rrwindow")
+            front_left = call.data.get("flwindow"),
+            front_right  = call.data.get("frwindow"),
+            back_left  = call.data.get("rlwindow"),
+            back_right  = call.data.get("rrwindow"),
         )
 
 
