@@ -337,7 +337,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
-    async def async_set_windows(self, vehicle_id: str, windowOptions: WindowRequestOptions):
+    async def async_set_windows(
+        self, vehicle_id: str, windowOptions: WindowRequestOptions
+    ):
         await self.async_check_and_refresh_token()
         action_id = await self.hass.async_add_executor_job(
             self.vehicle_manager.set_windows_state, vehicle_id, windowOptions
