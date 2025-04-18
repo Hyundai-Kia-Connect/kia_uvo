@@ -167,16 +167,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:car-electric",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.TOTAL_INCREASING,
     ),
     SensorEntityDescription(
         key="total_power_regenerated",
         name="Total Energy Regeneration",
         icon="mdi:car-electric",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.TOTAL_INCREASING,
-    ),
+        device_class=SensorDeviceClass.ENERGY,    ),
     # Need to remove km hard coding.  Underlying API needs this fixed first.  EU always does KM.
     SensorEntityDescription(
         key="power_consumption_30d",
