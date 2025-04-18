@@ -49,15 +49,15 @@ These can be access by going to the developer tools followed by actions. These c
 - set_charging_current: You can control the charging current level (100%, 90% or 60%)
 - open_charge_port / close_charge_port: Open or close the charge port.
 
-| Service                    | EU  | EU(>2023)  | CA  | USA Kia | USA Hyundai | USA Genesis | China |
-| -------------------------- | --- | ---------- | --- | ------- | ----------- | ----------- | ----- |
-| Update                     | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
-| Force Update               | ✔  | not tested | ✔  | ✔      |             |             | ✔    |
-| Lock Unlock                | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
-| start stop climate         | ✔  | ✔         | ✔  | ✔      | ✔          |             | ✔    |
-| start stop charge          | ✔  | ✔         | ✔  | ✔      | ✔          |             |       |
-| set charge limits          | ✔  | not tested | ✔  | ✔      | ✔          |             |       |
-| open and close charge port | ✖  | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
+| Service                    | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China |
+| -------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- |
+| Update                     | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
+| Force Update               | ✔  | not tested        | ✔  | ✔      |             |             | ✔    |
+| Lock Unlock                | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
+| start stop climate         | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    |
+| start stop charge          | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |
+| set charge limits          | ✔  | not tested        | ✔  | ✔      | ✔          |             |       |
+| open and close charge port | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
 
 I have posted an example screenshot from my own car.
 
