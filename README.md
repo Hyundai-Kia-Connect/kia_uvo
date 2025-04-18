@@ -58,7 +58,7 @@ These can be access by going to the developer tools followed by actions. These c
 | start stop charge          | ✔  | ✔         | ✔  | ✔      | ✔          |             |       |
 | set charge limits          | ✔  | not tested | ✔  | ✔      | ✔          |             |       |
 | open and close charge port | ✖  | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
-| set windows                | X  | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
+| set windows                | X   | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
 
 I have posted an example screenshot from my own car.
 
