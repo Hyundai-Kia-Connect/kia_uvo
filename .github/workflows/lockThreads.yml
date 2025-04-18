@@ -1,8 +1,8 @@
-name: 'Lock Threads'
+name: "Lock Threads"
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 permissions:

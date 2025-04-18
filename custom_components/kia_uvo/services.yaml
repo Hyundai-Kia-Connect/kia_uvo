@@ -257,6 +257,57 @@ set_charging_current:
               value: "2"
             - label: "60%"
               value: "3"
+set_windows:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+    flwindow:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Close"
+              value: "0"
+            - label: "Open"
+              value: "1"
+            - label: "Ventilation"
+              value: "2"
+    frwindow:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Close"
+              value: "0"
+            - label: "Open"
+              value: "1"
+            - label: "Ventilation"
+              value: "2"
+    rrwindow:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Close"
+              value: "0"
+            - label: "Open"
+              value: "1"
+            - label: "Ventilation"
+              value: "2"
+    rlwindow:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Close"
+              value: "0"
+            - label: "Open"
+              value: "1"
+            - label: "Ventilation"
+              value: "2"
 schedule_charging_and_climate:
   fields:
     device_id:
