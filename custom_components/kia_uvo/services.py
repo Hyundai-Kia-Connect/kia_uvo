@@ -164,19 +164,21 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         window_options = WindowRequestOptions(
-            front_left = call.data.get("flwindow"),
-            front_right  = call.data.get("frwindow"),
-            back_left  = call.data.get("rlwindow"),
-            back_right  = call.data.get("rrwindow"),
+            front_left=call.data.get("flwindow"),
+            front_right=call.data.get("frwindow"),
+            back_left=call.data.get("rlwindow"),
+            back_right=call.data.get("rrwindow"),
         )
 
-
-        if window_options.front_left is not None and window_options.front_right is not None and window_options.rear_left is not None and window_options.rear_right is not None:
+        if (
+            window_options.front_left is not None
+            and window_options.front_right is not None
+            and window_options.rear_left is not None
+            and window_options.rear_right is not None
+        ):
             await coordinator.async_set_windows(vehicle_id, window_options)
         else:
-            _LOGGER.error(
-                f"{DOMAIN} -  All windows value required, but not provided."
-            )
+            _LOGGER.error(f"{DOMAIN} -  All windows value required, but not provided.")
 
     async def async_handle_set_charging_current(call):
         coordinator = _get_coordinator_from_device(hass, call)
@@ -302,7 +304,6 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
         SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
         SERVICE_SET_WINDOWS: async_handle_set_windows,
-
     }
 
     for service in SUPPORTED_SERVICES:
