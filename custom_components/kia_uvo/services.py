@@ -163,7 +163,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         current_level = call.data.get("level")
 
         if current_level is not None:
-            await coordinator.set_charging_current(vehicle_id, int(current_level))
+            await coordinator.async_set_charging_current(vehicle_id, int(current_level))
         else:
             _LOGGER.error(
                 f"{DOMAIN} - Enable to set charging current.  Level required, but not provided."
