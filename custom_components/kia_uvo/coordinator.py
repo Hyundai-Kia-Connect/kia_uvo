@@ -10,6 +10,7 @@ import asyncio
 from hyundai_kia_connect_api import (
     VehicleManager,
     ClimateRequestOptions,
+    WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
@@ -173,7 +174,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
-            asyncio.sleep(30)
+            await asyncio.sleep(5)
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.check_action_status,
                 vehicle_id,
@@ -331,6 +332,17 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.async_check_and_refresh_token()
         action_id = await self.hass.async_add_executor_job(
             self.vehicle_manager.set_vehicle_to_load_discharge_limit, vehicle_id, limit
+        )
+        self.hass.async_create_task(
+            self.async_await_action_and_refresh(vehicle_id, action_id)
+        )
+
+    async def async_set_windows(
+        self, vehicle_id: str, windowOptions: WindowRequestOptions
+    ):
+        await self.async_check_and_refresh_token()
+        action_id = await self.hass.async_add_executor_job(
+            self.vehicle_manager.set_windows_state, vehicle_id, windowOptions
         )
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
