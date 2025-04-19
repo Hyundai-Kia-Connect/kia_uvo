@@ -52,7 +52,7 @@ These can be access by going to the developer tools followed by actions. These c
 - start_hazard_lights_and_horn / stop: Panic!
 - start_hazard_lights / stop: Hazard lights only
 - schedule_charging_and_climate: planned depature
-- start_valet_mode / stop
+- start_valet_mode / stop: valet mode
 
 | Service                           | EU  | EU(>2023)  | CA  | USA Kia | USA Hyundai | USA Genesis | China |
 | --------------------------------- | --- | ---------- | --- | ------- | ----------- | ----------- | ----- |
