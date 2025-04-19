@@ -21,7 +21,7 @@ REGIONS = {
     3: REGION_USA,
     4: REGION_CHINA,
     5: REGION_AUSTRALIA,
-    6: REGION_NZ,
+    7: REGION_NZ,
 }
 BRAND_KIA: str = "Kia"
 BRAND_HYUNDAI: str = "Hyundai"
