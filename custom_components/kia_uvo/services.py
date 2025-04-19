@@ -173,8 +173,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         if (
             window_options.front_left is not None
             and window_options.front_right is not None
-            and window_options.rear_left is not None
-            and window_options.rear_right is not None
+            and window_options.back_left is not None
+            and window_options.back_right is not None
         ):
             await coordinator.async_set_windows(vehicle_id, window_options)
         else:
