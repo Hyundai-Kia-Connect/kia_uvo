@@ -48,16 +48,26 @@ These can be access by going to the developer tools followed by actions. These c
 - set_charge_limits: You can control your charging capacity limits using this services
 - set_charging_current: You can control the charging current level (100%, 90% or 60%)
 - open_charge_port / close_charge_port: Open or close the charge port.
+- set_windows: opens and closes the windows for select cars and regions
+- start_hazard_lights_and_horn / stop: Panic!
+- start_hazard_lights / stop: Hazard lights only
+- schedule_charging_and_climate: planned depature
+- start_valet_mode / stop: valet mode
 
-| Service                    | EU  | EU(>2023)  | CA  | USA Kia | USA Hyundai | USA Genesis | China |
-| -------------------------- | --- | ---------- | --- | ------- | ----------- | ----------- | ----- |
-| Update                     | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
-| Force Update               | ✔  | not tested | ✔  | ✔      |             |             | ✔    |
-| Lock Unlock                | ✔  | ✔         | ✔  | ✔      | ✔          | ✔          | ✔    |
-| start stop climate         | ✔  | ✔         | ✔  | ✔      | ✔          |             | ✔    |
-| start stop charge          | ✔  | ✔         | ✔  | ✔      | ✔          |             |       |
-| set charge limits          | ✔  | not tested | ✔  | ✔      | ✔          |             |       |
-| open and close charge port | ✖  | ✔         | ✖  | ✖      | ✖          | ✖          | ✖    |
+| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China |
+| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- |
+| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
+| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    |
+| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
+| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    |
+| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |
+| set charge limits                 | ✔  | not tested        | ✔  | ✔      | ✔          |             |       |
+| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
 
 I have posted an example screenshot from my own car.
 
