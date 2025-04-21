@@ -18,7 +18,8 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
     UnitOfPower,
-    UnitOfTime, EntityCategory,
+    UnitOfTime,
+    EntityCategory,
 )
 
 from homeassistant.config_entries import ConfigEntry
