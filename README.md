@@ -12,7 +12,7 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password (I know, translations are missing, a PR for this would be great!).
 
-- AU, EU, CA and US is supported by this. USA and China support is limited.
+- AU, EU, CA, IN, AUS, NZ and US is supported by this. USA, India and China support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
@@ -54,20 +54,20 @@ These can be access by going to the developer tools followed by actions. These c
 - schedule_charging_and_climate: planned depature
 - start_valet_mode / stop: valet mode
 
-| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China |
-| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- |
-| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
-| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    |
-| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    |
-| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    |
-| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |
-| set charge limits                 | ✔  | not tested        | ✔  | ✔      | ✔          |             |       |
-| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
-| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
-| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
-| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
-| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
-| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |
+| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India |
+| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- |
+| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    |
+| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    |
+| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    |
+| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    |
+| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       |
+| set charge limits                 | ✔  | not tested        | ✔  | ✔      | ✔          |             |       |       |
+| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
+| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
+| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
+| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    |
+| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
+| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
 
 I have posted an example screenshot from my own car.
 
@@ -78,7 +78,7 @@ I have posted an example screenshot from my own car.
 
 If you receive an error while trying to login, please go through these steps;
 
-1. As of now, integration only supports USA, EU and CAD region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA coverage isn't complete.
+1. As of now, integration only supports USA, EU, China, IN, Aus, NZ and CAD region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA coverage isn't complete.
 2. If you are in EU, please log out from UVO app and login again. While logging in, if your account was created in legacy UVO servers, they will be migrated to new Kia Uvo / Hyundai Bluelink servers. Related Issue: https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/22
 3. If you have migrated recently, you might need to wait one day to try again. Related Issue: https://community.home-assistant.io/t/kia-uvo-integration-pre-alpha/297927/12?u=fuatakgun
 4. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
