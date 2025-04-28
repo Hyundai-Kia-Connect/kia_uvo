@@ -20,6 +20,7 @@ class HyundaiKiaConnectEntity(CoordinatorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, self.vehicle.id)},
             manufacturer=f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
-            model=self.vehicle.model,
-            name=self.vehicle.name,
+            model=f"{self.vehicle.name} ({self.vehicle.model})",
+            name=f"{self.vehicle.name} ({self.vehicle.model})",
+            serial_number=f"{self.vehicle.VIN}",
         )
