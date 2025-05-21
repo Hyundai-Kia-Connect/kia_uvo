@@ -61,7 +61,7 @@ These can be access by going to the developer tools followed by actions. These c
 | Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    |
 | start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    |
 | start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       |
-| set charge limits                 | ✔  | not tested        | ✔  | ✔      | ✔          |             |       |       |
+| set charge limits                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       |
 | open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
 | set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
 | start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
