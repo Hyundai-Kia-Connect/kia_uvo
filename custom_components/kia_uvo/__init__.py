@@ -120,6 +120,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
         _LOGGER.info("Migration to version %s successful", config_entry.version)
     return True
 
+
 async def async_remove_config_entry_device(
     hass: HomeAssistant, config_entry: ConfigEntry, device_entry: DeviceEntry
 ) -> bool:
