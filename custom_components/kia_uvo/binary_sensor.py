@@ -292,7 +292,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     HyundaiKiaBinarySensorEntityDescription(
-        key="sunroof_is_open ",
+        key="sunroof_is_open",
         name="Sunroof",
         is_on=lambda vehicle: vehicle.sunroof_is_open,
         on_icon="mdi:window-closed",
