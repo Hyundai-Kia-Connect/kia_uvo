@@ -12,5 +12,5 @@
     "hyundai_kia_connect_api==3.43.3",
     "git+https://github.com/VeNoMouS/cloudscraper.git@3.0.0"
   ],
-  "version": "2.43.1"
+  "version": "2.43.2"
 }
