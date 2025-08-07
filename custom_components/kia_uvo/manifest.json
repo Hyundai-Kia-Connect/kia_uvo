@@ -10,7 +10,7 @@
   "loggers": ["kia_uvo", "hyundai_kia_connect_api"],
   "requirements": [
     "hyundai_kia_connect_api==3.43.5",
-    "cloudscraper@git+https://github.com/VeNoMouS/cloudscraper.git@3.0.0"
+    "cloudscraper @ git+https://github.com/VeNoMouS/cloudscraper.git@3.0.0"
   ],
   "version": "2.43.4"
 }
