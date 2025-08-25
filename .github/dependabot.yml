@@ -6,3 +6,8 @@ updates:
     # Check for updates once a week
     schedule:
       interval: "weekly"
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
