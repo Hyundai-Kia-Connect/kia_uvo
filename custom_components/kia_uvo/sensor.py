@@ -38,6 +38,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:road-variant",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_odometer",
@@ -89,6 +90,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         name="EV State of Health Battery",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_remain",
@@ -107,6 +109,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:road-variant",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_fuel_driving_range",
