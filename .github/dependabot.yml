@@ -7,6 +7,6 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/custom_components/kia_uvo"
     schedule:
       interval: "daily"
