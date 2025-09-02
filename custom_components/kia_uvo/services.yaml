@@ -270,44 +270,44 @@ set_windows:
         select:
           options:
             - label: "Close"
-              value: "0"
+              value: 0
             - label: "Open"
-              value: "1"
+              value: 1
             - label: "Ventilation"
-              value: "2"
+              value: 2
     frwindow:
       required: true
       selector:
         select:
           options:
             - label: "Close"
-              value: "0"
+              value: 0
             - label: "Open"
-              value: "1"
+              value: 1
             - label: "Ventilation"
-              value: "2"
+              value: 2
     rrwindow:
       required: true
       selector:
         select:
           options:
             - label: "Close"
-              value: "0"
+              value: 0
             - label: "Open"
-              value: "1"
+              value: 1
             - label: "Ventilation"
-              value: "2"
+              value: 2
     rlwindow:
       required: true
       selector:
         select:
           options:
             - label: "Close"
-              value: "0"
+              value: 0
             - label: "Open"
-              value: "1"
+              value: 1
             - label: "Ventilation"
-              value: "2"
+              value: 2
 schedule_charging_and_climate:
   fields:
     device_id:
