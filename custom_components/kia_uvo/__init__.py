@@ -27,7 +27,7 @@ from .const import (
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     REGION_EUROPE,
-    BRAND_KIA
+    BRAND_KIA,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .services import async_setup_services, async_unload_services
@@ -75,8 +75,9 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         new_data = dict(config_entry.data)
         new_data[CONF_PASSWORD] = refresh_token
         hass.config_entries.async_update_entry(config_entry, data=new_data)
-        _LOGGER.debug(f"{DOMAIN} - Updated password field with refresh token for Kia EU config entry.")
-
+        _LOGGER.debug(
+            f"{DOMAIN} - Updated password field with refresh token for Kia EU config entry."
+        )
 
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
@@ -84,7 +85,6 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
         del hass.data[DOMAIN][config_entry.unique_id]
     if not hass.data[DOMAIN]:
         async_unload_services(hass)
-    
 
     return unload_ok
 
