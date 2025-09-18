@@ -12,6 +12,8 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password (I know, translations are missing, a PR for this would be great!).
 
+**EU KIA require special steps.   This is outlined here: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow
+**
 - AU, EU, CA, IN, AUS, NZ and US is supported by this. USA, India and China support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
