@@ -72,7 +72,7 @@
         },
         "duration": {
           "name": "Duration",
-          "description": "On Duration"
+          "description": "How long to run the climate system. Maximum duration may be limited by Model/Year/Region."
         },
         "climate": {
           "name": "Climate",
