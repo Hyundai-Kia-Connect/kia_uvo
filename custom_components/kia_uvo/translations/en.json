@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Hyundai / Kia Connect - Authentication",
-        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
+        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant, EU requires special token work, refer to readme and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
         "data": {
           "username": "Username",
           "password": "Password",
