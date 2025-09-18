@@ -52,7 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed as AuthError:
-            raise ConfigEntryAuthFailed(AuthError) from AuthError
+        raise ConfigEntryAuthFailed(AuthError) from AuthError
     except Exception as ex:
         raise ConfigEntryNotReady(f"Config Not Ready: {ex}")
 
