@@ -3,7 +3,7 @@ ci:
   autoupdate_commit_msg: "chore: pre-commit autoupdate"
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0
+    rev: v0.13.1
     hooks:
       - id: ruff
         args:
@@ -55,7 +55,7 @@ repos:
           - --keep-updates
         files: ^(/.+)?[^/]+\.py$
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.1
+    rev: v1.18.2
     hooks:
       - id: mypy
         args: [--strict, --ignore-missing-imports]
