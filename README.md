@@ -15,7 +15,7 @@ Install the software by using HACS or manually copying files into the `custom_co
 **EU KIA require special steps. This is outlined here: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow
 **
 
-- AU, EU, CA, IN, AUS, NZ and US is supported by this. USA, India and China support is limited.
+- AU, EU, CA, IN, AUS, NZ, BR and US is supported by this. USA, India, China and Brazil support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
@@ -57,20 +57,20 @@ These can be access by going to the developer tools followed by actions. These c
 - schedule_charging_and_climate: planned depature
 - start_valet_mode / stop: valet mode
 
-| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India |
-| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- |
-| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    |
-| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    |
-| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    |
-| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    |
-| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       |
-| set charge limits                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       |
-| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
-| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
-| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
-| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    |
-| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
-| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       |
+| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
+| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
+| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✔ |
+| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    | ✔ |
+| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✖ |
+| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    | ✖ |
+| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖ |
+| set charge limits                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖ |
+| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
+| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
+| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
+| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    | ✖ |
+| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
+| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
 
 I have posted an example screenshot from my own car.
 
@@ -81,7 +81,7 @@ I have posted an example screenshot from my own car.
 
 If you receive an error while trying to login, please go through these steps;
 
-1. As of now, integration only supports USA, EU, China, IN, Aus, NZ and CAD region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA coverage isn't complete.
+1. As of now, integration only supports USA, EU, China, IN, Aus, NZ, CAD and BR region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA and Brazil coverage isn't complete.
 2. EU Kia users recently (August 2025) faced an issue, while solution was implemented, some users require to login their account on https://www.kia.com/de and consent to data processing by Kia to overcome the issue.
 3. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
 4. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging click "Enable debug logging" on the integration. It can be access via "Settings -> System -> Logs"
