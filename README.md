@@ -59,18 +59,18 @@ These can be access by going to the developer tools followed by actions. These c
 
 | Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
 | --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
-| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✔ |
-| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    | ✔ |
-| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✖ |
-| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    | ✖ |
-| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖ |
-| set charge limits                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖ |
-| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
-| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
-| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
-| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    | ✖ |
-| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
-| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖ |
+| Update                            | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✔     |
+| Force Update                      | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    | ✔     |
+| Lock Unlock                       | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✖     |
+| start stop climate                | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    | ✖     |
+| start stop charge                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖     |
+| set charge limits                 | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖     |
+| open and close charge port        | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
+| set windows                       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
+| start stop hazard lights          | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
+| start stop hazard lights and horn | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    | ✖     |
+| schedule charging and climate     | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
+| start stop valet_mode             | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
 
 I have posted an example screenshot from my own car.
 
