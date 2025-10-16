@@ -1,1 +1,1 @@
-hyundai_kia_connect_api==3.44.5
+hyundai_kia_connect_api==3.48.1
