@@ -166,9 +166,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
-        return await self.async_step_credentials()
+        if self._region_data[CONF_REGION] == "EU" and (self._region_data[CONF_BRAND] == "KIA" or self._region_data[CONF_BRAND] == "HYUNDAI"):
+            return await self.async_step_credentials_token()
+        return await self.async_step_credentials_password()
 
-    async def async_step_credentials(
+    async def async_step_credentials_password(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the credentials step."""
@@ -201,7 +203,45 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_abort(reason="reauth_successful")
 
         return self.async_show_form(
-            step_id="credentials",
+            step_id="credentials_password",
+            data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
+            errors=errors
+        )
+    
+    async def async_step_credentials_token(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the credentials step."""
+        errors = {}
+
+        if user_input is not None:
+            # Combine region data with credentials
+            full_config = {**self._region_data, **user_input}
+
+            try:
+                await validate_input(self.hass, full_config)
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                if self.reauth_entry is None:
+                    title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+                    await self.async_set_unique_id(
+                        hashlib.sha256(title.encode("utf-8")).hexdigest()
+                    )
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(title=title, data=full_config)
+                else:
+                    self.hass.config_entries.async_update_entry(
+                        self.reauth_entry, data=full_config
+                    )
+                    await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                    return self.async_abort(reason="reauth_successful")
+
+        return self.async_show_form(
+            step_id="credentials_token",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors
         )
