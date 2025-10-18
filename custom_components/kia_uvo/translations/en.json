@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Hyundai / Kia Connect - Authentication",
-        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant, EU requires special token work, refer to readme and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
+        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant, Europe requires special token work, refer to readme and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
         "data": {
           "username": "Username",
           "password": "Password",
@@ -88,11 +88,11 @@
         },
         "heating": {
           "name": "Heating",
-          "description": "Heated features like front/rear windows and side mirrors. EU uses seperate steering wheel setting."
+          "description": "Heated features like front/rear windows and side mirrors. Europe uses separate steering wheel setting."
         },
         "steering_wheel": {
           "name": "Steering Wheel Heat",
-          "description": "Heating level for the steering wheel. EU only, other regions use a heating setting."
+          "description": "Heating level for the steering wheel. Europe only, other regions use a heating setting."
         },
         "flseat": {
           "name": "Front Left Seat",
