@@ -42,7 +42,7 @@ from .const import (
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     REGION_EUROPE,
     BRAND_HYUNDAI,
-    BRAND_KIA
+    BRAND_KIA,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -168,7 +168,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
-        if self._region_data[CONF_REGION] == REGION_EUROPE and (self._region_data[CONF_BRAND] == BRAND_KIA or self._region_data[CONF_BRAND] == BRAND_HYUNDAI):
+        if self._region_data[CONF_REGION] == REGION_EUROPE and (
+            self._region_data[CONF_BRAND] == BRAND_KIA
+            or self._region_data[CONF_BRAND] == BRAND_HYUNDAI
+        ):
             return await self.async_step_credentials_token()
         return await self.async_step_credentials_password()
 
