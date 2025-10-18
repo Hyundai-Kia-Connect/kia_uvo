@@ -7,6 +7,7 @@ import logging
 from typing import Any
 
 from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api.exceptions import AuthenticationError
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -99,19 +100,22 @@ OPTIONS_SCHEMA = vol.Schema(
 
 async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token:
     """Validate the user input allows us to connect."""
-    api = VehicleManager.get_implementation_by_region_brand(
-        user_input[CONF_REGION],
-        user_input[CONF_BRAND],
-        language=hass.config.language,
-    )
-    token: Token = await hass.async_add_executor_job(
-        api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
-    )
+    try:
+        api = VehicleManager.get_implementation_by_region_brand(
+            user_input[CONF_REGION],
+            user_input[CONF_BRAND],
+            language=hass.config.language,
+        )
+        token: Token = await hass.async_add_executor_job(
+            api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+        )
 
-    if token is None:
-        raise InvalidAuth
+        if token is None:
+            raise InvalidAuth
 
-    return token
+        return token
+    except AuthenticationError as err:
+        raise InvalidAuth from err
 
 
 class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
