@@ -161,12 +161,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step for region/brand selection."""
         if user_input is None:
             return self.async_show_form(
-                step_id="user", 
-                data_schema=STEP_REGION_DATA_SCHEMA
+                step_id="user", data_schema=STEP_REGION_DATA_SCHEMA
             )
 
         self._region_data = user_input
-        if self._region_data[CONF_REGION] == "EU" and (self._region_data[CONF_BRAND] == "KIA" or self._region_data[CONF_BRAND] == "HYUNDAI"):
+        if self._region_data[CONF_REGION] == "EU" and (
+            self._region_data[CONF_BRAND] == "KIA"
+            or self._region_data[CONF_BRAND] == "HYUNDAI"
+        ):
             return await self.async_step_credentials_token()
         return await self.async_step_credentials_password()
 
@@ -199,15 +201,17 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass.config_entries.async_update_entry(
                         self.reauth_entry, data=full_config
                     )
-                    await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                    await self.hass.config_entries.async_reload(
+                        self.reauth_entry.entry_id
+                    )
                     return self.async_abort(reason="reauth_successful")
 
         return self.async_show_form(
             step_id="credentials_password",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
-            errors=errors
+            errors=errors,
         )
-    
+
     async def async_step_credentials_token(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -237,13 +241,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass.config_entries.async_update_entry(
                         self.reauth_entry, data=full_config
                     )
-                    await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                    await self.hass.config_entries.async_reload(
+                        self.reauth_entry.entry_id
+                    )
                     return self.async_abort(reason="reauth_successful")
 
         return self.async_show_form(
             step_id="credentials_token",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
-            errors=errors
+            errors=errors,
         )
 
     async def async_step_reauth(self, user_input=None):
