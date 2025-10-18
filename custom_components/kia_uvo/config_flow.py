@@ -42,7 +42,7 @@ from .const import (
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     REGION_EUROPE,
     BRAND_HYUNDAI,
-    BRAND_KIA
+    BRAND_KIA,
 )
 
 _LOGGER = logging.getLogger(__name__)
