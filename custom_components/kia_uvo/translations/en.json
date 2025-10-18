@@ -13,7 +13,7 @@
       },
       "credentials_token": {
         "title": "Hyundai / Kia Connect - Credentials",
-        "description": "Enter your account credentials. For EU Hyundai/Genesis this field is a token. Europe requires special token work — refer to the README and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
+        "description": "Enter your account credentials. Europe requires special token work — refer to the README and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
         "data": {
           "username": "Username",
           "password": "Token",

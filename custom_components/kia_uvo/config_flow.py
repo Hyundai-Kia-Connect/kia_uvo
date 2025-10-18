@@ -168,7 +168,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
-        if self._region_data[CONF_REGION] == REGION_EUROPE and (self._region_data[CONF_BRAND] == BRAND_KIA or self._region_data[CONF_BRAND] == BRAND_HYUNDAI):
+        self._region_data = user_input
+        if REGIONS[self._region_data[CONF_REGION]] == REGION_EUROPE and (
+            BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
+            or BRANDS[self._region_data[CONF_BRAND]] == BRAND_HYUNDAI
+        ):
             return await self.async_step_credentials_token()
         return await self.async_step_credentials_password()
 
