@@ -7,6 +7,7 @@ import logging
 from typing import Any
 
 from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api.exceptions import AuthenticationError
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -39,6 +40,9 @@ from .const import (
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
+    REGION_EUROPE,
+    BRAND_HYUNDAI,
+    BRAND_KIA,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -99,19 +103,22 @@ OPTIONS_SCHEMA = vol.Schema(
 
 async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token:
     """Validate the user input allows us to connect."""
-    api = VehicleManager.get_implementation_by_region_brand(
-        user_input[CONF_REGION],
-        user_input[CONF_BRAND],
-        language=hass.config.language,
-    )
-    token: Token = await hass.async_add_executor_job(
-        api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
-    )
+    try:
+        api = VehicleManager.get_implementation_by_region_brand(
+            user_input[CONF_REGION],
+            user_input[CONF_BRAND],
+            language=hass.config.language,
+        )
+        token: Token = await hass.async_add_executor_job(
+            api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+        )
 
-    if token is None:
-        raise InvalidAuth
+        if token is None:
+            raise InvalidAuth
 
-    return token
+        return token
+    except AuthenticationError as err:
+        raise InvalidAuth from err
 
 
 class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
@@ -161,9 +168,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
-        return await self.async_step_credentials()
+        self._region_data = user_input
+        if REGIONS[self._region_data[CONF_REGION]] == REGION_EUROPE and (
+            BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
+            or BRANDS[self._region_data[CONF_BRAND]] == BRAND_HYUNDAI
+        ):
+            return await self.async_step_credentials_token()
+        return await self.async_step_credentials_password()
 
-    async def async_step_credentials(
+    async def async_step_credentials_password(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the credentials step."""
@@ -198,7 +211,47 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     return self.async_abort(reason="reauth_successful")
 
         return self.async_show_form(
-            step_id="credentials",
+            step_id="credentials_password",
+            data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
+            errors=errors,
+        )
+
+    async def async_step_credentials_token(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the credentials step."""
+        errors = {}
+
+        if user_input is not None:
+            # Combine region data with credentials
+            full_config = {**self._region_data, **user_input}
+
+            try:
+                await validate_input(self.hass, full_config)
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                if self.reauth_entry is None:
+                    title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
+                    await self.async_set_unique_id(
+                        hashlib.sha256(title.encode("utf-8")).hexdigest()
+                    )
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(title=title, data=full_config)
+                else:
+                    self.hass.config_entries.async_update_entry(
+                        self.reauth_entry, data=full_config
+                    )
+                    await self.hass.config_entries.async_reload(
+                        self.reauth_entry.entry_id
+                    )
+                    return self.async_abort(reason="reauth_successful")
+
+        return self.async_show_form(
+            step_id="credentials_token",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
         )

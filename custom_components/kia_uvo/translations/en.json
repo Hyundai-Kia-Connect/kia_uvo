@@ -2,27 +2,43 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
-      "user": {
-        "title": "Hyundai / Kia Connect - Authentication",
-        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant, EU requires special token work, refer to readme and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Credentials",
+        "description": "Enter your account credentials.",
         "data": {
           "username": "Username",
           "password": "Password",
-          "region": "Region",
-          "brand": "Brand",
           "pin": "Pin"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Credentials",
+        "description": "Enter your account credentials. Europe requires special token work — refer to the README and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
+        "data": {
+          "username": "Username",
+          "password": "Token",
+          "pin": "Pin"
+        }
+      },
+      "user": {
+        "title": "Hyundai / Kia Connect - Region and Brand",
+        "description": "Set up your Hyundai (Bluelink) / Kia (Uvo) Connect to integrate with Home Assistant.",
+        "data": {
+          "region": "Region",
+          "brand": "Brand"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reauthentication",
-        "description": "Your account is unable to authenticate.  Click Submit to re-setup."
+        "description": "Your account is unable to authenticate. Click Submit to re-setup."
       }
     },
     "abort": {
       "already_configured": "Device is already configured"
     },
     "error": {
-      "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect Servers. Please use official app to logout and log back in and try again!",
+      "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect servers. Please use the official app to logout and log back in, then try again.",
+      "invalid_credentials": "Invalid username or token/password",
       "unknown": "Unexpected error"
     }
   },
@@ -64,7 +80,7 @@
     },
     "start_climate": {
       "name": "Start Climate",
-      "description": "Please use cautiously - Starts climate and engine.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
+      "description": "Please use cautiously - Starts climate and engine. Not all options are available on all cars or regions. Use your car's mobile app as a guide and match the options available in your car.",
       "fields": {
         "device_id": {
           "name": "Vehicle",
@@ -88,11 +104,11 @@
         },
         "heating": {
           "name": "Heating",
-          "description": "Heated features like front/rear windows and side mirrors. EU uses seperate steering wheel setting."
+          "description": "Heated features like front/rear windows and side mirrors. Europe uses separate steering wheel setting."
         },
         "steering_wheel": {
           "name": "Steering Wheel Heat",
-          "description": "Heating level for the steering wheel. EU only, other regions use a heating setting."
+          "description": "Heating level for the steering wheel. Europe only, other regions use a heating setting."
         },
         "flseat": {
           "name": "Front Left Seat",
@@ -216,7 +232,7 @@
     },
     "schedule_charging_and_climate": {
       "name": "Schedule charging and climate",
-      "description": "Please use cautiously - Schedule charging and climate.  Not all options are available on all cars or regions.  Use your car's mobile app as a guide and match the options available in your car.",
+      "description": "Please use cautiously - Schedule charging and climate. Not all options are available on all cars or regions. Use your car's mobile app as a guide and match the options available in your car.",
       "fields": {
         "device_id": {
           "name": "Vehicle",
