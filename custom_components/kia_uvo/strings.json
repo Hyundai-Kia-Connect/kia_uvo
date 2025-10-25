@@ -37,5 +37,65 @@
         }
       }
     }
+  },
+  "entity": {
+    "button": {
+      "kia_uvo": {
+        "update_cached": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::update_cached::name%]"
+        },
+        "force_update": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::force_update::name%]"
+        },
+        "lock": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::lock::name%]"
+        },
+        "unlock": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::unlock::name%]"
+        },
+        "start_climate": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::start_climate::name%]"
+        },
+        "stop_climate": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::stop_climate::name%]"
+        },
+        "start_charge": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::start_charge::name%]"
+        },
+        "stop_charge": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::stop_charge::name%]"
+        },
+        "open_charge_port": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::open_charge_port::name%]"
+        },
+        "close_charge_port": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::close_charge_port::name%]"
+        },
+        "set_charge_limits_80": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::set_charge_limits_80::name%]"
+        },
+        "set_charge_limits_100": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::set_charge_limits_100::name%]"
+        },
+        "set_charging_current_100": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::set_charging_current_100::name%]"
+        },
+        "set_charging_current_60": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::set_charging_current_60::name%]"
+        },
+        "start_hazard_lights": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::start_hazard_lights::name%]"
+        },
+        "start_hazard_lights_and_horn": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::start_hazard_lights_and_horn::name%]"
+        },
+        "start_valet_mode": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::start_valet_mode::name%]"
+        },
+        "stop_valet_mode": {
+          "name": "[%key:component::hyundai_kia_connect::entity::button::kia_uvo::stop_valet_mode::name%]"
+        }
+      }
+    }
   }
 }
