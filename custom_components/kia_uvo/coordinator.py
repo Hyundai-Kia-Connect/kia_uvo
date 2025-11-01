@@ -187,7 +187,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         """Refresh token if needed via library and persist rmtoken changes."""
         old_rmtoken = self._config_entry.data.get(CONF_RMTOKEN)
         old_device_id = self._config_entry.data.get(CONF_DEVICE_ID)
-        await self.hass.async_add_executor_job(self.vehicle_manager.check_and_refresh_token)
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.check_and_refresh_token
+        )
         new_rmtoken = getattr(self.vehicle_manager.token, "refresh_token", None)
         new_device_id = getattr(self.vehicle_manager.token, "device_id", None)
         new_data = dict(self._config_entry.data)
@@ -199,7 +201,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             new_data[CONF_DEVICE_ID] = new_device_id
             changed = True
         if changed:
-            self.hass.config_entries.async_update_entry(self._config_entry, data=new_data)
+            self.hass.config_entries.async_update_entry(
+                self._config_entry, data=new_data
+            )
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:

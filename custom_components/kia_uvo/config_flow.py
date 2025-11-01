@@ -207,10 +207,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         hashlib.sha256(title.encode("utf-8")).hexdigest()
                     )
                     self._abort_if_unique_id_configured()
-                    data = {**full_config, CONF_RMTOKEN: getattr(token, "refresh_token", None), CONF_DEVICE_ID: getattr(token, "device_id", None)}
+                    data = {
+                        **full_config,
+                        CONF_RMTOKEN: getattr(token, "refresh_token", None),
+                        CONF_DEVICE_ID: getattr(token, "device_id", None),
+                    }
                     return self.async_create_entry(title=title, data=data)
                 else:
-                    data = {**full_config, CONF_RMTOKEN: getattr(token, "refresh_token", None), CONF_DEVICE_ID: getattr(token, "device_id", None)}
+                    data = {
+                        **full_config,
+                        CONF_RMTOKEN: getattr(token, "refresh_token", None),
+                        CONF_DEVICE_ID: getattr(token, "device_id", None),
+                    }
                     self.hass.config_entries.async_update_entry(
                         self.reauth_entry, data=data
                     )
@@ -239,7 +247,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                data = {**full_config, CONF_RMTOKEN: getattr(token, "refresh_token", None), CONF_DEVICE_ID: getattr(token, "device_id", None)}
+                data = {
+                    **full_config,
+                    CONF_RMTOKEN: getattr(token, "refresh_token", None),
+                    CONF_DEVICE_ID: getattr(token, "device_id", None),
+                }
                 if self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
                     await self.async_set_unique_id(
@@ -260,6 +272,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
         )
+
     async def async_step_send_otp(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -276,15 +289,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             The next step in the flow or a created entry.
         """
         errors = {}
-        schema = vol.Schema({vol.Required("notify_type", default="EMAIL"): vol.In(["EMAIL", "PHONE"])})
+        schema = vol.Schema(
+            {vol.Required("notify_type", default="EMAIL"): vol.In(["EMAIL", "PHONE"])}
+        )
         if user_input is None:
-            return self.async_show_form(step_id="send_otp", data_schema=schema, errors=errors)
+            return self.async_show_form(
+                step_id="send_otp", data_schema=schema, errors=errors
+            )
         self._otp_notify_type = str(user_input["notify_type"]).upper()
         cfg = self._pending_config
         try:
             if self._api is None:
                 self._api = VehicleManager.get_implementation_by_region_brand(
-                    cfg[CONF_REGION], cfg[CONF_BRAND], language=self.hass.config.language
+                    cfg[CONF_REGION],
+                    cfg[CONF_BRAND],
+                    language=self.hass.config.language,
                 )
             token, ctx = await self.hass.async_add_executor_job(
                 self._api.start_login, cfg[CONF_USERNAME], cfg[CONF_PASSWORD]
@@ -296,13 +315,21 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors["base"] = "unknown"
         else:
             if token is not None:
-                data = {**cfg, CONF_RMTOKEN: getattr(token, "refresh_token", None), CONF_DEVICE_ID: getattr(token, "device_id", None)}
+                data = {
+                    **cfg,
+                    CONF_RMTOKEN: getattr(token, "refresh_token", None),
+                    CONF_DEVICE_ID: getattr(token, "device_id", None),
+                }
                 if self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {cfg[CONF_USERNAME]}"
-                    await self.async_set_unique_id(hashlib.sha256(title.encode("utf-8")).hexdigest())
+                    await self.async_set_unique_id(
+                        hashlib.sha256(title.encode("utf-8")).hexdigest()
+                    )
                     self._abort_if_unique_id_configured()
                     return self.async_create_entry(title=title, data=data)
-                self.hass.config_entries.async_update_entry(self.reauth_entry, data=data)
+                self.hass.config_entries.async_update_entry(
+                    self.reauth_entry, data=data
+                )
                 await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
             self._otp_ctx = ctx or {}
@@ -318,7 +345,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
             else:
                 return await self.async_step_input_otp_code()
-        return self.async_show_form(step_id="send_otp", data_schema=schema, errors=errors)
+        return self.async_show_form(
+            step_id="send_otp", data_schema=schema, errors=errors
+        )
 
     def _login_send_otp(self, cfg: dict[str, Any], notify_type: str) -> Token | None:
         """Call login to send OTP and stop before code verification.
@@ -338,14 +367,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         api = VehicleManager.get_implementation_by_region_brand(
             cfg[CONF_REGION], cfg[CONF_BRAND], language=self.hass.config.language
         )
+
         def handler(ctx: dict) -> dict:
             if ctx.get("stage") == "choose_destination":
                 return {"notify_type": notify_type}
             if ctx.get("stage") == "input_code":
                 return {"otp_code": ""}
             return {}
+
         try:
-            return api.login(cfg[CONF_USERNAME], cfg[CONF_PASSWORD], otp_handler=handler)
+            return api.login(
+                cfg[CONF_USERNAME], cfg[CONF_PASSWORD], otp_handler=handler
+            )
         except AuthenticationError:
             return None
 
@@ -367,7 +400,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         schema = vol.Schema({vol.Required("otp_code"): str})
         if user_input is None:
-            return self.async_show_form(step_id="input_otp_code", data_schema=schema, errors=errors)
+            return self.async_show_form(
+                step_id="input_otp_code", data_schema=schema, errors=errors
+            )
         cfg = self._pending_config
         if self._api is None:
             self._api = VehicleManager.get_implementation_by_region_brand(
@@ -398,17 +433,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception during OTP verify")
                 errors["base"] = "unknown"
         else:
-            data = {**cfg, CONF_RMTOKEN: getattr(token, "refresh_token", None), CONF_DEVICE_ID: getattr(token, "device_id", None)}
+            data = {
+                **cfg,
+                CONF_RMTOKEN: getattr(token, "refresh_token", None),
+                CONF_DEVICE_ID: getattr(token, "device_id", None),
+            }
             if self.reauth_entry is None:
                 title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {cfg[CONF_USERNAME]}"
-                await self.async_set_unique_id(hashlib.sha256(title.encode("utf-8")).hexdigest())
+                await self.async_set_unique_id(
+                    hashlib.sha256(title.encode("utf-8")).hexdigest()
+                )
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(title=title, data=data)
             self.hass.config_entries.async_update_entry(self.reauth_entry, data=data)
             await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
             return self.async_abort(reason="reauth_successful")
-        return self.async_show_form(step_id="input_otp_code", data_schema=schema, errors=errors)
-
+        return self.async_show_form(
+            step_id="input_otp_code", data_schema=schema, errors=errors
+        )
 
     async def async_step_reauth(self, user_input=None):
         """Perform reauth upon an API authentication error."""
