@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import dataclasses
+import json
 import logging
-from typing import Final
 from datetime import date
-
-from hyundai_kia_connect_api import Vehicle
+from typing import Final
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -14,17 +14,17 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
+    EntityCategory,
     UnitOfEnergy,
     UnitOfPower,
     UnitOfTime,
-    EntityCategory,
 )
-
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from hyundai_kia_connect_api import Vehicle
 
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .entity import HyundaiKiaConnectEntity
@@ -271,6 +271,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
 )
 
 
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -361,7 +368,7 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def state_attributes(self):
         return {
-            "vehicle_data": self.vehicle.data,
+            "vehicle_data": json.dumps(self.vehicle.data, cls=EnhancedJSONEncoder),
             "vehicle_name": self.vehicle.name,
         }
 
