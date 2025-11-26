@@ -360,7 +360,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         key="headlamp_right_low",
         name="Headlamp Right Low",
         is_on=lambda vehicle: getattr(vehicle, "headlamp_right_low", None),
-        on_icon="mdi:car-light-dimmed,
+        on_icon="mdi:car-light-dimmed",
         off_icon="mdi:lightbulb-off",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
