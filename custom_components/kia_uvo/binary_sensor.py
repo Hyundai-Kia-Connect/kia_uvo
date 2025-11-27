@@ -310,7 +310,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="ign3",
-        name="Ignition (IGN3)",
+        name="IGN3",
         is_on=lambda vehicle: getattr(vehicle, "ign3", None),
         on_icon="mdi:key",
         off_icon="mdi:car-off",
