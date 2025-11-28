@@ -303,7 +303,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="accessory_on",
         name="Accessory",
-        is_on=lambda vehicle: getattr(vehicle, "accessory_on", None),
+        is_on=lambda vehicle: vehicle.accessory_on,
         on_icon="mdi:car-key",
         off_icon="mdi:car-off",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -311,7 +311,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="ign3",
         name="IGN3",
-        is_on=lambda vehicle: getattr(vehicle, "ign3", None),
+        is_on=lambda vehicle: vehicle.ign3,
         on_icon="mdi:key",
         off_icon="mdi:car-off",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -319,7 +319,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="remote_ignition",
         name="Remote Ignition",
-        is_on=lambda vehicle: getattr(vehicle, "remote_ignition", None),
+        is_on=lambda vehicle: vehicle.remote_ignition,
         on_icon="mdi:remote",
         off_icon="mdi:remote-off",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -327,7 +327,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="transmission_condition",
         name="Transmission Condition",
-        is_on=lambda vehicle: getattr(vehicle, "transmission_condition", None),
+        is_on=lambda vehicle: vehicle.transmission_condition,
         on_icon="mdi:car-shift-pattern",
         off_icon="mdi:car",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -335,7 +335,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="sleep_mode_check",
         name="Sleep Mode Check",
-        is_on=lambda vehicle: getattr(vehicle, "sleep_mode_check", None),
+        is_on=lambda vehicle: vehicle.sleep_mode_check,
         on_icon="mdi:sleep",
         off_icon="mdi:sleep-off",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -343,7 +343,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="headlamp_status",
         name="Headlight Fault",
-        is_on=lambda vehicle: getattr(vehicle, "headlamp_status", None),
+        is_on=lambda vehicle: vehicle.headlamp_status,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -351,7 +351,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="headlamp_left_low",
         name="Headlamp Left Low Fault",
-        is_on=lambda vehicle: getattr(vehicle, "headlamp_left_low", None),
+        is_on=lambda vehicle: vehicle.headlamp_left_low,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -359,7 +359,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="headlamp_right_low",
         name="Headlamp Right Low Fault",
-        is_on=lambda vehicle: getattr(vehicle, "headlamp_right_low", None),
+        is_on=lambda vehicle: vehicle.headlamp_right_low,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -367,7 +367,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="stop_lamp_left",
         name="Stop Lamp Left Fault",
-        is_on=lambda vehicle: getattr(vehicle, "stop_lamp_left", None),
+        is_on=lambda vehicle: vehicle.stop_lamp_left,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -375,7 +375,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="stop_lamp_right",
         name="Stop Lamp Right Fault",
-        is_on=lambda vehicle: getattr(vehicle, "stop_lamp_right", None),
+        is_on=lambda vehicle: vehicle.stop_lamp_right,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -383,7 +383,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="turn_signal_left_front",
         name="Turn Signal Left Front Fault",
-        is_on=lambda vehicle: getattr(vehicle, "turn_signal_left_front", None),
+        is_on=lambda vehicle: vehicle.turn_signal_left_front,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -391,7 +391,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="turn_signal_right_front",
         name="Turn Signal Right Front Fault",
-        is_on=lambda vehicle: getattr(vehicle, "turn_signal_right_front", None),
+        is_on=lambda vehicle: vehicle.turn_signal_right_front,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -399,7 +399,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="turn_signal_left_rear",
         name="Turn Signal Left Rear Fault",
-        is_on=lambda vehicle: getattr(vehicle, "turn_signal_left_rear", None),
+        is_on=lambda vehicle: vehicle.turn_signal_left_rear,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -407,7 +407,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="turn_signal_right_rear",
         name="Turn Signal Right Rear Fault",
-        is_on=lambda vehicle: getattr(vehicle, "turn_signal_right_rear", None),
+        is_on=lambda vehicle: vehicle.turn_signal_right_rear,
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -415,7 +415,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="is_locked",
         name="Locked",
-        is_on=lambda vehicle: getattr(vehicle, "is_locked", None),
+        is_on=lambda vehicle: vehicle.is_locked,
         device_class=BinarySensorDeviceClass.LOCK,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -423,8 +423,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
         name="Front Left Seat Heater",
-        is_on=lambda v: getattr(v, "front_left_seat_status", None)
-        not in (None, "OFF", 0),
+        is_on=lambda vehicle: vehicle.front_left_seat_status,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -432,8 +431,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_seat_heater_on",
         name="Front Right Seat Heater",
-        is_on=lambda v: getattr(v, "front_right_seat_status", None)
-        not in (None, "OFF", 0),
+        is_on=lambda vehicle: vehicle.front_right_seat_status,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -441,8 +439,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_left_seat_heater_on",
         name="Rear Left Seat Heater",
-        is_on=lambda v: getattr(v, "rear_left_seat_status", None)
-        not in (None, "OFF", 0),
+        is_on=lambda vehicle: vehicle.rear_left_seat_status,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -450,8 +447,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_right_seat_heater_on",
         name="Rear Right Seat Heater",
-        is_on=lambda v: getattr(v, "rear_right_seat_status", None)
-        not in (None, "OFF", 0),
+        is_on=lambda vehicle: vehicle.rear_right_seat_status,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
