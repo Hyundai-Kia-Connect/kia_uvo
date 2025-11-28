@@ -423,7 +423,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
         name="Front Left Seat Heater",
-        is_on=lambda v: getattr(v, "front_left_seat_status", None) not in (None, "OFF", 0),
+        is_on=lambda v: getattr(v, "front_left_seat_status", None)
+        not in (None, "OFF", 0),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -431,7 +432,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_seat_heater_on",
         name="Front Right Seat Heater",
-        is_on=lambda v: getattr(v, "front_right_seat_status", None) not in (None, "OFF", 0),
+        is_on=lambda v: getattr(v, "front_right_seat_status", None)
+        not in (None, "OFF", 0),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -439,7 +441,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_left_seat_heater_on",
         name="Rear Left Seat Heater",
-        is_on=lambda v: getattr(v, "rear_left_seat_status", None) not in (None, "OFF", 0),
+        is_on=lambda v: getattr(v, "rear_left_seat_status", None)
+        not in (None, "OFF", 0),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -447,7 +450,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_right_seat_heater_on",
         name="Rear Right Seat Heater",
-        is_on=lambda v: getattr(v, "rear_right_seat_status", None) not in (None, "OFF", 0),
+        is_on=lambda v: getattr(v, "rear_right_seat_status", None)
+        not in (None, "OFF", 0),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
