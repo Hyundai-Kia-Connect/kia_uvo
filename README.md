@@ -39,6 +39,8 @@ Install the software by using HACS or manually copying files into the `custom_co
 - Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
 - Latest Update
 - cache update interval, force update interval, blackout start and finish hours
+- Ignition, Accessory status
+- Lights status
 
 ## Supported services
 
