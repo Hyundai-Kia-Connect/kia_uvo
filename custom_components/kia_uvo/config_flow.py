@@ -292,6 +292,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             The next step in the flow or a created entry.
         """
         errors = {}
+        cfg = self._pending_config
+        if not cfg or REGIONS[cfg[CONF_REGION]] != REGION_USA or BRANDS[
+            cfg[CONF_BRAND]
+        ] != BRAND_KIA:
+            _LOGGER.debug("OTP step invoked for unsupported region/brand, restarting")
+            self._pending_config = None
+            return await self.async_step_credentials_password()
         schema = vol.Schema(
             {vol.Required("notify_type", default="EMAIL"): vol.In(["EMAIL", "PHONE"])}
         )
@@ -300,7 +307,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="send_otp", data_schema=schema, errors=errors
             )
         self._otp_notify_type = str(user_input["notify_type"]).upper()
-        cfg = self._pending_config
         try:
             if self._api is None:
                 self._api = VehicleManager.get_implementation_by_region_brand(
