@@ -293,9 +293,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """
         errors = {}
         cfg = self._pending_config
-        if not cfg or REGIONS[cfg[CONF_REGION]] != REGION_USA or BRANDS[
-            cfg[CONF_BRAND]
-        ] != BRAND_KIA:
+        if (
+            not cfg
+            or REGIONS[cfg[CONF_REGION]] != REGION_USA
+            or BRANDS[cfg[CONF_BRAND]] != BRAND_KIA
+        ):
             _LOGGER.debug("OTP step invoked for unsupported region/brand, restarting")
             self._pending_config = None
             return await self.async_step_credentials_password()
