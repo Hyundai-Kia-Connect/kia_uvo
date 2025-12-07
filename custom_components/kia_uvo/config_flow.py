@@ -191,7 +191,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             full_config = {**self._region_data, **user_input}
             try:
-                if REGIONS[self._region_data[CONF_REGION]] == REGION_USA and BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA:
+                if (
+                    REGIONS[self._region_data[CONF_REGION]] == REGION_USA
+                    and BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
+                ):
                     self._pending_config = full_config
                     return await self.async_step_send_otp()
                 token: Token = await validate_input(self.hass, full_config)
