@@ -12,7 +12,6 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
-    Token,
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
@@ -78,7 +77,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         if stored_rmtoken:
             self.vehicle_manager.token.refresh_token = stored_rmtoken
             self.vehicle_manager.token.device_id = stored_device_id
-            
+
         # Provide a non-interactive OTP handler so library raises AuthenticationError instead of blocking
         self.vehicle_manager.otp_handler = lambda ctx: {}
 
