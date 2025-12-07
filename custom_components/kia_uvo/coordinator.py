@@ -76,12 +76,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         stored_rmtoken = config_entry.data.get(CONF_RMTOKEN)
         stored_device_id = config_entry.data.get(CONF_DEVICE_ID)
         if stored_rmtoken:
-            self.vehicle_manager.token = Token(
-                username=config_entry.data.get(CONF_USERNAME),
-                password=config_entry.data.get(CONF_PASSWORD),
-                refresh_token=stored_rmtoken,
-                device_id=stored_device_id,
-            )
+            self.vehicle_manager.token.refresh_token = stored_rmtoken
+            self.vehicle_manager.token.device_id = stored_device_id
+            
         # Provide a non-interactive OTP handler so library raises AuthenticationError instead of blocking
         self.vehicle_manager.otp_handler = lambda ctx: {}
 
