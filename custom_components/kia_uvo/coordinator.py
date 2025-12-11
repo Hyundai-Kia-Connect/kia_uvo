@@ -12,7 +12,6 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
-    Token,
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
@@ -40,7 +39,6 @@ from .const import (
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_SCAN_INTERVAL,
-    DEFAULT_PIN,
     DOMAIN,
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
@@ -76,18 +74,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self._config_entry = config_entry
         stored_rmtoken = config_entry.data.get(CONF_RMTOKEN)
         stored_device_id = config_entry.data.get(CONF_DEVICE_ID)
-        stored_pin = config_entry.data.get(CONF_PIN, DEFAULT_PIN)
-        if stored_rmtoken or stored_device_id or stored_pin:
-            token_obj = getattr(self.vehicle_manager, "token", None)
-            if token_obj is None:
-                token_obj = Token()
-                setattr(self.vehicle_manager, "token", token_obj)
-            if stored_rmtoken:
-                token_obj.refresh_token = stored_rmtoken
-            if stored_device_id:
-                token_obj.device_id = stored_device_id
-            if stored_pin and not getattr(token_obj, "pin", None):
-                token_obj.pin = stored_pin
+        if stored_rmtoken:
+            self.vehicle_manager.token.refresh_token = stored_rmtoken
+            self.vehicle_manager.token.device_id = stored_device_id
 
         # Provide a non-interactive OTP handler so library raises AuthenticationError instead of blocking
         self.vehicle_manager.otp_handler = lambda ctx: {}
