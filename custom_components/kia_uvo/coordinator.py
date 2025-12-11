@@ -15,7 +15,6 @@ from hyundai_kia_connect_api import (
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
-
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from homeassistant.config_entries import ConfigEntry
@@ -44,8 +43,6 @@ from .const import (
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_RMTOKEN,
-    CONF_DEVICE_ID,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,16 +68,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             ),
             language=hass.config.language,
         )
-        self._config_entry = config_entry
-        stored_rmtoken = config_entry.data.get(CONF_RMTOKEN)
-        stored_device_id = config_entry.data.get(CONF_DEVICE_ID)
-        if stored_rmtoken:
-            self.vehicle_manager.token.refresh_token = stored_rmtoken
-            self.vehicle_manager.token.device_id = stored_device_id
-
-        # Provide a non-interactive OTP handler so library raises AuthenticationError instead of blocking
-        self.vehicle_manager.otp_handler = lambda ctx: {}
-
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
         )
@@ -180,26 +167,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.async_refresh()
 
     async def async_check_and_refresh_token(self):
-        """Refresh token if needed via library and persist rmtoken changes."""
-        old_rmtoken = self._config_entry.data.get(CONF_RMTOKEN)
-        old_device_id = self._config_entry.data.get(CONF_DEVICE_ID)
+        """Refresh token if needed via library."""
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_refresh_token
         )
-        new_rmtoken = getattr(self.vehicle_manager.token, "refresh_token", None)
-        new_device_id = getattr(self.vehicle_manager.token, "device_id", None)
-        new_data = dict(self._config_entry.data)
-        changed = False
-        if new_rmtoken and new_rmtoken != old_rmtoken:
-            new_data[CONF_RMTOKEN] = new_rmtoken
-            changed = True
-        if new_device_id and new_device_id != old_device_id:
-            new_data[CONF_DEVICE_ID] = new_device_id
-            changed = True
-        if changed:
-            self.hass.config_entries.async_update_entry(
-                self._config_entry, data=new_data
-            )
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
