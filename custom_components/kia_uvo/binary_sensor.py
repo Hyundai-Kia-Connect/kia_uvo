@@ -415,7 +415,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="is_locked",
         name="Locked",
-        is_on=lambda vehicle: vehicle.is_locked,
+        is_on=lambda vehicle: not vehicle.is_locked,
         device_class=BinarySensorDeviceClass.LOCK,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
