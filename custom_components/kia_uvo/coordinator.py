@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import timedelta
-import traceback
 import logging
 import asyncio
 
@@ -26,7 +25,7 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
 from .const import (
@@ -70,7 +69,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
         # Monkey patch to log API responses before they cause KeyError
-        if hasattr(self.vehicle_manager, 'api') and hasattr(self.vehicle_manager.api, '_get_vehicle_status'):
+        if hasattr(self.vehicle_manager, "api") and hasattr(
+            self.vehicle_manager.api, "_get_vehicle_status"
+        ):
             original_get_vehicle_status = self.vehicle_manager.api._get_vehicle_status
 
             def logged_get_vehicle_status(token, vehicle, force_refresh):
@@ -85,7 +86,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                         "KeyError in _get_vehicle_status: %s. "
                         "This typically indicates Hyundai API returned an error response (rate limit/502). "
                         "Enable hyundai_kia_connect_api debug logging to see full HTTP response.",
-                        err
+                        err,
                     )
                     raise
 
@@ -154,12 +155,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.warning(
                     "Circuit breaker [%s]: In degraded mode until %s. Returning stale data.",
                     vehicles,
-                    self._degraded_mode_until
+                    self._degraded_mode_until,
                 )
                 return True
             else:
                 # Cooldown expired, exit degraded mode
-                _LOGGER.info("Circuit breaker [%s]: Exiting degraded mode, will retry API", vehicles)
+                _LOGGER.info(
+                    "Circuit breaker [%s]: Exiting degraded mode, will retry API",
+                    vehicles,
+                )
                 self._degraded_mode = False
                 self._degraded_mode_until = None
                 self._consecutive_failures = 0
@@ -186,7 +190,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     vehicles,
                     len(self._failure_timestamps),
                     self.FAILURE_WINDOW_SECONDS,
-                    self._degraded_mode_until
+                    self._degraded_mode_until,
                 )
                 return True
 
@@ -202,7 +206,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             "Circuit breaker [%s]: Recorded failure #%d (total in window: %d)",
             vehicles,
             self._consecutive_failures,
-            len(self._failure_timestamps)
+            len(self._failure_timestamps),
         )
 
     def _record_api_success(self):
@@ -212,7 +216,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             _LOGGER.info(
                 "Circuit breaker [%s]: API success after %d failures, resetting counters",
                 vehicles,
-                self._consecutive_failures
+                self._consecutive_failures,
             )
         self._consecutive_failures = 0
         self._failure_timestamps.clear()
@@ -220,7 +224,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
         # If we were in degraded mode, exit it early
         if self._degraded_mode:
-            _LOGGER.info("Circuit breaker [%s]: API recovered, exiting degraded mode early", vehicles)
+            _LOGGER.info(
+                "Circuit breaker [%s]: API recovered, exiting degraded mode early",
+                vehicles,
+            )
             self._degraded_mode = False
             self._degraded_mode_until = None
 
@@ -282,7 +289,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 _LOGGER.error(
                     "Force refresh failed with %s: %s. Falling back to cached data.",
                     type(ex).__name__,
-                    str(ex)
+                    str(ex),
                 )
                 # Try cached update as fallback
                 try:
