@@ -175,7 +175,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
         await self._async_save_token()
 
-
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
             await asyncio.sleep(5)
@@ -352,10 +351,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
-    async def _async_save_token(self): 
-        """Persist the latest token into the config entry.""" 
-        new_token = self.vehicle_manager.token 
-        # Only update if token actually changed 
-        if new_token and new_token != self.config_entry.data.get(CONF_TOKEN): 
-            updated_data = {**self.config_entry.data, CONF_TOKEN: new_token} 
-            self.hass.config_entries.async_update_entry( self.config_entry, data=updated_data )
+    async def _async_save_token(self):
+        """Persist the latest token into the config entry."""
+        new_token = self.vehicle_manager.token
+        # Only update if token actually changed
+        if new_token and new_token != self.config_entry.data.get(CONF_TOKEN):
+            updated_data = {**self.config_entry.data, CONF_TOKEN: new_token}
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=updated_data
+            )
