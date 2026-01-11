@@ -129,6 +129,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     self.vehicle_manager.check_and_force_update_vehicles,
                     self.force_refresh_interval,
                 )
+            except KeyError as key_error:
+                _LOGGER.warning(
+                    f"API response missing expected key '{key_error}'. "
+                    f"This usually means the vehicle's telematics module is asleep. "
+                    f"Opening the Hyundai BlueLink app on your phone will wake it up. "
+                    f"Skipping this update cycle and will retry on the next scheduled update."
+                )
+                # Don't retry cached update if we're getting malformed responses
+                return self.data
             except Exception:
                 try:
                     _LOGGER.exception(
@@ -137,6 +146,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     await self.hass.async_add_executor_job(
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
+                except KeyError as key_error:
+                    _LOGGER.warning(
+                        f"Cached update also failed - API response missing key '{key_error}'. "
+                        f"Vehicle telematics may be asleep. Open the BlueLink app to wake it."
+                    )
+                    return self.data
                 except Exception:
                     _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
                     raise UpdateFailed(
@@ -144,9 +159,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     )
 
         else:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.update_all_vehicles_with_cached_state
-            )
+            try:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.update_all_vehicles_with_cached_state
+                )
+            except KeyError as key_error:
+                _LOGGER.warning(
+                    f"Cached update failed - API response missing key '{key_error}'. "
+                    f"Vehicle telematics may be asleep. Open the BlueLink app to wake it."
+                )
+                return self.data
 
         return self.data
 
