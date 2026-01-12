@@ -266,7 +266,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         otp = user_input["otp"]
 
         try:
-            verified = await self.hass.async_add_executor_job(
+            await self.hass.async_add_executor_job(
                 self._vehicle_manager.verify_otp_and_complete_login,
                 otp,
             )
