@@ -7,6 +7,7 @@ import logging
 from typing import Any
 
 from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 import voluptuous as vol
 
@@ -101,7 +102,7 @@ OPTIONS_SCHEMA = vol.Schema(
 )
 
 
-async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token:
+async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
         api = VehicleManager.get_implementation_by_region_brand(
@@ -109,14 +110,14 @@ async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Tok
             user_input[CONF_BRAND],
             language=hass.config.language,
         )
-        token: Token = await hass.async_add_executor_job(
+        result = await hass.async_add_executor_job(
             api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
         )
 
-        if token is None:
+        if result is None:
             raise InvalidAuth
 
-        return token
+        return result
     except AuthenticationError as err:
         raise InvalidAuth from err
 
@@ -151,6 +152,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize the config flow."""
         self._region_data = None
+        self._vehicle_manager: VehicleManager | None = None
+        self._pending_login_data = None
+        self._otp_request: OTPRequest | None = None
 
     @staticmethod
     @callback
@@ -187,13 +191,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             full_config = {**self._region_data, **user_input}
 
             try:
-                await validate_input(self.hass, full_config)
+                result = await validate_input(self.hass, full_config)
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
+                if isinstance(result, OTPRequest):
+                    self._pending_login_data = full_config 
+                    self._otp_request = result 
+                    self._vehicle_manager = VehicleManager.get_implementation_by_region_brand( full_config[CONF_REGION], full_config[CONF_BRAND], language=self.hass.config.language, ) 
+                    return await self.async_step_select_otp_method()
                 if self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
                     await self.async_set_unique_id(
@@ -215,6 +224,64 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
         )
+    
+    async def async_step_select_otp_method(self, user_input=None):
+        """Let user choose email or SMS."""
+        if user_input is None:
+            # Add code to build a list of available OTP methods
+            otp_methods = []
+            if self._otp_request.email_sent:
+                otp_methods.append("email")
+            if self._otp_request.sms_sent:
+                otp_methods.append("SMS")
+            return self.async_show_form(
+                step_id="select_otp_method",
+                data_schema=vol.Schema({
+                    vol.Required("method"): vol.In(otp_methods)
+                })
+            )
+
+        # Trigger sending OTP
+        await self.hass.async_add_executor_job(
+            self._vehicle_manager.request_otp, user_input["method"]
+        )
+
+        return await self.async_step_enter_otp()
+
+    async def async_step_enter_otp(self, user_input=None):
+        """Prompt user to enter the OTP."""
+        errors = {}
+
+        if user_input is None:
+            return self.async_show_form(
+                step_id="enter_otp",
+                data_schema=vol.Schema({
+                    vol.Required("otp"): str
+                })
+            )
+
+        otp = user_input["otp"]
+
+        try:
+            verified = await self.hass.async_add_executor_job(
+                self._vehicle_manager.verify_otp_and_complete_login,
+                otp,
+            )
+        except AuthenticationError:
+            errors["base"] = "invalid_otp"
+            return self.async_show_form(
+                step_id="enter_otp",
+                data_schema=vol.Schema({vol.Required("otp"): str}),
+                errors=errors,
+            )
+
+        # OTP success → create entry
+        title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
+        await self.async_set_unique_id(hashlib.sha256(title.encode("utf-8")).hexdigest())
+        self._abort_if_unique_id_configured()
+        # Need to save the token obtained after OTP verification.
+        return self.async_create_entry(title=title, data=self._pending_login_data)
+
 
     async def async_step_credentials_token(
         self, user_input: dict[str, Any] | None = None
