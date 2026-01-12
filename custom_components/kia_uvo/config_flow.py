@@ -102,7 +102,9 @@ OPTIONS_SCHEMA = vol.Schema(
 )
 
 
-async def validate_input(hass: HomeAssistant, user_input: dict[str, Any]) -> Token | OTPRequest:
+async def validate_input(
+    hass: HomeAssistant, user_input: dict[str, Any]
+) -> Token | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
         api = VehicleManager.get_implementation_by_region_brand(
@@ -199,9 +201,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
             else:
                 if isinstance(result, OTPRequest):
-                    self._pending_login_data = full_config 
-                    self._otp_request = result 
-                    self._vehicle_manager = VehicleManager.get_implementation_by_region_brand( full_config[CONF_REGION], full_config[CONF_BRAND], language=self.hass.config.language, ) 
+                    self._pending_login_data = full_config
+                    self._otp_request = result
+                    self._vehicle_manager = (
+                        VehicleManager.get_implementation_by_region_brand(
+                            full_config[CONF_REGION],
+                            full_config[CONF_BRAND],
+                            language=self.hass.config.language,
+                        )
+                    )
                     return await self.async_step_select_otp_method()
                 if self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
@@ -224,7 +232,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
         )
-    
+
     async def async_step_select_otp_method(self, user_input=None):
         """Let user choose email or SMS."""
         if user_input is None:
@@ -236,9 +244,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 otp_methods.append("SMS")
             return self.async_show_form(
                 step_id="select_otp_method",
-                data_schema=vol.Schema({
-                    vol.Required("method"): vol.In(otp_methods)
-                })
+                data_schema=vol.Schema({vol.Required("method"): vol.In(otp_methods)}),
             )
 
         # Trigger sending OTP
@@ -254,10 +260,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is None:
             return self.async_show_form(
-                step_id="enter_otp",
-                data_schema=vol.Schema({
-                    vol.Required("otp"): str
-                })
+                step_id="enter_otp", data_schema=vol.Schema({vol.Required("otp"): str})
             )
 
         otp = user_input["otp"]
@@ -277,11 +280,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # OTP success → create entry
         title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
-        await self.async_set_unique_id(hashlib.sha256(title.encode("utf-8")).hexdigest())
+        await self.async_set_unique_id(
+            hashlib.sha256(title.encode("utf-8")).hexdigest()
+        )
         self._abort_if_unique_id_configured()
         # Need to save the token obtained after OTP verification.
         return self.async_create_entry(title=title, data=self._pending_login_data)
-
 
     async def async_step_credentials_token(
         self, user_input: dict[str, Any] | None = None
