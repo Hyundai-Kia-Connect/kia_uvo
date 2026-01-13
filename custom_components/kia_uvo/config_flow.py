@@ -106,13 +106,13 @@ OPTIONS_SCHEMA = vol.Schema(
 
 
 async def validate_input(
-    hass: HomeAssistant, user_input: dict[str, Any], vehicle_manager: VehicleManager | None = None
+    hass: HomeAssistant,
+    user_input: dict[str, Any],
+    vehicle_manager: VehicleManager | None = None,
 ) -> Token | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
-        result = await hass.async_add_executor_job(
-            vehicle_manager.login
-        )
+        result = await hass.async_add_executor_job(vehicle_manager.login)
 
         if result is None:
             raise InvalidAuth
@@ -189,14 +189,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
             self._vehicle_manager = VehicleManager(
-                        region=full_config[CONF_REGION],
-                        brand=full_config[CONF_BRAND],
-                        language=self.hass.config.language,
-                        username=full_config[CONF_USERNAME],
-                        password=full_config[CONF_PASSWORD],
-                    )
+                region=full_config[CONF_REGION],
+                brand=full_config[CONF_BRAND],
+                language=self.hass.config.language,
+                username=full_config[CONF_USERNAME],
+                password=full_config[CONF_PASSWORD],
+            )
             try:
-                result = await validate_input(self.hass, full_config, self._vehicle_manager)
+                result = await validate_input(
+                    self.hass, full_config, self._vehicle_manager
+                )
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
             except Exception:  # pylint: disable=broad-except
@@ -249,9 +251,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             method = OTP_NOTIFY_TYPE.EMAIL
         if user_input["method"] == "SMS":
             method = OTP_NOTIFY_TYPE.SMS
-        await self.hass.async_add_executor_job(
-            self._vehicle_manager.send_otp, method
-        )
+        await self.hass.async_add_executor_job(self._vehicle_manager.send_otp, method)
 
         return await self.async_step_enter_otp()
 
