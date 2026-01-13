@@ -12,6 +12,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
+    Token,
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
@@ -68,7 +69,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
-            token=config_entry.data.get(CONF_TOKEN, None),
+            token=Token.from_dict(config_entry.data.get(CONF_TOKEN, None)),
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
@@ -353,7 +354,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_save_token(self):
         """Persist the latest token into the config entry."""
-        new_token = self.vehicle_manager.token
+        new_token = self.vehicle_manager.token.to_dict()
         # Only update if token actually changed
         if new_token and new_token != self.config_entry.data.get(CONF_TOKEN):
             updated_data = {**self.config_entry.data, CONF_TOKEN: new_token}
