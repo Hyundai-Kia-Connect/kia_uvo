@@ -238,9 +238,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is None:
             # Add code to build a list of available OTP methods
             otp_methods = []
-            if self._otp_request.email_sent:
+            if self._otp_request.has_email:
                 otp_methods.append("email")
-            if self._otp_request.sms_sent:
+            if self._otp_request.has_sms:
                 otp_methods.append("SMS")
             return self.async_show_form(
                 step_id="select_otp_method",
