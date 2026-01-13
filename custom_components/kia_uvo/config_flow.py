@@ -246,8 +246,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="select_otp_method",
                 data_schema=vol.Schema({vol.Required("method"): vol.In(otp_methods)}),
             )
-        _LOGGER.warning("Sending OTP via %s", user_input["method"])
-        # Trigger sending OTP
         if user_input["method"] == "EMAIL":
             method = OTP_NOTIFY_TYPE.EMAIL
         if user_input["method"] == "SMS":
@@ -278,7 +276,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors=errors,
             )
 
-        # OTP success → create entry
         title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
         await self.async_set_unique_id(
             hashlib.sha256(title.encode("utf-8")).hexdigest()
