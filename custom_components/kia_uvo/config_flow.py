@@ -239,7 +239,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Add code to build a list of available OTP methods
             otp_methods = []
             if self._otp_request.has_email:
-                otp_methods.append("email")
+                otp_methods.append("EMAIL")
             if self._otp_request.has_sms:
                 otp_methods.append("SMS")
             return self.async_show_form(
