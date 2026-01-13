@@ -44,7 +44,7 @@ from .const import (
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_TOKEN
+    CONF_TOKEN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
-            token=token
+            token=token,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
