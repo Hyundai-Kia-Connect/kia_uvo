@@ -194,6 +194,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 language=self.hass.config.language,
                 username=full_config[CONF_USERNAME],
                 password=full_config[CONF_PASSWORD],
+                pin=full_config[CONF_PIN],
             )
             try:
                 result = await validate_input(
