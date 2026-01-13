@@ -263,12 +263,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="enter_otp", data_schema=vol.Schema({vol.Required("otp"): str})
             )
 
-        otp = user_input["otp"]
 
         try:
             await self.hass.async_add_executor_job(
                 self._vehicle_manager.verify_otp_and_complete_login,
-                otp,
+                otp = user_input["otp"],
             )
         except AuthenticationError:
             errors["base"] = "invalid_otp"
