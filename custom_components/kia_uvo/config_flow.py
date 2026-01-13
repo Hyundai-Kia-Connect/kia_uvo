@@ -30,6 +30,7 @@ from .const import (
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
+    CONF_TOKEN,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
@@ -174,7 +175,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
-        self._region_data = user_input
         if REGIONS[self._region_data[CONF_REGION]] == REGION_EUROPE and (
             BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
             or BRANDS[self._region_data[CONF_BRAND]] == BRAND_HYUNDAI
@@ -283,7 +283,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             hashlib.sha256(title.encode("utf-8")).hexdigest()
         )
         self._abort_if_unique_id_configured()
-        # Need to save the token obtained after OTP verification.
+        self._pending_login_data[CONF_TOKEN] = self._vehicle_manager.token.to_dict()
         return self.async_create_entry(title=title, data=self._pending_login_data)
 
     async def async_step_credentials_token(
