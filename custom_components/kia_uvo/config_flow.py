@@ -9,6 +9,8 @@ from typing import Any
 from hyundai_kia_connect_api import Token, VehicleManager
 from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.exceptions import AuthenticationError
+from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
+
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -104,17 +106,12 @@ OPTIONS_SCHEMA = vol.Schema(
 
 
 async def validate_input(
-    hass: HomeAssistant, user_input: dict[str, Any]
+    hass: HomeAssistant, user_input: dict[str, Any], vehicle_manager: VehicleManager | None = None
 ) -> Token | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
-        api = VehicleManager.get_implementation_by_region_brand(
-            user_input[CONF_REGION],
-            user_input[CONF_BRAND],
-            language=hass.config.language,
-        )
         result = await hass.async_add_executor_job(
-            api.login, user_input[CONF_USERNAME], user_input[CONF_PASSWORD]
+            vehicle_manager.login
         )
 
         if result is None:
@@ -191,9 +188,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
-
+            self._vehicle_manager = VehicleManager(
+                        region=full_config[CONF_REGION],
+                        brand=full_config[CONF_BRAND],
+                        language=self.hass.config.language,
+                        username=full_config[CONF_USERNAME],
+                        password=full_config[CONF_PASSWORD],
+                    )
             try:
-                result = await validate_input(self.hass, full_config)
+                result = await validate_input(self.hass, full_config, self._vehicle_manager)
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
             except Exception:  # pylint: disable=broad-except
@@ -203,13 +206,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if isinstance(result, OTPRequest):
                     self._pending_login_data = full_config
                     self._otp_request = result
-                    self._vehicle_manager = (
-                        VehicleManager.get_implementation_by_region_brand(
-                            full_config[CONF_REGION],
-                            full_config[CONF_BRAND],
-                            language=self.hass.config.language,
-                        )
-                    )
+
                     return await self.async_step_select_otp_method()
                 if self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
@@ -246,10 +243,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="select_otp_method",
                 data_schema=vol.Schema({vol.Required("method"): vol.In(otp_methods)}),
             )
-
+        _LOGGER.warning("Sending OTP via %s", user_input["method"])
         # Trigger sending OTP
+        if user_input["method"] == "EMAIL":
+            method = OTP_NOTIFY_TYPE.EMAIL
+        if user_input["method"] == "SMS":
+            method = OTP_NOTIFY_TYPE.SMS
         await self.hass.async_add_executor_job(
-            self._vehicle_manager.send_otp, user_input["method"]
+            self._vehicle_manager.send_otp, method
         )
 
         return await self.async_step_enter_otp()
