@@ -268,7 +268,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             await self.hass.async_add_executor_job(
                 self._vehicle_manager.verify_otp_and_complete_login,
-                otp=user_input["otp"],
+                user_input["otp"],
             )
         except AuthenticationError:
             errors["base"] = "invalid_otp"
