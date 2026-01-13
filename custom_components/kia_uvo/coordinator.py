@@ -56,8 +56,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize."""
         self.platforms: set[str] = set()
-        if config_entry.data.get(CONF_TOKEN, None):
-            token = Token.from_dict(config_entry.data.get(CONF_TOKEN, None))
+
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
             brand=config_entry.data.get(CONF_BRAND),
@@ -71,7 +70,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
-            token=token if config_entry.data.get(CONF_TOKEN, None) else None,
+            token=Token.from_dict(config_entry.data.get(CONF_TOKEN, None)) if config_entry.data.get(CONF_TOKEN, None) else None,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
