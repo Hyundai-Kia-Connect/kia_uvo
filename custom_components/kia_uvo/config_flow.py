@@ -293,7 +293,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
-
+            self._vehicle_manager = VehicleManager(
+                region=full_config[CONF_REGION],
+                brand=full_config[CONF_BRAND],
+                language=self.hass.config.language,
+                username=full_config[CONF_USERNAME],
+                password=full_config[CONF_PASSWORD],
+                pin=full_config[CONF_PIN],
+            )
             try:
                 await validate_input(self.hass, full_config)
             except InvalidAuth:
