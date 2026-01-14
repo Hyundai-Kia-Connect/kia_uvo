@@ -12,6 +12,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
+    Token,
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
@@ -43,6 +44,7 @@ from .const import (
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_TOKEN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,6 +56,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize."""
         self.platforms: set[str] = set()
+
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
             brand=config_entry.data.get(CONF_BRAND),
@@ -67,6 +70,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
+            token=Token.from_dict(config_entry.data.get(CONF_TOKEN, None))
+            if config_entry.data.get(CONF_TOKEN, None)
+            else None,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
@@ -171,6 +177,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_refresh_token
         )
+        await self._async_save_token()
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
@@ -347,3 +354,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
+
+    async def _async_save_token(self):
+        """Persist the latest token into the config entry."""
+        new_token = self.vehicle_manager.token.to_dict()
+        # Only update if token actually changed
+        if new_token and new_token != self.config_entry.data.get(CONF_TOKEN):
+            updated_data = {**self.config_entry.data, CONF_TOKEN: new_token}
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=updated_data
+            )
