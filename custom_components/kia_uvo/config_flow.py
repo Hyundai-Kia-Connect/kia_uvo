@@ -275,14 +275,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data_schema=vol.Schema({vol.Required("otp"): str}),
                 errors=errors,
             )
-
-        title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
-        await self.async_set_unique_id(
-            hashlib.sha256(title.encode("utf-8")).hexdigest()
-        )
-        self._abort_if_unique_id_configured()
         self._pending_login_data[CONF_TOKEN] = self._vehicle_manager.token.to_dict()
-        return self.async_create_entry(title=title, data=self._pending_login_data)
+        if self.reauth_entry is None:
+            title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
+            await self.async_set_unique_id(
+                hashlib.sha256(title.encode("utf-8")).hexdigest()
+            )
+            self._abort_if_unique_id_configured()
+        
+            return self.async_create_entry(title=title, data=self._pending_login_data)
+        else: 
+            self.hass.config_entries.async_update_entry(
+                self.reauth_entry, data=self._pending_login_data
+            )
+            await self.hass.config_entries.async_reload(
+                        self.reauth_entry.entry_id
+                    )
+            return self.async_abort(reason="reauth_successful")
 
     async def async_step_credentials_token(
         self, user_input: dict[str, Any] | None = None
