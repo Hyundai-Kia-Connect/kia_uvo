@@ -309,7 +309,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 pin=full_config[CONF_PIN],
             )
             try:
-                await validate_input(self.hass, full_config)
+                await validate_input(self.hass, full_config, self._vehicle_manager)
             except InvalidAuth:
                 errors["base"] = "invalid_auth"
             except Exception:  # pylint: disable=broad-except
