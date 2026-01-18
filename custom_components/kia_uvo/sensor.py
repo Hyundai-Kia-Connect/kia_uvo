@@ -307,6 +307,7 @@ async def async_setup_entry(
     async_add_entities(entities)
     return True
 
+PARALLEL_UPDATES = 0
 
 class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect sensor class."""

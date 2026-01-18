@@ -473,6 +473,7 @@ async def async_setup_entry(
     async_add_entities(entities)
     return True
 
+PARALLEL_UPDATES = 0
 
 class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect binary sensor class."""
