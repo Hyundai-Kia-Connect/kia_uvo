@@ -37,7 +37,9 @@ async def async_setup_entry(
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         async_add_entities([HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)])
 
+
 PARALLEL_UPDATES = 1
+
 
 class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     """Hyundai / Kia Connect Car Climate Control."""
