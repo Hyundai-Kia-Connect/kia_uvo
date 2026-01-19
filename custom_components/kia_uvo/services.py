@@ -87,6 +87,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         steering_wheel = call.data.get("steering_wheel")
 
         # Confirm values are correct datatype
+        if heating is not None:
+            heating = int(heating)
         if front_left_seat is not None:
             front_left_seat = int(front_left_seat)
         if front_right_seat is not None:
