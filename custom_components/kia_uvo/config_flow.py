@@ -8,6 +8,7 @@ from typing import Any
 
 # Apply patches for Kia USA OTP authentication before importing the API library
 from .api_patches import apply_patches
+
 apply_patches()
 
 from hyundai_kia_connect_api import Token, VehicleManager

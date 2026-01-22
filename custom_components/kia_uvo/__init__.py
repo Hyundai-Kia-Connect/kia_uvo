@@ -2,6 +2,7 @@ import logging
 
 # Apply patches for Kia USA OTP authentication before importing the API library
 from .api_patches import apply_patches
+
 apply_patches()
 
 from homeassistant.config_entries import ConfigEntry
