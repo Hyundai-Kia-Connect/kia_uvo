@@ -35,6 +35,9 @@ async def async_setup_entry(
     return True
 
 
+PARALLEL_UPDATES = 0
+
+
 class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
