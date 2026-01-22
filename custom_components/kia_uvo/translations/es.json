@@ -19,7 +19,8 @@
       }
     },
     "abort": {
-      "already_configured": "El dispositivo ya está configurado"
+      "already_configured": "El dispositivo ya está configurado",
+      "reauth_successful": "Reautenticación fue exitosa"
     },
     "error": {
       "invalid_auth": "Falló el inicio de sesión en los servidores Hyundai (Bluelink) / Kia (Uvo) Connect. ¡Por favor, usa la aplicación oficial para cerrar sesión y volver a iniciarla e intenta de nuevo!",
