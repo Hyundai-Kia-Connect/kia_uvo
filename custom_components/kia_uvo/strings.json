@@ -1,32 +1,62 @@
 {
+  "title": "[%key:component::hyundai_kia_connect::title%]",
   "config": {
     "step": {
-      "user": {
+      "credentials_password": {
+        "title": "[%key:component::hyundai_kia_connect::config::step::credentials_password::title%]",
+        "description": "[%key:component::hyundai_kia_connect::config::step::credentials_password::description%]",
         "data": {
           "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]",
-          "region": "[%key:component::hyundai_kia_connect::config::step::user::data::region%]",
-          "brand": "[%key:component::hyundai_kia_connect::config::step::user::data::brand%]",
+          "password": "[%key:component::hyundai_kia_connect::config::step::credentials_password::data::password%]",
           "pin": "[%key:common::config_flow::data::pin%]"
+        }
+      },
+      "credentials_token": {
+        "title": "[%key:component::hyundai_kia_connect::config::step::credentials_token::title%]",
+        "description": "[%key:component::hyundai_kia_connect::config::step::credentials_token::description%]",
+        "data": {
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:component::hyundai_kia_connect::config::step::credentials_token::data::password%]",
+          "pin": "[%key:common::config_flow::data::pin%]"
+        }
+      },
+      "user": {
+        "title": "[%key:component::hyundai_kia_connect::config::step::user::title%]",
+        "description": "[%key:component::hyundai_kia_connect::config::step::user::description%]",
+        "data": {
+          "region": "[%key:component::hyundai_kia_connect::config::step::user::data::region%]",
+          "brand": "[%key:component::hyundai_kia_connect::config::step::user::data::brand%]"
         }
       },
       "reauth_confirm": {
         "title": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::title%]",
         "description": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::description%]"
+      },
+      "select_otp_method": {
+        "title": "Select OTP Method",
+        "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
+        "data": { "method": "OTP delivery method" }
+      },
+      "enter_otp": {
+        "title": "Enter One‑Time Password",
+        "description": "Enter the verification code sent to your selected method.",
+        "data": { "otp": "One‑time password" }
       }
-    },
-    "error": {
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
       "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+    },
+    "error": {
+      "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
+      "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
+      "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]"
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "[%key:component::hyundai_kia_connect::options::step::init::title%]",
         "data": {
           "scan_interval": "[%key:component::hyundai_kia_connect::options::step::init::data::scan_interval%]",
           "force_refresh": "[%key:component::hyundai_kia_connect::options::step::init::data::force_refresh%]",

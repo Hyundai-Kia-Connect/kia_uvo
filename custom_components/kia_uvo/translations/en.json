@@ -31,10 +31,21 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reauthentication",
         "description": "Your account is unable to authenticate. Click Submit to re-setup."
+      },
+      "select_otp_method": {
+        "title": "Select OTP Method",
+        "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
+        "data": { "method": "OTP delivery method" }
+      },
+      "enter_otp": {
+        "title": "Enter One‑Time Password",
+        "description": "Enter the verification code sent to your selected method.",
+        "data": { "otp": "One‑time password" }
       }
     },
     "abort": {
-      "already_configured": "Device is already configured"
+      "already_configured": "Device is already configured",
+      "reauth_successful": "Successfully reauthenticated"
     },
     "error": {
       "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect servers. Please use the official app to logout and log back in, then try again.",

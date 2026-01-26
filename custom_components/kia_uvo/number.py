@@ -77,6 +77,9 @@ async def async_setup_entry(
     return True
 
 
+PARALLEL_UPDATES = 1
+
+
 class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,

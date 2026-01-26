@@ -95,11 +95,15 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(
         key="ev_battery_remain",
         name="EV Battery Level",
+        native_unit_of_measurement=UnitOfEnergy.KILO_JOULE,
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_capacity",
         name="EV Battery Capacity",
+        native_unit_of_measurement=UnitOfEnergy.KILO_JOULE,
+        device_class=SensorDeviceClass.ENERGY_STORAGE,
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -302,6 +306,9 @@ async def async_setup_entry(
         )
     async_add_entities(entities)
     return True
+
+
+PARALLEL_UPDATES = 0
 
 
 class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):

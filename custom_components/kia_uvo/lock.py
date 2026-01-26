@@ -34,6 +34,9 @@ async def async_setup_entry(
     return True
 
 
+PARALLEL_UPDATES = 1
+
+
 class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
