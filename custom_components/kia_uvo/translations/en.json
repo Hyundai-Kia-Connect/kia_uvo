@@ -189,7 +189,7 @@
       }
     },
     "open_charge_port": {
-      "name": "Open Charging Port",
+      "name": "Open Charge Port",
       "description": "Open Charge Port",
       "fields": {
         "device_id": {
@@ -361,6 +361,23 @@
           "description": "Action for the rear right window"
         }
       }
+    }
+  },
+  "entity": {
+    "button": {
+      "update_cached": { "name": "Update (cached)" },
+      "force_update": { "name": "Force update" },
+      "lock": { "name": "Lock" },
+      "unlock": { "name": "Unlock" },
+      "set_charge_limits_80": { "name": "Set AC/DC limit to 80%" },
+      "set_charge_limits_100": { "name": "Set AC/DC limit to 100%" },
+      "set_charging_current_100": { "name": "Charging current 100%" },
+      "set_charging_current_60": { "name": "Charging current 60%" }
+    },
+    "switch": {
+      "remote_climate": { "name": "Remote climate" },
+      "charging": { "name": "Charging" },
+      "charge_port_door": { "name": "Charge port door" }
     }
   }
 }

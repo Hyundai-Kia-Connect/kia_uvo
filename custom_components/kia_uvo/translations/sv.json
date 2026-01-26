@@ -346,5 +346,22 @@
         }
       }
     }
+  },
+  "entity": {
+    "button": {
+      "update_cached": { "name": "Uppdatera (cache)" },
+      "force_update": { "name": "Tvinga uppdatering" },
+      "lock": { "name": "Lås" },
+      "unlock": { "name": "Lås upp" },
+      "set_charge_limits_80": { "name": "Sätt AC/DC-gräns till 80 %" },
+      "set_charge_limits_100": { "name": "Sätt AC/DC-gräns till 100 %" },
+      "set_charging_current_100": { "name": "Laddström 100 %" },
+      "set_charging_current_60": { "name": "Laddström 60 %" }
+    },
+    "switch": {
+      "remote_climate": { "name": "Fjärrklimat" },
+      "charging": { "name": "Laddning" },
+      "charge_port_door": { "name": "Laddportslucka" }
+    }
   }
 }
