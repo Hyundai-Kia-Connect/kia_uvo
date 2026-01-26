@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import Any, Callable, Final
 
@@ -48,46 +47,6 @@ BUTTONS: Final[tuple[HyundaiKiaButtonEntityDescription, ...]] = (
         name="Unlock",
         icon="mdi:lock-open",
         service="unlock",
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="start_climate",
-        name="Start climate",
-        icon="mdi:car-seat-heater",
-        service="start_climate",
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="stop_climate",
-        name="Stop climate",
-        icon="mdi:car-seat-cooler",
-        service="stop_climate",
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="start_charge",
-        name="Start charge",
-        icon="mdi:ev-station",
-        service="start_charge",
-        capability=lambda v: v.engine_type != ENGINE_TYPES.ICE,
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="stop_charge",
-        name="Stop charge",
-        icon="mdi:power-plug-off",
-        service="stop_charge",
-        capability=lambda v: v.engine_type != ENGINE_TYPES.ICE,
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="open_charge_port",
-        name="Open charge port",
-        icon="mdi:ev-plug-type2",
-        service="open_charge_port",
-        capability=lambda v: v.engine_type != ENGINE_TYPES.ICE,
-    ),
-    HyundaiKiaButtonEntityDescription(
-        key="close_charge_port",
-        name="Close charge port",
-        icon="mdi:ev-plug-ccs2",
-        service="close_charge_port",
-        capability=lambda v: v.engine_type != ENGINE_TYPES.ICE,
     ),
     HyundaiKiaButtonEntityDescription(
         key="set_charge_limits_80",
