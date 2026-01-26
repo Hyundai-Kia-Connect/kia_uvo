@@ -69,7 +69,9 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SWITCHES:
-            if description.capability is not None and not description.capability(vehicle):
+            if description.capability is not None and not description.capability(
+                vehicle
+            ):
                 continue
 
             if description.is_on is not None and description.is_on(vehicle) is None:
