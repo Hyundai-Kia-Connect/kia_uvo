@@ -71,9 +71,7 @@ async def async_setup_entry(
             if description.key in (AC_CHARGING_LIMIT_KEY, DC_CHARGING_LIMIT_KEY):
                 if getattr(vehicle, "ev_battery_percentage", None) is not None:
                     entities.append(
-                        HyundaiKiaConnectNumber(
-                            coordinator, description, vehicle
-                        )
+                        HyundaiKiaConnectNumber(coordinator, description, vehicle)
                     )
             elif getattr(vehicle, description.key, None) is not None:
                 entities.append(
