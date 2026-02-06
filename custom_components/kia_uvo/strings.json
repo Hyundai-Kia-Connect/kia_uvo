@@ -50,6 +50,7 @@
     "error": {
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
       "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
+      "invalid_otp": "Invalid one-time password. Please try again.",
       "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]"
     }
   },
