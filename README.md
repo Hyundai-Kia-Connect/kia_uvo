@@ -12,10 +12,10 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password(or token if Europe!) (I know, translations are missing, a PR for this would be great!).
 
-**EU KIA and Hyundai require special steps. This is outlined here: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow
+**Europe KIA and Hyundai require special steps. This is outlined here: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow. The script for Hyundai is here: [https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/blob/master/Hyundai%20Token%20Solution/readme.txt](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/blob/master/Hyundai%20Token%20Solution/readme.txt)
 **
 
-- AU, EU, CA, IN, AUS, NZ, BR and US is supported by this. USA, India, China and Brazil support is limited.
+- AU, EU, CA, CH, IN, AUS, NZ, BR and US is supported by this. USA, India, China and Brazil support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
