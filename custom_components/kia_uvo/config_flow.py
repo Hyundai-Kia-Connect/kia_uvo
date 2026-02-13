@@ -45,11 +45,24 @@ from .const import (
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     REGION_EUROPE,
+    REGION_CANADA,
     BRAND_HYUNDAI,
     BRAND_KIA,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_default_scan_interval_for_region(region: int) -> int:
+    """Return the default scan interval based on region.
+
+    Canada requires 5 minutes to keep the token alive.
+    Other regions use 30 minutes.
+    """
+    if REGIONS.get(region) == REGION_CANADA:
+        return 5
+    return DEFAULT_SCAN_INTERVAL
+
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -217,7 +230,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         hashlib.sha256(title.encode("utf-8")).hexdigest()
                     )
                     self._abort_if_unique_id_configured()
-                    return self.async_create_entry(title=title, data=full_config)
+                    # Set default scan interval based on region
+                    default_scan_interval = get_default_scan_interval_for_region(
+                        full_config[CONF_REGION]
+                    )
+                    return self.async_create_entry(
+                        title=title,
+                        data=full_config,
+                        options={CONF_SCAN_INTERVAL: default_scan_interval},
+                    )
                 else:
                     self.hass.config_entries.async_update_entry(
                         self.reauth_entry, data=full_config
@@ -282,8 +303,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 hashlib.sha256(title.encode("utf-8")).hexdigest()
             )
             self._abort_if_unique_id_configured()
-
-            return self.async_create_entry(title=title, data=self._pending_login_data)
+            # Set default scan interval based on region
+            default_scan_interval = get_default_scan_interval_for_region(
+                self._pending_login_data[CONF_REGION]
+            )
+            return self.async_create_entry(
+                title=title,
+                data=self._pending_login_data,
+                options={CONF_SCAN_INTERVAL: default_scan_interval},
+            )
         else:
             self.hass.config_entries.async_update_entry(
                 self.reauth_entry, data=self._pending_login_data
@@ -322,7 +350,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         hashlib.sha256(title.encode("utf-8")).hexdigest()
                     )
                     self._abort_if_unique_id_configured()
-                    return self.async_create_entry(title=title, data=full_config)
+                    # Set default scan interval based on region
+                    default_scan_interval = get_default_scan_interval_for_region(
+                        full_config[CONF_REGION]
+                    )
+                    return self.async_create_entry(
+                        title=title,
+                        data=full_config,
+                        options={CONF_SCAN_INTERVAL: default_scan_interval},
+                    )
                 else:
                     self.hass.config_entries.async_update_entry(
                         self.reauth_entry, data=full_config
