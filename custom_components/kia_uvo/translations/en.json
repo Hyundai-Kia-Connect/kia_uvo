@@ -13,7 +13,7 @@
       },
       "credentials_token": {
         "title": "Hyundai / Kia Connect - Credentials",
-        "description": "Enter your account credentials. Europe requires special token work — refer to the README and https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/wiki/Kia-Europe-Login-Flow",
+        "description": "Enter your account credentials. Europe requires special token work — refer to the README.",
         "data": {
           "username": "Username",
           "password": "Token",
@@ -63,7 +63,7 @@
           "no_force_refresh_hour_start": "No Force Refresh Start Hour",
           "no_force_refresh_hour_finish": "No Force Refresh Finish Hour",
           "enable_geolocation_entity": "Enable Geolocation Entity using OpenStreetMap",
-          "use_email_with_geocode_api": "Use your Kia email address for Geocode API - More Information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+          "use_email_with_geocode_api": "Use your Kia email address for Geocode API. Increases polling ability but provides it to the API. "
         }
       }
     }
