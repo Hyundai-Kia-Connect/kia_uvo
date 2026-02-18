@@ -15,14 +15,14 @@
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reautentisering",
-        "description": "Kontot kan inte autentiseres. Klicka på Send för att sätta upp på nytt."
+        "description": "Kontot kan inte autentiseras. Klicka på Skicka för att konfigurera på nytt."
       }
     },
     "abort": {
       "already_configured": "Enheten är redan konfigurerad"
     },
     "error": {
-      "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",
+      "invalid_auth": "Inloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd den officiella appen för att logga ut och logga in igen, och försök igen.",
       "unknown": "Oväntat fel"
     }
   },
@@ -31,12 +31,12 @@
       "init": {
         "title": "Hyundai / Kia Connect - Konfiguration",
         "data": {
-          "scan_interval": "Scanningsintervall (min)",
-          "force_refresh": "Tvångsuppdateringsintervall (min), var försiktig med att sätte detta för lågt då det använder 12V-batteriet",
-          "no_force_refresh_hour_start": "Ingen tvångsuppdatering starttid",
-          "no_force_refresh_hour_finish": "Ingen tvångsuppdatering sluttid",
-          "enable_geolocation_entity": "Aktivar Geolokation object vid användning av OpenStreetMap",
-          "use_email_with_geocode_api": "Använd din Kia e-postadress för Geocode API - Mer information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+          "scan_interval": "Skanningsintervall (min)",
+          "force_refresh": "Tvångsuppdateringsintervall (min). Var försiktig med att sätta detta för lågt då det använder 12V-batteriet",
+          "no_force_refresh_hour_start": "Starttid utan tvångsuppdatering",
+          "no_force_refresh_hour_finish": "Sluttid utan tvångsuppdatering",
+          "enable_geolocation_entity": "Aktivera geolokationsentitet med OpenStreetMap",
+          "use_email_with_geocode_api": "Använd din Kia-e-postadress för Geocode API – Mer information: https://nominatim.org/release-docs/develop/api/Reverse/#other"
         }
       }
     }
@@ -44,7 +44,7 @@
   "services": {
     "force_update": {
       "name": "Tvinga uppdatering",
-      "description": "Tvinga fordonet att uppdatera sin data. Alla fordon på samma konto som det valda fordonet kommer att uppdateras.",
+      "description": "Tvinga fordonet att uppdatera sina data. Alla fordon på samma konto som det valda fordonet kommer att uppdateras.",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -54,7 +54,7 @@
     },
     "update": {
       "name": "Uppdatera",
-      "description": "Uppdatera fordonsdata från tjänstecache",
+      "description": "Uppdatera fordonsdata från tjänstens cache",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -63,8 +63,8 @@
       }
     },
     "start_climate": {
-      "name": "Starta Klimatanläggning",
-      "description": "Använd med försiktighet - Startar klimatanläggning och motor. Alla alternativ är inte tillgängliga på alla bilar eller i alla regioner. Använd bilens mobilapp som vägledning och matcha alternativ som är tillgängliga i ditt fordon.",
+      "name": "Starta klimatanläggning",
+      "description": "Använd med försiktighet – Startar klimatanläggning och motor. Alla alternativ är inte tillgängliga för alla bilar eller regioner. Använd bilens mobilapp som vägledning och matcha de alternativ som finns där.",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -72,45 +72,49 @@
         },
         "duration": {
           "name": "Varaktighet",
-          "description": "Varaktighet för aktivering"
+          "description": "Hur länge klimatanläggningen ska köras. Max varaktighet kan begränsas av modell/år/region."
         },
         "climate": {
           "name": "Klimatanläggning",
-          "description": "Aktivera klimatanläggnig"
+          "description": "Aktivera HVAC-systemet"
         },
         "temperature": {
           "name": "Temperatur",
-          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+          "description": "Sätt temperatur för klimatanläggning. Enhet kan vara regionsspecifik."
         },
         "defrost": {
-          "name": "Avfrosning",
-          "description": "Fönsteravfrostning"
+          "name": "Avfrostning",
+          "description": "Avfrostning av vindruta"
         },
         "heating": {
           "name": "Uppvärmning",
-          "description": "Uppvärmande funktioner som ratt och bakruta"
+          "description": "Uppvärmningsfunktioner som ratt och bakruta"
+        },
+        "steering_wheel": {
+          "name": "Rattvärme",
+          "description": "Uppvärmningsnivå för ratt (Europa). Andra regioner använder inställningen för uppvärmning."
         },
         "flseat": {
           "name": "Vänster framsäte",
-          "description": "Vänster framsäte värme/kylinställning"
+          "description": "Värme/kyl-inställning"
         },
         "frseat": {
           "name": "Höger framsäte",
-          "description": "Höger framsäte värme/kylinställning"
+          "description": "Värme/kyl-inställning"
         },
         "rlseat": {
           "name": "Vänster baksäte",
-          "description": "Vänster baksäte värme/kylinställning"
+          "description": "Värme/kyl-inställning"
         },
         "rrseat": {
           "name": "Höger baksäte",
-          "description": "Höger baksäte värme/kylinställning"
+          "description": "Värme/kyl-inställning"
         }
       }
     },
     "stop_climate": {
-      "name": "Stoppa Klimatanläggning",
-      "description": "Använd med försiktighet - stoppar bilen och klimatanläggningen",
+      "name": "Stoppa klimatanläggning",
+      "description": "Använd med försiktighet – Stoppar bil och klimatanläggning",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -119,7 +123,7 @@
       }
     },
     "stop_charge": {
-      "name": "Stoppa Laddning",
+      "name": "Stoppa laddning",
       "description": "Stoppar laddningen",
       "fields": {
         "device_id": {
@@ -129,7 +133,7 @@
       }
     },
     "start_charge": {
-      "name": "Starta Laddning",
+      "name": "Starta laddning",
       "description": "Startar laddningen",
       "fields": {
         "device_id": {
@@ -140,7 +144,7 @@
     },
     "lock": {
       "name": "Lås",
-      "description": "Lås fordon",
+      "description": "Lås fordonet",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -150,7 +154,7 @@
     },
     "unlock": {
       "name": "Lås upp",
-      "description": "Lås upp fordon",
+      "description": "Lås upp fordonet",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -159,8 +163,8 @@
       }
     },
     "close_charge_port": {
-      "name": "Lås laddlucka",
-      "description": "Lås laddlucka",
+      "name": "Stäng laddlucka",
+      "description": "Stäng laddluckan",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -170,7 +174,7 @@
     },
     "open_charge_port": {
       "name": "Öppna laddlucka",
-      "description": "Öppna laddlucka",
+      "description": "Öppna laddluckan",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -180,51 +184,51 @@
     },
     "set_charge_limits": {
       "name": "Sätt laddningsmål",
-      "description": "Sätter AC och DC laddningsgränser",
+      "description": "Sätter AC- och DC-laddningsgränser",
       "fields": {
         "device_id": {
           "name": "Fordon",
           "description": "Valt fordon"
         },
         "dc_limit": {
-          "name": "DC laddnivåmål",
-          "description": "Max laddning med DC-laddare"
+          "name": "DC-laddningsmål",
+          "description": "Max laddnivå med DC-laddare"
         },
         "ac_limit": {
-          "name": "AC laddnivåmål",
-          "description": "Max laddning med AC-laddare"
+          "name": "AC-laddningsmål",
+          "description": "Max laddnivå med AC-laddare"
         }
       }
     },
     "set_charging_current": {
-      "name": "Sätt AC laddström",
-      "description": "Sätter AC laddströmskapacitet",
+      "name": "Sätt AC-laddström",
+      "description": "Ställer in AC-laddningens strömkapacitet",
       "fields": {
         "device_id": {
           "name": "Fordon",
           "description": "Valt fordon"
         },
         "level": {
-          "name": "Ladeffekt",
-          "description": "Ladeffektskapacitet procent"
+          "name": "Laddström",
+          "description": "Laddningsström i procent"
         }
       }
     },
     "schedule_charging_and_climate": {
-      "name": "Schemalägg laddning och klimatanläggning",
-      "description": "Använd med försiktighet - Schedulera laddning och klimat. Alla alternativ är inte tillgängliga på alla bilar eller i alla regioner. Använd bilens mobilapp som vägledning och matcha alternativ som är tillgängliga i ditt fordon.",
+      "name": "Schemalägg laddning och klimat",
+      "description": "Använd med försiktighet – Schemalägg laddning och klimat. Alla alternativ är inte tillgängliga för alla bilar eller regioner. Använd bilens mobilapp som vägledning.",
       "fields": {
         "device_id": {
           "name": "Fordon",
           "description": "Valt fordon"
         },
         "charging_enabled": {
-          "name": "Schemalägg laddning",
-          "description": "Aktiverar schemalagd laddning"
+          "name": "Schemalagd laddning",
+          "description": "Aktivera schemalagd laddning"
         },
         "first_departure_enabled": {
           "name": "1. avresa",
-          "description": "Aktiverar första avresa"
+          "description": "Aktivera första avresa"
         },
         "first_departure_days": {
           "name": "1. avresedagar",
@@ -232,7 +236,7 @@
         },
         "first_departure_time": {
           "name": "1. avresetid",
-          "description": "Tidpunkt för första avresan. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+          "description": "Tidpunkt för första avresan. Använd 00, 10, 20, 30, 40 eller 50 för minuter, och 00 för sekunder"
         },
         "second_departure_enabled": {
           "name": "2. avresa",
@@ -244,35 +248,35 @@
         },
         "second_departure_time": {
           "name": "2. avresetid",
-          "description": "Tidpunkt för andra avresan. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+          "description": "Tidpunkt för andra avresan. Använd 00, 10, 20, 30, 40 eller 50 för minuter, och 00 för sekunder"
         },
         "off_peak_start_time": {
-          "name": "Starttid för lågtraffik",
-          "description": "Starttid för lågtraffik. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+          "name": "Starttid för lågtrafik",
+          "description": "Starttid för lågtrafik. Använd 00, 10, 20, 30, 40 eller 50 för minuter, och 00 för sekunder"
         },
         "off_peak_end_time": {
-          "name": "Slutttid för lågtraffik",
-          "description": "Slutttid för lågtraffik. Använd 00,10,20,30,40 eller 50 för minuter, och 00 för sekunder"
+          "name": "Sluttid för lågtrafik",
+          "description": "Sluttid för lågtrafik. Använd 00, 10, 20, 30, 40 eller 50 för minuter, och 00 för sekunder"
         },
         "off_peak_charge_only_enabled": {
           "name": "Endast lågpristariffer",
-          "description": "Om satt till sant, laddar enbart under definierat lågpristid, annars kan laddningen starta före lågpristiden"
+          "description": "Om true, ladda endast under definierad lågpristid. Annars kan laddningen starta innan lågpristiden."
         },
         "climate_enabled": {
           "name": "Klimat",
-          "description": "Aktivera klimatanläggningen inför avresa"
+          "description": "Aktivera klimatanläggning inför avresa"
         },
         "temperature": {
           "name": "Temperatur",
-          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+          "description": "Sätt temperatur för klimatanläggning. Enhet kan vara regionsspecifik."
         },
         "temperature_unit": {
           "name": "Temperaturenhet",
-          "description": "Sätt temperatur för klimatanläggning. Målenheten är specifik per region."
+          "description": "Enhet för temperaturinställning. Regionsspecifik."
         },
         "defrost": {
           "name": "Avfrostning",
-          "description": "Framruteavfrostning inför avresa"
+          "description": "Avfrostning av vindruta inför avresa"
         }
       }
     },
@@ -297,8 +301,8 @@
       }
     },
     "start_valet_mode": {
-      "name": "Start valet-läge",
-      "description": "Aktivera Valet-läge. Om valet-läge aktivers under körning, stängs bildkärmen av.",
+      "name": "Starta valet-läge",
+      "description": "Aktivera valet-läge. Om valet-läge aktiveras under körning stängs bilens skärm av.",
       "fields": {
         "device_id": {
           "name": "Fordon",
@@ -307,7 +311,7 @@
       }
     },
     "stop_valet_mode": {
-      "name": "Stopp valet-läge",
+      "name": "Stoppa valet-läge",
       "description": "Avaktiverar valet-läge.",
       "fields": {
         "device_id": {
@@ -315,6 +319,49 @@
           "description": "Valt fordon"
         }
       }
+    },
+    "set_windows": {
+      "name": "Styr fönster",
+      "description": "Styr fordonets fönster. Öppna eller stäng fönstren vid behov.",
+      "fields": {
+        "device_id": {
+          "name": "Fordon",
+          "description": "Valt fordon"
+        },
+        "flwindow": {
+          "name": "Vänster framruta",
+          "description": "Åtgärd för vänster framruta"
+        },
+        "frwindow": {
+          "name": "Höger framruta",
+          "description": "Åtgärd för höger framruta"
+        },
+        "rlwindow": {
+          "name": "Vänster bakruta",
+          "description": "Åtgärd för vänster bakruta"
+        },
+        "rrwindow": {
+          "name": "Höger bakruta",
+          "description": "Åtgärd för höger bakruta"
+        }
+      }
+    }
+  },
+  "entity": {
+    "button": {
+      "update_cached": { "name": "Uppdatera (cache)" },
+      "force_update": { "name": "Tvinga uppdatering" },
+      "lock": { "name": "Lås" },
+      "unlock": { "name": "Lås upp" },
+      "set_charge_limits_80": { "name": "Sätt AC/DC-gräns till 80 %" },
+      "set_charge_limits_100": { "name": "Sätt AC/DC-gräns till 100 %" },
+      "set_charging_current_100": { "name": "Laddström 100 %" },
+      "set_charging_current_60": { "name": "Laddström 60 %" }
+    },
+    "switch": {
+      "remote_climate": { "name": "Fjärrklimat" },
+      "charging": { "name": "Laddning" },
+      "charge_port_door": { "name": "Laddportslucka" }
     }
   }
 }
