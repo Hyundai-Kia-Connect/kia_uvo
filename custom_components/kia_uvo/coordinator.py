@@ -14,6 +14,7 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     Token,
 )
+
 # Added DeviceIDError for error handling
 from hyundai_kia_connect_api.exceptions import AuthenticationError, DeviceIDError
 
@@ -124,7 +125,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             # Return last known data so entities stay available; retry next cycle.
             _LOGGER.warning(
                 "kia_uvo: DeviceIDError during token refresh (transient Kia server "
-                "issue), keeping last known data and retrying next cycle. Error: %s", ex
+                "issue), keeping last known data and retrying next cycle. Error: %s",
+                ex,
             )
             return self.data
 
