@@ -14,7 +14,8 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     Token,
 )
-from hyundai_kia_connect_api.exceptions import AuthenticationError
+# Added DeviceIDError for error handling
+from hyundai_kia_connect_api.exceptions import AuthenticationError, DeviceIDError
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
@@ -111,10 +112,22 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
+        # original block only caught AuthenticationError, allowing
+        # DeviceIDError to propagate uncaught to HA's coordinator framework which
+        # set last_update_success = False and marked all entities unavailable:
         try:
             await self.async_check_and_refresh_token()
         except AuthenticationError as AuthError:
             raise ConfigEntryAuthFailed(AuthError) from AuthError
+        except DeviceIDError as ex:
+            # Transient Kia server error generating device ID during login.
+            # Return last known data so entities stay available; retry next cycle.
+            _LOGGER.warning(
+                "kia_uvo: DeviceIDError during token refresh (transient Kia server "
+                "issue), keeping last known data and retrying next cycle. Error: %s", ex
+            )
+            return self.data
+
         current_hour = dt_util.now().hour
 
         if (
@@ -174,9 +187,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_refresh_token
-        )
+        # original bare call with no error handling; DeviceIDError
+        # would propagate uncaught up through _async_update_data to HA's framework:
+        try:
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_refresh_token
+            )
+        except AuthenticationError:
+            raise  # bubble up to _async_update_data → ConfigEntryAuthFailed
+        except DeviceIDError:
+            raise  # bubble up to _async_update_data → caught, returns self.data
+        except Exception:
+            raise  # all other exceptions bubble up unchanged
         await self._async_save_token()
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
