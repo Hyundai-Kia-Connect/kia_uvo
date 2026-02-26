@@ -16,7 +16,7 @@ from hyundai_kia_connect_api import (
 )
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -115,6 +115,21 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             await self.async_check_and_refresh_token()
         except AuthenticationError as AuthError:
             raise ConfigEntryAuthFailed(AuthError) from AuthError
+        except Exception as err:
+            # Transient API errors (e.g. DeviceIDError, ReadTimeoutError) from
+            # Kia's EU backend must be surfaced as UpdateFailed rather than
+            # propagating as unexpected exceptions.  HA's update coordinator
+            # counts unexpected exceptions and cancels the config entry after
+            # enough consecutive failures, which makes all entities permanently
+            # unavailable until the integration is manually reloaded.
+            # Raising UpdateFailed(retry_after=60) keeps entities temporarily
+            # unavailable and schedules an automatic retry after 60 seconds
+            # instead of waiting for the next full poll interval.
+            # See: https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1538
+            raise UpdateFailed(
+                f"Token refresh failed, will retry in 60s: {err}",
+                retry_after=60,
+            ) from err
         current_hour = dt_util.now().hour
 
         if (
@@ -194,36 +209,48 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.lock, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.lock, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to lock vehicle: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_unlock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.unlock, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.unlock, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to unlock vehicle: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_open_charge_port(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.open_charge_port, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.open_charge_port, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to open charge port: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_close_charge_port(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.close_charge_port, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.close_charge_port, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to close charge port: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
@@ -232,54 +259,72 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_climate, vehicle_id, climate_options
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_climate, vehicle_id, climate_options
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to start climate: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_stop_climate(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_climate, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.stop_climate, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to stop climate: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_start_charge(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_charge, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_charge, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to start charge: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_stop_charge(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_charge, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.stop_charge, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to stop charge: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.set_charge_limits, vehicle_id, ac, dc
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.set_charge_limits, vehicle_id, ac, dc
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to set charge limits: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.set_charging_current, vehicle_id, level
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.set_charging_current, vehicle_id, level
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to set charging current: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
@@ -288,58 +333,82 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
     ):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.schedule_charging_and_climate,
-            vehicle_id,
-            schedule_options,
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.schedule_charging_and_climate,
+                vehicle_id,
+                schedule_options,
+            )
+        except Exception as err:
+            raise HomeAssistantError(
+                f"Failed to schedule charging and climate: {err}"
+            ) from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_start_hazard_lights(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_hazard_lights, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_hazard_lights, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to start hazard lights: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_start_hazard_lights_and_horn(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_hazard_lights_and_horn,
-            vehicle_id,
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_hazard_lights_and_horn,
+                vehicle_id,
+            )
+        except Exception as err:
+            raise HomeAssistantError(
+                f"Failed to start hazard lights and horn: {err}"
+            ) from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_start_valet_mode(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.start_valet_mode, vehicle_id
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_valet_mode, vehicle_id
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to start valet mode: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_stop_valet_mode(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.stop_valet_mode,
-            vehicle_id,
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.stop_valet_mode,
+                vehicle_id,
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to stop valet mode: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_set_v2l_limit(self, vehicle_id: str, limit: int):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.set_vehicle_to_load_discharge_limit, vehicle_id, limit
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.set_vehicle_to_load_discharge_limit,
+                vehicle_id,
+                limit,
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to set V2L limit: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
@@ -348,9 +417,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self, vehicle_id: str, windowOptions: WindowRequestOptions
     ):
         await self.async_check_and_refresh_token()
-        action_id = await self.hass.async_add_executor_job(
-            self.vehicle_manager.set_windows_state, vehicle_id, windowOptions
-        )
+        try:
+            action_id = await self.hass.async_add_executor_job(
+                self.vehicle_manager.set_windows_state, vehicle_id, windowOptions
+            )
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to set windows: {err}") from err
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
