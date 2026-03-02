@@ -6,6 +6,7 @@ from datetime import datetime
 from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import ServiceCall, callback, HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from homeassistant.helpers import device_registry
 from hyundai_kia_connect_api import (
@@ -327,11 +328,22 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
         if len(vehicles) == 1:
             return list(vehicles.keys())[0]
 
-    device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
+    device_id = call.data.get(ATTR_DEVICE_ID)
+    if device_id is None:
+        raise HomeAssistantError(
+            f"{DOMAIN} - device_id is required when multiple vehicles or accounts are configured."
+        )
+    device_entry = device_registry.async_get(hass).async_get(device_id)
+    if device_entry is None:
+        raise HomeAssistantError(
+            f"{DOMAIN} - Device not found for device_id: {device_id}"
+        )
     for entry in device_entry.identifiers:
         if entry[0] == DOMAIN:
-            vehicle_id = entry[1]
-    return vehicle_id
+            return entry[1]
+    raise HomeAssistantError(
+        f"{DOMAIN} - No vehicle identifier found for device: {device_id}"
+    )
 
 
 def _get_coordinator_from_device(
@@ -341,9 +353,16 @@ def _get_coordinator_from_device(
     if len(coordinators) == 1:
         return hass.data[DOMAIN][coordinators[0]]
     else:
-        device_entry = device_registry.async_get(hass).async_get(
-            call.data[ATTR_DEVICE_ID]
-        )
+        device_id = call.data.get(ATTR_DEVICE_ID)
+        if device_id is None:
+            raise HomeAssistantError(
+                f"{DOMAIN} - device_id is required when multiple accounts are configured."
+            )
+        device_entry = device_registry.async_get(hass).async_get(device_id)
+        if device_entry is None:
+            raise HomeAssistantError(
+                f"{DOMAIN} - Device not found for device_id: {device_id}"
+            )
         config_entry_ids = device_entry.config_entries
         config_entry_id = next(
             (
@@ -357,7 +376,13 @@ def _get_coordinator_from_device(
             ),
             None,
         )
-        config_entry_unique_id = hass.config_entries.async_get_entry(
-            config_entry_id
-        ).unique_id
-        return hass.data[DOMAIN][config_entry_unique_id]
+        if config_entry_id is None:
+            raise HomeAssistantError(
+                f"{DOMAIN} - No matching config entry found for device: {device_id}"
+            )
+        config_entry = hass.config_entries.async_get_entry(config_entry_id)
+        if config_entry is None:
+            raise HomeAssistantError(
+                f"{DOMAIN} - Config entry not found: {config_entry_id}"
+            )
+        return hass.data[DOMAIN][config_entry.unique_id]
