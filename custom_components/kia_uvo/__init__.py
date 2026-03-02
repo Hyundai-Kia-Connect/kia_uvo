@@ -111,9 +111,7 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             CONF_SCAN_INTERVAL: scan_interval,
         }
         registry = er.async_get(hass)
-        entities = er.async_entries_for_config_entry(
-            registry, config_entry.entry_id
-        )
+        entities = er.async_entries_for_config_entry(registry, config_entry.entry_id)
         for entity in entities:
             registry.async_remove(entity.entity_id)
 

@@ -426,7 +426,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
         name="Front Left Seat Heater",
-        is_on=lambda vehicle: vehicle.front_left_seat_status not in (None, "Off", "0", 0, False),
+        is_on=lambda vehicle: (
+            vehicle.front_left_seat_status not in (None, "Off", "0", 0, False)
+        ),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -434,7 +436,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_seat_heater_on",
         name="Front Right Seat Heater",
-        is_on=lambda vehicle: vehicle.front_right_seat_status not in (None, "Off", "0", 0, False),
+        is_on=lambda vehicle: (
+            vehicle.front_right_seat_status not in (None, "Off", "0", 0, False)
+        ),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -442,7 +446,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_left_seat_heater_on",
         name="Rear Left Seat Heater",
-        is_on=lambda vehicle: vehicle.rear_left_seat_status not in (None, "Off", "0", 0, False),
+        is_on=lambda vehicle: (
+            vehicle.rear_left_seat_status not in (None, "Off", "0", 0, False)
+        ),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -450,7 +456,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_right_seat_heater_on",
         name="Rear Right Seat Heater",
-        is_on=lambda vehicle: vehicle.rear_right_seat_status not in (None, "Off", "0", 0, False),
+        is_on=lambda vehicle: (
+            vehicle.rear_right_seat_status not in (None, "Off", "0", 0, False)
+        ),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
