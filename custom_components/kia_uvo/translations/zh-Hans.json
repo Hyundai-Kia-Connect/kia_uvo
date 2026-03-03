@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - 重新登录账号",
         "description": "您的账户验证失败。点击提交重新登录授权。"
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - 重新配置",
+        "data": {
+          "reconfigure_choice": "您想做什么？"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - 设置 PIN",
+        "description": "请输入在 Kia/Hyundai Connect 应用中授权远程命令（锁车、解锁、空调）所需的 PIN 码。",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "设备已配置"
+      "already_configured": "设备已配置",
+      "reconfigure_successful": "重新配置成功"
     },
     "error": {
       "invalid_auth": "连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",

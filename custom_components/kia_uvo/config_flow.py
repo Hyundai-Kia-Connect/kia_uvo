@@ -15,6 +15,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.helpers.selector import selector
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_PIN,
@@ -65,6 +66,28 @@ STEP_REGION_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_REGION): vol.In(REGIONS),
         vol.Required(CONF_BRAND): vol.In(BRANDS),
+    }
+)
+
+STEP_RECONFIGURE_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("reconfigure_choice"): selector(
+            {
+                "select": {
+                    "options": [
+                        {"value": "reauth", "label": "Re-authenticate your account"},
+                        {"value": "pin", "label": "Set / change PIN"},
+                    ],
+                    "mode": "list",
+                }
+            }
+        ),
+    }
+)
+
+STEP_PIN_ONLY_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PIN): selector({"text": {"type": "password"}}),
     }
 )
 
@@ -155,6 +178,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._vehicle_manager: VehicleManager | None = None
         self._pending_login_data = None
         self._otp_request: OTPRequest | None = None
+        self._is_reconfigure = False
 
     @staticmethod
     @callback
@@ -211,7 +235,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self._otp_request = result
 
                     return await self.async_step_select_otp_method()
-                if self.reauth_entry is None:
+                if self._is_reconfigure:
+                    return self.async_update_reload_and_abort(
+                        self._get_reconfigure_entry(),
+                        data_updates=full_config,
+                    )
+                elif self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
                     await self.async_set_unique_id(
                         hashlib.sha256(title.encode("utf-8")).hexdigest()
@@ -276,7 +305,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors=errors,
             )
         self._pending_login_data[CONF_TOKEN] = self._vehicle_manager.token.to_dict()
-        if self.reauth_entry is None:
+        if self._is_reconfigure:
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                data_updates=self._pending_login_data,
+            )
+        elif self.reauth_entry is None:
             title = f"{BRANDS[self._pending_login_data[CONF_BRAND]]} {REGIONS[self._pending_login_data[CONF_REGION]]} {self._pending_login_data[CONF_USERNAME]}"
             await self.async_set_unique_id(
                 hashlib.sha256(title.encode("utf-8")).hexdigest()
@@ -316,7 +350,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
             else:
-                if self.reauth_entry is None:
+                if self._is_reconfigure:
+                    return self.async_update_reload_and_abort(
+                        self._get_reconfigure_entry(),
+                        data_updates=full_config,
+                    )
+                elif self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
                     await self.async_set_unique_id(
                         hashlib.sha256(title.encode("utf-8")).hexdigest()
@@ -336,6 +375,37 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="credentials_token",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Present choice: re-authenticate or set/change PIN."""
+        if user_input is not None:
+            if user_input["reconfigure_choice"] == "reauth":
+                self._is_reconfigure = True
+                return await self.async_step_user()
+            else:
+                return await self.async_step_reconfigure_pin()
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=STEP_RECONFIGURE_DATA_SCHEMA,
+        )
+
+    async def async_step_reconfigure_pin(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Allow the user to set or change the PIN without full re-authentication."""
+        if user_input is not None:
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                data_updates={CONF_PIN: user_input[CONF_PIN]},
+            )
+
+        return self.async_show_form(
+            step_id="reconfigure_pin",
+            data_schema=STEP_PIN_ONLY_SCHEMA,
         )
 
     async def async_step_reauth(self, user_input=None):

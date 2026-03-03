@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Uudelleentodennus",
         "description": "Tiliäsi ei voitu todentaa.  Napsauta lähetä yrittääksesi uudelleen."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Uudelleenmääritys",
+        "data": {
+          "reconfigure_choice": "Mitä haluat tehdä?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - Aseta PIN",
+        "description": "Anna PIN-koodi, jota tarvitaan etäkomentojen (lukitus, avaus, ilmastointi) valtuuttamiseen Kia/Hyundai Connect -sovelluksessa.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Laite on jo määritetty"
+      "already_configured": "Laite on jo määritetty",
+      "reconfigure_successful": "Uudelleenmääritys onnistui"
     },
     "error": {
       "invalid_auth": "Kirjautuminen Hyundai (Bluelink) / Kia (Uvo) Connect -palvelimille epäonnistui. Kirjaudu virallisella sovelluksella ulos ja sisään ja yritä uudelleen!",

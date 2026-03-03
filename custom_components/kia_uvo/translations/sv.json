@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reautentisering",
         "description": "Kontot kan inte autentiseres. Klicka på Send för att sätta upp på nytt."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Konfigurera om",
+        "data": {
+          "reconfigure_choice": "Vad vill du göra?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - Ange PIN",
+        "description": "Ange PIN-koden som krävs för att auktorisera fjärrkommandon (lås, lås upp, klimat) i Kia/Hyundai Connect-appen.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Enheten är redan konfigurerad"
+      "already_configured": "Enheten är redan konfigurerad",
+      "reconfigure_successful": "Omkonfigurering lyckades"
     },
     "error": {
       "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",

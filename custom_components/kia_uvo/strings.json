@@ -35,17 +35,35 @@
       "select_otp_method": {
         "title": "Select OTP Method",
         "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
-        "data": { "method": "OTP delivery method" }
+        "data": {
+          "method": "OTP delivery method"
+        }
       },
       "enter_otp": {
         "title": "Enter One‑Time Password",
         "description": "Enter the verification code sent to your selected method.",
-        "data": { "otp": "One‑time password" }
+        "data": {
+          "otp": "One‑time password"
+        }
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Reconfigure",
+        "data": {
+          "reconfigure_choice": "What would you like to do?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - Set PIN",
+        "description": "Enter the PIN required to authorize remote commands (lock, unlock, climate) in the Kia/Hyundai Connect app.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
-      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]",
+      "reconfigure_successful": "Reconfiguration was successful"
     },
     "error": {
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
