@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import timedelta
-import traceback
 import logging
 import asyncio
 
@@ -150,19 +149,23 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     self.vehicle_manager.check_and_force_update_vehicles,
                     self.force_refresh_interval,
                 )
-            except Exception:
+            except Exception as force_err:
+                _LOGGER.warning(
+                    "Force update failed, falling back to cached: %s",
+                    force_err,
+                )
                 try:
-                    _LOGGER.exception(
-                        f"Force update failed, falling back to cached: {traceback.format_exc()}"
-                    )
                     await self.hass.async_add_executor_job(
                         self.vehicle_manager.update_all_vehicles_with_cached_state
                     )
-                except Exception:
-                    _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
-                    raise UpdateFailed(
-                        f"Error communicating with API: {traceback.format_exc()}"
+                    # Surface a warning so the user knows data may be stale
+                    _LOGGER.warning(
+                        "Using cached vehicle data because force refresh failed"
                     )
+                except Exception as cached_err:
+                    raise UpdateFailed(
+                        f"Error communicating with API: {cached_err}"
+                    ) from cached_err
 
         else:
             await self.hass.async_add_executor_job(
