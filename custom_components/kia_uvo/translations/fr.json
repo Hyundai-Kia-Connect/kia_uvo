@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Ré-authentification",
         "description": "Echec d'authentification. Clickez Soumettre pour recommencer la configuration."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Reconfigurer",
+        "data": {
+          "reconfigure_choice": "Que souhaitez-vous faire ?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - Définir le PIN",
+        "description": "Entrez le PIN requis pour autoriser les commandes à distance (verrouillage, déverrouillage, climatisation) dans l'application Kia/Hyundai Connect.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Périférique déjà configuré"
+      "already_configured": "Périférique déjà configuré",
+      "reconfigure_successful": "Reconfiguration réussie"
     },
     "error": {
       "invalid_auth": "Authentification échouée aux serveurs Hyundai (Bluelink) / Kia (Uvo) Connect. Déconnectez-vous et reconnectez-vous sur l'application officielle puis ré-essayez!",

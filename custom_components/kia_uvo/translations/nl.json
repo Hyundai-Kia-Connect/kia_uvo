@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Opnieuw Authenticeren",
         "description": "Uw account kan zich niet authenticeren. Klik Submit om het opnieuw te proberen."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Opnieuw configureren",
+        "data": {
+          "reconfigure_choice": "Wat wil je doen?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - PIN instellen",
+        "description": "Voer de PIN in die vereist is om externe opdrachten (vergrendelen, ontgrendelen, klimaatbeheersing) te autoriseren in de Kia/Hyundai Connect-app.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Het device is al geconfigureerd"
+      "already_configured": "Het device is al geconfigureerd",
+      "reconfigure_successful": "Herconfiguratie geslaagd"
     },
     "error": {
       "invalid_auth": "Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiële app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",

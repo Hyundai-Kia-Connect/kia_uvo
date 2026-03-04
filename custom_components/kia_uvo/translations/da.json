@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Genbekræftelse",
         "description": "Din konto kan ikke godkendes. Klik på Indsend for at opsætte igen."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Genindstil",
+        "data": {
+          "reconfigure_choice": "Hvad vil du gøre?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - Indstil PIN",
+        "description": "Indtast den PIN-kode, der kræves for at godkende fjernkommandoer (lås, oplås, klima) i Kia/Hyundai Connect-appen.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Enheden er allerede konfigureret"
+      "already_configured": "Enheden er allerede konfigureret",
+      "reconfigure_successful": "Genindstilling lykkedes"
     },
     "error": {
       "invalid_auth": "Login fejlede til Hyundai (Bluelink) / Kia (Uvo) Connect-servere. Brug den officielle app til at logge ud og logge ind igen, og prøv derefter igen!",

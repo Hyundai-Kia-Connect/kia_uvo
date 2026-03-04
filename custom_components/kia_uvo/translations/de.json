@@ -16,10 +16,24 @@
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reauthentifizierung",
         "description": "Dein Konto kann nicht authentifiziert werden. Klicke auf Senden, um die Neukonfiguration durchzuführen."
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - Neu konfigurieren",
+        "data": {
+          "reconfigure_choice": "Was möchtest du tun?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - PIN festlegen",
+        "description": "Gib die PIN ein, die für Fernbefehle (Sperren, Entsperren, Klimaanlage) in der Kia/Hyundai Connect App benötigt wird.",
+        "data": {
+          "pin": "PIN"
+        }
       }
     },
     "abort": {
-      "already_configured": "Dein Fahrzeug ist bereits konfiguriert"
+      "already_configured": "Dein Fahrzeug ist bereits konfiguriert",
+      "reconfigure_successful": "Neukonfiguration erfolgreich"
     },
     "error": {
       "invalid_auth": "Anmeldung bei Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde dich von deiner Hyundai/Kia-App ab, melde dich erneut an und versuche es erneut!",
