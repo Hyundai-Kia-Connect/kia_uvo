@@ -213,6 +213,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Used after setting charge limits because the soft refresh (cmm/gvi)
         does not return targetSOC for some vehicles. A force refresh (rems/rvs)
         ensures the fresh charge limits are read back immediately.
+
+        Uses async_set_updated_data instead of async_refresh to avoid a
+        redundant cmm/gvi API call — the force refresh already updates the
+        vehicle objects in-place (rems/rvs + cmm/gvi), so we just need to
+        notify HA entities to re-read their state.
         """
         try:
             await asyncio.sleep(5)
@@ -224,10 +229,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 60,
             )
         finally:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
-            )
-            await self.async_refresh()
+            try:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
+                )
+            except Exception:
+                _LOGGER.exception(
+                    "Force refresh after setting charge limits failed"
+                )
+            self.async_set_updated_data(self.data)
 
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
