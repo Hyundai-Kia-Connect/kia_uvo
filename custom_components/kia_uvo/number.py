@@ -15,6 +15,7 @@ from homeassistant.components.number import (
 from homeassistant.const import PERCENTAGE
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, DYNAMIC_UNIT
@@ -106,12 +107,13 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         """Return the entity value to represent the entity state."""
         return getattr(self.vehicle, self._key)
 
+    @staticmethod
+    def _is_valid_charge_limit(val) -> bool:
+        """Check if a charge limit value is a valid integer 50-100 in steps of 10."""
+        return isinstance(val, (int, float)) and int(val) in range(50, 101, 10)
+
     async def async_set_native_value(self, value: float) -> None:
         """Set new charging limit."""
-        # force refresh of state so that we can get the value for the other charging limit
-        # since we have to set both limits as compound API call.
-        # await self.coordinator.async_force_update_all()
-
         if (
             self._description.key == AC_CHARGING_LIMIT_KEY
             and self.vehicle.ev_charge_limits_ac == int(value)
@@ -125,13 +127,37 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
 
         # set new limits
         if self._description.key == AC_CHARGING_LIMIT_KEY:
-            ac = value
+            ac = int(value)
             dc = self.vehicle.ev_charge_limits_dc
-            await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, dc)
+            if not self._is_valid_charge_limit(dc):
+                _LOGGER.error(
+                    "Cannot set charge limit: the DC charging limit is not "
+                    "available yet (%r). Try performing a force refresh first, "
+                    "or set the DC slider to a valid value (50-100%%).",
+                    dc,
+                )
+                raise HomeAssistantError(
+                    "Cannot set charge limit: the DC charging limit "
+                    "is not available yet. Try performing a force refresh "
+                    "first, or set the DC slider to a valid value (50-100%)."
+                )
+            await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, int(dc))
         elif self._description.key == DC_CHARGING_LIMIT_KEY:
             ac = self.vehicle.ev_charge_limits_ac
-            dc = value
-            await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, dc)
+            dc = int(value)
+            if not self._is_valid_charge_limit(ac):
+                _LOGGER.error(
+                    "Cannot set charge limit: the AC charging limit is not "
+                    "available yet (%r). Try performing a force refresh first, "
+                    "or set the AC slider to a valid value (50-100%%).",
+                    ac,
+                )
+                raise HomeAssistantError(
+                    "Cannot set charge limit: the AC charging limit "
+                    "is not available yet. Try performing a force refresh "
+                    "first, or set the AC slider to a valid value (50-100%)."
+                )
+            await self.coordinator.async_set_charge_limits(self.vehicle.id, int(ac), dc)
         elif self._description.key == V2L_LIMIT_KEY:
             v2l = value
             await self.coordinator.async_set_v2l_limit(self.vehicle.id, v2l)
