@@ -207,6 +207,28 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         finally:
             await self.async_refresh()
 
+    async def async_await_action_and_force_refresh(self, vehicle_id, action_id):
+        """Wait for action then force refresh to get fresh vehicle data.
+
+        Used after setting charge limits because the soft refresh (cmm/gvi)
+        does not return targetSOC for some vehicles. A force refresh (rems/rvs)
+        ensures the fresh charge limits are read back immediately.
+        """
+        try:
+            await asyncio.sleep(5)
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_action_status,
+                vehicle_id,
+                action_id,
+                True,
+                60,
+            )
+        finally:
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
+            )
+            await self.async_refresh()
+
     async def async_lock_vehicle(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
         try:
@@ -314,7 +336,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise HomeAssistantError(f"Failed to set charge limits: {err}") from err
         self.hass.async_create_task(
-            self.async_await_action_and_refresh(vehicle_id, action_id)
+            self.async_await_action_and_force_refresh(vehicle_id, action_id)
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):
