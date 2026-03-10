@@ -30,7 +30,6 @@ async def async_setup_entry(
         entities.append(ForceRefreshButton(coordinator, vehicle))
 
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 1

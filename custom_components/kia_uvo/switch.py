@@ -32,7 +32,6 @@ async def async_setup_entry(
         entities.append(ClimateSwitch(coordinator, vehicle))
 
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 1
