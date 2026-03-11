@@ -263,6 +263,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
+    async def async_start_climate_default(self, vehicle_id: str):
+        """Start climate with default options (API fills sensible defaults)."""
+        await self.async_start_climate(vehicle_id, ClimateRequestOptions())
+
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ):
