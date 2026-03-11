@@ -39,9 +39,7 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in BUTTON_DESCRIPTIONS:
-            entities.append(
-                HyundaiKiaConnectButton(coordinator, description, vehicle)
-            )
+            entities.append(HyundaiKiaConnectButton(coordinator, description, vehicle))
 
     async_add_entities(entities)
 
