@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from typing import Final
 
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -17,6 +18,22 @@ from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
 
+EV_CHARGING_KEY = "ev_battery_is_charging"
+CLIMATE_KEY = "air_control_is_on"
+
+SWITCH_DESCRIPTIONS: Final[tuple[SwitchEntityDescription, ...]] = (
+    SwitchEntityDescription(
+        key=EV_CHARGING_KEY,
+        name="EV Charging",
+        icon="mdi:ev-station",
+    ),
+    SwitchEntityDescription(
+        key=CLIMATE_KEY,
+        name="Climate",
+        icon="mdi:air-conditioner",
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -27,9 +44,16 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        if getattr(vehicle, "ev_battery_percentage", None) is not None:
-            entities.append(EVChargingSwitch(coordinator, vehicle))
-        entities.append(ClimateSwitch(coordinator, vehicle))
+        for description in SWITCH_DESCRIPTIONS:
+            if description.key == EV_CHARGING_KEY:
+                if getattr(vehicle, "ev_battery_percentage", None) is not None:
+                    entities.append(
+                        HyundaiKiaConnectSwitch(coordinator, description, vehicle)
+                    )
+            else:
+                entities.append(
+                    HyundaiKiaConnectSwitch(coordinator, description, vehicle)
+                )
 
     async_add_entities(entities)
 
@@ -37,46 +61,34 @@ async def async_setup_entry(
 PARALLEL_UPDATES = 1
 
 
-class EVChargingSwitch(SwitchEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        description: SwitchEntityDescription,
         vehicle: Vehicle,
-    ):
+    ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_ev_charging"
-        self._attr_name = f"{vehicle.name} EV Charging"
-        self._attr_icon = "mdi:ev-station"
+        self._description = description
+        self._key = description.key
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
+        self._attr_icon = description.icon
+        self._attr_name = f"{vehicle.name} {description.name}"
 
     @property
     def is_on(self) -> bool | None:
-        return getattr(self.vehicle, "ev_battery_is_charging", None)
+        return getattr(self.vehicle, self._key, None)
 
     async def async_turn_on(self, **kwargs) -> None:
-        await self.coordinator.async_start_charge(self.vehicle.id)
+        if self._key == EV_CHARGING_KEY:
+            await self.coordinator.async_start_charge(self.vehicle.id)
+        elif self._key == CLIMATE_KEY:
+            await self.coordinator.async_start_climate(
+                self.vehicle.id, ClimateRequestOptions()
+            )
 
     async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.async_stop_charge(self.vehicle.id)
-
-
-class ClimateSwitch(SwitchEntity, HyundaiKiaConnectEntity):
-    def __init__(
-        self,
-        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
-        vehicle: Vehicle,
-    ):
-        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate"
-        self._attr_name = f"{vehicle.name} Climate"
-        self._attr_icon = "mdi:air-conditioner"
-
-    @property
-    def is_on(self) -> bool | None:
-        return getattr(self.vehicle, "air_control_is_on", None)
-
-    async def async_turn_on(self, **kwargs) -> None:
-        climate_options = ClimateRequestOptions()
-        await self.coordinator.async_start_climate(self.vehicle.id, climate_options)
-
-    async def async_turn_off(self, **kwargs) -> None:
-        await self.coordinator.async_stop_climate(self.vehicle.id)
+        if self._key == EV_CHARGING_KEY:
+            await self.coordinator.async_stop_charge(self.vehicle.id)
+        elif self._key == CLIMATE_KEY:
+            await self.coordinator.async_stop_climate(self.vehicle.id)

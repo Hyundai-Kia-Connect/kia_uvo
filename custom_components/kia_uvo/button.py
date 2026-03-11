@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from typing import Final
 
-from homeassistant.components.button import ButtonEntity
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -17,6 +18,16 @@ from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
 
+FORCE_REFRESH_KEY = "force_refresh"
+
+BUTTON_DESCRIPTIONS: Final[tuple[ButtonEntityDescription, ...]] = (
+    ButtonEntityDescription(
+        key=FORCE_REFRESH_KEY,
+        name="Force Refresh",
+        icon="mdi:refresh",
+    ),
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -27,7 +38,10 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        entities.append(ForceRefreshButton(coordinator, vehicle))
+        for description in BUTTON_DESCRIPTIONS:
+            entities.append(
+                HyundaiKiaConnectButton(coordinator, description, vehicle)
+            )
 
     async_add_entities(entities)
 
@@ -35,16 +49,20 @@ async def async_setup_entry(
 PARALLEL_UPDATES = 1
 
 
-class ForceRefreshButton(ButtonEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        description: ButtonEntityDescription,
         vehicle: Vehicle,
-    ):
+    ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_force_refresh"
-        self._attr_name = f"{vehicle.name} Force Refresh"
-        self._attr_icon = "mdi:refresh"
+        self._description = description
+        self._key = description.key
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
+        self._attr_icon = description.icon
+        self._attr_name = f"{vehicle.name} {description.name}"
 
     async def async_press(self) -> None:
-        await self.coordinator.async_force_update_all()
+        if self._key == FORCE_REFRESH_KEY:
+            await self.coordinator.async_force_refresh_vehicle(self.vehicle.id)
