@@ -52,20 +52,27 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+REGION_OPTIONS = [
+    {"value": key, "label": label} for key, label in REGIONS.items()
+]
+BRAND_OPTIONS = [
+    {"value": key, "label": label} for key, label in BRANDS.items()
+]
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
         vol.Optional(CONF_PIN, default=DEFAULT_PIN): str,
-        vol.Required(CONF_REGION): vol.In(REGIONS),
-        vol.Required(CONF_BRAND): vol.In(BRANDS),
+        vol.Required(CONF_REGION): selector({"select": {"options": REGION_OPTIONS}}),
+        vol.Required(CONF_BRAND): selector({"select": {"options": BRAND_OPTIONS}}),
     }
 )
 
 STEP_REGION_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_REGION): vol.In(REGIONS),
-        vol.Required(CONF_BRAND): vol.In(BRANDS),
+        vol.Required(CONF_REGION): selector({"select": {"options": REGION_OPTIONS}}),
+        vol.Required(CONF_BRAND): selector({"select": {"options": BRAND_OPTIONS}}),
     }
 )
 
