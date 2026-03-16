@@ -43,7 +43,10 @@ def _should_add_sensor(description: SensorEntityDescription, vehicle: Vehicle) -
     if getattr(vehicle, description.key, None) is not None:
         return True
 
-    return _is_electrified_vehicle(vehicle) and description.key.startswith(("ev_", "_ev_"))
+    return _is_electrified_vehicle(vehicle) and description.key.startswith(
+        ("ev_", "_ev_")
+    )
+
 
 SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(

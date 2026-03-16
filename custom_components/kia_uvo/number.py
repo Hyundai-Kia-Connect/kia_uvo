@@ -33,6 +33,7 @@ def _is_electrified_vehicle(vehicle: Vehicle) -> bool:
     """Return True for EV and PHEV vehicles."""
     return getattr(vehicle, "engine_type", None) in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
+
 NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
         key=AC_CHARGING_LIMIT_KEY,
@@ -75,7 +76,9 @@ async def async_setup_entry(
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
             if description.key in (AC_CHARGING_LIMIT_KEY, DC_CHARGING_LIMIT_KEY):
-                if getattr(vehicle, description.key, None) is not None or _is_electrified_vehicle(vehicle):
+                if getattr(
+                    vehicle, description.key, None
+                ) is not None or _is_electrified_vehicle(vehicle):
                     entities.append(
                         HyundaiKiaConnectNumber(coordinator, description, vehicle)
                     )

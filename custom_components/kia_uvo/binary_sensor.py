@@ -40,7 +40,7 @@ def _is_electrified_vehicle(vehicle: Vehicle) -> bool:
 
 
 def _should_add_binary_sensor(
-    description: "HyundaiKiaBinarySensorEntityDescription", vehicle: Vehicle
+    description: HyundaiKiaBinarySensorEntityDescription, vehicle: Vehicle
 ) -> bool:
     """Create EV entities even when the backend currently reports null values."""
     if getattr(vehicle, description.key, None) is not None:
@@ -199,7 +199,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="ev_battery_is_plugged_in",
         name="EV Battery Plug",
-        is_on=lambda vehicle: _normalize_optional_bool(vehicle.ev_battery_is_plugged_in),
+        is_on=lambda vehicle: _normalize_optional_bool(
+            vehicle.ev_battery_is_plugged_in
+        ),
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
