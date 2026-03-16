@@ -9,6 +9,7 @@ from typing import Final
 
 from homeassistant.const import EntityCategory
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -24,6 +25,28 @@ from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _normalize_optional_bool(value: object) -> bool | None:
+    """Normalize 0/1 backend flags to booleans while preserving None."""
+    if value is None:
+        return None
+    return bool(value)
+
+
+def _is_electrified_vehicle(vehicle: Vehicle) -> bool:
+    """Return True for EV and PHEV vehicles."""
+    return getattr(vehicle, "engine_type", None) in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+
+
+def _should_add_binary_sensor(
+    description: "HyundaiKiaBinarySensorEntityDescription", vehicle: Vehicle
+) -> bool:
+    """Create EV entities even when the backend currently reports null values."""
+    if getattr(vehicle, description.key, None) is not None:
+        return True
+
+    return _is_electrified_vehicle(vehicle) and description.key.startswith("ev_")
 
 
 @dataclass
@@ -169,14 +192,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="ev_battery_is_charging",
         name="EV Battery Charge",
-        is_on=lambda vehicle: vehicle.ev_battery_is_charging,
+        is_on=lambda vehicle: _normalize_optional_bool(vehicle.ev_battery_is_charging),
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="ev_battery_is_plugged_in",
         name="EV Battery Plug",
-        is_on=lambda vehicle: vehicle.ev_battery_is_plugged_in,
+        is_on=lambda vehicle: _normalize_optional_bool(vehicle.ev_battery_is_plugged_in),
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -466,7 +489,7 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
-            if getattr(vehicle, description.key, None) is not None:
+            if _should_add_binary_sensor(description, vehicle):
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )

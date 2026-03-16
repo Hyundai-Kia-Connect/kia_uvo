@@ -6,6 +6,7 @@ import logging
 from typing import Final
 
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from homeassistant.components.number import (
     NumberEntity,
@@ -26,6 +27,11 @@ _LOGGER = logging.getLogger(__name__)
 AC_CHARGING_LIMIT_KEY = "ev_charge_limits_ac"
 DC_CHARGING_LIMIT_KEY = "ev_charge_limits_dc"
 V2L_LIMIT_KEY = "ev_v2l_discharge_limit"
+
+
+def _is_electrified_vehicle(vehicle: Vehicle) -> bool:
+    """Return True for EV and PHEV vehicles."""
+    return getattr(vehicle, "engine_type", None) in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
 NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
@@ -69,7 +75,7 @@ async def async_setup_entry(
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
             if description.key in (AC_CHARGING_LIMIT_KEY, DC_CHARGING_LIMIT_KEY):
-                if getattr(vehicle, "ev_battery_percentage", None) is not None:
+                if getattr(vehicle, description.key, None) is not None or _is_electrified_vehicle(vehicle):
                     entities.append(
                         HyundaiKiaConnectNumber(coordinator, description, vehicle)
                     )
