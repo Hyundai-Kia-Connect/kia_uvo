@@ -187,6 +187,14 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
         await self.async_refresh()
 
+    async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
+        """Force refresh a single vehicle's state."""
+        await self.async_check_and_refresh_token()
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
+        )
+        self.async_set_updated_data(self.data)
+
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
         await self.hass.async_add_executor_job(
@@ -254,6 +262,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
+
+    async def async_start_climate_default(self, vehicle_id: str):
+        """Start climate with default options (API fills sensible defaults)."""
+        await self.async_start_climate(vehicle_id, ClimateRequestOptions())
 
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
