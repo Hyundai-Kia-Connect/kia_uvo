@@ -12,6 +12,7 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady, ConfigEntryAuthFailed
 from homeassistant.helpers.device_registry import DeviceEntry
+from homeassistant.helpers import entity_registry as er
 
 import hashlib
 
@@ -54,7 +55,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     except ConfigEntryAuthFailed as AuthError:
         raise ConfigEntryAuthFailed(AuthError) from AuthError
     except Exception as ex:
-        raise ConfigEntryNotReady(f"Config Not Ready: {ex}")
+        raise ConfigEntryNotReady(f"Config Not Ready: {ex}") from ex
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
@@ -109,10 +110,8 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             CONF_FORCE_REFRESH_INTERVAL: force_refresh_interval,
             CONF_SCAN_INTERVAL: scan_interval,
         }
-        registry = hass.helpers.entity_registry.async_get(hass)
-        entities = hass.helpers.entity_registry.async_entries_for_config_entry(
-            registry, config_entry.entry_id
-        )
+        registry = er.async_get(hass)
+        entities = er.async_entries_for_config_entry(registry, config_entry.entry_id)
         for entity in entities:
             registry.async_remove(entity.entity_id)
 
