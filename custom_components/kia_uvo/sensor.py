@@ -7,6 +7,7 @@ from typing import Final
 from datetime import date
 
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -30,6 +31,22 @@ from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _is_electrified_vehicle(vehicle: Vehicle) -> bool:
+    """Return True for EV and PHEV vehicles."""
+    return getattr(vehicle, "engine_type", None) in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+
+
+def _should_add_sensor(description: SensorEntityDescription, vehicle: Vehicle) -> bool:
+    """Create EV entities even when the backend currently reports null values."""
+    if getattr(vehicle, description.key, None) is not None:
+        return True
+
+    return _is_electrified_vehicle(vehicle) and description.key.startswith(
+        ("ev_", "_ev_")
+    )
+
 
 SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(
@@ -286,7 +303,7 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
-            if getattr(vehicle, description.key, None) is not None:
+            if _should_add_sensor(description, vehicle):
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
