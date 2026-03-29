@@ -146,8 +146,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
         for vehicle in self.vehicle_manager.vehicles.values():
             try:
-                vehicle.notification_history = self.vehicle_manager.get_notification_history(
-                    vehicle.id
+                vehicle.notification_history = (
+                    self.vehicle_manager.get_notification_history(vehicle.id)
                 )
             except Exception:
                 _LOGGER.debug(
@@ -326,9 +326,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_start_engine(self, vehicle_id: str):
         """Remote-start the engine using the same backend command as climate start."""
-        await self.async_start_climate(
-            vehicle_id, ClimateRequestOptions(climate=True)
-        )
+        await self.async_start_climate(vehicle_id, ClimateRequestOptions(climate=True))
 
     async def async_stop_climate(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
