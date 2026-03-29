@@ -15,7 +15,7 @@ from homeassistant.components.climate.const import (
 )
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -62,6 +62,21 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     }
     heat_status_str_to_int = {v: k for [k, v] in heat_status_int_to_str.items()}
 
+    @staticmethod
+    def _default_target_temperature(vehicle: Vehicle) -> float:
+        """Fallback target temperature when the API snapshot does not expose one."""
+        if vehicle.air_temperature is not None:
+            return vehicle.air_temperature
+        return 21
+
+    @staticmethod
+    def _temperature_unit(vehicle: Vehicle) -> str:
+        """Return a Home Assistant-compatible temperature unit."""
+        unit = vehicle._air_temperature_unit
+        if unit in (UnitOfTemperature.CELSIUS, UnitOfTemperature.FAHRENHEIT):
+            return unit
+        return UnitOfTemperature.CELSIUS
+
     def get_internal_heat_int_for_climate_request(self):
         if (
             self.vehicle.steering_wheel_heater_is_on
@@ -86,7 +101,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             key="climate_control",
             icon="mdi:air-conditioner",
             name="Climate Control",
-            unit_of_measurement=vehicle._air_temperature_unit,
+            unit_of_measurement=self._temperature_unit(vehicle),
         )
         self.vehicle_manager = coordinator.vehicle_manager
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate_control"
@@ -94,7 +109,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
         # set the Climate Request to the current actual state of the car
         self.climate_config = ClimateRequestOptions(
-            set_temp=self.vehicle.air_temperature,
+            set_temp=self._default_target_temperature(self.vehicle),
             climate=self.vehicle.air_control_is_on,
             heating=self.get_internal_heat_int_for_climate_request(),
             defrost=self.vehicle.defrost_is_on,
@@ -103,7 +118,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
-        return self.vehicle._air_temperature_unit
+        return self._temperature_unit(self.vehicle)
 
     @property
     def current_temperature(self) -> float | None:
@@ -143,15 +158,19 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if not self.vehicle.air_control_is_on:
             return HVACMode.OFF
 
+        current_temperature = self.current_temperature
+        target_temperature = self.climate_config.set_temp
+        if current_temperature is None or target_temperature is None:
+            return HVACMode.AUTO
+
         # Cheating: there is no perfect mapping to either heat or cool,
         # as the API can only set target temp and then decides: so we
         # just derive the same by temperature change direction.
-        if self.current_temperature > self.climate_config.set_temp:
+        if current_temperature > target_temperature:
             return HVACMode.COOL
-        if self.current_temperature < self.climate_config.set_temp:
+        if current_temperature < target_temperature:
             return HVACMode.HEAT
 
-        # TODO: what could be a sensible answer if target temp is reached?
         return HVACMode.AUTO
 
     @property
@@ -165,16 +184,21 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if not self.vehicle.air_control_is_on:
             return HVACAction.OFF
 
+        current_temperature = self.current_temperature
+        target_temperature = self.climate_config.set_temp
+        if current_temperature is None or target_temperature is None:
+            return HVACAction.IDLE
+
         # if temp is lower than target, it HEATs
-        if self.current_temperature < self.climate_config.set_temp:
+        if current_temperature < target_temperature:
             return HVACAction.HEATING
 
         # if temp is higher than target, it COOLs
-        if self.current_temperature > self.climate_config.set_temp:
+        if current_temperature > target_temperature:
             return HVACAction.COOLING
 
         # target temp reached
-        if self.current_temperature == self.climate_config.set_temp:
+        if current_temperature == target_temperature:
             return HVACAction.IDLE
 
         # should not happen, fallback
@@ -185,6 +209,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         """Supported in-car climate control modes."""
         return [
             HVACMode.OFF,
+            HVACMode.AUTO,
             # if only heater is activated
             HVACMode.HEAT,
             # if only AC is activated

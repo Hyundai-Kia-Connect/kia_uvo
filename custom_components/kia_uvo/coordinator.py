@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from datetime import date
 import traceback
 import logging
 import asyncio
@@ -105,6 +106,56 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             ),
         )
 
+    def _update_extended_br_data(self) -> None:
+        """Fetch additional BR-only diagnostics used by Home Assistant entities."""
+        self._update_trip_info_for_supported_regions()
+        self._update_notification_history_for_supported_regions()
+
+    def _update_trip_info_for_supported_regions(self) -> None:
+        """Fetch current trip summaries for regions that expose trip endpoints."""
+        if self.vehicle_manager.region != 8 or not self.vehicle_manager.token:
+            return
+
+        today = date.today()
+        month_key = today.strftime("%Y%m")
+        day_key = today.strftime("%Y%m%d")
+
+        for vehicle in self.vehicle_manager.vehicles.values():
+            try:
+                self.vehicle_manager.api.update_month_trip_info(
+                    self.vehicle_manager.token, vehicle, month_key
+                )
+            except Exception:
+                _LOGGER.debug(
+                    "Failed to fetch month trip info for %s", vehicle.id, exc_info=True
+                )
+
+            try:
+                self.vehicle_manager.api.update_day_trip_info(
+                    self.vehicle_manager.token, vehicle, day_key
+                )
+            except Exception:
+                _LOGGER.debug(
+                    "Failed to fetch day trip info for %s", vehicle.id, exc_info=True
+                )
+
+    def _update_notification_history_for_supported_regions(self) -> None:
+        """Fetch BR notification history for diagnostics."""
+        if self.vehicle_manager.region != 8 or not self.vehicle_manager.token:
+            return
+
+        for vehicle in self.vehicle_manager.vehicles.values():
+            try:
+                vehicle.notification_history = (
+                    self.vehicle_manager.get_notification_history(vehicle.id)
+                )
+            except Exception:
+                _LOGGER.debug(
+                    "Failed to fetch notification history for %s",
+                    vehicle.id,
+                    exc_info=True,
+                )
+
     async def _async_update_data(self):
         """Update data via library. Called by update_coordinator periodically.
 
@@ -169,6 +220,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
+        await self.hass.async_add_executor_job(self._update_extended_br_data)
+
         return self.data
 
     async def async_update_all(self) -> None:
@@ -177,6 +230,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.update_all_vehicles_with_cached_state
         )
+        await self.hass.async_add_executor_job(self._update_extended_br_data)
         await self.async_refresh()
 
     async def async_force_update_all(self) -> None:
@@ -185,6 +239,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_all_vehicles_states
         )
+        await self.hass.async_add_executor_job(self._update_extended_br_data)
         await self.async_refresh()
 
     async def async_check_and_refresh_token(self):
@@ -268,6 +323,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
+
+    async def async_start_engine(self, vehicle_id: str):
+        """Remote-start the engine using the same backend command as climate start."""
+        await self.async_start_climate(vehicle_id, ClimateRequestOptions(climate=True))
 
     async def async_stop_climate(self, vehicle_id: str):
         await self.async_check_and_refresh_token()
