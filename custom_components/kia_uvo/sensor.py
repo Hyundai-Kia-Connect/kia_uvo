@@ -18,6 +18,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfSpeed,
     UnitOfTime,
     EntityCategory,
 )
@@ -232,6 +233,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:alert-circle",
     ),
     SensorEntityDescription(
+        key="remote_control_waiting_time",
+        name="Remote Control Waiting Time",
+        icon="mdi:timer-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
         key="ev_first_departure_time",
         name="EV First Scheduled Departure Time",
         icon="mdi:clock-outline",
@@ -301,6 +308,71 @@ async def async_setup_entry(
                     coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
                 )
             )
+        if (
+            coordinator.vehicle_manager.region == 8
+            or vehicle.month_trip_info is not None
+            or vehicle.day_trip_info is not None
+        ):
+            entities.append(
+                MonthTripInfoEntity(
+                    coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+                )
+            )
+            entities.append(
+                DayTripInfoEntity(
+                    coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+                )
+            )
+            entities.append(
+                TripSummaryMetricEntity(
+                    coordinator,
+                    coordinator.vehicle_manager.vehicles[vehicle_id],
+                    "month",
+                    "drive_time",
+                    "Monthly Drive Time",
+                    "mdi:timer-outline",
+                    UnitOfTime.MINUTES,
+                )
+            )
+            entities.append(
+                TripSummaryMetricEntity(
+                    coordinator,
+                    coordinator.vehicle_manager.vehicles[vehicle_id],
+                    "month",
+                    "avg_speed",
+                    "Monthly Average Speed",
+                    "mdi:speedometer-medium",
+                    UnitOfSpeed.KILOMETERS_PER_HOUR,
+                )
+            )
+            entities.append(
+                TripSummaryMetricEntity(
+                    coordinator,
+                    coordinator.vehicle_manager.vehicles[vehicle_id],
+                    "day",
+                    "drive_time",
+                    "Daily Drive Time",
+                    "mdi:timer-outline",
+                    UnitOfTime.MINUTES,
+                )
+            )
+            entities.append(
+                TripSummaryMetricEntity(
+                    coordinator,
+                    coordinator.vehicle_manager.vehicles[vehicle_id],
+                    "day",
+                    "avg_speed",
+                    "Daily Average Speed",
+                    "mdi:speedometer-medium",
+                    UnitOfSpeed.KILOMETERS_PER_HOUR,
+                )
+            )
+        if coordinator.vehicle_manager.region == 8 or vehicle.notification_history:
+            entities.append(
+                NotificationHistoryEntity(
+                    coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+                )
+            )
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
@@ -346,6 +418,13 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             return self._description.native_unit_of_measurement
 
     @property
+    def suggested_unit_of_measurement(self):
+        """Prefer the API-provided unit instead of HA-wide distance conversion."""
+        if self._description.device_class == SensorDeviceClass.DISTANCE:
+            return self.native_unit_of_measurement
+        return None
+
+    @property
     def state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
@@ -370,6 +449,9 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
         return {
             "vehicle_data": self.vehicle.data,
             "vehicle_name": self.vehicle.name,
+            "month_trip_info": self._serialize_month_trip_info(),
+            "day_trip_info": self._serialize_day_trip_info(),
+            "notification_history": self._serialize_notification_history(),
         }
 
     @property
@@ -379,6 +461,36 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
+
+    def _serialize_month_trip_info(self):
+        month_trip_info = self.vehicle.month_trip_info
+        if month_trip_info is None:
+            return None
+
+        return {
+            "yyyymm": month_trip_info.yyyymm,
+            "summary": (
+                vars(month_trip_info.summary) if month_trip_info.summary else None
+            ),
+            "day_list": [vars(day) for day in (month_trip_info.day_list or [])],
+        }
+
+    def _serialize_day_trip_info(self):
+        day_trip_info = self.vehicle.day_trip_info
+        if day_trip_info is None:
+            return None
+
+        return {
+            "yyyymmdd": day_trip_info.yyyymmdd,
+            "summary": vars(day_trip_info.summary) if day_trip_info.summary else None,
+            "trip_list": [vars(trip) for trip in (day_trip_info.trip_list or [])],
+        }
+
+    def _serialize_notification_history(self):
+        history = self.vehicle.notification_history or []
+        if not history:
+            return None
+        return history[:10]
 
 
 class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
@@ -467,3 +579,164 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+class MonthTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+        self._attr_icon = "mdi:map-marker-distance"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def state(self):
+        month_trip_info = self.vehicle.month_trip_info
+        if month_trip_info is None:
+            return None
+        return month_trip_info.summary.distance if month_trip_info.summary else None
+
+    @property
+    def native_unit_of_measurement(self):
+        return "km"
+
+    @property
+    def suggested_unit_of_measurement(self):
+        return "km"
+
+    @property
+    def device_class(self):
+        return SensorDeviceClass.DISTANCE
+
+    @property
+    def state_attributes(self):
+        month_trip_info = self.vehicle.month_trip_info
+        if month_trip_info is None:
+            return {}
+
+        return {
+            "yyyymm": month_trip_info.yyyymm,
+            "day_count": len(month_trip_info.day_list or []),
+            "summary": (
+                vars(month_trip_info.summary) if month_trip_info.summary else None
+            ),
+            "day_list": [vars(day) for day in (month_trip_info.day_list or [])],
+        }
+
+    @property
+    def name(self):
+        return f"{self.vehicle.name} Monthly Trip Info"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-monthly-trip-info-{self.vehicle.id}"
+
+
+class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+        self._attr_icon = "mdi:timeline-text"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def state(self):
+        day_trip_info = self.vehicle.day_trip_info
+        if day_trip_info is None:
+            return None
+        return day_trip_info.summary.distance if day_trip_info.summary else None
+
+    @property
+    def native_unit_of_measurement(self):
+        return "km"
+
+    @property
+    def suggested_unit_of_measurement(self):
+        return "km"
+
+    @property
+    def device_class(self):
+        return SensorDeviceClass.DISTANCE
+
+    @property
+    def state_attributes(self):
+        day_trip_info = self.vehicle.day_trip_info
+        if day_trip_info is None:
+            return {}
+
+        return {
+            "yyyymmdd": day_trip_info.yyyymmdd,
+            "trip_count": len(day_trip_info.trip_list or []),
+            "summary": vars(day_trip_info.summary) if day_trip_info.summary else None,
+            "trip_list": [vars(trip) for trip in (day_trip_info.trip_list or [])],
+        }
+
+    @property
+    def name(self):
+        return f"{self.vehicle.name} Daily Trip Info"
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-daily-trip-info-{self.vehicle.id}"
+
+
+class TripSummaryMetricEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(
+        self,
+        coordinator,
+        vehicle: Vehicle,
+        period: str,
+        metric_key: str,
+        label: str,
+        icon: str,
+        unit: str,
+    ):
+        super().__init__(coordinator, vehicle)
+        self._period = period
+        self._metric_key = metric_key
+        self._attr_name = f"{vehicle.name} {label}"
+        self._attr_unique_id = f"{DOMAIN}-{period}-{metric_key}-{vehicle.id}"
+        self._attr_icon = icon
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_native_unit_of_measurement = unit
+
+    @property
+    def native_value(self):
+        summary = self._get_summary()
+        if summary is None:
+            return None
+        return getattr(summary, self._metric_key, None)
+
+    @property
+    def suggested_unit_of_measurement(self):
+        return self._attr_native_unit_of_measurement
+
+    def _get_summary(self):
+        trip_info = (
+            self.vehicle.month_trip_info
+            if self._period == "month"
+            else self.vehicle.day_trip_info
+        )
+        if trip_info is None:
+            return None
+        return trip_info.summary
+
+
+class NotificationHistoryEntity(SensorEntity, HyundaiKiaConnectEntity):
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+        self._attr_name = f"{vehicle.name} Notification History"
+        self._attr_unique_id = f"{DOMAIN}-notification-history-{vehicle.id}"
+        self._attr_icon = "mdi:message-text-clock-outline"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    @property
+    def native_value(self):
+        history = self.vehicle.notification_history or []
+        return len(history)
+
+    @property
+    def state_attributes(self):
+        history = self.vehicle.notification_history or []
+        latest = history[0] if history else None
+        return {
+            "latest_notification": latest,
+            "history": history[:10],
+        }

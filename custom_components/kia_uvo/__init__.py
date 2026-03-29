@@ -38,7 +38,9 @@ PLATFORMS: list[str] = [
     Platform.DEVICE_TRACKER,
     Platform.LOCK,
     Platform.NUMBER,
-    # Platform.CLIMATE,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.BUTTON,
 ]
 
 
