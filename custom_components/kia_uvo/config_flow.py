@@ -310,6 +310,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             from urllib.parse import parse_qs, urlparse
+
             redirect_url = user_input["redirect_url"].strip()
             try:
                 parsed = urlparse(redirect_url)
