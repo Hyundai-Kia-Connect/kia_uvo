@@ -398,9 +398,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Allow the user to set or change the PIN without full re-authentication."""
         if user_input is not None:
+            new_pin = user_input[CONF_PIN]
+            data_updates = {CONF_PIN: new_pin}
+            entry = self._get_reconfigure_entry()
+            token_data = entry.data.get(CONF_TOKEN)
+            if token_data is not None:
+                updated_token = {**token_data, CONF_PIN: new_pin}
+                data_updates[CONF_TOKEN] = updated_token
             return self.async_update_reload_and_abort(
-                self._get_reconfigure_entry(),
-                data_updates={CONF_PIN: user_input[CONF_PIN]},
+                entry,
+                data_updates=data_updates,
             )
 
         return self.async_show_form(
