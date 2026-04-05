@@ -346,7 +346,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             return self._description.native_unit_of_measurement
 
     @property
-    def state_attributes(self):
+    def extra_state_attributes(self):
         if self._description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
         elif self._description.key == "dtc_count":
@@ -366,7 +366,7 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
         return True
 
     @property
-    def state_attributes(self):
+    def extra_state_attributes(self):
         return {
             "vehicle_data": self.vehicle.data,
             "vehicle_name": self.vehicle.name,
@@ -390,7 +390,7 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         return len(self.vehicle.daily_stats)
 
     @property
-    def state_attributes(self):
+    def extra_state_attributes(self):
         m = {}
         for day in self.vehicle.daily_stats:
             key = day.date.strftime("%Y-%m-%d")
@@ -430,7 +430,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         return todayskey
 
     @property
-    def state_attributes(self):
+    def extra_state_attributes(self):
         today = date.today()
         todayskey = today.strftime("%Y-%m-%d")
         m = {
