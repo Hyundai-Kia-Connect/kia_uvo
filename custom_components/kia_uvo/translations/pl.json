@@ -1,0 +1,395 @@
+{
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect – Dane logowania",
+        "description": "Wprowadź dane logowania do swojego konta.",
+        "data": {
+          "username": "Nazwa użytkownika",
+          "password": "Hasło",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect – Dane logowania",
+        "description": "Wprowadź dane logowania do swojego konta. W regionie europejskim wymagana jest obsługa specjalnego tokena — szczegóły znajdziesz w README.",
+        "data": {
+          "username": "Nazwa użytkownika",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
+      "user": {
+        "title": "Hyundai / Kia Connect – Region i marka",
+        "description": "Skonfiguruj integrację Hyundai (Bluelink) / Kia (Uvo) Connect z Home Assistant.",
+        "data": {
+          "region": "Region",
+          "brand": "Marka"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect – Ponowna autoryzacja",
+        "description": "Nie można uwierzytelnić Twojego konta. Kliknij Wyślij, aby ponownie skonfigurować."
+      },
+      "select_otp_method": {
+        "title": "Wybierz metodę OTP",
+        "description": "Twoje konto wymaga weryfikacji. Wybierz sposób otrzymania jednorazowego hasła.",
+        "data": {
+          "method": "Metoda dostarczenia OTP"
+        }
+      },
+      "enter_otp": {
+        "title": "Wprowadź jednorazowe hasło",
+        "description": "Wprowadź kod weryfikacyjny wysłany wybraną metodą.",
+        "data": {
+          "otp": "Jednorazowe hasło"
+        }
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect – Rekonfiguracja",
+        "data": {
+          "reconfigure_choice": "Co chcesz zrobić?"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect – Ustaw PIN",
+        "description": "Wprowadź PIN wymagany do autoryzacji zdalnych poleceń (zamykanie, otwieranie, klimatyzacja) w aplikacji Kia/Hyundai Connect.",
+        "data": {
+          "pin": "PIN"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Urządzenie jest już skonfigurowane",
+      "reauth_successful": "Ponowna autoryzacja zakończona pomyślnie",
+      "reconfigure_successful": "Rekonfiguracja zakończona pomyślnie"
+    },
+    "error": {
+      "invalid_auth": "Logowanie do serwerów Hyundai (Bluelink) / Kia (Uvo) Connect nie powiodło się. Użyj oficjalnej aplikacji, aby się wylogować i zalogować ponownie, a następnie spróbuj jeszcze raz.",
+      "invalid_credentials": "Nieprawidłowa nazwa użytkownika lub token/hasło",
+      "unknown": "Nieoczekiwany błąd"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect – Konfiguracja",
+        "data": {
+          "scan_interval": "Interwał skanowania (min)",
+          "force_refresh": "Interwał wymuszonego odświeżania (min) — ustawienie zbyt niskiej wartości może rozładować akumulator 12V",
+          "no_force_refresh_hour_start": "Godzina początku przerwy w wymuszonym odświeżaniu",
+          "no_force_refresh_hour_finish": "Godzina końca przerwy w wymuszonym odświeżaniu",
+          "enable_geolocation_entity": "Włącz encję geolokalizacji przy użyciu OpenStreetMap",
+          "use_email_with_geocode_api": "Użyj adresu e-mail Kia dla API geokodowania. Zwiększa możliwości odpytywania, ale udostępnia adres e-mail do API."
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "Wymuś aktualizację",
+      "description": "Wymuś aktualizację danych pojazdu. Wszystkie pojazdy na tym samym koncie co wybrany pojazd zostaną zaktualizowane.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "update": {
+      "name": "Aktualizuj",
+      "description": "Zaktualizuj dane pojazdu z pamięci podręcznej serwisu",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Uruchom klimatyzację",
+      "description": "Używaj ostrożnie — uruchamia klimatyzację i silnik. Nie wszystkie opcje są dostępne we wszystkich samochodach i regionach. Użyj aplikacji mobilnej samochodu jako przewodnika i dopasuj dostępne opcje.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "duration": {
+          "name": "Czas trwania",
+          "description": "Jak długo ma działać klimatyzacja. Maksymalny czas może być ograniczony przez model/rok/region."
+        },
+        "climate": {
+          "name": "Klimatyzacja",
+          "description": "Włącz system HVAC"
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Ustaw temperaturę klimatyzacji. Jednostka zależy od regionu."
+        },
+        "defrost": {
+          "name": "Odmrażanie",
+          "description": "Odmrażanie przedniej szyby"
+        },
+        "heating": {
+          "name": "Ogrzewanie",
+          "description": "Funkcje ogrzewania, takie jak przednia/tylna szyba i lusterka boczne. W Europie kierownica ma osobne ustawienie."
+        },
+        "steering_wheel": {
+          "name": "Ogrzewanie kierownicy",
+          "description": "Poziom ogrzewania kierownicy. Tylko dla Europy — w innych regionach użyj ustawienia ogrzewania."
+        },
+        "flseat": {
+          "name": "Przedni lewy fotel",
+          "description": "Ogrzewanie/chłodzenie przedniego lewego fotela"
+        },
+        "frseat": {
+          "name": "Przedni prawy fotel",
+          "description": "Ogrzewanie/chłodzenie przedniego prawego fotela"
+        },
+        "rlseat": {
+          "name": "Tylny lewy fotel",
+          "description": "Ogrzewanie/chłodzenie tylnego lewego fotela"
+        },
+        "rrseat": {
+          "name": "Tylny prawy fotel",
+          "description": "Ogrzewanie/chłodzenie tylnego prawego fotela"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "Zatrzymaj klimatyzację",
+      "description": "Używaj ostrożnie — zatrzymuje silnik i klimatyzację",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "Zatrzymaj ładowanie",
+      "description": "Zatrzymaj ładowanie",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "Rozpocznij ładowanie",
+      "description": "Rozpocznij ładowanie",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "lock": {
+      "name": "Zamknij",
+      "description": "Zamknij pojazd",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "unlock": {
+      "name": "Otwórz",
+      "description": "Otwórz pojazd",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "Zamknij port ładowania",
+      "description": "Zamknij port ładowania",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "Otwórz port ładowania",
+      "description": "Otwórz port ładowania",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "Ustaw limity ładowania",
+      "description": "Ustaw limity pojemności ładowania AC i DC",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "dc_limit": {
+          "name": "Limit ładowania DC",
+          "description": "Maksymalna pojemność ładowania ładowarką DC"
+        },
+        "ac_limit": {
+          "name": "Limit ładowania AC",
+          "description": "Maksymalna pojemność ładowania ładowarką AC"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "Ustaw prąd ładowania AC",
+      "description": "Ustaw prąd ładowania AC",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "level": {
+          "name": "Prąd ładowania",
+          "description": "Procentowa wartość prądu ładowania"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Zaplanuj ładowanie i klimatyzację",
+      "description": "Używaj ostrożnie — planowanie ładowania i klimatyzacji. Nie wszystkie opcje są dostępne we wszystkich samochodach i regionach. Użyj aplikacji mobilnej samochodu jako przewodnika i dopasuj dostępne opcje.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "charging_enabled": {
+          "name": "Zaplanowane ładowanie",
+          "description": "Włącz zaplanowane ładowanie"
+        },
+        "first_departure_enabled": {
+          "name": "1. wyjazd",
+          "description": "Włącz pierwszy wyjazd"
+        },
+        "first_departure_days": {
+          "name": "Dni 1. wyjazdu",
+          "description": "Dni, w których obowiązuje pierwszy wyjazd. Nie może być puste."
+        },
+        "first_departure_time": {
+          "name": "Godzina 1. wyjazdu",
+          "description": "Godzina pierwszego wyjazdu. Dla minut użyj 00, 10, 20, 30, 40 lub 50, a dla sekund 00"
+        },
+        "second_departure_enabled": {
+          "name": "2. wyjazd",
+          "description": "Włącz drugi wyjazd"
+        },
+        "second_departure_days": {
+          "name": "Dni 2. wyjazdu",
+          "description": "Dni, w których obowiązuje drugi wyjazd. Nie może być puste."
+        },
+        "second_departure_time": {
+          "name": "Godzina 2. wyjazdu",
+          "description": "Godzina drugiego wyjazdu. Dla minut użyj 00, 10, 20, 30, 40 lub 50, a dla sekund 00"
+        },
+        "off_peak_start_time": {
+          "name": "Początek taryfy pozaszczytowej",
+          "description": "Godzina rozpoczęcia taryfy pozaszczytowej. Dla minut użyj 00, 10, 20, 30, 40 lub 50, a dla sekund 00"
+        },
+        "off_peak_end_time": {
+          "name": "Koniec taryfy pozaszczytowej",
+          "description": "Godzina zakończenia taryfy pozaszczytowej. Dla minut użyj 00, 10, 20, 30, 40 lub 50, a dla sekund 00"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Tylko taryfa pozaszczytowa",
+          "description": "Jeśli włączone, ładowanie odbywa się tylko w godzinach pozaszczytowych. W przeciwnym razie ładowanie może rozpocząć się przed godziną pozaszczytową."
+        },
+        "climate_enabled": {
+          "name": "Klimatyzacja",
+          "description": "Włącz system HVAC przed wyjazdem"
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Ustaw temperaturę klimatyzacji. Jednostka zależy od regionu."
+        },
+        "temperature_unit": {
+          "name": "Jednostka temperatury",
+          "description": "Ustaw jednostkę temperatury klimatyzacji. Jednostka zależy od regionu."
+        },
+        "defrost": {
+          "name": "Odmrażanie",
+          "description": "Odmrażanie przedniej szyby przed wyjazdem"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Włącz światła awaryjne",
+      "description": "Włącz światła awaryjne na 30 sekund.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Włącz światła awaryjne i klakson",
+      "description": "Włącz światła awaryjne i klakson na 30 sekund.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Włącz tryb valet",
+      "description": "Aktywuj tryb valet. Jeśli zdalny tryb valet zostanie włączony podczas jazdy, ekran pojazdu zostanie dezaktywowany.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Wyłącz tryb valet",
+      "description": "Dezaktywuj tryb valet.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Steruj oknami",
+      "description": "Steruj oknami pojazdu. Otwieraj lub zamykaj okna w razie potrzeby.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "flwindow": {
+          "name": "Przednie lewe okno",
+          "description": "Akcja dla przedniego lewego okna"
+        },
+        "frwindow": {
+          "name": "Przednie prawe okno",
+          "description": "Akcja dla przedniego prawego okna"
+        },
+        "rlwindow": {
+          "name": "Tylne lewe okno",
+          "description": "Akcja dla tylnego lewego okna"
+        },
+        "rrwindow": {
+          "name": "Tylne prawe okno",
+          "description": "Akcja dla tylnego prawego okna"
+        }
+      }
+    }
+  }
+}
