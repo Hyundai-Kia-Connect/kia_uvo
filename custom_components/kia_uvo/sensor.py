@@ -323,7 +323,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         self._key = self._description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = self._description.icon
-        self._attr_name = f"{vehicle.name} {self._description.name}"
+        self._attr_name = self._description.name
         self._attr_state_class = self._description.state_class
         self._attr_device_class = self._description.device_class
         if description.entity_category:
@@ -374,7 +374,7 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def name(self):
-        return f"{self.vehicle.name} Data"
+        return "Data"
 
     @property
     def unique_id(self):
@@ -408,7 +408,7 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def name(self):
-        return f"{self.vehicle.name} Daily Driving Stats"
+        return "Daily Driving Stats"
 
     @property
     def unique_id(self):
@@ -462,7 +462,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def name(self):
-        return f"{self.vehicle.name} Todays Daily Driving Stats"
+        return "Todays Daily Driving Stats"
 
     @property
     def unique_id(self):
