@@ -18,13 +18,13 @@ jobs:
             const labels = [];
 
             // Extract Region
-            const regionMatch = body.match(/\*\*Region\*\*\s*\n\s*(EU|CA|USA|AUS|China|India|NZ)/);
+            const regionMatch = body.match(/### Region\s*\n\s*(EU|CA|USA|AUS|China|India|NZ)/);
             if (regionMatch) {
               labels.push(regionMatch[1]);
             }
 
             // Extract Brand
-            const brandMatch = body.match(/\*\*Brand of Car\*\*\s*\n\s*(Hyundai|Kia|Genesis)/);
+            const brandMatch = body.match(/### Brand of Car\s*\n\s*(Hyundai|Kia|Genesis)/);
             if (brandMatch) {
               labels.push(brandMatch[1]);
             }
