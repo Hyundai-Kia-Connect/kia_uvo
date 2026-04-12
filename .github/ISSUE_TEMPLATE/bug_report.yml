@@ -1,0 +1,106 @@
+name: Bug Report
+description: Create a report to help us improve
+title: ""
+labels: ["Bug"]
+assignees: ""
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check Services, Known Bug / Issues and Troubleshooting first:
+        https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
+
+  - type: dropdown
+    id: region
+    attributes:
+      label: Region
+      description: Select your region
+      options:
+        - EU
+        - CA
+        - USA
+        - AUS
+        - China
+    validations:
+      required: true
+
+  - type: dropdown
+    id: brand
+    attributes:
+      label: Brand of Car
+      description: Select the vehicle brand
+      options:
+        - Hyundai
+        - Kia
+        - Genesis
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version of the Integration
+      description: Provide the version number you are using
+      placeholder: e.g., 0.4.1
+    validations:
+      required: true
+
+  - type: textarea
+    id: describe_bug
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the issue you are experiencing
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug_logs
+    attributes:
+      label: Debug Logs (if an error occurred)
+      description: |
+        Provide logs if available. Instructions:
+        https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
+      placeholder: Paste logs here
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the issue
+      placeholder: |
+        1. Go to...
+        2. Click...
+        3. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+      placeholder: Describe the expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Add screenshots if applicable
+      placeholder: Drag and drop images here
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: Additional notes or observations
+    validations:
+      required: false
