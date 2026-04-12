@@ -1,14 +1,21 @@
 name: Bug Report
-description: Report a bug to help us improve
-title: "[BUG] "
-labels: ["bug"]
+description: Create a report to help us improve
+title: ""
+labels: ["Bug"]
+assignees: ""
 
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check Services, Known Bug / Issues and Troubleshooting first:
+        https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
+
   - type: dropdown
     id: region
     attributes:
       label: Region
-      description: Select the region relevant to this issue
+      description: Select your region
       options:
         - EU
         - CA
@@ -21,8 +28,8 @@ body:
   - type: dropdown
     id: brand
     attributes:
-      label: Brand
-      description: Select the vehicle brand involved
+      label: Brand of Car
+      description: Select the vehicle brand
       options:
         - Hyundai
         - Kia
@@ -30,23 +37,43 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: summary
+  - type: input
+    id: version
     attributes:
-      label: Summary
-      description: Provide a clear and concise summary of the issue
-      placeholder: Briefly describe the problem
+      label: Version of the Integration
+      description: Provide the version number you are using
+      placeholder: e.g., 0.4.1
     validations:
       required: true
 
   - type: textarea
-    id: steps
+    id: describe_bug
     attributes:
-      label: Steps to Reproduce
-      description: List the steps required to reproduce the issue
+      label: Describe the Bug
+      description: A clear and concise description of what the bug is
+      placeholder: Describe the issue you are experiencing
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug_logs
+    attributes:
+      label: Debug Logs (if an error occurred)
+      description: |
+        Provide logs if available. Instructions:
+        https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
+      placeholder: Paste logs here
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce
+      description: Steps to reproduce the issue
       placeholder: |
         1. Go to...
-        2. Click on...
+        2. Click...
         3. Observe...
     validations:
       required: true
@@ -55,34 +82,25 @@ body:
     id: expected
     attributes:
       label: Expected Behavior
-      description: Describe what you expected to happen
-      placeholder: What should have happened?
+      description: What you expected to happen
+      placeholder: Describe the expected behavior
     validations:
       required: true
 
   - type: textarea
-    id: actual
+    id: screenshots
     attributes:
-      label: Actual Behavior
-      description: Describe what actually happened
-      placeholder: What happened instead?
-    validations:
-      required: true
-
-  - type: textarea
-    id: environment
-    attributes:
-      label: Environment Details
-      description: Provide any relevant environment information
-      placeholder: App version, vehicle model/year, OS, browser, etc.
+      label: Screenshots
+      description: Add screenshots if applicable
+      placeholder: Drag and drop images here
     validations:
       required: false
 
   - type: textarea
-    id: attachments
+    id: additional_context
     attributes:
-      label: Logs / Screenshots
-      description: Attach logs, screenshots, or error messages
-      placeholder: Drag and drop files here
+      label: Additional Context
+      description: Add any other context about the problem here
+      placeholder: Additional notes or observations
     validations:
       required: false
