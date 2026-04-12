@@ -46,6 +46,7 @@ from .const import (
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     REGION_EUROPE,
+    REGION_NZ,
     BRAND_HYUNDAI,
     BRAND_KIA,
 )
@@ -88,6 +89,12 @@ STEP_RECONFIGURE_DATA_SCHEMA = vol.Schema(
 STEP_PIN_ONLY_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_PIN): selector({"text": {"type": "password"}}),
+    }
+)
+
+STEP_NZ_BROWSER_AUTH_SCHEMA = vol.Schema(
+    {
+        vol.Required("redirect_url"): str,
     }
 )
 
@@ -179,6 +186,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._pending_login_data = None
         self._otp_request: OTPRequest | None = None
         self._is_reconfigure = False
+        self._nz_authorize_url: str | None = None
 
     @staticmethod
     @callback
@@ -196,6 +204,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         self._region_data = user_input
+        if REGIONS[self._region_data[CONF_REGION]] == REGION_NZ:
+            return await self.async_step_credentials_nz()
         if REGIONS[self._region_data[CONF_REGION]] == REGION_EUROPE and (
             BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
             or BRANDS[self._region_data[CONF_BRAND]] == BRAND_HYUNDAI
@@ -260,6 +270,99 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="credentials_password",
             data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
             errors=errors,
+        )
+
+    async def async_step_credentials_nz(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Collect credentials and show the authorize URL for NZ browser-based auth."""
+        errors = {}
+
+        if user_input is not None:
+            full_config = {**self._region_data, **user_input}
+            self._vehicle_manager = VehicleManager(
+                region=full_config[CONF_REGION],
+                brand=full_config[CONF_BRAND],
+                language=self.hass.config.language,
+                username=full_config[CONF_USERNAME],
+                password=full_config[CONF_PASSWORD],
+                pin=full_config[CONF_PIN],
+            )
+            self._pending_login_data = full_config
+            authorize_url = await self.hass.async_add_executor_job(
+                self._vehicle_manager.get_authorize_url
+            )
+            self._nz_authorize_url = authorize_url
+            return await self.async_step_nz_browser_auth()
+
+        return self.async_show_form(
+            step_id="credentials_nz",
+            data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
+            errors=errors,
+            description_placeholders={},
+        )
+
+    async def async_step_nz_browser_auth(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Show the authorize URL and accept the redirect URL paste."""
+        errors = {}
+
+        if user_input is not None:
+            from urllib.parse import parse_qs, urlparse
+
+            redirect_url = user_input["redirect_url"].strip()
+            try:
+                parsed = urlparse(redirect_url)
+                auth_code = "".join(parse_qs(parsed.query)["code"])
+            except (KeyError, ValueError):
+                errors["base"] = "invalid_auth"
+                return self.async_show_form(
+                    step_id="nz_browser_auth",
+                    data_schema=STEP_NZ_BROWSER_AUTH_SCHEMA,
+                    errors=errors,
+                    description_placeholders={"authorize_url": self._nz_authorize_url},
+                )
+            try:
+                await self.hass.async_add_executor_job(
+                    self._vehicle_manager.login_with_auth_code, auth_code
+                )
+            except Exception:
+                _LOGGER.exception("NZ login_with_auth_code failed")
+                errors["base"] = "invalid_auth"
+                return self.async_show_form(
+                    step_id="nz_browser_auth",
+                    data_schema=STEP_NZ_BROWSER_AUTH_SCHEMA,
+                    errors=errors,
+                    description_placeholders={"authorize_url": self._nz_authorize_url},
+                )
+
+            self._pending_login_data[CONF_TOKEN] = self._vehicle_manager.token.to_dict()
+            full_config = self._pending_login_data
+            if self._is_reconfigure:
+                return self.async_update_reload_and_abort(
+                    self._get_reconfigure_entry(),
+                    data_updates=full_config,
+                )
+            elif self.reauth_entry is None:
+                title = f"{BRANDS[full_config[CONF_BRAND]]} {REGIONS[full_config[CONF_REGION]]} {full_config[CONF_USERNAME]}"
+                await self.async_set_unique_id(
+                    hashlib.sha256(title.encode("utf-8")).hexdigest()
+                )
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(title=title, data=full_config)
+            else:
+                self.hass.config_entries.async_update_entry(
+                    self.reauth_entry, data=full_config
+                )
+                await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                return self.async_abort(reason="reauth_successful")
+
+        return self.async_show_form(
+            step_id="nz_browser_auth",
+            data_schema=STEP_NZ_BROWSER_AUTH_SCHEMA,
+            errors=errors,
+            description_placeholders={"authorize_url": self._nz_authorize_url},
         )
 
     async def async_step_select_otp_method(self, user_input=None):
