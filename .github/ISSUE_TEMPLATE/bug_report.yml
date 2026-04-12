@@ -1,16 +1,14 @@
-name: Bug Report
-description: Create a report to help us improve
+name: "Bug Report"
+description: "Create a report to help us improve"
 title: "Bug Report"
 labels: ["Bug"]
 assignees: ""
-
 body:
   - type: markdown
     attributes:
       value: |
         Please check Services, Known Bug / Issues and Troubleshooting first:
         https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
-
   - type: dropdown
     id: region
     attributes:
@@ -24,7 +22,6 @@ body:
         - China
     validations:
       required: true
-
   - type: dropdown
     id: brand
     attributes:
@@ -36,7 +33,6 @@ body:
         - Genesis
     validations:
       required: true
-
   - type: input
     id: version
     attributes:
@@ -45,7 +41,6 @@ body:
       placeholder: e.g., 0.4.1
     validations:
       required: true
-
   - type: textarea
     id: describe_bug
     attributes:
@@ -65,7 +60,6 @@ body:
       placeholder: Paste logs here
     validations:
       required: false
-
   - type: textarea
     id: reproduce
     attributes:
@@ -77,7 +71,6 @@ body:
         3. Observe...
     validations:
       required: true
-
   - type: textarea
     id: expected
     attributes:
@@ -86,7 +79,6 @@ body:
       placeholder: Describe the expected behavior
     validations:
       required: true
-
   - type: textarea
     id: screenshots
     attributes:
@@ -95,7 +87,6 @@ body:
       placeholder: Drag and drop images here
     validations:
       required: false
-
   - type: textarea
     id: additional_context
     attributes:
