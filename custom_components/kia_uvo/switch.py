@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 import logging
-from typing import Final
+from typing import Any, Final
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
@@ -22,8 +23,10 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaSwitchDescription(SwitchEntityDescription):
-    on_action: str
-    off_action: str
+    value_fn: Callable[[Vehicle], bool | None]
+    exists_fn: Callable[[Vehicle], bool]
+    on_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
+    off_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
 
 
 SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
@@ -31,15 +34,19 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         key="ev_battery_is_charging",
         name="EV Charging",
         icon="mdi:ev-station",
-        on_action="async_start_charge",
-        off_action="async_stop_charge",
+        value_fn=lambda vehicle: vehicle.ev_battery_is_charging,
+        exists_fn=lambda vehicle: vehicle.ev_battery_percentage is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_start_charge(vid),
+        off_fn=lambda coordinator, vid: coordinator.async_stop_charge(vid),
     ),
     HyundaiKiaSwitchDescription(
         key="air_control_is_on",
         name="Climate",
         icon="mdi:air-conditioner",
-        on_action="async_start_climate_default",
-        off_action="async_stop_climate",
+        value_fn=lambda vehicle: vehicle.air_control_is_on,
+        exists_fn=lambda vehicle: vehicle.air_control_is_on is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_start_climate_default(vid),
+        off_fn=lambda coordinator, vid: coordinator.async_stop_climate(vid),
     ),
 )
 
@@ -54,12 +61,7 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SWITCH_DESCRIPTIONS:
-            if description.key == "ev_battery_is_charging":
-                if getattr(vehicle, "ev_battery_percentage", None) is not None:
-                    entities.append(
-                        HyundaiKiaConnectSwitch(coordinator, description, vehicle)
-                    )
-            elif getattr(vehicle, description.key, None) is not None:
+            if description.exists_fn(vehicle):
                 entities.append(
                     HyundaiKiaConnectSwitch(coordinator, description, vehicle)
                 )
@@ -71,6 +73,8 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
+    entity_description: HyundaiKiaSwitchDescription
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
@@ -78,18 +82,17 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._description = description
-        self._key = description.key
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
+        self.entity_description = description
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
         self._attr_icon = description.icon
         self._attr_name = f"{vehicle.name} {description.name}"
 
     @property
     def is_on(self) -> bool | None:
-        return getattr(self.vehicle, self._key, None)
+        return self.entity_description.value_fn(self.vehicle)
 
-    async def async_turn_on(self, **kwargs) -> None:
-        await getattr(self.coordinator, self._description.on_action)(self.vehicle.id)
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.entity_description.on_fn(self.coordinator, self.vehicle.id)
 
-    async def async_turn_off(self, **kwargs) -> None:
-        await getattr(self.coordinator, self._description.off_action)(self.vehicle.id)
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.entity_description.off_fn(self.coordinator, self.vehicle.id)
