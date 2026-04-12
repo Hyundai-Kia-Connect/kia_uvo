@@ -1,0 +1,88 @@
+name: Bug Report
+description: Report a bug to help us improve
+title: "[BUG] "
+labels: ["bug"]
+
+body:
+  - type: dropdown
+    id: region
+    attributes:
+      label: Region
+      description: Select the region relevant to this issue
+      options:
+        - EU
+        - CA
+        - USA
+        - AUS
+        - China
+    validations:
+      required: true
+
+  - type: dropdown
+    id: brand
+    attributes:
+      label: Brand
+      description: Select the vehicle brand involved
+      options:
+        - Hyundai
+        - Kia
+        - Genesis
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Provide a clear and concise summary of the issue
+      placeholder: Briefly describe the problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: List the steps required to reproduce the issue
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: Describe what you expected to happen
+      placeholder: What should have happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: Describe what actually happened
+      placeholder: What happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Provide any relevant environment information
+      placeholder: App version, vehicle model/year, OS, browser, etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Logs / Screenshots
+      description: Attach logs, screenshots, or error messages
+      placeholder: Drag and drop files here
+    validations:
+      required: false
