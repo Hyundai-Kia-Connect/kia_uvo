@@ -490,7 +490,7 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
         super().__init__(coordinator, vehicle)
         self.entity_description: HyundaiKiaBinarySensorEntityDescription = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
-        self._attr_name = f"{vehicle.name} {description.name}"
+        self._attr_name = description.name
         if description.entity_category:
             self._attr_entity_category = description.entity_category
 

@@ -90,7 +90,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         )
         self.vehicle_manager = coordinator.vehicle_manager
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate_control"
-        self._attr_name = f"{vehicle.name} Climate Control"
+        self._attr_name = self.entity_description.name
 
         # set the Climate Request to the current actual state of the car
         self.climate_config = ClimateRequestOptions(

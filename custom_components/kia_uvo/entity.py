@@ -9,6 +9,8 @@ from .const import BRANDS, DOMAIN, REGIONS
 class HyundaiKiaConnectEntity(CoordinatorEntity):
     """Class for base entity for Hyundai / Kia Connect integration."""
 
+    _attr_has_entity_name = True
+
     def __init__(self, coordinator, vehicle):
         """Initialize the base entity."""
         super().__init__(coordinator)
@@ -20,7 +22,7 @@ class HyundaiKiaConnectEntity(CoordinatorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, self.vehicle.id)},
             manufacturer=f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
-            model=f"{self.vehicle.name} ({self.vehicle.model})",
-            name=f"{self.vehicle.name} ({self.vehicle.model})",
+            model=self.vehicle.model,
+            name=self.vehicle.name,
             serial_number=f"{self.vehicle.VIN}",
         )
