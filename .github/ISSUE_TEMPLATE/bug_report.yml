@@ -19,6 +19,8 @@ body:
         - USA
         - AUS
         - China
+        - India
+        - NZ
     validations:
       required: true
   - type: dropdown
