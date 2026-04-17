@@ -14,6 +14,7 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     Token,
 )
+from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.exceptions import AuthenticationError
 
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
@@ -31,6 +32,9 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    BRANDS,
+    BRAND_GENESIS,
+    BRAND_HYUNDAI,
     CONF_BRAND,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
@@ -45,9 +49,16 @@ from .const import (
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_TOKEN,
+    REGIONS,
+    REGION_USA,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+AUTH_RETRY_DELAYS = (30 * 60, 6 * 60 * 60)
+AUTH_FAILURE_INVALID = "invalid"
+AUTH_FAILURE_TRANSIENT = "transient"
+AUTH_FAILURE_UNKNOWN = "unknown"
 
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
@@ -56,6 +67,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize."""
         self.platforms: set[str] = set()
+        self.config_entry = config_entry
+        self._auth_retry_attempt = 0
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -113,6 +126,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         """
         try:
             await self.async_check_and_refresh_token()
+        except UpdateFailed:
+            raise
         except AuthenticationError as AuthError:
             raise ConfigEntryAuthFailed(AuthError) from AuthError
         except Exception as err:
@@ -197,10 +212,106 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_refresh_token
-        )
+        try:
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.check_and_refresh_token
+            )
+        except AuthenticationError as err:
+            await self._async_handle_auth_failure(err)
+        self._reset_auth_retry_state()
         await self._async_save_token()
+
+    async def _async_handle_auth_failure(self, err: AuthenticationError) -> None:
+        """Classify auth failures before deciding whether to reauth or retry later."""
+        failure_type = self._classify_auth_error(err)
+
+        if failure_type == AUTH_FAILURE_TRANSIENT:
+            raise self._build_auth_retry_error(err) from err
+
+        if not self._should_try_silent_relogin():
+            raise err
+
+        _LOGGER.info(
+            "Token refresh failed for Hyundai/Genesis USA account; attempting silent re-login"
+        )
+
+        try:
+            result = await self.hass.async_add_executor_job(self.vehicle_manager.login)
+        except AuthenticationError as login_err:
+            failure_type = self._classify_auth_error(login_err)
+            if failure_type == AUTH_FAILURE_TRANSIENT:
+                raise self._build_auth_retry_error(login_err) from login_err
+            raise login_err
+
+        if result is None or isinstance(result, OTPRequest):
+            raise err
+
+    def _classify_auth_error(self, err: AuthenticationError) -> str:
+        """Best-effort classification for auth failures."""
+        message = str(err).lower()
+
+        invalid_markers = (
+            "invalid credential",
+            "invalid_credentials",
+            "invalid login",
+            "wrong password",
+            "incorrect password",
+            "incorrect username",
+            "invalid username",
+            "unauthorized",
+            "forbidden",
+            "login failed: invalid",
+        )
+        transient_markers = (
+            "maintenance",
+            "undergoing planned",
+            "temporarily unavailable",
+            "service unavailable",
+            "systems are currently",
+            "try again later",
+            "server error",
+            "gateway timeout",
+            "bad gateway",
+            "too many requests",
+            "rate limit",
+        )
+
+        if any(marker in message for marker in invalid_markers):
+            return AUTH_FAILURE_INVALID
+        if any(marker in message for marker in transient_markers):
+            return AUTH_FAILURE_TRANSIENT
+        return AUTH_FAILURE_UNKNOWN
+
+    def _build_auth_retry_error(self, err: AuthenticationError) -> UpdateFailed:
+        """Build a staged retry for transient auth failures."""
+        delay = AUTH_RETRY_DELAYS[min(self._auth_retry_attempt, len(AUTH_RETRY_DELAYS) - 1)]
+        self._auth_retry_attempt += 1
+        _LOGGER.warning(
+            "Authentication temporarily failed while fetching %s data; retrying in %s seconds: %s",
+            DOMAIN,
+            delay,
+            err,
+        )
+        return UpdateFailed(
+            f"Authentication temporarily failed, will retry in {delay}s: {err}",
+            retry_after=delay,
+        )
+
+    def _reset_auth_retry_state(self) -> None:
+        """Clear auth retry backoff after a successful refresh/login."""
+        self._auth_retry_attempt = 0
+
+    def _should_try_silent_relogin(self) -> bool:
+        """Only retry automatically for Hyundai/Genesis USA entries with stored credentials."""
+        region = REGIONS.get(self.config_entry.data.get(CONF_REGION))
+        brand = BRANDS.get(self.config_entry.data.get(CONF_BRAND))
+
+        return (
+            region == REGION_USA
+            and brand in {BRAND_HYUNDAI, BRAND_GENESIS}
+            and bool(self.config_entry.data.get(CONF_USERNAME))
+            and bool(self.config_entry.data.get(CONF_PASSWORD))
+        )
 
     async def async_await_action_and_refresh(self, vehicle_id, action_id):
         try:
