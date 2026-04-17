@@ -281,7 +281,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     def _build_auth_retry_error(self, err: AuthenticationError) -> UpdateFailed:
         """Build a staged retry for transient auth failures."""
-        delay = AUTH_RETRY_DELAYS[min(self._auth_retry_attempt, len(AUTH_RETRY_DELAYS) - 1)]
+        delay = AUTH_RETRY_DELAYS[
+            min(self._auth_retry_attempt, len(AUTH_RETRY_DELAYS) - 1)
+        ]
         self._auth_retry_attempt += 1
         _LOGGER.warning(
             "Authentication temporarily failed while fetching %s data; retrying in %s seconds: %s",
