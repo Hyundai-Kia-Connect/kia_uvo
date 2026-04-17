@@ -32,9 +32,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .const import (
-    BRANDS,
-    BRAND_GENESIS,
-    BRAND_HYUNDAI,
     CONF_BRAND,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
@@ -302,13 +299,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self._auth_retry_attempt = 0
 
     def _should_try_silent_relogin(self) -> bool:
-        """Only retry automatically for Hyundai/Genesis USA entries with stored credentials."""
+        """Only retry automatically for USA entries with stored credentials."""
         region = REGIONS.get(self.config_entry.data.get(CONF_REGION))
-        brand = BRANDS.get(self.config_entry.data.get(CONF_BRAND))
 
         return (
             region == REGION_USA
-            and brand in {BRAND_HYUNDAI, BRAND_GENESIS}
             and bool(self.config_entry.data.get(CONF_USERNAME))
             and bool(self.config_entry.data.get(CONF_PASSWORD))
         )
