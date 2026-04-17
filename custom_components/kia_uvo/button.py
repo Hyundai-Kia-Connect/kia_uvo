@@ -67,4 +67,6 @@ class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
         self._attr_icon = description.icon
 
     async def async_press(self) -> None:
-        await getattr(self.coordinator, self.entity_description.press_action)(self.vehicle.id)
+        await getattr(self.coordinator, self.entity_description.press_action)(
+            self.vehicle.id
+        )
