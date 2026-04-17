@@ -58,8 +58,7 @@ STEP_REGION_DATA_SCHEMA = vol.Schema(
             {
                 "select": {
                     "options": [
-                        {"value": str(k), "label": v}
-                        for k, v in REGIONS.items()
+                        {"value": str(k), "label": v} for k, v in REGIONS.items()
                     ],
                     "mode": "dropdown",
                 }
@@ -69,8 +68,7 @@ STEP_REGION_DATA_SCHEMA = vol.Schema(
             {
                 "select": {
                     "options": [
-                        {"value": str(k), "label": v}
-                        for k, v in BRANDS.items()
+                        {"value": str(k), "label": v} for k, v in BRANDS.items()
                     ],
                     "mode": "dropdown",
                 }
