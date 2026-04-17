@@ -34,7 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     SensorEntityDescription(
         key="_total_driving_range",
-        name="Total Driving Range",
+        translation_key="total_driving_range",
         icon="mdi:road-variant",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -42,7 +42,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="_odometer",
-        name="Odometer",
+        translation_key="odometer",
         icon="mdi:speedometer",
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.DISTANCE,
@@ -50,7 +50,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="_last_service_distance",
-        name="Last Service",
+        translation_key="last_service_distance",
         icon="mdi:car-wrench",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -58,7 +58,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="_next_service_distance",
-        name="Next Service",
+        translation_key="next_service_distance",
         icon="mdi:car-wrench",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -66,42 +66,42 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="car_battery_percentage",
-        name="Car Battery Level",
+        translation_key="car_battery_percentage",
         icon="mdi:car-battery",
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="last_updated_at",
-        name="Last Updated At",
+        translation_key="last_updated_at",
         icon="mdi:update",
         device_class=SensorDeviceClass.TIMESTAMP,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="ev_battery_percentage",
-        name="EV Battery Level",
+        translation_key="ev_battery_percentage",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_soh_percentage",
-        name="EV State of Health Battery",
+        translation_key="ev_battery_soh_percentage",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_remain",
-        name="EV Battery Level",
+        translation_key="ev_battery_remain",
         native_unit_of_measurement=UnitOfEnergy.KILO_JOULE,
         device_class=SensorDeviceClass.ENERGY_STORAGE,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="ev_battery_capacity",
-        name="EV Battery Capacity",
+        translation_key="ev_battery_capacity",
         native_unit_of_measurement=UnitOfEnergy.KILO_JOULE,
         device_class=SensorDeviceClass.ENERGY_STORAGE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -109,7 +109,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="_ev_driving_range",
-        name="EV Range",
+        translation_key="ev_driving_range",
         icon="mdi:road-variant",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
@@ -117,65 +117,65 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="_fuel_driving_range",
-        name="Fuel Driving Range",
+        translation_key="fuel_driving_range",
         icon="mdi:road-variant",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
         key="fuel_level",
-        name="Fuel Level",
+        translation_key="fuel_level",
         native_unit_of_measurement=PERCENTAGE,
         icon="mdi:fuel",
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="_air_temperature",
-        name="Set Temperature",
+        translation_key="air_temperature",
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.TEMPERATURE,
     ),
     SensorEntityDescription(
         key="ev_estimated_current_charge_duration",
-        name="Estimated Charge Duration",
+        translation_key="ev_estimated_current_charge_duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_fast_charge_duration",
-        name="Estimated Fast Charge Duration",
+        translation_key="ev_estimated_fast_charge_duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_portable_charge_duration",
-        name="Estimated Portable Charge Duration",
+        translation_key="ev_estimated_portable_charge_duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="ev_estimated_station_charge_duration",
-        name="Estimated Station Charge Duration",
+        translation_key="ev_estimated_station_charge_duration",
         icon="mdi:ev-station",
         native_unit_of_measurement=UnitOfTime.MINUTES,
     ),
     SensorEntityDescription(
         key="_ev_target_range_charge_AC",
-        name="Target Range of Charge AC",
+        translation_key="ev_target_range_charge_ac",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
         key="_ev_target_range_charge_DC",
-        name="Target Range of Charge DC",
+        translation_key="ev_target_range_charge_dc",
         icon="mdi:ev-station",
         device_class=SensorDeviceClass.DISTANCE,
         native_unit_of_measurement=DYNAMIC_UNIT,
     ),
     SensorEntityDescription(
         key="total_power_consumed",
-        name="90 Day Energy Consumption",
+        translation_key="total_power_consumed",
         icon="mdi:car-electric",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -183,7 +183,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="total_power_regenerated",
-        name="Total Energy Regeneration",
+        translation_key="total_power_regenerated",
         icon="mdi:car-electric",
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
@@ -192,75 +192,75 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     # Need to remove km hard coding.  Underlying API needs this fixed first.  EU always does KM.
     SensorEntityDescription(
         key="power_consumption_30d",
-        name="Average Energy Consumption",
+        translation_key="power_consumption_30d",
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=f"{UnitOfEnergy.WATT_HOUR}/km",
     ),
     SensorEntityDescription(
         key="front_left_seat_status",
-        name="Front Left Seat",
+        translation_key="front_left_seat_status",
         icon="mdi:car-seat-heater",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="front_right_seat_status",
-        name="Front Right Seat",
+        translation_key="front_right_seat_status",
         icon="mdi:car-seat-heater",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="rear_left_seat_status",
-        name="Rear Left Seat",
+        translation_key="rear_left_seat_status",
         icon="mdi:car-seat-heater",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="rear_right_seat_status",
-        name="Rear Right Seat",
+        translation_key="rear_right_seat_status",
         icon="mdi:car-seat-heater",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="_geocode_name",
-        name="Geocoded Location",
+        translation_key="geocode_name",
         icon="mdi:map",
     ),
     SensorEntityDescription(
         key="dtc_count",
-        name="DTC Count",
+        translation_key="dtc_count",
         icon="mdi:alert-circle",
     ),
     SensorEntityDescription(
         key="ev_first_departure_time",
-        name="EV First Scheduled Departure Time",
+        translation_key="ev_first_departure_time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
         key="ev_second_departure_time",
-        name="EV Second Scheduled Departure Time",
+        translation_key="ev_second_departure_time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
         key="ev_off_peak_start_time",
-        name="EV Off Peak Start Time",
+        translation_key="ev_off_peak_start_time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
         key="ev_off_peak_end_time",
-        name="EV Off Peak End Time",
+        translation_key="ev_off_peak_end_time",
         icon="mdi:clock-outline",
     ),
     SensorEntityDescription(
         key="ev_charging_current",
-        name="EV Charging Current Limit",
+        translation_key="ev_charging_current",
         icon="mdi:lightning-bolt-circle",
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.POWER_FACTOR,
     ),
     SensorEntityDescription(
         key="ev_charging_power",
-        name="EV Charging Power",
+        translation_key="ev_charging_power",
         icon="mdi:flash",
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         device_class=SensorDeviceClass.POWER,
@@ -268,7 +268,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
     ),
     SensorEntityDescription(
         key="VIN",
-        name="Vehicle Identification Number",
+        translation_key="vehicle_identification_number",
         icon="mdi:identifier",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
@@ -319,13 +319,12 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     ):
         """Initialize the sensor."""
         super().__init__(coordinator, vehicle)
-        self._description = description
-        self._key = self._description.key
+        self.entity_description = description
+        self._key = description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
-        self._attr_icon = self._description.icon
-        self._attr_name = self._description.name
-        self._attr_state_class = self._description.state_class
-        self._attr_device_class = self._description.device_class
+        self._attr_icon = description.icon
+        self._attr_state_class = description.state_class
+        self._attr_device_class = description.device_class
         if description.entity_category:
             self._attr_entity_category = description.entity_category
 
@@ -340,20 +339,22 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def native_unit_of_measurement(self):
         """Return the unit the value was reported in by the sensor"""
-        if self._description.native_unit_of_measurement == DYNAMIC_UNIT:
+        if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
             return getattr(self.vehicle, self._key + "_unit")
         else:
-            return self._description.native_unit_of_measurement
+            return self.entity_description.native_unit_of_measurement
 
     @property
     def state_attributes(self):
-        if self._description.key == "_geocode_name":
+        if self.entity_description.key == "_geocode_name":
             return {"address": getattr(self.vehicle, "_geocode_address")}
-        elif self._description.key == "dtc_count":
+        elif self.entity_description.key == "dtc_count":
             return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
+    _attr_translation_key = "data"
+
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
 
@@ -373,15 +374,13 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
         }
 
     @property
-    def name(self):
-        return "Data"
-
-    @property
     def unique_id(self):
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
 
 
 class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
+    _attr_translation_key = "daily_driving_stats"
+
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
 
@@ -407,10 +406,6 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         return m
 
     @property
-    def name(self):
-        return "Daily Driving Stats"
-
-    @property
     def unique_id(self):
         return f"{DOMAIN}-daily-driving-stats-{self.vehicle.id}"
 
@@ -420,6 +415,8 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
 
 class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
+    _attr_translation_key = "todays_daily_driving_stats"
+
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
 
@@ -459,10 +456,6 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
                 m = todayvalue
                 break
         return m
-
-    @property
-    def name(self):
-        return "Todays Daily Driving Stats"
 
     @property
     def unique_id(self):

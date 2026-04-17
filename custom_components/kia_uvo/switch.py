@@ -32,7 +32,7 @@ class HyundaiKiaSwitchDescription(SwitchEntityDescription):
 SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_battery_is_charging",
-        name="EV Charging",
+        translation_key="ev_charging",
         icon="mdi:ev-station",
         value_fn=lambda vehicle: vehicle.ev_battery_is_charging,
         exists_fn=lambda vehicle: vehicle.ev_battery_percentage is not None,
@@ -41,7 +41,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     ),
     HyundaiKiaSwitchDescription(
         key="air_control_is_on",
-        name="Climate",
+        translation_key="climate",
         icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.air_control_is_on,
         exists_fn=lambda vehicle: vehicle.air_control_is_on is not None,
@@ -85,7 +85,6 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
         self.entity_description = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
         self._attr_icon = description.icon
-        self._attr_name = f"{vehicle.name} {description.name}"
 
     @property
     def is_on(self) -> bool | None:

@@ -391,5 +391,317 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "total_driving_range": {
+        "name": "Całkowity zasięg jazdy"
+      },
+      "odometer": {
+        "name": "Licznik kilometrów"
+      },
+      "last_service_distance": {
+        "name": "Ostatni serwis"
+      },
+      "next_service_distance": {
+        "name": "Następny serwis"
+      },
+      "car_battery_percentage": {
+        "name": "Poziom baterii 12V"
+      },
+      "last_updated_at": {
+        "name": "Ostatnia aktualizacja"
+      },
+      "ev_battery_percentage": {
+        "name": "Poziom baterii EV"
+      },
+      "ev_battery_soh_percentage": {
+        "name": "Stan zdrowia baterii EV"
+      },
+      "ev_battery_remain": {
+        "name": "Pozostała pojemność baterii EV"
+      },
+      "ev_battery_capacity": {
+        "name": "Pojemność baterii EV"
+      },
+      "ev_driving_range": {
+        "name": "Zasięg EV"
+      },
+      "fuel_driving_range": {
+        "name": "Zasięg na paliwie"
+      },
+      "fuel_level": {
+        "name": "Poziom paliwa"
+      },
+      "air_temperature": {
+        "name": "Ustawiona temperatura"
+      },
+      "ev_estimated_current_charge_duration": {
+        "name": "Szacowany czas ładowania"
+      },
+      "ev_estimated_fast_charge_duration": {
+        "name": "Szacowany czas szybkiego ładowania"
+      },
+      "ev_estimated_portable_charge_duration": {
+        "name": "Szacowany czas ładowania przenośnego"
+      },
+      "ev_estimated_station_charge_duration": {
+        "name": "Szacowany czas ładowania stacyjnego"
+      },
+      "ev_target_range_charge_ac": {
+        "name": "Zasięg docelowy ładowania AC"
+      },
+      "ev_target_range_charge_dc": {
+        "name": "Zasięg docelowy ładowania DC"
+      },
+      "total_power_consumed": {
+        "name": "Zużycie energii - 90 dni"
+      },
+      "total_power_regenerated": {
+        "name": "Całkowita regeneracja energii"
+      },
+      "power_consumption_30d": {
+        "name": "Średnie zużycie energii"
+      },
+      "front_left_seat_status": {
+        "name": "Podgrzewanie fotela przedniego lewego"
+      },
+      "front_right_seat_status": {
+        "name": "Podgrzewanie fotela przedniego prawego"
+      },
+      "rear_left_seat_status": {
+        "name": "Podgrzewanie fotela tylnego lewego"
+      },
+      "rear_right_seat_status": {
+        "name": "Podgrzewanie fotela tylnego prawego"
+      },
+      "geocode_name": {
+        "name": "Geokodowana lokalizacja"
+      },
+      "dtc_count": {
+        "name": "Liczba kodów DTC"
+      },
+      "ev_first_departure_time": {
+        "name": "EV pierwszy zaplanowany wyjazd"
+      },
+      "ev_second_departure_time": {
+        "name": "EV drugi zaplanowany wyjazd"
+      },
+      "ev_off_peak_start_time": {
+        "name": "EV początek taryfy nocnej"
+      },
+      "ev_off_peak_end_time": {
+        "name": "EV koniec taryfy nocnej"
+      },
+      "ev_charging_current": {
+        "name": "Limit prądu ładowania EV"
+      },
+      "ev_charging_power": {
+        "name": "Moc ładowania EV"
+      },
+      "vehicle_identification_number": {
+        "name": "Numer VIN"
+      },
+      "data": {
+        "name": "Dane pojazdu"
+      },
+      "daily_driving_stats": {
+        "name": "Statystyki jazdy dzienne"
+      },
+      "todays_daily_driving_stats": {
+        "name": "Dzisiejsze statystyki jazdy"
+      }
+    },
+    "binary_sensor": {
+      "engine_is_running": {
+        "name": "Silnik"
+      },
+      "defrost_is_on": {
+        "name": "Odmrażanie"
+      },
+      "steering_wheel_heater_is_on": {
+        "name": "Podgrzewanie kierownicy"
+      },
+      "back_window_heater_is_on": {
+        "name": "Podgrzewanie tylnej szyby"
+      },
+      "side_mirror_heater_is_on": {
+        "name": "Podgrzewanie lusterek"
+      },
+      "front_left_door_is_open": {
+        "name": "Drzwi przednie lewe"
+      },
+      "front_right_door_is_open": {
+        "name": "Drzwi przednie prawe"
+      },
+      "back_left_door_is_open": {
+        "name": "Drzwi tylne lewe"
+      },
+      "back_right_door_is_open": {
+        "name": "Drzwi tylne prawe"
+      },
+      "trunk_is_open": {
+        "name": "Bagażnik"
+      },
+      "hood_is_open": {
+        "name": "Maska"
+      },
+      "front_left_window_is_open": {
+        "name": "Szyba przednia lewa"
+      },
+      "front_right_window_is_open": {
+        "name": "Szyba przednia prawa"
+      },
+      "back_left_window_is_open": {
+        "name": "Szyba tylna lewa"
+      },
+      "back_right_window_is_open": {
+        "name": "Szyba tylna prawa"
+      },
+      "ev_battery_is_charging": {
+        "name": "Ładowanie baterii EV"
+      },
+      "ev_battery_is_plugged_in": {
+        "name": "Wtyczka baterii EV"
+      },
+      "fuel_level_is_low": {
+        "name": "Niski poziom paliwa"
+      },
+      "smart_key_battery_warning_is_on": {
+        "name": "Ostrzeżenie o baterii w kluczyku"
+      },
+      "washer_fluid_warning_is_on": {
+        "name": "Ostrzeżenie o płynie do spryskiwaczy"
+      },
+      "tire_pressure_all_warning_is_on": {
+        "name": "Ciśnienie opon - wszystkie"
+      },
+      "tire_pressure_rear_left_warning_is_on": {
+        "name": "Ciśnienie opon - tylna lewa"
+      },
+      "tire_pressure_front_left_warning_is_on": {
+        "name": "Ciśnienie opon - przednia lewa"
+      },
+      "tire_pressure_front_right_warning_is_on": {
+        "name": "Ciśnienie opon - przednia prawa"
+      },
+      "tire_pressure_rear_right_warning_is_on": {
+        "name": "Ciśnienie opon - tylna prawa"
+      },
+      "air_control_is_on": {
+        "name": "Klimatyzacja"
+      },
+      "ev_charge_port_door_is_open": {
+        "name": "Port ładowania EV"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV zaplanowany wyjazd 1"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV zaplanowany wyjazd 2"
+      },
+      "brake_fluid_warning_is_on": {
+        "name": "Ostrzeżenie o płynie hamulcowym"
+      },
+      "sunroof_is_open": {
+        "name": "Szyberdach"
+      },
+      "accessory_on": {
+        "name": "Akcesoria"
+      },
+      "ign3": {
+        "name": "IGN3"
+      },
+      "remote_ignition": {
+        "name": "Zdalne uruchamianie"
+      },
+      "transmission_condition": {
+        "name": "Stan skrzyni biegów"
+      },
+      "sleep_mode_check": {
+        "name": "Tryb uśpienia"
+      },
+      "headlamp_status": {
+        "name": "Stan lamp"
+      },
+      "headlamp_left_low": {
+        "name": "Awaria lampy przedniej lewej"
+      },
+      "headlamp_right_low": {
+        "name": "Awaria lampy przedniej prawej"
+      },
+      "stop_lamp_left": {
+        "name": "Awaria lampy tylnej lewej"
+      },
+      "stop_lamp_right": {
+        "name": "Awaria lampy tylnej prawej"
+      },
+      "turn_signal_left_front": {
+        "name": "Kierunkowskaz lewy przedni"
+      },
+      "turn_signal_right_front": {
+        "name": "Kierunkowskaz prawy przedni"
+      },
+      "turn_signal_left_rear": {
+        "name": "Kierunkowskaz lewy tylny"
+      },
+      "turn_signal_right_rear": {
+        "name": "Kierunkowskaz prawy tylny"
+      },
+      "is_locked": {
+        "name": "Zamknięty"
+      },
+      "front_left_seat_heater_on": {
+        "name": "Podgrzewanie fotela przedniego lewego"
+      },
+      "front_right_seat_heater_on": {
+        "name": "Podgrzewanie fotela przedniego prawego"
+      },
+      "rear_left_seat_heater_on": {
+        "name": "Podgrzewanie fotela tylnego lewego"
+      },
+      "rear_right_seat_heater_on": {
+        "name": "Podgrzewanie fotela tylnego prawego"
+      }
+    },
+    "lock": {
+      "door_lock": {
+        "name": "Zamek drzwi"
+      }
+    },
+    "button": {
+      "force_refresh": {
+        "name": "Wymuś odświeżenie"
+      }
+    },
+    "switch": {
+      "ev_charging": {
+        "name": "Ładowanie EV"
+      },
+      "climate": {
+        "name": "Klimatyzacja"
+      }
+    },
+    "climate": {
+      "climate_control": {
+        "name": "Sterowanie klimatyzacją"
+      }
+    },
+    "number": {
+      "ev_charge_limits_ac": {
+        "name": "Limit ładowania AC"
+      },
+      "ev_charge_limits_dc": {
+        "name": "Limit ładowania DC"
+      },
+      "ev_v2l_discharge_limit": {
+        "name": "Limit V2L"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "Lokalizacja"
+      }
+    }
   }
 }
