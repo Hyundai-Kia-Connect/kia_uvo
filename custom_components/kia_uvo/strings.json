@@ -28,6 +28,22 @@
           "brand": "[%key:component::hyundai_kia_connect::config::step::user::data::brand%]"
         }
       },
+      "credentials_nz": {
+        "title": "New Zealand - Enter Credentials",
+        "description": "New Zealand requires browser-based login. Enter your Kia Connect credentials, then on the next screen you'll be given a URL to open in your browser.",
+        "data": {
+          "username": "Email",
+          "password": "Password",
+          "pin": "PIN (optional)"
+        }
+      },
+      "nz_browser_auth": {
+        "title": "New Zealand - Browser Login",
+        "description": "Open this URL in your browser and log in with your Kia Connect account:\n\n{authorize_url}\n\nAfter logging in you will be redirected to a URL that starts with `https://au-apigw...`. Copy and paste that full URL below.",
+        "data": {
+          "redirect_url": "Redirect URL"
+        }
+      },
       "reauth_confirm": {
         "title": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::title%]",
         "description": "[%key:component::hyundai_kia_connect::config::step::reauth_confirm::description%]"
