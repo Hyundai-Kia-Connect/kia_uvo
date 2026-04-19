@@ -510,6 +510,30 @@
       },
       "todays_daily_driving_stats": {
         "name": "Dzisiejsze statystyki jazdy"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "Napięcie pakietu baterii EV"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Minimalna temperatura baterii EV"
+      },
+      "ev_battery_temperature_max": {
+        "name": "Maksymalna temperatura baterii EV"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Temperatura chłodziwa baterii EV"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Moc klimatyzacji"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Moc chłodzenia baterii"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Moc grzałki baterii"
+      },
+      "location_last_updated_at": {
+        "name": "Ostatnia aktualizacja lokalizacji"
       }
     },
     "binary_sensor": {
@@ -662,6 +686,21 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Podgrzewanie fotela tylnego prawego"
+      },
+      "front_left_door_is_locked": {
+        "name": "Zamek drzwi przednich lewych"
+      },
+      "front_right_door_is_locked": {
+        "name": "Zamek drzwi przednich prawych"
+      },
+      "back_left_door_is_locked": {
+        "name": "Zamek drzwi tylnych lewych"
+      },
+      "back_right_door_is_locked": {
+        "name": "Zamek drzwi tylnych prawych"
+      },
+      "ev_battery_winter_mode": {
+        "name": "Zimowy tryb baterii EV"
       }
     },
     "lock": {
@@ -672,6 +711,24 @@
     "button": {
       "force_refresh": {
         "name": "Wymuś odświeżenie"
+      },
+      "open_charge_port": {
+        "name": "Otwórz port ładowania"
+      },
+      "close_charge_port": {
+        "name": "Zamknij port ładowania"
+      },
+      "start_hazard_lights": {
+        "name": "Światła awaryjne"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Światła awaryjne i klakson"
+      },
+      "start_valet_mode": {
+        "name": "Włącz tryb parkingowy"
+      },
+      "stop_valet_mode": {
+        "name": "Wyłącz tryb parkingowy"
       }
     },
     "switch": {
@@ -701,6 +758,25 @@
     "device_tracker": {
       "location": {
         "name": "Lokalizacja"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Okno przednie lewe"
+      },
+      "front_right_window": {
+        "name": "Okno przednie prawe"
+      },
+      "back_left_window": {
+        "name": "Okno tylne lewe"
+      },
+      "back_right_window": {
+        "name": "Okno tylne prawe"
+      }
+    },
+    "select": {
+      "ev_charging_current_limit": {
+        "name": "Limit prądu ładowania"
       }
     }
   }

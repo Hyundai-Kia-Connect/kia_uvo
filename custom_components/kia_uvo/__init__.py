@@ -40,7 +40,9 @@ PLATFORMS: list[str] = [
     Platform.LOCK,
     Platform.NUMBER,
     Platform.SWITCH,
-    # Platform.CLIMATE,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.SELECT,
 ]
 
 
