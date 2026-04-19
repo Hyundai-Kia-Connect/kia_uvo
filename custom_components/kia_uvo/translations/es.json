@@ -225,5 +225,317 @@
         }
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "total_driving_range": {
+        "name": "Total Driving Range"
+      },
+      "odometer": {
+        "name": "Odometer"
+      },
+      "last_service_distance": {
+        "name": "Last Service"
+      },
+      "next_service_distance": {
+        "name": "Next Service"
+      },
+      "car_battery_percentage": {
+        "name": "Car Battery Level"
+      },
+      "last_updated_at": {
+        "name": "Last Updated At"
+      },
+      "ev_battery_percentage": {
+        "name": "EV Battery Level"
+      },
+      "ev_battery_soh_percentage": {
+        "name": "EV State of Health Battery"
+      },
+      "ev_battery_remain": {
+        "name": "EV Battery Remaining Energy"
+      },
+      "ev_battery_capacity": {
+        "name": "EV Battery Capacity"
+      },
+      "ev_driving_range": {
+        "name": "EV Range"
+      },
+      "fuel_driving_range": {
+        "name": "Fuel Driving Range"
+      },
+      "fuel_level": {
+        "name": "Fuel Level"
+      },
+      "air_temperature": {
+        "name": "Set Temperature"
+      },
+      "ev_estimated_current_charge_duration": {
+        "name": "Estimated Charge Duration"
+      },
+      "ev_estimated_fast_charge_duration": {
+        "name": "Estimated Fast Charge Duration"
+      },
+      "ev_estimated_portable_charge_duration": {
+        "name": "Estimated Portable Charge Duration"
+      },
+      "ev_estimated_station_charge_duration": {
+        "name": "Estimated Station Charge Duration"
+      },
+      "ev_target_range_charge_ac": {
+        "name": "Target Range of Charge AC"
+      },
+      "ev_target_range_charge_dc": {
+        "name": "Target Range of Charge DC"
+      },
+      "total_power_consumed": {
+        "name": "90 Day Energy Consumption"
+      },
+      "total_power_regenerated": {
+        "name": "Total Energy Regeneration"
+      },
+      "power_consumption_30d": {
+        "name": "Average Energy Consumption"
+      },
+      "front_left_seat_status": {
+        "name": "Front Left Seat"
+      },
+      "front_right_seat_status": {
+        "name": "Front Right Seat"
+      },
+      "rear_left_seat_status": {
+        "name": "Rear Left Seat"
+      },
+      "rear_right_seat_status": {
+        "name": "Rear Right Seat"
+      },
+      "geocode_name": {
+        "name": "Geocoded Location"
+      },
+      "dtc_count": {
+        "name": "DTC Count"
+      },
+      "ev_first_departure_time": {
+        "name": "EV First Scheduled Departure Time"
+      },
+      "ev_second_departure_time": {
+        "name": "EV Second Scheduled Departure Time"
+      },
+      "ev_off_peak_start_time": {
+        "name": "EV Off Peak Start Time"
+      },
+      "ev_off_peak_end_time": {
+        "name": "EV Off Peak End Time"
+      },
+      "ev_charging_current": {
+        "name": "EV Charging Current Limit"
+      },
+      "ev_charging_power": {
+        "name": "EV Charging Power"
+      },
+      "vehicle_identification_number": {
+        "name": "Vehicle Identification Number"
+      },
+      "data": {
+        "name": "Data"
+      },
+      "daily_driving_stats": {
+        "name": "Daily Driving Stats"
+      },
+      "todays_daily_driving_stats": {
+        "name": "Today's Daily Driving Stats"
+      }
+    },
+    "binary_sensor": {
+      "engine_is_running": {
+        "name": "Engine"
+      },
+      "defrost_is_on": {
+        "name": "Defrost"
+      },
+      "steering_wheel_heater_is_on": {
+        "name": "Steering Wheel Heater"
+      },
+      "back_window_heater_is_on": {
+        "name": "Back Window Heater"
+      },
+      "side_mirror_heater_is_on": {
+        "name": "Side Mirror Heater"
+      },
+      "front_left_door_is_open": {
+        "name": "Front Left Door"
+      },
+      "front_right_door_is_open": {
+        "name": "Front Right Door"
+      },
+      "back_left_door_is_open": {
+        "name": "Back Left Door"
+      },
+      "back_right_door_is_open": {
+        "name": "Back Right Door"
+      },
+      "trunk_is_open": {
+        "name": "Trunk"
+      },
+      "hood_is_open": {
+        "name": "Hood"
+      },
+      "front_left_window_is_open": {
+        "name": "Front Left Window"
+      },
+      "front_right_window_is_open": {
+        "name": "Front Right Window"
+      },
+      "back_left_window_is_open": {
+        "name": "Back Left Window"
+      },
+      "back_right_window_is_open": {
+        "name": "Back Right Window"
+      },
+      "ev_battery_is_charging": {
+        "name": "EV Battery Charge"
+      },
+      "ev_battery_is_plugged_in": {
+        "name": "EV Battery Plug"
+      },
+      "fuel_level_is_low": {
+        "name": "Fuel Low Level"
+      },
+      "smart_key_battery_warning_is_on": {
+        "name": "Smart Key Battery Warning"
+      },
+      "washer_fluid_warning_is_on": {
+        "name": "Washer Fluid Warning"
+      },
+      "tire_pressure_all_warning_is_on": {
+        "name": "Tire Pressure - All"
+      },
+      "tire_pressure_rear_left_warning_is_on": {
+        "name": "Tire Pressure - Rear Left"
+      },
+      "tire_pressure_front_left_warning_is_on": {
+        "name": "Tire Pressure - Front Left"
+      },
+      "tire_pressure_front_right_warning_is_on": {
+        "name": "Tire Pressure - Front Right"
+      },
+      "tire_pressure_rear_right_warning_is_on": {
+        "name": "Tire Pressure - Rear Right"
+      },
+      "air_control_is_on": {
+        "name": "Air Conditioner"
+      },
+      "ev_charge_port_door_is_open": {
+        "name": "EV Charge Port"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV Scheduled Departure 1"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV Scheduled Departure 2"
+      },
+      "brake_fluid_warning_is_on": {
+        "name": "Brake Fluid Warning"
+      },
+      "sunroof_is_open": {
+        "name": "Sunroof"
+      },
+      "accessory_on": {
+        "name": "Accessory"
+      },
+      "ign3": {
+        "name": "IGN3"
+      },
+      "remote_ignition": {
+        "name": "Remote Ignition"
+      },
+      "transmission_condition": {
+        "name": "Transmission Condition"
+      },
+      "sleep_mode_check": {
+        "name": "Sleep Mode Check"
+      },
+      "headlamp_status": {
+        "name": "Headlamp Status"
+      },
+      "headlamp_left_low": {
+        "name": "Front Left Lamp Fault"
+      },
+      "headlamp_right_low": {
+        "name": "Front Right Lamp Fault"
+      },
+      "stop_lamp_left": {
+        "name": "Rear Left Lamp Fault"
+      },
+      "stop_lamp_right": {
+        "name": "Rear Right Lamp Fault"
+      },
+      "turn_signal_left_front": {
+        "name": "Turn Signal Left Front"
+      },
+      "turn_signal_right_front": {
+        "name": "Turn Signal Right Front"
+      },
+      "turn_signal_left_rear": {
+        "name": "Turn Signal Left Rear"
+      },
+      "turn_signal_right_rear": {
+        "name": "Turn Signal Right Rear"
+      },
+      "is_locked": {
+        "name": "Locked"
+      },
+      "front_left_seat_heater_on": {
+        "name": "Front Left Seat Heater"
+      },
+      "front_right_seat_heater_on": {
+        "name": "Front Right Seat Heater"
+      },
+      "rear_left_seat_heater_on": {
+        "name": "Rear Left Seat Heater"
+      },
+      "rear_right_seat_heater_on": {
+        "name": "Rear Right Seat Heater"
+      }
+    },
+    "lock": {
+      "door_lock": {
+        "name": "Door Lock"
+      }
+    },
+    "button": {
+      "force_refresh": {
+        "name": "Force Refresh"
+      }
+    },
+    "switch": {
+      "ev_charging": {
+        "name": "EV Charging"
+      },
+      "climate": {
+        "name": "Climate"
+      }
+    },
+    "climate": {
+      "climate_control": {
+        "name": "Climate Control"
+      }
+    },
+    "number": {
+      "ev_charge_limits_ac": {
+        "name": "AC Charging Limit"
+      },
+      "ev_charge_limits_dc": {
+        "name": "DC Charging Limit"
+      },
+      "ev_v2l_discharge_limit": {
+        "name": "V2L Limit"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "Location"
+      }
+    }
   }
 }

@@ -28,7 +28,7 @@ class HyundaiKiaButtonDescription(ButtonEntityDescription):
 BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
     HyundaiKiaButtonDescription(
         key="force_refresh",
-        name="Force Refresh",
+        translation_key="force_refresh",
         icon="mdi:refresh",
         press_action="async_force_refresh_vehicle",
     ),
@@ -61,11 +61,12 @@ class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self._description = description
+        self.entity_description = description
         self._key = description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = description.icon
-        self._attr_name = f"{vehicle.name} {description.name}"
 
     async def async_press(self) -> None:
-        await getattr(self.coordinator, self._description.press_action)(self.vehicle.id)
+        await getattr(self.coordinator, self.entity_description.press_action)(
+            self.vehicle.id
+        )

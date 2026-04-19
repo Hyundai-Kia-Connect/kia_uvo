@@ -46,7 +46,7 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     ):
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_location"
-        self._attr_name = "Location"
+        self._attr_translation_key = "location"
         self._attr_icon = "mdi:map-marker-outline"
 
     @property
