@@ -15,7 +15,7 @@ from homeassistant.components.climate.const import (
 )
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -31,11 +31,12 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up binary_sensor platform."""
+    """Set up climate platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
-        async_add_entities([HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)])
+        if vehicle.air_control_is_on is not None:
+            async_add_entities([HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)])
 
 
 PARALLEL_UPDATES = 1
@@ -102,7 +103,9 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
-        return self.vehicle._air_temperature_unit
+        if self.vehicle._air_temperature_unit is not None:
+            return self.vehicle._air_temperature_unit
+        return UnitOfTemperature.CELSIUS
 
     @property
     def current_temperature(self) -> float | None:
