@@ -87,7 +87,9 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
-    _attr_supported_features = CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE
+    _attr_supported_features = (
+        CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE | CoverEntityFeature.SET_POSITION
+    )
 
     def __init__(
         self,
@@ -106,7 +108,30 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
         state = getattr(self.vehicle, self.entity_description.window_state_attr, None)
         if state is None:
             return None
+        # state is True for open/vent, False for closed
         return not state
+
+    @property
+    def current_cover_position(self) -> int | None:
+        """Return current position as percentage.
+
+        Maps window state to position:
+        - Closed → 0
+        - Ventilation → 50
+        - Open → 100
+
+        The API reports window state as boolean (open/closed) only.
+        When open, we report 100. When closed, 0.
+        If the API adds OpenLevel support in the future, this can be refined.
+        """
+        state = getattr(self.vehicle, self.entity_description.window_state_attr, None)
+        if state is None:
+            return None
+        if not state:
+            return 0
+        # Window is open (True) — report as fully open since we can't
+        # distinguish ventilation from fully open in the current state model
+        return 100
 
     @property
     def is_opening(self) -> bool | None:
@@ -124,4 +149,23 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
     async def async_close_cover(self, **kwargs) -> None:
         options = WindowRequestOptions()
         setattr(options, self._window_key, WINDOW_STATE.CLOSED)
+        await self.coordinator.async_set_windows(self.vehicle.id, options)
+
+    async def async_set_cover_position(self, position: int, **kwargs) -> None:
+        """Set cover to a specific position.
+
+        Position mapping:
+        - 0 → CLOSED
+        - 1-49 → VENTILATION
+        - 50-100 → OPEN
+        """
+        if position == 0:
+            window_state = WINDOW_STATE.CLOSED
+        elif position <= 49:
+            window_state = WINDOW_STATE.VENTILATION
+        else:
+            window_state = WINDOW_STATE.OPEN
+
+        options = WindowRequestOptions()
+        setattr(options, self._window_key, window_state)
         await self.coordinator.async_set_windows(self.vehicle.id, options)

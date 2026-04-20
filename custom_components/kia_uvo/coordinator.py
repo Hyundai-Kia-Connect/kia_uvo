@@ -469,6 +469,39 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
+    async def async_open_all_windows(self, vehicle_id: str):
+        """Open all windows."""
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.OPEN,
+            front_right=WINDOW_STATE.OPEN,
+            back_left=WINDOW_STATE.OPEN,
+            back_right=WINDOW_STATE.OPEN,
+        )
+        await self.async_set_windows(vehicle_id, options)
+
+    async def async_close_all_windows(self, vehicle_id: str):
+        """Close all windows."""
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.CLOSED,
+            front_right=WINDOW_STATE.CLOSED,
+            back_left=WINDOW_STATE.CLOSED,
+            back_right=WINDOW_STATE.CLOSED,
+        )
+        await self.async_set_windows(vehicle_id, options)
+
+    async def async_vent_all_windows(self, vehicle_id: str):
+        """Vent all windows (ventilation position)."""
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.VENTILATION,
+            front_right=WINDOW_STATE.VENTILATION,
+            back_left=WINDOW_STATE.VENTILATION,
+            back_right=WINDOW_STATE.VENTILATION,
+        )
+        await self.async_set_windows(vehicle_id, options)
+
     async def _async_save_token(self):
         """Persist the latest token into the config entry."""
         new_token = self.vehicle_manager.token.to_dict()

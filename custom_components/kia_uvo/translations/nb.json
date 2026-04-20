@@ -668,6 +668,15 @@
       },
       "stop_valet_mode": {
         "name": "Stop Valet Mode"
+      },
+      "open_all_windows": {
+        "name": "Open All Windows"
+      },
+      "close_all_windows": {
+        "name": "Close All Windows"
+      },
+      "vent_all_windows": {
+        "name": "Vent All Windows"
       }
     },
     "switch": {

@@ -68,6 +68,24 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:car-key",
         press_action="async_stop_valet_mode",
     ),
+    HyundaiKiaButtonDescription(
+        key="open_all_windows",
+        translation_key="open_all_windows",
+        icon="mdi:car-door",
+        press_action="async_open_all_windows",
+    ),
+    HyundaiKiaButtonDescription(
+        key="close_all_windows",
+        translation_key="close_all_windows",
+        icon="mdi:car-door",
+        press_action="async_close_all_windows",
+    ),
+    HyundaiKiaButtonDescription(
+        key="vent_all_windows",
+        translation_key="vent_all_windows",
+        icon="mdi:car-door",
+        press_action="async_vent_all_windows",
+    ),
 )
 
 
@@ -84,6 +102,14 @@ async def async_setup_entry(
             # Charge port buttons only for vehicles with charge port
             if description.key in ("open_charge_port", "close_charge_port"):
                 if vehicle.ev_charge_port_door_is_open is None:
+                    continue
+            # Window buttons only for vehicles with window state
+            if description.key in (
+                "open_all_windows",
+                "close_all_windows",
+                "vent_all_windows",
+            ):
+                if vehicle.front_left_window_is_open is None:
                     continue
             entities.append(HyundaiKiaConnectButton(coordinator, description, vehicle))
 

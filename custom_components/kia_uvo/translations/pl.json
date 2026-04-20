@@ -729,6 +729,15 @@
       },
       "stop_valet_mode": {
         "name": "Wyłącz tryb parkingowy"
+      },
+      "open_all_windows": {
+        "name": "Otwórz wszystkie okna"
+      },
+      "close_all_windows": {
+        "name": "Zamknij wszystkie okna"
+      },
+      "vent_all_windows": {
+        "name": "Wentylacja wszystkich okien"
       }
     },
     "switch": {
