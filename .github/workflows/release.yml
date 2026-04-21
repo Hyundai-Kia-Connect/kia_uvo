@@ -11,7 +11,7 @@ jobs:
 
       - name: Gets semantic release info
         id: semantic_release_info
-        uses: jossef/action-semantic-release-info@6cf3ceeb3254e56fa643f25f1796cd114c2970ff # v2
+        uses: jossef/action-semantic-release-info@277fc891fc5ac40ed0e8d6bf59a0e24a25dfdeac # v3.0.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - name: Update Version and Commit
