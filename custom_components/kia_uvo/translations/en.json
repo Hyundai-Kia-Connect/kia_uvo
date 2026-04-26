@@ -510,6 +510,30 @@
       },
       "todays_daily_driving_stats": {
         "name": "Today's Daily Driving Stats"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "EV Battery Pack Voltage"
+      },
+      "ev_battery_temperature_min": {
+        "name": "EV Battery Min Temperature"
+      },
+      "ev_battery_temperature_max": {
+        "name": "EV Battery Max Temperature"
+      },
+      "ev_battery_water_temperature": {
+        "name": "EV Battery Coolant Temperature"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Air Conditioning Power"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Battery Cooling Power"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Battery Heater Power"
+      },
+      "location_last_updated_at": {
+        "name": "Location Last Updated"
       }
     },
     "binary_sensor": {
@@ -662,6 +686,21 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Rear Right Seat Heater"
+      },
+      "front_left_door_is_locked": {
+        "name": "Front Left Door Lock"
+      },
+      "front_right_door_is_locked": {
+        "name": "Front Right Door Lock"
+      },
+      "back_left_door_is_locked": {
+        "name": "Back Left Door Lock"
+      },
+      "back_right_door_is_locked": {
+        "name": "Back Right Door Lock"
+      },
+      "ev_battery_winter_mode": {
+        "name": "EV Battery Winter Mode"
       }
     },
     "lock": {
@@ -672,6 +711,33 @@
     "button": {
       "force_refresh": {
         "name": "Force Refresh"
+      },
+      "open_charge_port": {
+        "name": "Open Charge Port"
+      },
+      "close_charge_port": {
+        "name": "Close Charge Port"
+      },
+      "start_hazard_lights": {
+        "name": "Hazard Lights"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Hazard Lights and Horn"
+      },
+      "start_valet_mode": {
+        "name": "Start Valet Mode"
+      },
+      "stop_valet_mode": {
+        "name": "Stop Valet Mode"
+      },
+      "open_all_windows": {
+        "name": "Open All Windows"
+      },
+      "close_all_windows": {
+        "name": "Close All Windows"
+      },
+      "vent_all_windows": {
+        "name": "Vent All Windows"
       }
     },
     "switch": {
@@ -701,6 +767,25 @@
     "device_tracker": {
       "location": {
         "name": "Location"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Front Left Window"
+      },
+      "front_right_window": {
+        "name": "Front Right Window"
+      },
+      "back_left_window": {
+        "name": "Back Left Window"
+      },
+      "back_right_window": {
+        "name": "Back Right Window"
+      }
+    },
+    "select": {
+      "ev_charging_current_limit": {
+        "name": "Charging Current Limit"
       }
     }
   }

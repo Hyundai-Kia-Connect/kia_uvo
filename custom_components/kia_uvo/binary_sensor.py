@@ -419,6 +419,52 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         device_class=BinarySensorDeviceClass.LOCK,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    # CCS2 individual door lock states
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_left_door_is_locked",
+        translation_key="front_left_door_is_locked",
+        is_on=lambda vehicle: not vehicle.front_left_door_is_locked,
+        on_icon="mdi:car-door-lock",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.LOCK,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_right_door_is_locked",
+        translation_key="front_right_door_is_locked",
+        is_on=lambda vehicle: not vehicle.front_right_door_is_locked,
+        on_icon="mdi:car-door-lock",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.LOCK,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_left_door_is_locked",
+        translation_key="back_left_door_is_locked",
+        is_on=lambda vehicle: not vehicle.back_left_door_is_locked,
+        on_icon="mdi:car-door-lock",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.LOCK,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_right_door_is_locked",
+        translation_key="back_right_door_is_locked",
+        is_on=lambda vehicle: not vehicle.back_right_door_is_locked,
+        on_icon="mdi:car-door-lock",
+        off_icon="mdi:car-door",
+        device_class=BinarySensorDeviceClass.LOCK,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    # CCS2 battery winter mode
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_battery_winter_mode",
+        translation_key="ev_battery_winter_mode",
+        is_on=lambda vehicle: vehicle.ev_battery_winter_mode,
+        on_icon="mdi:snowflake",
+        off_icon="mdi:snowflake-off",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
     # Seat heater sensors derived from seat status strings
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
