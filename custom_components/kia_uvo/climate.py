@@ -93,8 +93,11 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate_control"
 
         # set the Climate Request to the current actual state of the car
+        current_temp = self.vehicle.air_temperature
+        if isinstance(current_temp, tuple):
+            current_temp = current_temp[0] if current_temp[0] != "OFF" else None
         self.climate_config = ClimateRequestOptions(
-            set_temp=self.vehicle.air_temperature,
+            set_temp=current_temp,
             climate=self.vehicle.air_control_is_on,
             heating=self.get_internal_heat_int_for_climate_request(),
             defrost=self.vehicle.defrost_is_on,
@@ -110,7 +113,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def current_temperature(self) -> float | None:
         """Get the current in-car temperature."""
-        return self.vehicle.air_temperature
+        temp = self.vehicle.air_temperature
+        if isinstance(temp, tuple):
+            return temp[0] if temp[0] != "OFF" else None
+        return temp if temp != "OFF" else None
 
     @property
     def target_temperature(self) -> float | None:
@@ -145,12 +151,19 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if not self.vehicle.air_control_is_on:
             return HVACMode.OFF
 
+        current = self.current_temperature
+        target = self.climate_config.set_temp
+
+        # If we don't have both temperatures, fall back to AUTO
+        if current is None or target is None:
+            return HVACMode.AUTO
+
         # Cheating: there is no perfect mapping to either heat or cool,
         # as the API can only set target temp and then decides: so we
         # just derive the same by temperature change direction.
-        if self.current_temperature > self.climate_config.set_temp:
+        if current > target:
             return HVACMode.COOL
-        if self.current_temperature < self.climate_config.set_temp:
+        if current < target:
             return HVACMode.HEAT
 
         # TODO: what could be a sensible answer if target temp is reached?
@@ -167,16 +180,22 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if not self.vehicle.air_control_is_on:
             return HVACAction.OFF
 
+        current = self.current_temperature
+        target = self.climate_config.set_temp
+
+        if current is None or target is None:
+            return HVACAction.IDLE
+
         # if temp is lower than target, it HEATs
-        if self.current_temperature < self.climate_config.set_temp:
+        if current < target:
             return HVACAction.HEATING
 
         # if temp is higher than target, it COOLs
-        if self.current_temperature > self.climate_config.set_temp:
+        if current > target:
             return HVACAction.COOLING
 
         # target temp reached
-        if self.current_temperature == self.climate_config.set_temp:
+        if current == target:
             return HVACAction.IDLE
 
         # should not happen, fallback
