@@ -472,6 +472,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_open_all_windows(self, vehicle_id: str):
         """Open all windows."""
         from hyundai_kia_connect_api.const import WINDOW_STATE
+
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.OPEN,
             front_right=WINDOW_STATE.OPEN,
@@ -483,6 +484,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_close_all_windows(self, vehicle_id: str):
         """Close all windows."""
         from hyundai_kia_connect_api.const import WINDOW_STATE
+
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.CLOSED,
             front_right=WINDOW_STATE.CLOSED,
@@ -494,6 +496,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_vent_all_windows(self, vehicle_id: str):
         """Vent all windows (ventilation position)."""
         from hyundai_kia_connect_api.const import WINDOW_STATE
+
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.VENTILATION,
             front_right=WINDOW_STATE.VENTILATION,

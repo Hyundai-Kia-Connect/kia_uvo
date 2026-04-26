@@ -13,7 +13,7 @@ from homeassistant.const import EntityCategory
 
 from hyundai_kia_connect_api import Vehicle
 
-from .const import CHARGING_CURRENTS, DOMAIN
+from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 

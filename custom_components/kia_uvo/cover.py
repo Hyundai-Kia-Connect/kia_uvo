@@ -6,7 +6,11 @@ from dataclasses import dataclass
 import logging
 from typing import Final
 
-from homeassistant.components.cover import CoverEntity, CoverEntityDescription, CoverEntityFeature
+from homeassistant.components.cover import (
+    CoverEntity,
+    CoverEntityDescription,
+    CoverEntityFeature,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -79,7 +83,9 @@ async def async_setup_entry(
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in COVER_DESCRIPTIONS:
             if getattr(vehicle, description.window_state_attr, None) is not None:
-                entities.append(HyundaiKiaConnectCover(coordinator, description, vehicle))
+                entities.append(
+                    HyundaiKiaConnectCover(coordinator, description, vehicle)
+                )
     async_add_entities(entities)
 
 
@@ -88,7 +94,9 @@ PARALLEL_UPDATES = 1
 
 class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
     _attr_supported_features = (
-        CoverEntityFeature.OPEN | CoverEntityFeature.CLOSE | CoverEntityFeature.SET_POSITION
+        CoverEntityFeature.OPEN
+        | CoverEntityFeature.CLOSE
+        | CoverEntityFeature.SET_POSITION
     )
 
     def __init__(
