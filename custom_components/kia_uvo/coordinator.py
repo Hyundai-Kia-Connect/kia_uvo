@@ -356,7 +356,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         except Exception as err:
             raise HomeAssistantError(f"Failed to set charge limits: {err}") from err
         self.hass.async_create_task(
-            self.async_await_action_and_force_refresh(vehicle_id, action_id)
+            self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):
