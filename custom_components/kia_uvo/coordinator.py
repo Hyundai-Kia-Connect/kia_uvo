@@ -190,6 +190,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
         await self.async_check_and_refresh_token()
+        await asyncio.sleep(20)
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
         )
@@ -213,6 +214,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 60,
             )
         finally:
+            await asyncio.sleep(40)
             await self.async_refresh()
 
     async def async_await_action_and_force_refresh(self, vehicle_id, action_id):
@@ -238,6 +240,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             )
         finally:
             try:
+                await asyncio.sleep(60)
                 await self.hass.async_add_executor_job(
                     self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
                 )
@@ -350,13 +353,14 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int):
         await self.async_check_and_refresh_token()
         try:
+            await asyncio.sleep(5)
             action_id = await self.hass.async_add_executor_job(
                 self.vehicle_manager.set_charge_limits, vehicle_id, ac, dc
             )
         except Exception as err:
             raise HomeAssistantError(f"Failed to set charge limits: {err}") from err
         self.hass.async_create_task(
-            self.async_await_action_and_force_refresh(vehicle_id, action_id)
+            self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):
