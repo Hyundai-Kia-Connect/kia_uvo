@@ -284,10 +284,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 ) from err
             except Exception as err:
                 raise HomeAssistantError(f"Failed to {error_label}: {err}") from err
-            if force_refresh:
-                await self.async_await_action_and_force_refresh(vehicle_id, action_id)
-            else:
-                await self.async_await_action_and_refresh(vehicle_id, action_id)
+            try:
+                if force_refresh:
+                    await self.async_await_action_and_force_refresh(
+                        vehicle_id, action_id
+                    )
+                else:
+                    await self.async_await_action_and_refresh(vehicle_id, action_id)
+            except Exception:
+                _LOGGER.exception(
+                    "Action '%s' was sent but confirmation polling failed",
+                    error_label,
+                )
 
     async def async_lock_vehicle(self, vehicle_id: str):
         await self._async_send_action(
