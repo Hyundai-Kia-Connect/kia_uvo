@@ -14,7 +14,10 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     Token,
 )
-from hyundai_kia_connect_api.exceptions import AuthenticationError, UnsupportedControlError
+from hyundai_kia_connect_api.exceptions import (
+    AuthenticationError,
+    UnsupportedControlError,
+)
 
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 
