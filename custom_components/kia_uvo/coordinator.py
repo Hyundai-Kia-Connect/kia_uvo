@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
 from datetime import timedelta
 import traceback
 import logging
@@ -252,7 +254,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
     async def _async_send_action(
         self,
         vehicle_id: str,
-        action_fn,
+        action_fn: Callable[[], Any],
         error_label: str,
         *,
         force_refresh: bool = False,
