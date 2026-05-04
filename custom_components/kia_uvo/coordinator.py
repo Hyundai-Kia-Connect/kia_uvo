@@ -256,7 +256,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         vehicle_id: str,
         action_fn: Callable[[], Any],
         error_label: str,
-        *,
         force_refresh: bool = False,
     ):
         """Send a vehicle action, wait for completion, and refresh data.
