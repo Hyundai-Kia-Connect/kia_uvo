@@ -31,11 +31,10 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up binary_sensor platform."""
+    """Set up climate platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
-        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+    for vehicle in coordinator.vehicle_manager.vehicles.values():
         if vehicle.air_control_is_on is not None:
             entities.append(HyundaiKiaCarClimateControlSwitch(coordinator, vehicle))
     async_add_entities(entities, True)
