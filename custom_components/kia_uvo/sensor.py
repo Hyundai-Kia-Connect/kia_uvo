@@ -18,6 +18,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfTemperature,
     UnitOfTime,
     EntityCategory,
 )
@@ -270,6 +271,29 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         key="VIN",
         translation_key="vehicle_identification_number",
         icon="mdi:identifier",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="outside_temperature",
+        translation_key="outside_temperature",
+        icon="mdi:thermometer",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="engine_type",
+        translation_key="engine_type",
+        icon="mdi:engine",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="ev_battery_chiller_rpm",
+        translation_key="ev_battery_chiller_rpm",
+        icon="mdi:fan",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="rpm",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
 )
