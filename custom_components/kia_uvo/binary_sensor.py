@@ -494,6 +494,34 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         icon="mdi:snowflake-thermometer",
         is_on=lambda vehicle: vehicle.ev_battery_winter_mode,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_first_departure_climate_enabled",
+        translation_key="ev_first_departure_climate_enabled",
+        icon="mdi:car-climate",
+        is_on=lambda vehicle: vehicle.ev_first_departure_climate_enabled,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_second_departure_climate_enabled",
+        translation_key="ev_second_departure_climate_enabled",
+        icon="mdi:car-climate",
+        is_on=lambda vehicle: vehicle.ev_second_departure_climate_enabled,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_first_departure_climate_defrost",
+        translation_key="ev_first_departure_climate_defrost",
+        icon="mdi:car-defrost-rear",
+        is_on=lambda vehicle: vehicle.ev_first_departure_climate_defrost,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_second_departure_climate_defrost",
+        translation_key="ev_second_departure_climate_defrost",
+        icon="mdi:car-defrost-rear",
+        is_on=lambda vehicle: vehicle.ev_second_departure_climate_defrost,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 )
 
 
