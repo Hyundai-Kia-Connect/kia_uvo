@@ -6,6 +6,7 @@ import logging
 from time import sleep
 
 from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle, VehicleManager
+from hyundai_kia_connect_api.exceptions import UnsupportedControlError
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
@@ -202,19 +203,22 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     async def async_set_hvac_mode(self, hvac_mode):
         """Set the operation mode of the in-car climate control."""
 
-        if hvac_mode == HVACMode.OFF:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.stop_climate,
-                self.vehicle.id,
-            )
-            self.vehicle.air_control_is_on = False
-        else:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.start_climate,
-                self.vehicle.id,
-                self.climate_config,
-            )
-            self.vehicle.air_control_is_on = True
+        try:
+            if hvac_mode == HVACMode.OFF:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.stop_climate,
+                    self.vehicle.id,
+                )
+                self.vehicle.air_control_is_on = False
+            else:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.start_climate,
+                    self.vehicle.id,
+                    self.climate_config,
+                )
+                self.vehicle.air_control_is_on = True
+        except UnsupportedControlError as ex:
+            _LOGGER.warning("Climate control not supported by vehicle: %s", ex)
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
 
@@ -226,18 +230,21 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         # activation is controlled separately, but if system is turned on
         # and temp has changed, send update to car
         if self.hvac_mode != HVACMode.OFF and old_temp != self.climate_config.set_temp:
-            # Car does not accept changing the temp after starting the heating. So we have to turn off first
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.stop_climate,
-                self.vehicle.id,
-            )
-            # Wait, because the car ignores the start_climate command if it comes too fast after stopping
-            # TODO: replace with some more event driven method
-            await self.hass.async_add_executor_job(sleep, 5.0)
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.start_climate,
-                self.vehicle.id,
-                self.climate_config,
-            )
+            try:
+                # Car does not accept changing the temp after starting the heating. So we have to turn off first
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.stop_climate,
+                    self.vehicle.id,
+                )
+                # Wait, because the car ignores the start_climate command if it comes too fast after stopping
+                # TODO: replace with some more event driven method
+                await self.hass.async_add_executor_job(sleep, 5.0)
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.start_climate,
+                    self.vehicle.id,
+                    self.climate_config,
+                )
+            except UnsupportedControlError as ex:
+                _LOGGER.warning("Climate control not supported by vehicle: %s", ex)
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
