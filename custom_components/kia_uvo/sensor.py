@@ -18,7 +18,6 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
     UnitOfPower,
-    UnitOfTemperature,
     UnitOfTime,
     EntityCategory,
 )
@@ -274,12 +273,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
-        key="outside_temperature",
+        key="_outside_temperature",
         translation_key="outside_temperature",
         icon="mdi:thermometer",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=DYNAMIC_UNIT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
