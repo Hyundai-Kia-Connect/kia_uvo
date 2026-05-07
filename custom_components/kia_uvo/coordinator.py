@@ -469,6 +469,61 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
 
+    async def async_open_all_windows(self, vehicle_id: str):
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.OPEN,
+            front_right=WINDOW_STATE.OPEN,
+            back_left=WINDOW_STATE.OPEN,
+            back_right=WINDOW_STATE.OPEN,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "open all windows",
+        )
+
+    async def async_close_all_windows(self, vehicle_id: str):
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.CLOSED,
+            front_right=WINDOW_STATE.CLOSED,
+            back_left=WINDOW_STATE.CLOSED,
+            back_right=WINDOW_STATE.CLOSED,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "close all windows",
+        )
+
+    async def async_vent_all_windows(self, vehicle_id: str):
+        from hyundai_kia_connect_api.const import WINDOW_STATE
+
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.VENTILATION,
+            front_right=WINDOW_STATE.VENTILATION,
+            back_left=WINDOW_STATE.VENTILATION,
+            back_right=WINDOW_STATE.VENTILATION,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "vent all windows",
+        )
+
+    async def _async_send_action(self, vehicle_id: str, action_fn, action_name: str):
+        await self.async_check_and_refresh_token()
+        try:
+            action_id = await self.hass.async_add_executor_job(action_fn)
+        except Exception as err:
+            raise HomeAssistantError(f"Failed to {action_name}: {err}") from err
+        self.hass.async_create_task(
+            self.async_await_action_and_refresh(vehicle_id, action_id)
+        )
+
     async def _async_save_token(self):
         """Persist the latest token into the config entry."""
         new_token = self.vehicle_manager.token.to_dict()
