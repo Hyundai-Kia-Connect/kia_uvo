@@ -674,6 +674,20 @@
         "name": "Force Refresh"
       }
     },
+    "cover": {
+      "front_left_window": {
+        "name": "Front Left Window"
+      },
+      "front_right_window": {
+        "name": "Front Right Window"
+      },
+      "back_left_window": {
+        "name": "Back Left Window"
+      },
+      "back_right_window": {
+        "name": "Back Right Window"
+      }
+    },
     "switch": {
       "ev_charging": {
         "name": "EV Charging"
