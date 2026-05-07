@@ -18,6 +18,7 @@ from homeassistant.const import (
     PERCENTAGE,
     UnitOfEnergy,
     UnitOfPower,
+    UnitOfTemperature,
     UnitOfTime,
     EntityCategory,
 )
@@ -295,6 +296,36 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement="rpm",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    SensorEntityDescription(
+        key="ev_first_departure_days",
+        translation_key="ev_first_departure_days",
+        icon="mdi:calendar-clock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="ev_second_departure_days",
+        translation_key="ev_second_departure_days",
+        icon="mdi:calendar-clock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="ev_first_departure_climate_temperature",
+        translation_key="ev_first_departure_climate_temperature",
+        icon="mdi:thermometer",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
+        key="ev_second_departure_climate_temperature",
+        translation_key="ev_second_departure_climate_temperature",
+        icon="mdi:thermometer",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 )
 
 
@@ -357,6 +388,10 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         value = getattr(self.vehicle, self._key)
         if self._key == "ev_charging_current":
             return CHARGING_CURRENTS.get(value, None)
+        if self._key in ("ev_first_departure_days", "ev_second_departure_days"):
+            if isinstance(value, list):
+                return ", ".join(str(d) for d in value)
+            return value
         return value
 
     @property
