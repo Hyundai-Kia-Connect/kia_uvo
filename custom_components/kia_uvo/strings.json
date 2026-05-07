@@ -356,6 +356,21 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Rear Right Seat Heater"
+      },
+      "front_left_door_is_locked": {
+        "name": "Front Left Door Lock"
+      },
+      "front_right_door_is_locked": {
+        "name": "Front Right Door Lock"
+      },
+      "back_left_door_is_locked": {
+        "name": "Back Left Door Lock"
+      },
+      "back_right_door_is_locked": {
+        "name": "Back Right Door Lock"
+      },
+      "ev_battery_winter_mode": {
+        "name": "EV Battery Winter Mode"
       }
     },
     "lock": {

@@ -452,6 +452,48 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_left_door_is_locked",
+        translation_key="front_left_door_is_locked",
+        device_class=BinarySensorDeviceClass.LOCK,
+        is_on=lambda vehicle: not vehicle.front_left_door_is_locked,
+        on_icon="mdi:lock-open",
+        off_icon="mdi:lock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="front_right_door_is_locked",
+        translation_key="front_right_door_is_locked",
+        device_class=BinarySensorDeviceClass.LOCK,
+        is_on=lambda vehicle: not vehicle.front_right_door_is_locked,
+        on_icon="mdi:lock-open",
+        off_icon="mdi:lock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_left_door_is_locked",
+        translation_key="back_left_door_is_locked",
+        device_class=BinarySensorDeviceClass.LOCK,
+        is_on=lambda vehicle: not vehicle.back_left_door_is_locked,
+        on_icon="mdi:lock-open",
+        off_icon="mdi:lock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="back_right_door_is_locked",
+        translation_key="back_right_door_is_locked",
+        device_class=BinarySensorDeviceClass.LOCK,
+        is_on=lambda vehicle: not vehicle.back_right_door_is_locked,
+        on_icon="mdi:lock-open",
+        off_icon="mdi:lock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_battery_winter_mode",
+        translation_key="ev_battery_winter_mode",
+        icon="mdi:snowflake-thermometer",
+        is_on=lambda vehicle: vehicle.ev_battery_winter_mode,
+    ),
 )
 
 
