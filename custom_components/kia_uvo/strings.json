@@ -456,6 +456,33 @@
     "button": {
       "force_refresh": {
         "name": "Force Refresh"
+      },
+      "open_charge_port": {
+        "name": "Open Charge Port"
+      },
+      "close_charge_port": {
+        "name": "Close Charge Port"
+      },
+      "start_hazard_lights": {
+        "name": "Start Hazard Lights"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Start Hazard Lights and Horn"
+      },
+      "start_valet_mode": {
+        "name": "Start Valet Mode"
+      },
+      "stop_valet_mode": {
+        "name": "Stop Valet Mode"
+      },
+      "open_all_windows": {
+        "name": "Open All Windows"
+      },
+      "close_all_windows": {
+        "name": "Close All Windows"
+      },
+      "vent_all_windows": {
+        "name": "Vent All Windows"
       }
     },
     "cover": {
