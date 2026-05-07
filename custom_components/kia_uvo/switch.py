@@ -35,7 +35,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         translation_key="ev_charging",
         icon="mdi:ev-station",
         value_fn=lambda vehicle: vehicle.ev_battery_is_charging,
-        exists_fn=lambda vehicle: vehicle.ev_battery_percentage is not None,
+        exists_fn=lambda vehicle: vehicle.ev_battery_is_charging is not None,
         on_fn=lambda coordinator, vid: coordinator.async_start_charge(vid),
         off_fn=lambda coordinator, vid: coordinator.async_stop_charge(vid),
     ),
