@@ -413,14 +413,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             or False,
             climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
             temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
-            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit
-            or 0,
+            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit or 0,
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
-    async def async_set_schedule_charge_enabled(
-        self, vehicle_id: str, enabled: bool
-    ):
+    async def async_set_schedule_charge_enabled(self, vehicle_id: str, enabled: bool):
         """Toggle scheduled charging on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
