@@ -506,20 +506,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         icon="mdi:ev-station",
         is_on=lambda vehicle: vehicle.ev_v2x_status,
     ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_off_peak_charge_only_enabled",
-        translation_key="ev_off_peak_charge_only_enabled",
-        icon="mdi:clock-outline",
-        is_on=lambda vehicle: vehicle.ev_off_peak_charge_only_enabled,
-        entity_category=EntityCategory.DIAGNOSTIC,
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_schedule_charge_enabled",
-        translation_key="ev_schedule_charge_enabled",
-        icon="mdi:calendar-clock",
-        is_on=lambda vehicle: vehicle.ev_schedule_charge_enabled,
-        entity_category=EntityCategory.DIAGNOSTIC,
-    ),
 )
 
 

@@ -570,12 +570,6 @@
       "ev_first_departure_enabled": {
         "name": "EV Scheduled Departure 1"
       },
-      "ev_off_peak_charge_only_enabled": {
-        "name": "Off-peak charge only"
-      },
-      "ev_schedule_charge_enabled": {
-        "name": "Scheduled charging"
-      },
       "ev_second_departure_enabled": {
         "name": "EV Scheduled Departure 2"
       },
@@ -722,11 +716,17 @@
       }
     },
     "switch": {
+      "climate": {
+        "name": "Climate"
+      },
       "ev_charging": {
         "name": "EV Charging"
       },
-      "climate": {
-        "name": "Climate"
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Off-peak charge only"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Scheduled charging"
       }
     },
     "climate": {
