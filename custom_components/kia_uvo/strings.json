@@ -267,24 +267,6 @@
       "ev_charge_port_door_is_open": {
         "name": "EV Charge Port"
       },
-      "ev_first_departure_climate_defrost": {
-        "name": "First departure defrost"
-      },
-      "ev_first_departure_climate_enabled": {
-        "name": "First departure climate"
-      },
-      "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
-      },
-      "ev_second_departure_climate_defrost": {
-        "name": "Second departure defrost"
-      },
-      "ev_second_departure_climate_enabled": {
-        "name": "Second departure climate"
-      },
-      "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
-      },
       "front_left_door_is_locked": {
         "name": "Front Left Door Lock"
       },
@@ -422,11 +404,29 @@
       }
     },
     "switch": {
+      "climate": {
+        "name": "Climate"
+      },
       "ev_charging": {
         "name": "EV Charging"
       },
-      "climate": {
-        "name": "Climate"
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV Scheduled Departure 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV Scheduled Departure 2"
       }
     },
     "climate": {
