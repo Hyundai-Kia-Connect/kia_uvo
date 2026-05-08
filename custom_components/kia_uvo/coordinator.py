@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import datetime as dt
 from datetime import timedelta
 import traceback
 import logging
 import asyncio
 
 from hyundai_kia_connect_api import (
+    Vehicle,
     VehicleManager,
     ClimateRequestOptions,
     WindowRequestOptions,
@@ -388,6 +390,81 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass.async_create_task(
             self.async_await_action_and_refresh(vehicle_id, action_id)
         )
+
+    def _build_schedule_options_from_vehicle(
+        self, vehicle: Vehicle
+    ) -> ScheduleChargingClimateRequestOptions:
+        """Build schedule options from current vehicle state for partial updates."""
+        return ScheduleChargingClimateRequestOptions(
+            first_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
+                enabled=vehicle.ev_first_departure_enabled or False,
+                days=vehicle.ev_first_departure_days or [0],
+                time=vehicle.ev_first_departure_time or dt.time(),
+            ),
+            second_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
+                enabled=vehicle.ev_second_departure_enabled or False,
+                days=vehicle.ev_second_departure_days or [0],
+                time=vehicle.ev_second_departure_time or dt.time(),
+            ),
+            charging_enabled=vehicle.ev_schedule_charge_enabled or False,
+            off_peak_start_time=vehicle.ev_off_peak_start_time or dt.time(),
+            off_peak_end_time=vehicle.ev_off_peak_end_time or dt.time(),
+            off_peak_charge_only_enabled=vehicle.ev_off_peak_charge_only_enabled
+            or False,
+            climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
+            temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
+            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit
+            or 0,
+            defrost=vehicle.ev_first_departure_climate_defrost or False,
+        )
+
+    async def async_set_schedule_charge_enabled(
+        self, vehicle_id: str, enabled: bool
+    ):
+        """Toggle scheduled charging on/off."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        options.charging_enabled = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def async_set_off_peak_charge_only_enabled(
+        self, vehicle_id: str, enabled: bool
+    ):
+        """Toggle off-peak charge only on/off."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        options.off_peak_charge_only_enabled = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def async_set_departure_enabled(
+        self, vehicle_id: str, departure_num: int, enabled: bool
+    ):
+        """Toggle a departure schedule on/off."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        if departure_num == 1:
+            options.first_departure.enabled = enabled
+        else:
+            options.second_departure.enabled = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def async_set_departure_climate_enabled(
+        self, vehicle_id: str, departure_num: int, enabled: bool
+    ):
+        """Toggle departure climate on/off."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        options.climate_enabled = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def async_set_departure_defrost(
+        self, vehicle_id: str, departure_num: int, enabled: bool
+    ):
+        """Toggle departure defrost on/off."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        options.defrost = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_start_hazard_lights(self, vehicle_id: str):
         await self.async_check_and_refresh_token()

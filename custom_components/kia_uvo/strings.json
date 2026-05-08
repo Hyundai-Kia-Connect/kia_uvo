@@ -448,6 +448,24 @@
       },
       "climate": {
         "name": "Climate"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV Scheduled Departure 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV Scheduled Departure 2"
       }
     },
     "climate": {
