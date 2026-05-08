@@ -520,7 +520,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.ev_schedule_charge_enabled,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
-    ),
 )
 
 
