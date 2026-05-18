@@ -446,6 +446,11 @@
       "location": {
         "name": "Location"
       }
+    },
+    "select": {
+      "ev_charging_current_limit": {
+        "name": "AC Charging Current Limit"
+      }
     }
   }
 }
