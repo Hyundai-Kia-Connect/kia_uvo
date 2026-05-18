@@ -494,6 +494,18 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         icon="mdi:snowflake-thermometer",
         is_on=lambda vehicle: vehicle.ev_battery_winter_mode,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_v2l_status",
+        translation_key="ev_v2l_status",
+        icon="mdi:ev-station",
+        is_on=lambda vehicle: vehicle.ev_v2l_status,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_v2x_status",
+        translation_key="ev_v2x_status",
+        icon="mdi:ev-station",
+        is_on=lambda vehicle: vehicle.ev_v2x_status,
+    ),
 )
 
 
