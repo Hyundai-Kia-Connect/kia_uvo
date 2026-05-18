@@ -48,6 +48,93 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         on_fn=lambda coordinator, vid: coordinator.async_start_climate_default(vid),
         off_fn=lambda coordinator, vid: coordinator.async_stop_climate(vid),
     ),
+    # Departure schedule switches
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_enabled",
+        translation_key="ev_first_departure_enabled",
+        icon="mdi:clock-outline",
+        value_fn=lambda vehicle: vehicle.ev_first_departure_enabled,
+        exists_fn=lambda vehicle: vehicle.ev_first_departure_enabled is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
+            vid, 1, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
+            vid, 1, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_enabled",
+        translation_key="ev_second_departure_enabled",
+        icon="mdi:clock-outline",
+        value_fn=lambda vehicle: vehicle.ev_second_departure_enabled,
+        exists_fn=lambda vehicle: vehicle.ev_second_departure_enabled is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
+            vid, 2, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
+            vid, 2, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_climate_enabled",
+        translation_key="ev_first_departure_climate_enabled",
+        icon="mdi:car-climate",
+        value_fn=lambda vehicle: vehicle.ev_first_departure_climate_enabled,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_climate_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_climate_enabled(
+            vid, 1, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_climate_enabled(
+            vid, 1, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_climate_enabled",
+        translation_key="ev_second_departure_climate_enabled",
+        icon="mdi:car-climate",
+        value_fn=lambda vehicle: vehicle.ev_second_departure_climate_enabled,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_climate_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_climate_enabled(
+            vid, 2, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_climate_enabled(
+            vid, 2, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_climate_defrost",
+        translation_key="ev_first_departure_climate_defrost",
+        icon="mdi:car-defrost-rear",
+        value_fn=lambda vehicle: vehicle.ev_first_departure_climate_defrost,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_climate_defrost is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_defrost(
+            vid, 1, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_defrost(
+            vid, 1, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_climate_defrost",
+        translation_key="ev_second_departure_climate_defrost",
+        icon="mdi:car-defrost-rear",
+        value_fn=lambda vehicle: vehicle.ev_second_departure_climate_defrost,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_climate_defrost is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_departure_defrost(
+            vid, 2, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_departure_defrost(
+            vid, 2, False
+        ),
+    ),
 )
 
 

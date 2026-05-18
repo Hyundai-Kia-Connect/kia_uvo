@@ -269,20 +269,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     HyundaiKiaBinarySensorEntityDescription(
-        key="ev_first_departure_enabled",
-        translation_key="ev_first_departure_enabled",
-        is_on=lambda vehicle: vehicle.ev_first_departure_enabled,
-        on_icon="mdi:clock-outline",
-        off_icon="mdi:clock-outline",
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_second_departure_enabled",
-        translation_key="ev_second_departure_enabled",
-        is_on=lambda vehicle: vehicle.ev_second_departure_enabled,
-        on_icon="mdi:clock-outline",
-        off_icon="mdi:clock-outline",
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
         key="brake_fluid_warning_is_on",
         translation_key="brake_fluid_warning_is_on",
         is_on=lambda vehicle: vehicle.brake_fluid_warning_is_on,
