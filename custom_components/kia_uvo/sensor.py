@@ -19,7 +19,6 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
-    UnitOfTemperature,
     UnitOfTime,
     EntityCategory,
 )
@@ -289,7 +288,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:thermometer-low",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=DYNAMIC_UNIT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
@@ -298,7 +297,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:thermometer-high",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=DYNAMIC_UNIT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
@@ -307,7 +306,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         icon="mdi:thermometer-water",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=DYNAMIC_UNIT,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
