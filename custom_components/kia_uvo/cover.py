@@ -68,6 +68,8 @@ async def async_setup_entry(
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        if not vehicle.supports_window_control:
+            continue
         for description in COVER_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:
                 entities.append(
