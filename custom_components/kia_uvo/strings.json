@@ -419,16 +419,14 @@
       },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
+      },
+      "ev_charging_current_limit": {
+        "name": "AC Charging Current Limit"
       }
     },
     "device_tracker": {
       "location": {
         "name": "Location"
-      }
-    },
-    "select": {
-      "ev_charging_current_limit": {
-        "name": "AC Charging Current Limit"
       }
     }
   }
