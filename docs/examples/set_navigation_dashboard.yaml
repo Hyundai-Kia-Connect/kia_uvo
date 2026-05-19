@@ -2,118 +2,96 @@
 #
 # Copy these cards to your Home Assistant dashboard.
 # Replace <DEVICE_ID> with your vehicle's device ID
-# (found in Settings > Devices > your vehicle > URL, or via Developer Tools).
+# (found in Settings > Devices > your vehicle, or via Developer Tools).
 #
 # The set_navigation service sends a POI destination to the car's
 # built-in navigation. Only EU/AU/CN/IN regions are supported.
 
 # ── Example 1: Predefined destination buttons ──────────────────────────
-# Simple button cards for favorite destinations.
+# Add these as separate button cards on your dashboard.
 
-type: vertical-stack
-cards:
-  - type: button
-    name: "Nawigacja: Berlin Hbf"
-    icon: mdi:navigation-variant
-    tap_action:
-      action: call-service
-      service: kia_uvo.set_navigation
-      target:
-        device_id: <DEVICE_ID>
-      data:
-        latitude: 52.5251
-        longitude: 13.3694
-        name: "Berlin Central Station"
-        address: "Europaplatz 1, 10557 Berlin"
+---
+type: button
+name: "Nawigacja: Berlin Hbf"
+icon: mdi:navigation-variant
+tap_action:
+  action: call-service
+  service: kia_uvo.set_navigation
+  target:
+    device_id: <DEVICE_ID>
+  data:
+    latitude: 52.5251
+    longitude: 13.3694
+    name: "Berlin Central Station"
+    address: "Europaplatz 1, 10557 Berlin"
 
-  - type: button
-    name: "Nawigacja: Warszawa Centrum"
-    icon: mdi:navigation-variant
-    tap_action:
-      action: call-service
-      service: kia_uvo.set_navigation
-      target:
-        device_id: <DEVICE_ID>
-      data:
-        latitude: 52.2297
-        longitude: 21.0122
-        name: "Warszawa Centrum"
-        address: "Plac Defilad 1, 00-901 Warszawa"
+---
+type: button
+name: "Nawigacja: Warszawa"
+icon: mdi:navigation-variant
+tap_action:
+  action: call-service
+  service: kia_uvo.set_navigation
+  target:
+    device_id: <DEVICE_ID>
+  data:
+    latitude: 52.2297
+    longitude: 21.0122
+    name: "Warszawa Centrum"
+    address: "Plac Defilad 1, 00-901 Warszawa"
 
-  - type: button
-    name: "Nawigacja: Kraków Rynek"
-    icon: mdi:navigation-variant
-    tap_action:
-      action: call-service
-      service: kia_uvo.set_navigation
-      target:
-        device_id: <DEVICE_ID>
-      data:
-        latitude: 50.0614
-        longitude: 19.9373
-        name: "Kraków Rynek Główny"
-        address: "Rynek Główny, 31-042 Kraków"
+---
+type: button
+name: "Nawigacja: Kraków Rynek"
+icon: mdi:navigation-variant
+tap_action:
+  action: call-service
+  service: kia_uvo.set_navigation
+  target:
+    device_id: <DEVICE_ID>
+  data:
+    latitude: 50.0614
+    longitude: 19.9373
+    name: "Kraków Rynek Główny"
+    address: "Rynek Główny, 31-042 Kraków"
 
-# ── Example 2: Conditional card (only show for EV/PHEV) ───────────────
-# Shows the navigation buttons only when the vehicle engine is not running,
-# since sending navigation while driving may not work.
+# ── Example 2: Automation — send home when leaving work ──────────────────
+# Automatically sends "Drive Home" when you leave your work zone.
 
-type: conditional
-conditions:
-  - entity: binary_sensor.santa_fe_engine_is_running
-    state: "off"
-card:
-  type: vertical-stack
-  cards:
-    - type: heading
-      heading: "Send destination to car"
-      icon: mdi:car-navigation
-    - type: tile
-      entity: binary_sensor.santa_fe_engine_is_running
-      name: "Engine status"
+---
+alias: "Send navigation home when leaving work"
+trigger:
+  - platform: zone
+    entity_id: device_tracker.your_phone
+    zone: zone.work
+    event: leave
+condition:
+  - condition: state
+    entity_id: binary_sensor.santa_fe_engine_is_running
+    state: "on"
+action:
+  - service: kia_uvo.set_navigation
+    target:
+      device_id: <DEVICE_ID>
+    data:
+      latitude: 50.0647
+      longitude: 19.9450
+      name: "Dom"
 
-# ── Example 3: Automation — send home location when leaving work ───────
-# Automatically sends "Drive Home" destination when you leave the work zone.
+# ── Example 3: Script with confirmation notification ────────────────────
 
-automation:
-  - id: send_navigation_home_from_work
-    alias: "Send navigation home when leaving work"
-    trigger:
-      - platform: zone
-        entity_id: device_tracker.your_phone
-        zone: zone.work
-        event: leave
-    condition:
-      - condition: state
-        entity_id: binary_sensor.santa_fe_engine_is_running
-        state: "on"
-    action:
-      - service: kia_uvo.set_navigation
-        target:
-          device_id: <DEVICE_ID>
-        data:
-          latitude: 50.0647
-          longitude: 19.9450
-          name: "Dom"
-          address: "Twoja ulica, Miasto"
-
-# ── Example 4: Script with confirmation notification ───────────────────
-# Sends a destination and shows a notification in HA.
-
-script:
-  send_navigation_with_notification:
-    alias: "Send navigation with confirmation"
-    mode: single
-    sequence:
-      - service: kia_uvo.set_navigation
-        target:
-          device_id: <DEVICE_ID>
-        data:
-          latitude: 52.5251
-          longitude: 13.3694
-          name: "Berlin Central Station"
-          address: "Europaplatz 1, 10557 Berlin"
-      - service: notify.mobile_app_your_phone
-        data:
-          title: "Nawigacja"
-          message: "Cel podróży wysłany: Berlin Central Station"
+---
+alias: "Send navigation with confirmation"
+sequence:
+  - service: kia_uvo.set_navigation
+    target:
+      device_id: <DEVICE_ID>
+    data:
+      latitude: 52.5251
+      longitude: 13.3694
+      name: "Berlin Central Station"
+      address: "Europaplatz 1, 10557 Berlin"
+  - service: notify.mobile_app_your_phone
+    data:
+      title: "Nawigacja"
+      message: "Cel podróży wysłany: Berlin Central Station"
