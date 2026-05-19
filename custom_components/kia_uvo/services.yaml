@@ -463,8 +463,6 @@ stop_valet_mode:
           integration: kia_uvo
 set_navigation:
   target:
-    device:
-      integration: kia_uvo
   fields:
     latitude:
       required: true
