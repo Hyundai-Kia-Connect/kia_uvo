@@ -259,6 +259,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         vehicle_id: str,
         action_fn: Callable[[], Any],
         error_label: str,
+        *,
         force_refresh: bool = False,
     ):
         """Send a vehicle action, wait for completion, and refresh data.
@@ -367,6 +368,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             vehicle_id,
             lambda: self.vehicle_manager.set_charge_limits(vehicle_id, ac, dc),
             "set charge limits",
+            force_refresh=True,
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):
@@ -506,15 +508,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
     async def async_set_navigation(self, vehicle_id: str, poi_list: list[POIInfo]):
-        await self.async_check_and_refresh_token()
-        try:
-            action_id = await self.hass.async_add_executor_job(
-                self.vehicle_manager.set_navigation, vehicle_id, poi_list
-            )
-        except Exception as err:
-            raise HomeAssistantError(f"Failed to set navigation: {err}") from err
-        self.hass.async_create_task(
-            self.async_await_action_and_refresh(vehicle_id, action_id)
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
+            "set navigation",
         )
 
     async def _async_save_token(self):
