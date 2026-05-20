@@ -10,7 +10,23 @@ A custom integration for Kia Uvo / Hyundai Bluelink. This project uses our under
 
 ## Installation
 
-Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password.
+### HACS
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Hyundai-Kia-Connect&repository=kia_uvo&category=integration)
+
+1. Install [HACS](https://hacs.xyz/) if you don't have it already
+2. Open HACS in Home Assistant
+3. Search for "Kia Uvo"
+4. Click the download button
+
+### Manual
+
+1. Copy the `custom_components/kia_uvo` directory to your `config/custom_components/` directory
+2. Restart Home Assistant
+
+### Configuration
+
+After installation, go to **Settings** → **Devices & Services** → **Integrations** and search for **Kia Uvo**. Configure your vehicle using your username and password.
 
 - AU, EU, CA, CH, IN, NZ, BR and US is supported. USA, India, China and Brazil support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
