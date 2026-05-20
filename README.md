@@ -6,79 +6,131 @@ I no longer have a Kia or Hyundai so don't maintain this like I used to. Others 
 
 ## Intro
 
-I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be working for new account types. Thanks for your hard work [@wcomartin](https://github.com/wcomartin/kiauvo). This project was mostly inspired by his [home assistant integration](https://github.com/wcomartin/kia_uvo). This now uses our underlying python package: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api.
+A custom integration for Kia Uvo / Hyundai Bluelink. This project uses our underlying python package: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api.
 
 ## Installation
 
-Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password(or token if Europe!) (I know, translations are missing, a PR for this would be great!).
+Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password.
 
-- AU, EU, CA, CH, IN, AUS, NZ, BR and US is supported by this. USA, India, China and Brazil support is limited.
+- AU, EU, CA, CH, IN, NZ, BR and US is supported. USA, India, China and Brazil support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
-- update - It will fetch the cached information every 30 minutes from Kia Uvo / Hyundai Bluelink Servers. **Now Configurable**
-- force update - It will ask your car for the latest data every 4 hours. **Now Configurable**
-- It will not force update between 10PM to 6AM. I am trying to be cautios here. **Now Configurable**
+- Reconfigure flow is available from the integration options (change credentials or set PIN).
+- Cached update - fetches cached information from servers every 30 minutes. **Configurable**
+- Force update - asks your car for the latest data every 4 hours. **Configurable**
+- Force update is disabled between 10PM and 6AM by default. **Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure each entity if you would like other units.
 
 ## Supported entities
 
-- Air Conditioner Status, Defroster Status, Set Temperature
-- Heated Rear Window, Heated Steering Wheel
-- Car Battery Level (12v), EV Battery Level, Remaining Time to Full Charge
+### Sensors
+- Odometer, Total Range, EV Range, Fuel Range
+- Car Battery Level (12v), EV Battery Level, EV Battery SOH, EV Battery Capacity, EV Battery Remain
+- Estimated Charge Duration (current, fast, portable, station)
+- EV Target Range (AC/DC charge)
+- Air Temperature, Outside Temperature
+- Fuel Level
+- Total Power Consumed/Regenerated, Power Consumption 30d
+- Front/Rear Seat Status and Heater
+- Last Service Distance, Next Service Distance
+- Engine Type, DTC Count
+- EV Charging Power, EV Charging Current
+- Geocoded Location (optional, disabled by default)
+- Location Last Updated
+
+### EV Diagnostics (CCS2 vehicles)
+- EV Battery Pack Voltage
+- EV Battery Temperature (min, max, water)
+- EV Battery Chiller RPM
+- EV Power Consumption (air conditioning, battery cooling, battery heater)
+- EV Off-Peak Start/End Time, EV Departure Time (first/second)
+
+### Binary Sensors
+- Engine Running, Ignition, Accessory Status
+- Defrost, Heated Rear Window, Heated Steering Wheel, Side Mirror Heater
+- EV Battery Charging, EV Battery Plugged In, EV Charge Port Open
+- EV Battery Winter Mode, EV Battery Precondition Enabled, EV Battery Heating State
+- EV V2L/V2X Status
+- EV Schedule Charge Enabled, EV Off-Peak Charge Only Enabled
+- Door Open/Close (individual doors), Trunk, Hood
+- Window Open/Close (individual windows)
+- Lock Status (individual doors)
 - Tire Pressure Warnings (individual and all)
-- Charge Status and Plugged In Status
-- Low Fuel Light Status (for PHEV and IC)
-- Doors, Trunk, Window and Hood Open/Close Status
-- Locking and Unlocking
-- Engine Status
-- Location/Coordinates (over GPS) and Geocoded Location using OpenStreetMap (optional, disabled by default)
-- Last Service and Next Service in Canada
-- Odometer, EV Range (for PHEV and EV), Fuel Range (for PHEV and IC), Total Range (for PHEV and EV)
-- Latest Update
-- cache update interval, force update interval, blackout start and finish hours
-- Ignition, Accessory status
-- Lights status
+- Low Fuel Light, Smart Key Battery Warning
+- Brake Fluid Warning, Washer Fluid Warning
+- Headlamp Status, Turn Signals, Stop Lamps
+- Sunroof Open, Sleep Mode
+- Transmission Condition
+
+### Switches
+- Climate Control
+- EV Charging
+- EV Schedule Charge Enabled
+- EV Off-Peak Charge Only Enabled
+
+### Number Entities
+- EV Charge Limits (AC/DC)
+- EV V2L Discharge Limit
+
+### Covers
+- Individual Window Control (front left, front right, rear left, rear right) — where supported
+
+### Locks
+- Door Lock/Unlock
+
+### Climate
+- Climate Control (temperature, mode, defrost)
+
+### Buttons
+- Force Refresh
+
+### Device Tracker
+- Vehicle Location (GPS)
 
 ## Supported services
 
-These can be access by going to the developer tools followed by actions. These can also be called via automation.
+These can be accessed via Developer Tools > Actions, or called from automations.
 
-- update: get latest **cached** vehicle data
-- force_update: this will make a call to your vehicle to get its latest data, do not overuse this!
-- start_climate / stop_climate: Starts the ICE engine in some regions or starts EV climate.
-- start_charge / stop_charge: You can control your charging using these services
-- set_charge_limits: You can control your charging capacity limits using this services
-- set_charging_current: You can control the charging current level (100%, 90% or 60%)
-- open_charge_port / close_charge_port: Open or close the charge port.
-- set_windows: opens and closes the windows for select cars and regions
-- start_hazard_lights_and_horn / stop: Panic!
-- start_hazard_lights / stop: Hazard lights only
-- schedule_charging_and_climate: planned depature
-- start_valet_mode / stop: valet mode
+- `update`: get latest **cached** vehicle data
+- `force_update`: ask the vehicle for its latest data — do not overuse!
+- `start_climate` / `stop_climate`: start/stop climate control (starts ICE engine in some regions)
+- `start_charge` / `stop_charge`: control EV charging
+- `set_charge_limits`: set AC/DC charge capacity limits
+- `set_charging_current`: set charging current level (100%, 90% or 60%)
+- `open_charge_port` / `close_charge_port`: open or close the charge port
+- `lock` / `unlock`: lock or unlock the vehicle
+- `set_windows`: open/close individual windows (where supported)
+- `start_hazard_lights` / `stop_hazard_lights`: hazard lights only
+- `start_hazard_lights_and_horn` / `stop_hazard_lights_and_horn`: panic mode
+- `schedule_charging_and_climate`: set planned departure schedule
+- `start_valet_mode` / `stop_valet_mode`: valet mode
+
+### Service availability by region
 
 | Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
 | --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
 | Update                            | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
 | Force Update                      | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
-| Lock Unlock                       | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
-| start stop climate                | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
-| start stop charge                 | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| set charge limits                 | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| open and close charge port        | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| set windows                       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| start stop hazard lights          | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| start stop hazard lights and horn | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
-| schedule charging and climate     | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| start stop valet_mode             | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Lock / Unlock                     | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
+| Start / Stop Climate              | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
+| Start / Stop Charge               | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charge Limits                 | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charging Current             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Open / Close Charge Port          | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Windows                       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard Lights        | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard + Horn        | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
+| Schedule Charging and Climate     | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Valet Mode           | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
 
-I have posted an example screenshot from my own car.
+## Screenshots
 
 ![Device Details](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Device%20Details.PNG?raw=true)
 ![Configuration](https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/Configuration.PNG?raw=true)
 
 ## Troubleshooting
 
-If you receive an error while trying to login, please go through these steps;
+If you receive an error while trying to login, please go through these steps:
 
-1. As of now, integration only supports USA, EU, China, IN, Aus, NZ, CAD and BR region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA and Brazil coverage isn't complete.
-2. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging click "Enable debug logging" on the integration. It can be access via "Settings -> System -> Logs"
+1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada and Brazil. If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
+2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**.
