@@ -24,6 +24,7 @@ Install the software by using HACS or manually copying files into the `custom_co
 ## Supported entities
 
 ### Sensors
+
 - Odometer, Total Range, EV Range, Fuel Range
 - Car Battery Level (12v), EV Battery Level, EV Battery SOH, EV Battery Capacity, EV Battery Remain
 - Estimated Charge Duration (current, fast, portable, station)
@@ -39,6 +40,7 @@ Install the software by using HACS or manually copying files into the `custom_co
 - Location Last Updated
 
 ### EV Diagnostics (CCS2 vehicles)
+
 - EV Battery Pack Voltage
 - EV Battery Temperature (min, max, water)
 - EV Battery Chiller RPM
@@ -46,6 +48,7 @@ Install the software by using HACS or manually copying files into the `custom_co
 - EV Off-Peak Start/End Time, EV Departure Time (first/second)
 
 ### Binary Sensors
+
 - Engine Running, Ignition, Accessory Status
 - Defrost, Heated Rear Window, Heated Steering Wheel, Side Mirror Heater
 - EV Battery Charging, EV Battery Plugged In, EV Charge Port Open
@@ -63,28 +66,35 @@ Install the software by using HACS or manually copying files into the `custom_co
 - Transmission Condition
 
 ### Switches
+
 - Climate Control
 - EV Charging
 - EV Schedule Charge Enabled
 - EV Off-Peak Charge Only Enabled
 
 ### Number Entities
+
 - EV Charge Limits (AC/DC)
 - EV V2L Discharge Limit
 
 ### Covers
+
 - Individual Window Control (front left, front right, rear left, rear right) — where supported
 
 ### Locks
+
 - Door Lock/Unlock
 
 ### Climate
+
 - Climate Control (temperature, mode, defrost)
 
 ### Buttons
+
 - Force Refresh
 
 ### Device Tracker
+
 - Vehicle Location (GPS)
 
 ## Supported services
@@ -107,21 +117,21 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 ### Service availability by region
 
-| Service                           | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
-| --------------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
-| Update                            | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
-| Force Update                      | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
-| Lock / Unlock                     | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
-| Start / Stop Climate              | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
-| Start / Stop Charge               | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charge Limits                 | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charging Current             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Open / Close Charge Port          | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Windows                       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard Lights        | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard + Horn        | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
-| Schedule Charging and Climate     | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Valet Mode           | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
+| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
+| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
+| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
+| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
+| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
+| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
+| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
 
 ## Screenshots
 
