@@ -13,7 +13,7 @@
       },
       "credentials_token": {
         "title": "Hyundai / Kia Connect - Credentials",
-        "description": "Enter your account credentials. Europe requires special token work — refer to the README.",
+        "description": "Enter your account credentials.",
         "data": {
           "username": "Username",
           "password": "Token",
@@ -67,7 +67,7 @@
     },
     "error": {
       "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect servers. Please use the official app to logout and log back in, then try again.",
-      "invalid_credentials": "Invalid username or token/password",
+      "invalid_credentials": "Invalid username or password",
       "unknown": "Unexpected error"
     }
   },
