@@ -12,9 +12,6 @@ I have baked a custom integration for Kia Uvo / Hyundai Bluelink, this will be w
 
 Install the software by using HACS or manually copying files into the `custom_components` subdirectory. Next, go to **Settings**, then **Devices & services** and in the **Integrations** section search for **Kia uvo** and configure your vehicle using your username and password(or token if Europe!) (I know, translations are missing, a PR for this would be great!).
 
-**Europe KIA and Hyundai require special steps. This is outlined here: https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/tree/master/KiaHyundaiToken
-**
-
 - AU, EU, CA, CH, IN, AUS, NZ, BR and US is supported by this. USA, India, China and Brazil support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
@@ -84,6 +81,4 @@ I have posted an example screenshot from my own car.
 If you receive an error while trying to login, please go through these steps;
 
 1. As of now, integration only supports USA, EU, China, IN, Aus, NZ, CAD and BR region, so if you are outside, you are more than welcome to create an issue and become a test user for changes to expand coverage. USA and Brazil coverage isn't complete.
-2. EU Kia users recently (August 2025) faced an issue, while solution was implemented, some users require to login their account on https://www.kia.com/de and consent to data processing by Kia to overcome the issue.
-3. As a last resort, please double check your account credentials or you can create a new account and share your car from main account to new account.
-4. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging click "Enable debug logging" on the integration. It can be access via "Settings -> System -> Logs"
+2. You can enable logging for this integration specifically and share your logs, so I can have a deep dive investigation. To enable logging click "Enable debug logging" on the integration. It can be access via "Settings -> System -> Logs"
