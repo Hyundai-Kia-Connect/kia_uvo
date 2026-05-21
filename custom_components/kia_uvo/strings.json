@@ -149,7 +149,7 @@
         "name": "Estimated Station Charge Duration"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "First departure time"
       },
       "ev_off_peak_end_time": {
         "name": "EV Off Peak End Time"
@@ -158,7 +158,7 @@
         "name": "EV Off Peak Start Time"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Second departure time"
       },
       "ev_target_range_charge_ac": {
         "name": "Target Range of Charge AC"
@@ -219,6 +219,18 @@
       },
       "vehicle_identification_number": {
         "name": "Vehicle Identification Number"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "First departure climate temperature"
+      },
+      "ev_first_departure_days": {
+        "name": "First departure days"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Second departure climate temperature"
+      },
+      "ev_second_departure_days": {
+        "name": "Second departure days"
       }
     },
     "binary_sensor": {
@@ -392,6 +404,18 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Washer Fluid Warning"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
       }
     },
     "lock": {
@@ -424,6 +448,24 @@
       },
       "climate": {
         "name": "Climate"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV Scheduled Departure 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV Scheduled Departure 2"
       }
     },
     "climate": {
