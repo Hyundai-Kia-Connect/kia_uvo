@@ -413,7 +413,7 @@
         "name": "EV Battery Capacity"
       },
       "ev_battery_pack_voltage": {
-        "name": "EV battery pack voltage"
+        "name": "EV Battery Pack Voltage"
       },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
@@ -425,13 +425,13 @@
         "name": "EV State of Health Battery"
       },
       "ev_battery_temperature_max": {
-        "name": "EV battery temperature max"
+        "name": "EV Battery Temperature Max"
       },
       "ev_battery_temperature_min": {
-        "name": "EV battery temperature min"
+        "name": "EV Battery Temperature Min"
       },
       "ev_battery_water_temperature": {
-        "name": "EV battery water temperature"
+        "name": "EV Battery Water Temperature"
       },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
@@ -455,7 +455,7 @@
         "name": "Estimated Station Charge Duration"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "First departure time"
       },
       "ev_off_peak_end_time": {
         "name": "EV Off Peak End Time"
@@ -464,7 +464,7 @@
         "name": "EV Off Peak Start Time"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Second departure time"
       },
       "ev_target_range_charge_ac": {
         "name": "Target Range of Charge AC"
@@ -525,6 +525,30 @@
       },
       "vehicle_identification_number": {
         "name": "Vehicle Identification Number"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "First departure climate temperature"
+      },
+      "ev_first_departure_days": {
+        "name": "First departure days"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Second departure climate temperature"
+      },
+      "ev_second_departure_days": {
+        "name": "Second departure days"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "EV Power Consumption Air Conditioning"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "EV Power Consumption Battery Cooling"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "EV Power Consumption Battery Heater"
+      },
+      "location_last_updated_at": {
+        "name": "Location Last Updated"
       }
     },
     "binary_sensor": {
@@ -698,6 +722,18 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Washer Fluid Warning"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
       }
     },
     "lock": {
@@ -730,6 +766,24 @@
       },
       "climate": {
         "name": "Climate"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "First departure defrost"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "First departure climate"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV Scheduled Departure 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Second departure defrost"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Second departure climate"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV Scheduled Departure 2"
       }
     },
     "climate": {
@@ -746,30 +800,6 @@
       },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
-      },
-      "ev_battery_pack_voltage": {
-        "name": "EV Battery Pack Voltage"
-      },
-      "ev_battery_temperature_min": {
-        "name": "EV Battery Temperature Min"
-      },
-      "ev_battery_temperature_max": {
-        "name": "EV Battery Temperature Max"
-      },
-      "ev_battery_water_temperature": {
-        "name": "EV Battery Water Temperature"
-      },
-      "ev_power_consumption_air_conditioning": {
-        "name": "EV Power Consumption Air Conditioning"
-      },
-      "ev_power_consumption_battery_cooling": {
-        "name": "EV Power Consumption Battery Cooling"
-      },
-      "ev_power_consumption_battery_heater": {
-        "name": "EV Power Consumption Battery Heater"
-      },
-      "location_last_updated_at": {
-        "name": "Location Last Updated"
       }
     },
     "device_tracker": {
