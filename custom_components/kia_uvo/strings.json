@@ -107,7 +107,7 @@
         "name": "EV Battery Capacity"
       },
       "ev_battery_pack_voltage": {
-        "name": "EV battery pack voltage"
+        "name": "EV Battery Pack Voltage"
       },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
@@ -119,13 +119,13 @@
         "name": "EV State of Health Battery"
       },
       "ev_battery_temperature_max": {
-        "name": "EV battery temperature max"
+        "name": "EV Battery Temperature Max"
       },
       "ev_battery_temperature_min": {
-        "name": "EV battery temperature min"
+        "name": "EV Battery Temperature Min"
       },
       "ev_battery_water_temperature": {
-        "name": "EV battery water temperature"
+        "name": "EV Battery Water Temperature"
       },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
@@ -231,6 +231,18 @@
       },
       "ev_second_departure_days": {
         "name": "Second departure days"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "EV Power Consumption Air Conditioning"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "EV Power Consumption Battery Cooling"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "EV Power Consumption Battery Heater"
+      },
+      "location_last_updated_at": {
+        "name": "Location Last Updated"
       }
     },
     "binary_sensor": {
