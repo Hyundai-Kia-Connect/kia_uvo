@@ -494,6 +494,18 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.ev_battery_heating_state,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_v2l_status",
+        translation_key="ev_v2l_status",
+        icon="mdi:ev-station",
+        is_on=lambda vehicle: vehicle.ev_v2l_status,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="ev_v2x_status",
+        translation_key="ev_v2x_status",
+        icon="mdi:ev-station",
+        is_on=lambda vehicle: vehicle.ev_v2x_status,
+    ),
 )
 
 
