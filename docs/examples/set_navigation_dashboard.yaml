@@ -55,6 +55,7 @@ tap_action:
     name: "Kraków Rynek Główny"
     address: "Rynek Główny, 31-042 Kraków"
 
+
 # ── Example 2: Automation — send home when leaving work ──────────────────
 # Automatically sends "Drive Home" when you leave your work zone.
 
@@ -77,6 +78,7 @@ action:
       latitude: 50.0647
       longitude: 19.9450
       name: "Dom"
+
 
 # ── Example 3: Script with confirmation notification ────────────────────
 
