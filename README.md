@@ -69,8 +69,8 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 - Defrost, Heated Rear Window, Heated Steering Wheel, Side Mirror Heater
 - EV Battery Charging, EV Battery Plugged In, EV Charge Port Open
 - EV Battery Winter Mode, EV Battery Precondition Enabled, EV Battery Heating State
-- EV V2L/V2X Status
-- EV Schedule Charge Enabled, EV Off-Peak Charge Only Enabled
+- EV V2L/V2X Status *(WIP — pending merge)*
+- EV Schedule Charge Enabled, EV Off-Peak Charge Only Enabled *(WIP — pending merge)*
 - Door Open/Close (individual doors), Trunk, Hood
 - Window Open/Close (individual windows)
 - Lock Status (individual doors)
@@ -85,8 +85,8 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 - Climate Control
 - EV Charging
-- EV Schedule Charge Enabled
-- EV Off-Peak Charge Only Enabled
+- EV Schedule Charge Enabled *(WIP — pending merge)*
+- EV Off-Peak Charge Only Enabled *(WIP — pending merge)*
 
 ### Number Entities
 
@@ -103,11 +103,12 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 ### Climate
 
-- Climate Control (temperature, mode, defrost)
+- Climate Control (temperature, mode, defrost) *(WIP — pending merge)*
 
 ### Buttons
 
 - Force Refresh
+- Open/Close Charge Port, Start/Stop Hazard Lights, Start/Stop Valet Mode, Open/Close Windows *(WIP — pending merge)*
 
 ### Device Tracker
 
@@ -130,6 +131,7 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 - `start_hazard_lights_and_horn` / `stop_hazard_lights_and_horn`: panic mode
 - `schedule_charging_and_climate`: set planned departure schedule
 - `start_valet_mode` / `stop_valet_mode`: valet mode
+- `set_navigation`: send a destination to the vehicle's navigation system *(WIP — pending merge)*
 
 ### Service availability by region
 
@@ -148,6 +150,7 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 | Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
 | Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
 | Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Navigation *(WIP)*        |     | ✔                 |     |         |             |             |       |       |        |
 
 ## Screenshots
 
