@@ -13,7 +13,7 @@
       },
       "credentials_token": {
         "title": "Hyundai / Kia Connect - Credentials",
-        "description": "Enter your account credentials.",
+        "description": "Enter your account credentials. Europe requires special token work — refer to the README.",
         "data": {
           "username": "Username",
           "password": "Token",
