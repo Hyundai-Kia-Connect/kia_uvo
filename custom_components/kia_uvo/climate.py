@@ -18,6 +18,7 @@ from homeassistant.components.climate.const import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
@@ -209,16 +210,16 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
                     self.vehicle_manager.stop_climate,
                     self.vehicle.id,
                 )
-                self.vehicle.air_control_is_on = False
             else:
                 await self.hass.async_add_executor_job(
                     self.vehicle_manager.start_climate,
                     self.vehicle.id,
                     self.climate_config,
                 )
-                self.vehicle.air_control_is_on = True
         except UnsupportedControlError as ex:
-            _LOGGER.warning("Climate control not supported by vehicle: %s", ex)
+            raise HomeAssistantError(
+                f"Climate control not supported by this vehicle: {ex}"
+            ) from ex
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
 
@@ -245,6 +246,8 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
                     self.climate_config,
                 )
             except UnsupportedControlError as ex:
-                _LOGGER.warning("Climate control not supported by vehicle: %s", ex)
+                raise HomeAssistantError(
+                    f"Climate control not supported by this vehicle: {ex}"
+                ) from ex
         self.coordinator.async_request_refresh()
         self.async_write_ha_state()
