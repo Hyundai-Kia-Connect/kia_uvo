@@ -159,4 +159,4 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 If you receive an error while trying to login, please go through these steps:
 
 1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada and Brazil. If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
-2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**.
+2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**. See [Home Assistant troubleshooting: enabling debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#enabling-debug-logging) for details.
