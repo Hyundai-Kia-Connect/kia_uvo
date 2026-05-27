@@ -135,6 +135,33 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
             vid, 2, False
         ),
     ),
+    # Charging schedule switches
+    HyundaiKiaSwitchDescription(
+        key="ev_schedule_charge_enabled",
+        translation_key="ev_schedule_charge_enabled",
+        icon="mdi:calendar-clock",
+        value_fn=lambda vehicle: vehicle.ev_schedule_charge_enabled,
+        exists_fn=lambda vehicle: vehicle.ev_schedule_charge_enabled is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_set_schedule_charge_enabled(
+            vid, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_schedule_charge_enabled(
+            vid, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_off_peak_charge_only_enabled",
+        translation_key="ev_off_peak_charge_only_enabled",
+        icon="mdi:clock-outline",
+        value_fn=lambda vehicle: vehicle.ev_off_peak_charge_only_enabled,
+        exists_fn=lambda vehicle: vehicle.ev_off_peak_charge_only_enabled is not None,
+        on_fn=lambda coordinator, vid: (
+            coordinator.async_set_off_peak_charge_only_enabled(vid, True)
+        ),
+        off_fn=lambda coordinator, vid: (
+            coordinator.async_set_off_peak_charge_only_enabled(vid, False)
+        ),
+    ),
 )
 
 

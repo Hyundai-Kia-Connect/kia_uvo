@@ -549,6 +549,12 @@
       },
       "location_last_updated_at": {
         "name": "Location Last Updated"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L max power"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L target SoC"
       }
     },
     "binary_sensor": {
@@ -734,6 +740,18 @@
       },
       "ev_second_departure_climate_enabled": {
         "name": "Second departure climate"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Off-peak charge only"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Scheduled charging"
+      },
+      "ev_v2l_status": {
+        "name": "V2L status"
+      },
+      "ev_v2x_status": {
+        "name": "V2X status"
       }
     },
     "lock": {
@@ -784,6 +802,12 @@
       },
       "ev_second_departure_enabled": {
         "name": "EV Scheduled Departure 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Off-peak charge only"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Scheduled charging"
       }
     },
     "climate": {
