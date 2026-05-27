@@ -69,8 +69,8 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 - Defrost, Heated Rear Window, Heated Steering Wheel, Side Mirror Heater
 - EV Battery Charging, EV Battery Plugged In, EV Charge Port Open
 - EV Battery Winter Mode, EV Battery Precondition Enabled, EV Battery Heating State
-- EV V2L/V2X Status *(WIP — pending merge)*
-- EV Schedule Charge Enabled, EV Off-Peak Charge Only Enabled *(WIP — pending merge)*
+- EV V2L/V2X Status
+- EV Schedule Charge Enabled, EV Off-Peak Charge Only Enabled
 - Door Open/Close (individual doors), Trunk, Hood
 - Window Open/Close (individual windows)
 - Lock Status (individual doors)
@@ -85,8 +85,8 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 - Climate Control
 - EV Charging
-- EV Schedule Charge Enabled *(WIP — pending merge)*
-- EV Off-Peak Charge Only Enabled *(WIP — pending merge)*
+- EV Schedule Charge Enabled
+- EV Off-Peak Charge Only Enabled
 
 ### Number Entities
 
