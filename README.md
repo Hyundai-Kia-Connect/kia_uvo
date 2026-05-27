@@ -103,12 +103,12 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 ### Climate
 
-- Climate Control (temperature, mode, defrost) *(WIP — pending merge)*
+- Climate Control (temperature, mode, defrost) _(WIP — pending merge)_
 
 ### Buttons
 
 - Force Refresh
-- Open/Close Charge Port, Start/Stop Hazard Lights, Start/Stop Valet Mode, Open/Close Windows *(WIP — pending merge)*
+- Open/Close Charge Port, Start/Stop Hazard Lights, Start/Stop Valet Mode, Open/Close Windows _(WIP — pending merge)_
 
 ### Device Tracker
 
@@ -131,7 +131,7 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 - `start_hazard_lights_and_horn` / `stop_hazard_lights_and_horn`: panic mode
 - `schedule_charging_and_climate`: set planned departure schedule
 - `start_valet_mode` / `stop_valet_mode`: valet mode
-- `set_navigation`: send a destination to the vehicle's navigation system *(WIP — pending merge)*
+- `set_navigation`: send a destination to the vehicle's navigation system _(WIP — pending merge)_
 
 ### Service availability by region
 
@@ -150,7 +150,7 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 | Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
 | Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
 | Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Navigation *(WIP)*        |     | ✔                 |     |         |             |             |       |       |        |
+| Set Navigation _(WIP)_        |     | ✔                 |     |         |             |             |       |       |        |
 
 ## Screenshots
 
