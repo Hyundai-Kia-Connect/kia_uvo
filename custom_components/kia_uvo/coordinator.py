@@ -368,7 +368,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             vehicle_id,
             lambda: self.vehicle_manager.set_charge_limits(vehicle_id, ac, dc),
             "set charge limits",
-            force_refresh=True,
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int):

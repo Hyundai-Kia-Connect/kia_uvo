@@ -2,10 +2,12 @@
 
 Validates:
 1. Service handler builds POIInfo correctly from call data
-2. Service handler rejects missing required fields (latitude, longitude, name)
-3. Coordinator async_set_navigation calls vehicle_manager correctly
-4. Coordinator async_set_navigation propagates API errors as HomeAssistantError
-5. POICoord/POIInfo round-trip: service data -> POIInfo -> to_dict() matches API expectations
+2. Coordinator async_set_navigation calls vehicle_manager correctly
+3. Coordinator async_set_navigation propagates API errors as HomeAssistantError
+4. POICoord/POIInfo round-trip: service data -> POIInfo -> to_dict() matches API expectations
+
+Required field validation (latitude, longitude, name) is enforced by
+services.yaml (required: true), not by the Python handler.
 """
 
 import pytest
@@ -190,61 +192,3 @@ async def test_set_navigation_multiple_pois():
     await coord.async_set_navigation("veh1", pois)
 
     coord.vehicle_manager.set_navigation.assert_called_once_with("veh1", pois)
-
-
-# --- Tests: Service handler field validation ---
-
-
-class TestServiceHandlerValidation:
-    """Test the service handler's field validation logic."""
-
-    def test_missing_latitude_returns_early(self):
-        """If latitude is missing, handler should log error and return."""
-        call_data = {"longitude": 13.405, "name": "Berlin"}
-        latitude = call_data.get("latitude")
-        assert latitude is None
-
-    def test_missing_longitude_returns_early(self):
-        """If longitude is missing, handler should log error and return."""
-        call_data = {"latitude": 52.52, "name": "Berlin"}
-        longitude = call_data.get("longitude")
-        assert longitude is None
-
-    def test_missing_name_returns_early(self):
-        """If name is missing, handler should log error and return."""
-        call_data = {"latitude": 52.52, "longitude": 13.405}
-        name = call_data.get("name")
-        assert name is None
-
-    def test_all_required_fields_present(self):
-        """All required fields present should not trigger early return."""
-        call_data = {
-            "latitude": 52.52,
-            "longitude": 13.405,
-            "name": "Berlin",
-        }
-        assert call_data.get("latitude") is not None
-        assert call_data.get("longitude") is not None
-        assert call_data.get("name") is not None
-
-    def test_optional_fields_default_to_empty_string(self):
-        """Optional fields should default to empty string when not provided."""
-        call_data = {"latitude": 52.52, "longitude": 13.405, "name": "Berlin"}
-        address = call_data.get("address", "")
-        zip_code = call_data.get("zip_code", "")
-        place_id = call_data.get("place_id", "")
-
-        poi = POIInfo(
-            coord=POICoord(
-                lat=float(call_data["latitude"]),
-                lon=float(call_data["longitude"]),
-            ),
-            name=call_data["name"],
-            addr=address,
-            zip=zip_code,
-            place_id=place_id,
-        )
-        d = poi.to_dict()
-        assert d["addr"] == ""
-        assert d["zip"] == ""
-        assert d["placeid"] == ""

@@ -294,25 +294,19 @@ def async_setup_services(hass: HomeAssistant) -> bool:
     async def async_handle_set_navigation(call):
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
-        latitude = call.data.get("latitude")
-        longitude = call.data.get("longitude")
-        name = call.data.get("name")
+        latitude = call.data["latitude"]
+        longitude = call.data["longitude"]
+        name = call.data["name"]
         address = call.data.get("address", "")
         zip_code = call.data.get("zip_code", "")
         place_id = call.data.get("place_id", "")
 
-        if latitude is None or longitude is None or name is None:
-            _LOGGER.error(
-                f"{DOMAIN} - Unable to set navigation. Latitude, longitude, and name are required."
-            )
-            return
-
         poi = POIInfo(
             coord=POICoord(lat=float(latitude), lon=float(longitude)),
             name=name,
-            addr=address or "",
-            zip=zip_code or "",
-            place_id=place_id or "",
+            addr=address,
+            zip=zip_code,
+            place_id=place_id,
         )
         await coordinator.async_set_navigation(vehicle_id, [poi])
 
