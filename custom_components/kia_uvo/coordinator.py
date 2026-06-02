@@ -177,6 +177,28 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
+        # Per-trip data (TRIP-01). The library implements update_day_trip_info()
+        # but the upstream coordinator never calls it. Trip data must not fail
+        # the coordinator update — wrap in try/except so a NoDataFound (5921),
+        # an unsupported region/firmware, or a transient backend error becomes
+        # a DEBUG log line rather than UpdateFailed.
+        today_str = dt_util.now().strftime("%Y%m%d")
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
+            if vehicle.engine_type not in ("EV", "PHEV"):
+                continue
+            try:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.update_day_trip_info,
+                    vehicle_id,
+                    today_str,
+                )
+            except Exception as exc:
+                _LOGGER.debug(
+                    "Day trip info not available for vehicle %s (may be unsupported for this region/firmware): %s",
+                    vehicle_id,
+                    exc,
+                )
+
         return self.data
 
     async def async_update_all(self) -> None:

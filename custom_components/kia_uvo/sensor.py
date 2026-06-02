@@ -428,6 +428,14 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
+        # day_trip_info starts None and is populated by the coordinator's
+        # first update — register unconditionally so the entity exists even
+        # when no trip data has been fetched yet (TRIP-01).
+        entities.append(
+            DayTripInfoEntity(
+                coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+            )
+        )
     async_add_entities(entities)
     return True
 
@@ -588,3 +596,52 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Per-trip sensor for today (TRIP-01).
+
+    State is the number of trips today; attributes carry the full per-trip list
+    (start time, drive/idle time, distance, avg/max speed). The underlying
+    ``vehicle.day_trip_info`` is populated by the coordinator on each cached-state
+    poll cycle via ``VehicleManager.update_day_trip_info()``; before the first
+    successful fetch (or when the trip endpoint is unsupported / returns
+    NoDataFound for this region/firmware) the value is ``None`` — both
+    ``state`` and ``state_attributes`` handle that case so the entity remains
+    available with state ``0`` instead of going unavailable.
+    """
+
+    _attr_translation_key = "day_trip_info"
+
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+
+    @property
+    def state(self):
+        if self.vehicle.day_trip_info is None:
+            return 0
+        return len(self.vehicle.day_trip_info.trip_list)
+
+    @property
+    def state_attributes(self):
+        if self.vehicle.day_trip_info is None:
+            return {}
+        info = self.vehicle.day_trip_info
+        return {
+            "yyyymmdd": info.yyyymmdd,
+            "trip_list": [
+                {
+                    "start_time": t.hhmmss,
+                    "drive_time": t.drive_time,
+                    "idle_time": t.idle_time,
+                    "distance": t.distance,
+                    "avg_speed": t.avg_speed,
+                    "max_speed": t.max_speed,
+                }
+                for t in info.trip_list
+            ],
+        }
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-day-trip-info-{self.vehicle.id}"
