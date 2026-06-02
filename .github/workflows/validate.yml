@@ -8,14 +8,14 @@ jobs:
   validate-hassfest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: Hassfest validation
         uses: home-assistant/actions/hassfest@868e6cb4607727d764341a158d98872cd63fa658 # master
 
   validate-hacs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - name: HACS validation
         uses: hacs/action@dcb30e72781db3f207d5236b861172774ab0b485 # main
         with:
