@@ -1,3 +1,4 @@
+---
 force_update:
   fields:
     device_id:
@@ -461,3 +462,38 @@ stop_valet_mode:
       selector:
         device:
           integration: kia_uvo
+set_navigation:
+  target:
+  fields:
+    latitude:
+      required: true
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.001
+          mode: box
+    longitude:
+      required: true
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.001
+          mode: box
+    name:
+      required: true
+      selector:
+        text:
+    address:
+      required: false
+      selector:
+        text:
+    zip_code:
+      required: false
+      selector:
+        text:
+    place_id:
+      required: false
+      selector:
+        text:

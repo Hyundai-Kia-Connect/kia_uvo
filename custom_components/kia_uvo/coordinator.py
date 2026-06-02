@@ -16,6 +16,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
+    POIInfo,
     Token,
 )
 from hyundai_kia_connect_api.exceptions import (
@@ -258,6 +259,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         vehicle_id: str,
         action_fn: Callable[[], Any],
         error_label: str,
+        *,
         force_refresh: bool = False,
     ):
         """Send a vehicle action, wait for completion, and refresh data.
@@ -502,6 +504,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, windowOptions),
             "set windows",
+        )
+
+    async def async_set_navigation(self, vehicle_id: str, poi_list: list[POIInfo]):
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
+            "set navigation",
         )
 
     async def _async_save_token(self):
