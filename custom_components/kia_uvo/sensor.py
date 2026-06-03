@@ -628,11 +628,12 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
         if self.vehicle.day_trip_info is None:
             return {}
         info = self.vehicle.day_trip_info
+        date_iso = _iso_date(info.yyyymmdd)
         return {
-            "yyyymmdd": info.yyyymmdd,
+            "date": date_iso,
             "trip_list": [
                 {
-                    "start_time": t.hhmmss,
+                    "start_time": _iso_datetime(date_iso, t.hhmmss),
                     "drive_time": t.drive_time,
                     "idle_time": t.idle_time,
                     "distance": t.distance,
@@ -646,3 +647,17 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-day-trip-info-{self.vehicle.id}"
+
+
+def _iso_date(yyyymmdd):
+    """Convert YYYYMMDD packed string to ISO YYYY-MM-DD, or None if unset."""
+    if not yyyymmdd or len(yyyymmdd) != 8:
+        return None
+    return f"{yyyymmdd[0:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
+
+
+def _iso_datetime(date_iso, hhmmss):
+    """Combine an ISO date with a packed HHMMSS string into ISO 8601."""
+    if not date_iso or not hhmmss or len(hhmmss) != 6:
+        return None
+    return f"{date_iso}T{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:6]}"
