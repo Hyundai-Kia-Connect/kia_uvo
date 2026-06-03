@@ -18,6 +18,7 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     Token,
 )
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
     UnsupportedControlError,
@@ -184,7 +185,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         # a DEBUG log line rather than UpdateFailed.
         today_str = dt_util.now().strftime("%Y%m%d")
         for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
-            if vehicle.engine_type not in ("EV", "PHEV"):
+            # vehicle.engine_type holds an ENGINE_TYPES enum member, not a
+            # bare string — comparing against ("EV", "PHEV") would never
+            # match (typo silently filtered every vehicle out).
+            if vehicle.engine_type not in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV):
                 continue
             try:
                 await self.hass.async_add_executor_job(
