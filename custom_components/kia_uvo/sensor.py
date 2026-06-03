@@ -612,6 +612,7 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     """
 
     _attr_translation_key = "day_trip_info"
+    _attr_icon = "mdi:calendar"
 
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
