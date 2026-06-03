@@ -151,10 +151,14 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         # Cheating: there is no perfect mapping to either heat or cool,
         # as the API can only set target temp and then decides: so we
         # just derive the same by temperature change direction.
-        if self.current_temperature > self.climate_config.set_temp:
-            return HVACMode.COOL
-        if self.current_temperature < self.climate_config.set_temp:
-            return HVACMode.HEAT
+        if (
+            self.current_temperature is not None
+            and self.climate_config.set_temp is not None
+        ):
+            if self.current_temperature > self.climate_config.set_temp:
+                return HVACMode.COOL
+            if self.current_temperature < self.climate_config.set_temp:
+                return HVACMode.HEAT
 
         # TODO: what could be a sensible answer if target temp is reached?
         return HVACMode.AUTO
@@ -171,16 +175,20 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             return HVACAction.OFF
 
         # if temp is lower than target, it HEATs
-        if self.current_temperature < self.climate_config.set_temp:
-            return HVACAction.HEATING
+        if (
+            self.current_temperature is not None
+            and self.climate_config.set_temp is not None
+        ):
+            if self.current_temperature < self.climate_config.set_temp:
+                return HVACAction.HEATING
 
-        # if temp is higher than target, it COOLs
-        if self.current_temperature > self.climate_config.set_temp:
-            return HVACAction.COOLING
+            # if temp is higher than target, it COOLs
+            if self.current_temperature > self.climate_config.set_temp:
+                return HVACAction.COOLING
 
-        # target temp reached
-        if self.current_temperature == self.climate_config.set_temp:
-            return HVACAction.IDLE
+            # target temp reached
+            if self.current_temperature == self.climate_config.set_temp:
+                return HVACAction.IDLE
 
         # should not happen, fallback
         return HVACAction.OFF
