@@ -440,6 +440,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             options.first_departure.enabled = enabled
         else:
             options.second_departure.enabled = enabled
+        # reservFlag (charging_enabled) must be 1 for departure slots to take
+        # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
+        # (None), the builder defaults it to False, causing the API to accept
+        # the request but ignore per-slot reservChargeSet.
+        if enabled and not options.charging_enabled:
+            options.charging_enabled = True
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_departure_climate_enabled(
