@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Final
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from hyundai_kia_connect_api import Vehicle
 
@@ -629,11 +629,24 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
             return {}
         info = self.vehicle.day_trip_info
         date_iso = _iso_date(info.yyyymmdd)
+        summary = info.summary
         return {
             "date": date_iso,
+            "summary": {
+                "drive_time": summary.drive_time,
+                "idle_time": summary.idle_time,
+                "distance": summary.distance,
+                "avg_speed": summary.avg_speed,
+                "max_speed": summary.max_speed,
+            }
+            if summary is not None
+            else None,
             "trip_list": [
                 {
                     "start_time": _iso_datetime(date_iso, t.hhmmss),
+                    "end_time": _iso_datetime_add(
+                        date_iso, t.hhmmss, (t.drive_time or 0) + (t.idle_time or 0)
+                    ),
                     "drive_time": t.drive_time,
                     "idle_time": t.idle_time,
                     "distance": t.distance,
@@ -661,3 +674,15 @@ def _iso_datetime(date_iso, hhmmss):
     if not date_iso or not hhmmss or len(hhmmss) != 6:
         return None
     return f"{date_iso}T{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:6]}"
+
+
+def _iso_datetime_add(date_iso, hhmmss, minutes):
+    """Return the naive ISO 8601 timestamp `minutes` after (date_iso, hhmmss)."""
+    start_iso = _iso_datetime(date_iso, hhmmss)
+    if start_iso is None:
+        return None
+    try:
+        start = datetime.fromisoformat(start_iso)
+    except (TypeError, ValueError):
+        return None
+    return (start + timedelta(minutes=int(minutes))).isoformat(timespec="seconds")
