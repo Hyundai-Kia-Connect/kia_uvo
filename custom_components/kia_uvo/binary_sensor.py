@@ -382,7 +382,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
-    
     HyundaiKiaBinarySensorEntityDescription(
         key="stop_lamp_left",
         translation_key="stop_lamp_left",
