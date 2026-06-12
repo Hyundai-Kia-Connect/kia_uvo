@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 import logging
 from typing import Final
@@ -23,6 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaButtonDescription(ButtonEntityDescription):
     press_action: str
+    exists_fn: Callable[[Vehicle], bool] = lambda _: True
 
 
 BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
@@ -33,58 +35,39 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         press_action="async_force_refresh_vehicle",
     ),
     HyundaiKiaButtonDescription(
-        key="open_charge_port",
-        translation_key="open_charge_port",
-        icon="mdi:ev-plug-charging",
-        press_action="async_open_charge_port",
-    ),
-    HyundaiKiaButtonDescription(
-        key="close_charge_port",
-        translation_key="close_charge_port",
-        icon="mdi:ev-plug",
-        press_action="async_close_charge_port",
-    ),
-    HyundaiKiaButtonDescription(
         key="start_hazard_lights",
         translation_key="start_hazard_lights",
         icon="mdi:hazard-lights",
         press_action="async_start_hazard_lights",
+        exists_fn=lambda vehicle: vehicle.supports_window_control is not None,
     ),
     HyundaiKiaButtonDescription(
         key="start_hazard_lights_and_horn",
         translation_key="start_hazard_lights_and_horn",
         icon="mdi:car-emergency",
         press_action="async_start_hazard_lights_and_horn",
-    ),
-    HyundaiKiaButtonDescription(
-        key="start_valet_mode",
-        translation_key="start_valet_mode",
-        icon="mdi:key-variant",
-        press_action="async_start_valet_mode",
-    ),
-    HyundaiKiaButtonDescription(
-        key="stop_valet_mode",
-        translation_key="stop_valet_mode",
-        icon="mdi:key",
-        press_action="async_stop_valet_mode",
+        exists_fn=lambda vehicle: vehicle.supports_window_control is not None,
     ),
     HyundaiKiaButtonDescription(
         key="open_all_windows",
         translation_key="open_all_windows",
         icon="mdi:window-maximize",
         press_action="async_open_all_windows",
+        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
     ),
     HyundaiKiaButtonDescription(
         key="close_all_windows",
         translation_key="close_all_windows",
         icon="mdi:window-minimize",
         press_action="async_close_all_windows",
+        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
     ),
     HyundaiKiaButtonDescription(
         key="vent_all_windows",
         translation_key="vent_all_windows",
         icon="mdi:window-open-variant",
         press_action="async_vent_all_windows",
+        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
     ),
 )
 
@@ -99,17 +82,10 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in BUTTON_DESCRIPTIONS:
-            if description.key in ("open_charge_port", "close_charge_port"):
-                if getattr(vehicle, "ev_charge_port_door_is_open", None) is None:
-                    continue
-            if description.key in (
-                "open_all_windows",
-                "close_all_windows",
-                "vent_all_windows",
-            ):
-                if getattr(vehicle, "front_left_window_is_open", None) is None:
-                    continue
-            entities.append(HyundaiKiaConnectButton(coordinator, description, vehicle))
+            if description.exists_fn(vehicle):
+                entities.append(
+                    HyundaiKiaConnectButton(coordinator, description, vehicle)
+                )
 
     async_add_entities(entities)
 

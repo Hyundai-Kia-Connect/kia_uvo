@@ -162,6 +162,24 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
             coordinator.async_set_off_peak_charge_only_enabled(vid, False)
         ),
     ),
+    HyundaiKiaSwitchDescription(
+        key="ev_charge_port_door_is_open",
+        translation_key="ev_charge_port_door",
+        icon="mdi:ev-plug-charging",
+        value_fn=lambda vehicle: vehicle.ev_charge_port_door_is_open,
+        exists_fn=lambda vehicle: vehicle.ev_charge_port_door_is_open is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_open_charge_port(vid),
+        off_fn=lambda coordinator, vid: coordinator.async_close_charge_port(vid),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="valet_mode_control",
+        translation_key="valet_mode_control",
+        icon="mdi:key-variant",
+        value_fn=lambda vehicle: vehicle.valet_mode_active,
+        exists_fn=lambda vehicle: vehicle.valet_mode_active is not None,
+        on_fn=lambda coordinator, vid: coordinator.async_start_valet_mode(vid),
+        off_fn=lambda coordinator, vid: coordinator.async_stop_valet_mode(vid),
+    ),
 )
 
 
