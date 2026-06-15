@@ -359,7 +359,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     HyundaiKiaBinarySensorEntityDescription(
-        key="headlamp_right_hight",
+        key="headlamp_right_high",
         translation_key="headlamp_right_high",
         is_on=lambda vehicle: vehicle.headlamp_right_high,
         on_icon="mdi:lightbulb-alert-outline",
