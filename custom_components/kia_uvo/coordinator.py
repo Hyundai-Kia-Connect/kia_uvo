@@ -113,6 +113,17 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 seconds=min(self.scan_interval, self.force_refresh_interval)
             ),
         )
+        _LOGGER.info(
+            "%s - Polling configured: scan_interval=%ds, "
+            "force_refresh_interval=%ds, update_interval=%ds, "
+            "no_force_refresh_hours=%d-%d",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+            min(self.scan_interval, self.force_refresh_interval),
+            self.no_force_refresh_hour_start,
+            self.no_force_refresh_hour_finish,
+        )
 
     async def _async_update_data(self):
         """Update data via library. Called by update_coordinator periodically.
@@ -120,6 +131,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
+        _LOGGER.debug(
+            "%s - _async_update_data called, scan_interval=%ds, force_refresh_interval=%ds",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+        )
         try:
             await self.async_check_and_refresh_token()
         except AuthenticationError as AuthError:

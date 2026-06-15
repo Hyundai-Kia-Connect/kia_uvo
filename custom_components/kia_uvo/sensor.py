@@ -81,6 +81,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
+        key="last_scanned_at",
+        translation_key="last_scanned_at",
+        icon="mdi:cloud-search",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    SensorEntityDescription(
         key="ev_battery_percentage",
         translation_key="ev_battery_percentage",
         native_unit_of_measurement=PERCENTAGE,

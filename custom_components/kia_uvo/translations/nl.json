@@ -245,6 +245,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "Laatste scan"
+      },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
       },
