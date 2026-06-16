@@ -113,7 +113,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 seconds=min(self.scan_interval, self.force_refresh_interval)
             ),
         )
-        _LOGGER.info(
+        _LOGGER.debug(
             "%s - Polling configured: scan_interval=%ds, "
             "force_refresh_interval=%ds, update_interval=%ds, "
             "no_force_refresh_hours=%d-%d",
