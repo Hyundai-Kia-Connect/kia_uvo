@@ -351,6 +351,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "Senaste skanning"
+      },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
       },

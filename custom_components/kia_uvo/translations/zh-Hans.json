@@ -75,6 +75,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "上次扫描"
+      },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
       },

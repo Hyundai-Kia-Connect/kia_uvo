@@ -493,6 +493,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "Last Scanned At"
+      },
       "next_service_distance": {
         "name": "Next Service"
       },
