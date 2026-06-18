@@ -65,6 +65,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
+        # Vehicle IDs where update_day_trip_info() returned without exception
+        # but left day_trip_info as None — indicates the base-class no-op ran,
+        # meaning the endpoint is not implemented for this region. Resets on
+        # HA restart so a firmware/API change is picked up on next boot.
+        self.day_trip_unsupported: set[str] = set()
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -178,22 +183,30 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
-        # Per-trip data. The library implements update_day_trip_info() but the
-        # upstream coordinator never calls it. Trip data must not fail the
-        # coordinator update — wrap in try/except so a NoDataFound, an
-        # unsupported region/firmware, or a transient backend error becomes a
-        # DEBUG log line rather than UpdateFailed.
+        # Per-trip data for today. Skipped for vehicles where the endpoint is
+        # confirmed unsupported (see day_trip_unsupported). On exception the
+        # endpoint exists but returned no data (e.g. no trips yet) — keep
+        # polling. No exception but day_trip_info still None means the library's
+        # base-class no-op ran — endpoint unsupported, stop polling.
         today_str = dt_util.now().strftime("%Y%m%d")
         for vehicle_id in self.vehicle_manager.vehicles:
+            if vehicle_id in self.day_trip_unsupported:
+                continue
             try:
                 await self.hass.async_add_executor_job(
                     self.vehicle_manager.update_day_trip_info,
                     vehicle_id,
                     today_str,
                 )
+                if self.vehicle_manager.vehicles[vehicle_id].day_trip_info is None:
+                    self.day_trip_unsupported.add(vehicle_id)
+                    _LOGGER.debug(
+                        "Day trip info not supported for vehicle %s — skipping future polls",
+                        vehicle_id,
+                    )
             except Exception as exc:
                 _LOGGER.debug(
-                    "Day trip info not available for vehicle %s: %s",
+                    "Day trip info fetch failed for vehicle %s: %s",
                     vehicle_id,
                     exc,
                 )

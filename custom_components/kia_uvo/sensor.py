@@ -599,10 +599,13 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     """Per-trip sensor for today.
 
     State is the number of trips today; attributes carry the full per-trip list
-    (start time, drive/idle time, distance, avg/max speed). ``vehicle.day_trip_info``
-    is populated by the coordinator each poll cycle; when it is ``None`` (unsupported
-    region/firmware or not yet fetched) state is ``0`` and attributes are empty —
-    same graceful-degradation pattern as ``DailyDrivingStatsEntity``.
+    (start time, drive/idle time, distance, avg/max speed).
+
+    Three possible states:
+    - ``unavailable`` — endpoint not supported for this vehicle/region (coordinator
+      confirmed by seeing no exception but day_trip_info still None after the call).
+    - ``0`` — endpoint supported, no trips recorded yet today.
+    - positive integer — number of trips driven today.
     """
 
     _attr_translation_key = "day_trip_info"
@@ -613,6 +616,8 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def state(self):
+        if self.vehicle.id in self.coordinator.day_trip_unsupported:
+            return None
         if self.vehicle.day_trip_info is None:
             return 0
         return len(self.vehicle.day_trip_info.trip_list)
