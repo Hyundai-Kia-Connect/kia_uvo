@@ -601,17 +601,12 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     State is the number of trips today; attributes carry the full per-trip list
     (start time, drive/idle time, distance, avg/max speed). ``vehicle.day_trip_info``
     is populated by the coordinator each poll cycle; when it is ``None`` (unsupported
-    region/firmware or not yet fetched) state is ``0`` and attributes are empty.
-
-    Disabled by default — users enable it from the HA entity registry once they
-    confirm the trip endpoint works for their vehicle/region.
+    region/firmware or not yet fetched) state is ``0`` and attributes are empty —
+    same graceful-degradation pattern as ``DailyDrivingStatsEntity``.
     """
 
     _attr_translation_key = "day_trip_info"
     _attr_icon = "mdi:calendar"
-    # Disabled by default: not all regions/firmware support the trip endpoint.
-    # Users who want trip tracking enable the entity from the HA UI.
-    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
