@@ -428,9 +428,6 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
-        # day_trip_info starts None and is populated by the coordinator's
-        # first update — register unconditionally so the entity exists even
-        # when no trip data has been fetched yet (TRIP-01).
         entities.append(
             DayTripInfoEntity(
                 coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
@@ -599,20 +596,22 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
 
 class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
-    """Per-trip sensor for today (TRIP-01).
+    """Per-trip sensor for today.
 
     State is the number of trips today; attributes carry the full per-trip list
-    (start time, drive/idle time, distance, avg/max speed). The underlying
-    ``vehicle.day_trip_info`` is populated by the coordinator on each cached-state
-    poll cycle via ``VehicleManager.update_day_trip_info()``; before the first
-    successful fetch (or when the trip endpoint is unsupported / returns
-    NoDataFound for this region/firmware) the value is ``None`` — both
-    ``state`` and ``state_attributes`` handle that case so the entity remains
-    available with state ``0`` instead of going unavailable.
+    (start time, drive/idle time, distance, avg/max speed). ``vehicle.day_trip_info``
+    is populated by the coordinator each poll cycle; when it is ``None`` (unsupported
+    region/firmware or not yet fetched) state is ``0`` and attributes are empty.
+
+    Disabled by default — users enable it from the HA entity registry once they
+    confirm the trip endpoint works for their vehicle/region.
     """
 
     _attr_translation_key = "day_trip_info"
     _attr_icon = "mdi:calendar"
+    # Disabled by default: not all regions/firmware support the trip endpoint.
+    # Users who want trip tracking enable the entity from the HA UI.
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, coordinator, vehicle: Vehicle):
         super().__init__(coordinator, vehicle)
