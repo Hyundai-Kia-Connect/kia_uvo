@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Final
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from hyundai_kia_connect_api import Vehicle
 
@@ -436,6 +436,11 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
+        entities.append(
+            DayTripInfoEntity(
+                coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+            )
+        )
     async_add_entities(entities)
     return True
 
@@ -596,3 +601,95 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Per-trip sensor for today.
+
+    State is the number of trips today; attributes carry the full per-trip list
+    (start time, drive/idle time, distance, avg/max speed).
+
+    Three possible states:
+    - ``unavailable`` — endpoint not supported for this vehicle/region (coordinator
+      confirmed by seeing no exception but day_trip_info still None after the call).
+    - ``0`` — endpoint supported, no trips recorded yet today.
+    - positive integer — number of trips driven today.
+    """
+
+    _attr_translation_key = "day_trip_info"
+    _attr_icon = "mdi:calendar"
+
+    def __init__(self, coordinator, vehicle: Vehicle):
+        super().__init__(coordinator, vehicle)
+
+    @property
+    def state(self):
+        if self.vehicle.id in self.coordinator.day_trip_unsupported:
+            return None
+        if self.vehicle.day_trip_info is None:
+            return 0
+        return len(self.vehicle.day_trip_info.trip_list)
+
+    @property
+    def state_attributes(self):
+        if self.vehicle.day_trip_info is None:
+            return {}
+        info = self.vehicle.day_trip_info
+        date_iso = _iso_date(info.yyyymmdd)
+        summary = info.summary
+        return {
+            "date": date_iso,
+            "summary": {
+                "drive_time": summary.drive_time,
+                "idle_time": summary.idle_time,
+                "distance": summary.distance,
+                "avg_speed": summary.avg_speed,
+                "max_speed": summary.max_speed,
+            }
+            if summary is not None
+            else None,
+            "trip_list": [
+                {
+                    "start_time": _iso_datetime(date_iso, t.hhmmss),
+                    "end_time": _iso_datetime_add(
+                        date_iso, t.hhmmss, (t.drive_time or 0) + (t.idle_time or 0)
+                    ),
+                    "drive_time": t.drive_time,
+                    "idle_time": t.idle_time,
+                    "distance": t.distance,
+                    "avg_speed": t.avg_speed,
+                    "max_speed": t.max_speed,
+                }
+                for t in info.trip_list
+            ],
+        }
+
+    @property
+    def unique_id(self):
+        return f"{DOMAIN}-day-trip-info-{self.vehicle.id}"
+
+
+def _iso_date(yyyymmdd):
+    """Convert YYYYMMDD packed string to ISO YYYY-MM-DD, or None if unset."""
+    if not yyyymmdd or len(yyyymmdd) != 8:
+        return None
+    return f"{yyyymmdd[0:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
+
+
+def _iso_datetime(date_iso, hhmmss):
+    """Combine an ISO date with a packed HHMMSS string into ISO 8601."""
+    if not date_iso or not hhmmss or len(hhmmss) != 6:
+        return None
+    return f"{date_iso}T{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:6]}"
+
+
+def _iso_datetime_add(date_iso, hhmmss, minutes):
+    """Return the naive ISO 8601 timestamp `minutes` after (date_iso, hhmmss)."""
+    start_iso = _iso_datetime(date_iso, hhmmss)
+    if start_iso is None:
+        return None
+    try:
+        start = datetime.fromisoformat(start_iso)
+    except (TypeError, ValueError):
+        return None
+    return (start + timedelta(minutes=int(minutes))).isoformat(timespec="seconds")

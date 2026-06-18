@@ -403,6 +403,9 @@
       "daily_driving_stats": {
         "name": "Daily Driving Stats"
       },
+      "day_trip_info": {
+        "name": "Day Trip Info"
+      },
       "data": {
         "name": "Data"
       },
