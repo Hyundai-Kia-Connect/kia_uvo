@@ -187,6 +187,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "Last Scanned At"
+      },
       "next_service_distance": {
         "name": "Next Service"
       },
@@ -344,6 +347,18 @@
       },
       "headlamp_right_low": {
         "name": "Front Right Lamp Fault"
+      },
+      "headlamp_left_high": {
+        "name": "Headlamp Left High Fault"
+      },
+      "headlamp_right_high": {
+        "name": "Headlamp Right High Fault"
+      },
+      "headlamp_left_bifunc": {
+        "name": "Headlamp Left Bifunctional Fault"
+      },
+      "headlamp_right_bifunc": {
+        "name": "Headlamp Right Bifunctional Fault"
       },
       "headlamp_status": {
         "name": "Headlamp Status"

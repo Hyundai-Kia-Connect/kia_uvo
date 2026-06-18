@@ -75,6 +75,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "上次扫描"
+      },
       "ev_battery_percentage": {
         "name": "EV Battery Level"
       },
@@ -292,6 +295,18 @@
       },
       "headlamp_right_low": {
         "name": "Front Right Lamp Fault"
+      },
+      "headlamp_left_high": {
+        "name": "Headlamp Left High Fault"
+      },
+      "headlamp_right_high": {
+        "name": "Headlamp Right High Fault"
+      },
+      "headlamp_left_bifunc": {
+        "name": "Headlamp Left Bifunctional Fault"
+      },
+      "headlamp_right_bifunc": {
+        "name": "Headlamp Right Bifunctional Fault"
       },
       "stop_lamp_left": {
         "name": "Rear Left Lamp Fault"

@@ -150,7 +150,7 @@ async def validate_input(
         raise InvalidAuth from err
 
 
-class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlow):
+class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlowWithReload):
     """Handle an option flow for Hyundai / Kia Connect."""
 
     async def async_step_init(

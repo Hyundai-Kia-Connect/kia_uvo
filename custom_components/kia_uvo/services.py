@@ -12,6 +12,8 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     ScheduleChargingClimateRequestOptions,
     WindowRequestOptions,
+    POIInfo,
+    POICoord,
 )
 
 from .const import DOMAIN
@@ -34,6 +36,7 @@ SERVICE_START_HAZARD_LIGHTS_AND_HORN = "start_hazard_lights_and_horn"
 SERVICE_START_VALET_MODE = "start_valet_mode"
 SERVICE_STOP_VALET_MODE = "stop_valet_mode"
 SERVICE_SET_WINDOWS = "set_windows"
+SERVICE_SET_NAVIGATION = "set_navigation"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -54,6 +57,7 @@ SUPPORTED_SERVICES = (
     SERVICE_START_VALET_MODE,
     SERVICE_STOP_VALET_MODE,
     SERVICE_SET_WINDOWS,
+    SERVICE_SET_NAVIGATION,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -287,6 +291,25 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_stop_valet_mode(vehicle_id)
 
+    async def async_handle_set_navigation(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        latitude = call.data["latitude"]
+        longitude = call.data["longitude"]
+        name = call.data["name"]
+        address = call.data.get("address", "")
+        zip_code = call.data.get("zip_code", "")
+        place_id = call.data.get("place_id", "")
+
+        poi = POIInfo(
+            coord=POICoord(lat=float(latitude), lon=float(longitude)),
+            name=name,
+            addr=address,
+            zip=zip_code,
+            place_id=place_id,
+        )
+        await coordinator.async_set_navigation(vehicle_id, [poi])
+
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
         SERVICE_UPDATE: async_handle_update,
@@ -306,6 +329,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
         SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
         SERVICE_SET_WINDOWS: async_handle_set_windows,
+        SERVICE_SET_NAVIGATION: async_handle_set_navigation,
     }
 
     for service in SUPPORTED_SERVICES:

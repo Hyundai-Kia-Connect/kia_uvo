@@ -16,6 +16,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     WindowRequestOptions,
     ScheduleChargingClimateRequestOptions,
+    POIInfo,
     Token,
 )
 from hyundai_kia_connect_api.exceptions import (
@@ -112,6 +113,17 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 seconds=min(self.scan_interval, self.force_refresh_interval)
             ),
         )
+        _LOGGER.debug(
+            "%s - Polling configured: scan_interval=%ds, "
+            "force_refresh_interval=%ds, update_interval=%ds, "
+            "no_force_refresh_hours=%d-%d",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+            min(self.scan_interval, self.force_refresh_interval),
+            self.no_force_refresh_hour_start,
+            self.no_force_refresh_hour_finish,
+        )
 
     async def _async_update_data(self):
         """Update data via library. Called by update_coordinator periodically.
@@ -119,6 +131,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
+        _LOGGER.debug(
+            "%s - _async_update_data called, scan_interval=%ds, force_refresh_interval=%ds",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+        )
         try:
             await self.async_check_and_refresh_token()
         except AuthenticationError as AuthError:
@@ -258,6 +276,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         vehicle_id: str,
         action_fn: Callable[[], Any],
         error_label: str,
+        *,
         force_refresh: bool = False,
     ):
         """Send a vehicle action, wait for completion, and refresh data.
@@ -438,6 +457,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             options.first_departure.enabled = enabled
         else:
             options.second_departure.enabled = enabled
+        # reservFlag (charging_enabled) must be 1 for departure slots to take
+        # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
+        # (None), the builder defaults it to False, causing the API to accept
+        # the request but ignore per-slot reservChargeSet.
+        if enabled and not options.charging_enabled:
+            options.charging_enabled = True
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_departure_climate_enabled(
@@ -502,6 +527,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, windowOptions),
             "set windows",
+        )
+
+    async def async_set_navigation(self, vehicle_id: str, poi_list: list[POIInfo]):
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
+            "set navigation",
         )
 
     async def _async_save_token(self):

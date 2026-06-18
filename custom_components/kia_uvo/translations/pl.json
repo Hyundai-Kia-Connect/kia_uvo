@@ -412,6 +412,9 @@
       "last_updated_at": {
         "name": "Ostatnia aktualizacja"
       },
+      "last_scanned_at": {
+        "name": "Ostatni skan"
+      },
       "ev_battery_percentage": {
         "name": "Poziom baterii EV"
       },
