@@ -777,6 +777,21 @@
     "button": {
       "force_refresh": {
         "name": "Force Refresh"
+      },
+      "start_hazard_lights": {
+        "name": "Start Hazard Lights"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Start Hazard Lights and Horn"
+      },
+      "open_all_windows": {
+        "name": "Open All Windows"
+      },
+      "close_all_windows": {
+        "name": "Close All Windows"
+      },
+      "vent_all_windows": {
+        "name": "Vent All Windows"
       }
     },
     "cover": {
@@ -823,6 +838,12 @@
       },
       "ev_schedule_charge_enabled": {
         "name": "Scheduled charging"
+      },
+      "ev_charge_port_door": {
+        "name": "Charge Port"
+      },
+      "valet_mode_control": {
+        "name": "Valet Mode"
       }
     },
     "climate": {
