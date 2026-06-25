@@ -555,7 +555,12 @@
       },
       "ev_v2l_target_soc": {
         "name": "V2L target SoC"
-      }
+      },
+      "tire_pressure_front_left": "Tire Pressure - Front Left",
+      "tire_pressure_front_right": "Tire Pressure - Front Right",
+      "tire_pressure_rear_left": "Tire Pressure - Rear Left",
+      "tire_pressure_rear_right": "Tire Pressure - Rear Right",
+      "drive_mode": "Drive Mode"
     },
     "binary_sensor": {
       "accessory_on": {
@@ -764,7 +769,9 @@
       },
       "ev_v2x_status": {
         "name": "V2X status"
-      }
+      },
+      "oil_level_warning_is_on": "Oil Level Warning",
+      "battery_auxiliary_fail_warning_is_on": "12V Battery Fault"
     },
     "lock": {
       "door_lock": {
