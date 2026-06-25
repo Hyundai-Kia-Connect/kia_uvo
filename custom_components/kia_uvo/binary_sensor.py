@@ -538,6 +538,24 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         icon="mdi:ev-station",
         is_on=lambda vehicle: vehicle.ev_v2x_status,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="oil_level_warning_is_on",
+        translation_key="oil_level_warning_is_on",
+        is_on=lambda vehicle: vehicle.oil_level_warning_is_on,
+        on_icon="mdi:oil",
+        off_icon="mdi:oil",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="battery_auxiliary_fail_warning_is_on",
+        translation_key="battery_auxiliary_fail_warning_is_on",
+        is_on=lambda vehicle: vehicle.battery_auxiliary_fail_warning_is_on,
+        on_icon="mdi:car-battery",
+        off_icon="mdi:car-battery",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 )
 
 
