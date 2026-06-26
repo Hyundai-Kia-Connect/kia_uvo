@@ -390,6 +390,20 @@
           "description": "Action for the rear right window"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Capture SVM Image",
+      "description": "Trigger a fresh Surround View Monitor capture. acknowledged_warning must be True.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        },
+        "acknowledged_warning": {
+          "name": "Acknowledge Warning",
+          "description": "Confirm you understand this command wakes the vehicle and captures a 360 image."
+        }
+      }
     }
   },
   "entity": {
@@ -792,6 +806,14 @@
       },
       "vent_all_windows": {
         "name": "Vent All Windows"
+      },
+      "capture_svm_image": {
+        "name": "Capture SVM Image"
+      }
+    },
+    "image": {
+      "svm_image": {
+        "name": "SVM Image"
       }
     },
     "cover": {

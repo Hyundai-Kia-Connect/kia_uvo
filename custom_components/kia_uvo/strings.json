@@ -486,6 +486,14 @@
       },
       "vent_all_windows": {
         "name": "Vent All Windows"
+      },
+      "capture_svm_image": {
+        "name": "Capture SVM Image"
+      }
+    },
+    "image": {
+      "svm_image": {
+        "name": "SVM Image"
       }
     },
     "cover": {
