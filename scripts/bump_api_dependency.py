@@ -178,7 +178,7 @@ def update_manifest(manifest_path: str, new_version: str) -> None:
 
 
 def main() -> int:
-    noop = "--noop" in sys.argv
+    dry_run = "--noop" in sys.argv
     args = [a for a in sys.argv[1:] if a != "--noop"]
     manifest_path = args[0] if args else "custom_components/kia_uvo/manifest.json"
     token = os.environ.get("GITHUB_TOKEN")
@@ -193,13 +193,13 @@ def main() -> int:
     commit_type, commit_body = classify_release_notes(releases)
     target_version = releases[-1]["tag_name"].lstrip("vV")
 
-    if not noop:
+    if not dry_run:
         update_manifest(manifest_path, target_version)
 
     commit_title = f"{_commit_prefix(commit_type)} bump {PACKAGE_NAME} {current_pin} → {target_version}"
 
     output = {
-        "noop": noop,
+        "noop": False,
         "branch": BRANCH_NAME,
         "commit_title": commit_title,
         "commit_body": commit_body,
