@@ -23,13 +23,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Determine API bump
+      - name: Determine and apply API bump
         id: bump
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json --noop > bump_result.json
+          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json > bump_result.json
           cat bump_result.json
           echo "noop=$(jq -r '.noop' bump_result.json)" >> "$GITHUB_OUTPUT"
           echo "branch=$(jq -r '.branch' bump_result.json)" >> "$GITHUB_OUTPUT"
@@ -44,14 +44,6 @@ jobs:
           jq -r '.commit_body' bump_result.json > commit_body.md
           jq -r '.pr_body' bump_result.json > pr_body.md
 
-      - name: Apply manifest update
-        if: ${{ steps.bump.outputs.noop == 'false' }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json
-
       - name: Commit and push branch
         if: ${{ steps.bump.outputs.noop == 'false' }}
         run: |
@@ -60,9 +52,13 @@ jobs:
           git config --local user.name "GitHub Action"
           git checkout -B ${{ steps.bump.outputs.branch }}
           git add custom_components/kia_uvo/manifest.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 1
+          fi
           printf '%s\n\n' "${{ steps.bump.outputs.commit_title }}" > commit_msg.txt
           cat commit_body.md >> commit_msg.txt
-          git commit -F commit_msg.txt || true
+          git commit -F commit_msg.txt
           git push --force-with-lease origin ${{ steps.bump.outputs.branch }}
 
       - name: Create or update PR
@@ -71,7 +67,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq '.[0].number')
+          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq -r '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
           else
