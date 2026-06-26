@@ -81,7 +81,9 @@ def test_main_noop_does_not_change_manifest(
     assert data["requirements"] == ["hyundai_kia_connect_api==4.21.0"]
 
     captured = capsys.readouterr()
-    assert '"noop": true' in captured.out
+    # A bump is available, so the workflow signal is "noop": false; --noop only
+    # prevents writing the manifest.
+    assert '"noop": false' in captured.out
 
 
 def test_main_without_noop_changes_manifest(tmp_path, monkeypatch, fake_releases):
@@ -100,3 +102,29 @@ def test_main_without_noop_changes_manifest(tmp_path, monkeypatch, fake_releases
 
     data = json.loads(manifest.read_text())
     assert data["requirements"] == ["hyundai_kia_connect_api==4.22.0"]
+
+
+def test_main_at_latest_is_noop(tmp_path, monkeypatch, capsys):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps({"requirements": ["hyundai_kia_connect_api==4.22.0"]})
+    )
+
+    def _no_new_releases(_owner, _repo, _token):
+        return []
+
+    monkeypatch.setattr("bump_api_dependency._fetch_releases", _no_new_releases)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["bump_api_dependency.py", str(manifest)],
+    )
+
+    assert main() == 0
+
+    data = json.loads(manifest.read_text())
+    assert data["requirements"] == ["hyundai_kia_connect_api==4.22.0"]
+
+    captured = capsys.readouterr()
+    assert '"noop": true' in captured.out
+    assert "already at latest version" in captured.out
