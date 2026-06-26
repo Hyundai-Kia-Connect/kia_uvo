@@ -2,9 +2,16 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
-from bump_api_dependency import get_current_pin, classify_release_notes, update_manifest
+from bump_api_dependency import (
+    classify_release_notes,
+    get_current_pin,
+    main,
+    update_manifest,
+)
 
 
 def test_get_current_pin(tmp_path):
@@ -36,3 +43,60 @@ def test_update_manifest(tmp_path):
     update_manifest(str(manifest), "4.23.0")
     data = json.loads(manifest.read_text())
     assert data["requirements"] == ["hyundai_kia_connect_api==4.23.0"]
+
+
+@pytest.fixture
+def fake_releases(monkeypatch):
+    def _fetch(_owner, _repo, _token):
+        return [
+            {
+                "tag_name": "v4.22.0",
+                "body": "### Features\n- new sensor\n",
+            }
+        ]
+
+    monkeypatch.setattr(
+        "bump_api_dependency._fetch_releases",
+        _fetch,
+    )
+
+
+def test_main_noop_does_not_change_manifest(
+    tmp_path, monkeypatch, fake_releases, capsys
+):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps({"requirements": ["hyundai_kia_connect_api==4.21.0"]})
+    )
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["bump_api_dependency.py", str(manifest), "--noop"],
+    )
+
+    assert main() == 0
+
+    data = json.loads(manifest.read_text())
+    assert data["requirements"] == ["hyundai_kia_connect_api==4.21.0"]
+
+    captured = capsys.readouterr()
+    assert '"noop": true' in captured.out
+
+
+def test_main_without_noop_changes_manifest(tmp_path, monkeypatch, fake_releases):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps({"requirements": ["hyundai_kia_connect_api==4.21.0"]})
+    )
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["bump_api_dependency.py", str(manifest)],
+    )
+
+    assert main() == 0
+
+    data = json.loads(manifest.read_text())
+    assert data["requirements"] == ["hyundai_kia_connect_api==4.22.0"]
