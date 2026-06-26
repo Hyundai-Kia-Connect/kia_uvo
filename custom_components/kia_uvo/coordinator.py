@@ -18,6 +18,7 @@ from hyundai_kia_connect_api import (
     ScheduleChargingClimateRequestOptions,
     POIInfo,
     Token,
+    SVMDetails,
 )
 from hyundai_kia_connect_api.const import WINDOW_STATE
 from hyundai_kia_connect_api.exceptions import (
@@ -66,6 +67,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
+        self._svm_details: dict[str, SVMDetails] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -221,6 +223,36 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
         )
         self.async_set_updated_data(self.data)
+
+    async def async_supports_svm(self, vehicle_id: str) -> bool:
+        """Return whether the given vehicle supports SVM."""
+        return await self.hass.async_add_executor_job(
+            self.vehicle_manager.supports_svm, vehicle_id
+        )
+
+    async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
+        """Fetch the latest cached SVM image and metadata from the API."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.api.get_svm_details,
+            self.vehicle_manager.token,
+            vehicle,
+        )
+        self._svm_details[vehicle_id] = details
+        return details
+
+    async def async_request_svm_capture(self, vehicle_id: str) -> SVMDetails:
+        """Trigger a fresh SVM capture and update the cached details."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.api.request_svm_capture,
+            self.vehicle_manager.token,
+            vehicle,
+            True,  # acknowledged_warning
+        )
+        self._svm_details[vehicle_id] = details
+        self.async_set_updated_data(self.data)
+        return details
 
     async def async_check_and_refresh_token(self):
         """Refresh token if needed via library."""
