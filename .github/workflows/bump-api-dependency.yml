@@ -41,6 +41,8 @@ jobs:
           echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
           jq -r '.pr_body' bump_result.json >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.commit_body' bump_result.json > commit_body.md
+          jq -r '.pr_body' bump_result.json > pr_body.md
 
       - name: Apply manifest update
         if: ${{ steps.bump.outputs.noop == 'false' }}
@@ -58,7 +60,9 @@ jobs:
           git config --local user.name "GitHub Action"
           git checkout -B ${{ steps.bump.outputs.branch }}
           git add custom_components/kia_uvo/manifest.json
-          git commit -m "${{ steps.bump.outputs.commit_title }}" -m "${{ steps.bump.outputs.commit_body }}" || true
+          printf '%s\n\n' "${{ steps.bump.outputs.commit_title }}" > commit_msg.txt
+          cat commit_body.md >> commit_msg.txt
+          git commit -F commit_msg.txt || true
           git push --force-with-lease origin ${{ steps.bump.outputs.branch }}
 
       - name: Create or update PR
@@ -69,7 +73,7 @@ jobs:
           set -euo pipefail
           existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
-            gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body "${{ steps.bump.outputs.pr_body }}"
+            gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
           else
-            gh pr create --base master --head ${{ steps.bump.outputs.branch }} --title "${{ steps.bump.outputs.pr_title }}" --body "${{ steps.bump.outputs.pr_body }}"
+            gh pr create --base master --head ${{ steps.bump.outputs.branch }} --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
           fi
