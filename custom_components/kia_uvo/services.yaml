@@ -531,3 +531,14 @@ set_off_peak_charging:
       required: false
       selector:
         time:
+capture_svm_image:
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+    acknowledged_warning:
+      required: true
+      selector:
+        boolean:

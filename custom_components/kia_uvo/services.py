@@ -38,6 +38,7 @@ SERVICE_STOP_VALET_MODE = "stop_valet_mode"
 SERVICE_SET_WINDOWS = "set_windows"
 SERVICE_SET_NAVIGATION = "set_navigation"
 SERVICE_SET_OFF_PEAK_CHARGING = "set_off_peak_charging"
+SERVICE_CAPTURE_SVM_IMAGE = "capture_svm_image"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -60,6 +61,7 @@ SUPPORTED_SERVICES = (
     SERVICE_SET_WINDOWS,
     SERVICE_SET_NAVIGATION,
     SERVICE_SET_OFF_PEAK_CHARGING,
+    SERVICE_CAPTURE_SVM_IMAGE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -331,6 +333,21 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         )
         await coordinator.async_set_navigation(vehicle_id, [poi])
 
+    async def async_handle_capture_svm_image(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        acknowledged_warning = call.data.get("acknowledged_warning")
+
+        if not acknowledged_warning:
+            raise HomeAssistantError(
+                "acknowledged_warning must be True to trigger SVM capture."
+            )
+
+        if not await coordinator.async_supports_svm(vehicle_id):
+            raise HomeAssistantError("SVM is not available for this vehicle.")
+
+        await coordinator.async_request_svm_capture(vehicle_id)
+
     services = {
         SERVICE_FORCE_UPDATE: async_handle_force_update,
         SERVICE_UPDATE: async_handle_update,
@@ -352,6 +369,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_SET_WINDOWS: async_handle_set_windows,
         SERVICE_SET_NAVIGATION: async_handle_set_navigation,
         SERVICE_SET_OFF_PEAK_CHARGING: async_handle_set_off_peak_charging,
+        SERVICE_CAPTURE_SVM_IMAGE: async_handle_capture_svm_image,
     }
 
     for service in SUPPORTED_SERVICES:
