@@ -1,4 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"]
+  "extends": ["config:best-practices"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["hyundai_kia_connect_api"],
+      "enabled": false
+    }
+  ]
 }
