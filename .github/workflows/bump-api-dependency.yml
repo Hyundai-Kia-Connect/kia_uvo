@@ -1,0 +1,75 @@
+name: Bump API dependency
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-api-dependency:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@8d9ed9ac5c53483e7b5f4efe10d6f4f806f6f183 # v5.5.0
+        with:
+          python-version: "3.12"
+
+      - name: Determine API bump
+        id: bump
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json --noop > bump_result.json
+          cat bump_result.json
+          echo "noop=$(jq -r '.noop' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "branch=$(jq -r '.branch' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "commit_title=$(jq -r '.commit_title' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "commit_body<<EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.commit_body' bump_result.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$(jq -r '.pr_title' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.pr_body' bump_result.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Apply manifest update
+        if: ${{ steps.bump.outputs.noop == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json
+
+      - name: Commit and push branch
+        if: ${{ steps.bump.outputs.noop == 'false' }}
+        run: |
+          set -euo pipefail
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -B ${{ steps.bump.outputs.branch }}
+          git add custom_components/kia_uvo/manifest.json
+          git commit -m "${{ steps.bump.outputs.commit_title }}" -m "${{ steps.bump.outputs.commit_body }}" || true
+          git push --force-with-lease origin ${{ steps.bump.outputs.branch }}
+
+      - name: Create or update PR
+        if: ${{ steps.bump.outputs.noop == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body "${{ steps.bump.outputs.pr_body }}"
+          else
+            gh pr create --base master --head ${{ steps.bump.outputs.branch }} --title "${{ steps.bump.outputs.pr_title }}" --body "${{ steps.bump.outputs.pr_body }}"
+          fi
