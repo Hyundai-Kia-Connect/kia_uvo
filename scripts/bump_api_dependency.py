@@ -50,6 +50,63 @@ def _fetch_releases(owner: str, repo: str, token: str | None) -> list[dict[str, 
     return _http_get(url, token)
 
 
+def _fetch_compare(
+    owner: str, repo: str, base: str, head: str, token: str | None
+) -> dict[str, Any]:
+    url = f"https://api.github.com/repos/{owner}/{repo}/compare/{base}...{head}"
+    return _http_get(url, token)
+
+
+def _tag_name(version_or_tag: str) -> str:
+    return (
+        version_or_tag
+        if version_or_tag.lower().startswith("v")
+        else f"v{version_or_tag}"
+    )
+
+
+def _synthesize_body_from_commits(commits: list[dict[str, Any]]) -> str:
+    feat: list[str] = []
+    fix: list[str] = []
+    other: list[str] = []
+    breaking = False
+
+    for commit in commits:
+        message = commit.get("commit", {}).get("message", "").split("\n")[0].strip()
+        if not message:
+            continue
+        lower = message.lower()
+        if "breaking change" in lower or "breaking changes" in lower:
+            breaking = True
+        if lower.startswith("feat") or lower.startswith("fix"):
+            clean = re.sub(
+                r"^(feat|fix)(?:\([^)]+\))?!?:\s*", "", message, flags=re.IGNORECASE
+            )
+            (feat if lower.startswith("feat") else fix).append(clean)
+        else:
+            clean = re.sub(
+                r"^(chore|docs|ci|test)(?:\([^)]+\))?!?:\s*",
+                "",
+                message,
+                flags=re.IGNORECASE,
+            )
+            other.append(clean)
+
+    lines: list[str] = []
+    if breaking:
+        lines.append("BREAKING CHANGES")
+    if feat:
+        lines.append("### Features")
+        lines.extend(feat)
+    if fix:
+        lines.append("### Bug Fixes")
+        lines.extend(fix)
+    if not feat and not fix and other:
+        lines.append("### Other Changes")
+        lines.extend(other)
+    return "\n".join(lines)
+
+
 def list_releases_after(
     owner: str, repo: str, current_pin: str, token: str | None
 ) -> list[dict[str, Any]]:
@@ -88,7 +145,11 @@ def _classify_single_release(body: str) -> tuple[str, dict[str, list[str]]]:
     }
     level = "chore"
 
-    if re.search(r"BREAKING CHANGE", body, re.IGNORECASE):
+    if re.search(
+        r"BREAKING CHANGES?\b|^[#]+\s*BREAKING\b",
+        body,
+        re.IGNORECASE | re.MULTILINE,
+    ):
         level = "breaking"
         sections["breaking"].append("Release notes indicate a breaking change.")
 
@@ -101,6 +162,12 @@ def _classify_single_release(body: str) -> tuple[str, dict[str, list[str]]]:
     if fixes and fixes[0]:
         level = max(level, "fix", key=["chore", "fix", "feat", "breaking"].index)
         sections["fixes"].extend(fixes)
+
+    other = _extract_section(
+        body, ["### Other Changes", "## Other Changes"]
+    ).splitlines()
+    if other and other[0]:
+        sections["other"].extend(other)
 
     if not any(sections.values()):
         sections["other"].append("No categorized release notes.")
@@ -120,6 +187,10 @@ def _commit_prefix(level: str) -> str:
 
 def classify_release_notes(
     releases: list[dict[str, Any]],
+    current_pin: str,
+    owner: str = API_OWNER,
+    repo: str = API_REPO,
+    token: str | None = None,
 ) -> tuple[str, str]:
     aggregate: dict[str, list[str]] = {
         "breaking": [],
@@ -129,9 +200,16 @@ def classify_release_notes(
     }
     level = "chore"
 
-    for release in releases:
+    for i, release in enumerate(releases):
         tag = release["tag_name"].lstrip("vV")
         body = release.get("body") or ""
+        if not body.strip():
+            base = releases[i - 1]["tag_name"] if i > 0 else _tag_name(current_pin)
+            try:
+                compare = _fetch_compare(owner, repo, base, release["tag_name"], token)
+                body = _synthesize_body_from_commits(compare.get("commits", []))
+            except urllib.error.HTTPError:
+                body = ""
         rel_level, sections = _classify_single_release(body)
         if rel_level != "chore":
             level = max(
@@ -190,7 +268,9 @@ def main() -> int:
         print(json.dumps({"noop": True, "reason": "already at latest version"}))
         return 0
 
-    commit_type, commit_body = classify_release_notes(releases)
+    commit_type, commit_body = classify_release_notes(
+        releases, current_pin, API_OWNER, API_REPO, token
+    )
     target_version = releases[-1]["tag_name"].lstrip("vV")
 
     if not dry_run:
