@@ -27,12 +27,72 @@ def test_classify_release_notes_feat_and_fix():
         {"tag_name": "v4.22.0", "body": "### Features\n- add new sensor\n"},
         {"tag_name": "v4.23.0", "body": "### Bug Fixes\n- fix timeout\n"},
     ]
-    commit_type, body = classify_release_notes(releases)
+    commit_type, body = classify_release_notes(releases, "4.21.0")
     assert commit_type == "feat"
     assert "### Features" in body
     assert "- 4.22.0:" in body
     assert "### Bug Fixes" in body
     assert "- 4.23.0:" in body
+
+
+def test_classify_release_notes_breaking_heading():
+    releases = [
+        {
+            "tag_name": "v4.22.0",
+            "body": "### BREAKING CHANGES\n- drop legacy auth endpoint\n",
+        }
+    ]
+    commit_type, body = classify_release_notes(releases, "4.21.0")
+    assert commit_type == "breaking"
+    assert "### BREAKING CHANGES" in body
+    assert "- 4.22.0: Release notes indicate a breaking change." in body
+
+
+def test_classify_release_notes_empty_body_uses_compare_commits(monkeypatch):
+    releases = [{"tag_name": "v4.22.0", "body": ""}]
+
+    def _fetch_compare(_owner, _repo, base, head, _token):
+        assert base == "v4.21.0"
+        assert head == "v4.22.0"
+        return {
+            "commits": [
+                {"commit": {"message": "feat(api): add new sensor"}},
+                {"commit": {"message": "fix: resolve timeout issue"}},
+                {"commit": {"message": "chore: bump internal deps"}},
+            ]
+        }
+
+    monkeypatch.setattr("bump_api_dependency._fetch_compare", _fetch_compare)
+
+    commit_type, body = classify_release_notes(releases, "4.21.0")
+    assert commit_type == "feat"
+    assert "### Features" in body
+    assert "- 4.22.0: add new sensor" in body
+    assert "### Bug Fixes" in body
+    assert "- 4.22.0: resolve timeout issue" in body
+    assert "chore: bump internal deps" not in body
+
+
+def test_classify_release_notes_empty_body_falls_back_to_ignored_commits(monkeypatch):
+    releases = [{"tag_name": "v4.22.0", "body": "   "}]
+
+    def _fetch_compare(_owner, _repo, base, head, _token):
+        return {
+            "commits": [
+                {"commit": {"message": "chore: cleanup"}},
+                {"commit": {"message": "docs: update readme"}},
+                {"commit": {"message": "ci: tweak pipeline"}},
+                {"commit": {"message": "test: add coverage"}},
+            ]
+        }
+
+    monkeypatch.setattr("bump_api_dependency._fetch_compare", _fetch_compare)
+
+    commit_type, body = classify_release_notes(releases, "4.21.0")
+    assert commit_type == "chore"
+    assert "### Other Changes" in body
+    assert "- 4.22.0: cleanup" in body
+    assert "- 4.22.0: update readme" in body
 
 
 def test_update_manifest(tmp_path):
