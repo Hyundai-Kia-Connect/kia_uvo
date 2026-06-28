@@ -176,8 +176,9 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         translation_key="valet_mode_control",
         icon="mdi:key-variant",
         value_fn=lambda vehicle: getattr(vehicle, "valet_mode_active", None),
-        exists_fn=lambda vehicle: getattr(vehicle, "valet_mode_active", None)
-        is not None,
+        exists_fn=lambda vehicle: (
+            getattr(vehicle, "valet_mode_active", None) is not None
+        ),
         on_fn=lambda coordinator, vid: coordinator.async_start_valet_mode(vid),
         off_fn=lambda coordinator, vid: coordinator.async_stop_valet_mode(vid),
     ),
