@@ -110,16 +110,31 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
         return UnitOfTemperature.CELSIUS
 
+    @staticmethod
+    def _as_float(value) -> float | None:
+        """Coerce a temperature value to float.
+
+        Some API backends (e.g. the US ones) report the in-car temperature as a
+        string such as "72" instead of a number. Home Assistant's climate base
+        class rejects non-numeric temperatures with a TypeError, so coerce here.
+        """
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
     @property
     def current_temperature(self) -> float | None:
         """Get the current in-car temperature."""
-        return self.vehicle.air_temperature
+        return self._as_float(self.vehicle.air_temperature)
 
     @property
     def target_temperature(self) -> float | None:
         """Get the desired in-car target temperature."""
         # TODO: use Coordinator data, not internal state
-        return self.climate_config.set_temp
+        return self._as_float(self.climate_config.set_temp)
 
     @property
     def target_temperature_step(self) -> float | None:
