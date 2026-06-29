@@ -54,21 +54,30 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         translation_key="open_all_windows",
         icon="mdi:window-maximize",
         press_action="async_open_all_windows",
-        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
+        exists_fn=lambda vehicle: (
+            vehicle.supports_window_control
+            and vehicle.front_left_window_is_open is not None
+        ),
     ),
     HyundaiKiaButtonDescription(
         key="close_all_windows",
         translation_key="close_all_windows",
         icon="mdi:window-minimize",
         press_action="async_close_all_windows",
-        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
+        exists_fn=lambda vehicle: (
+            vehicle.supports_window_control
+            and vehicle.front_left_window_is_open is not None
+        ),
     ),
     HyundaiKiaButtonDescription(
         key="vent_all_windows",
         translation_key="vent_all_windows",
         icon="mdi:window-open-variant",
         press_action="async_vent_all_windows",
-        exists_fn=lambda vehicle: vehicle.front_left_window_is_open is not None,
+        exists_fn=lambda vehicle: (
+            vehicle.supports_window_control
+            and vehicle.front_left_window_is_open is not None
+        ),
     ),
 )
 
