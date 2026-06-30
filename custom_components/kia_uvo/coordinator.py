@@ -232,23 +232,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
         """Fetch the latest cached SVM image and metadata from the API."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
         details = await self.hass.async_add_executor_job(
-            self.vehicle_manager.api.get_svm_details,
-            self.vehicle_manager.token,
-            vehicle,
+            self.vehicle_manager.get_svm_details, vehicle_id
         )
         self._svm_details[vehicle_id] = details
         return details
 
     async def async_request_svm_capture(self, vehicle_id: str) -> SVMDetails:
         """Trigger a fresh SVM capture and update the cached details."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
         details = await self.hass.async_add_executor_job(
-            self.vehicle_manager.api.request_svm_capture,
-            self.vehicle_manager.token,
-            vehicle,
-            True,  # acknowledged_warning
+            self.vehicle_manager.request_svm_capture,
+            vehicle_id,
+            True,  # acknowledged_warning — enforced by the capture service
         )
         self._svm_details[vehicle_id] = details
         self.async_set_updated_data(self.data)
