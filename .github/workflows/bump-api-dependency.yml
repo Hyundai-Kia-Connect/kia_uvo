@@ -67,7 +67,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq -r '.[0].number // empty')
+          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq '.[0].number // empty')
           if [ -n "$existing" ]; then
             gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
           else
