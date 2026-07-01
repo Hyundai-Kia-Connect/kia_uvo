@@ -390,6 +390,20 @@
           "description": "Akcja dla tylnego prawego okna"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Wykonaj obraz SVM",
+      "description": "Wyzwala nowe zdjęcie Surround View Monitor. acknowledged_warning musi być True.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        },
+        "acknowledged_warning": {
+          "name": "Potwierdź ostrzeżenie",
+          "description": "Potwierdź, że rozumiesz — to polecenie budzi pojazd i wykonuje zdjęcie 360."
+        }
+      }
     }
   },
   "entity": {
@@ -675,6 +689,14 @@
     "button": {
       "force_refresh": {
         "name": "Wymuś odświeżenie"
+      },
+      "capture_svm_image": {
+        "name": "Wykonaj obraz SVM"
+      }
+    },
+    "image": {
+      "svm_image": {
+        "name": "Obraz SVM"
       }
     },
     "switch": {
