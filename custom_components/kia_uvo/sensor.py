@@ -447,6 +447,19 @@ PARALLEL_UPDATES = 0
 class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect sensor class."""
 
+    # Keys whose values are distances that should be rounded to whole units
+    # to avoid spurious state changes from fractional fluctuations.
+    _RANGE_KEYS = {
+        "_total_driving_range",
+        "_ev_driving_range",
+        "_fuel_driving_range",
+        "_odometer",
+        "_last_service_distance",
+        "_next_service_distance",
+        "_ev_target_range_charge_AC",
+        "_ev_target_range_charge_DC",
+    }
+
     def __init__(
         self, coordinator, description: SensorEntityDescription, vehicle: Vehicle
     ):
@@ -460,6 +473,9 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         self._attr_device_class = description.device_class
         if description.entity_category:
             self._attr_entity_category = description.entity_category
+        # Cache last known unit for DYNAMIC_UNIT sensors to prevent
+        # unit flip-flop notifications when API returns None temporarily.
+        self._last_known_unit: str | None = None
 
     @property
     def native_value(self):
@@ -471,13 +487,26 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             if isinstance(value, list):
                 return ", ".join(str(d) for d in value)
             return value
+        # Round distance values to whole units to avoid spurious
+        # "has changed" notifications from minor fluctuations.
+        if self._key in self._RANGE_KEYS and isinstance(value, (int, float)):
+            return int(round(value))
         return value
 
     @property
     def native_unit_of_measurement(self):
-        """Return the unit the value was reported in by the sensor"""
+        """Return the unit the value was reported in by the sensor.
+
+        For DYNAMIC_UNIT sensors, cache the last known unit to prevent
+        unit flip-flop notifications (e.g. "km" -> "" -> "km") when the
+        API temporarily returns None.
+        """
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
-            return getattr(self.vehicle, self._key + "_unit")
+            current_unit = getattr(self.vehicle, self._key + "_unit")
+            if current_unit is not None:
+                self._last_known_unit = current_unit
+                return current_unit
+            return self._last_known_unit
         else:
             return self.entity_description.native_unit_of_measurement
 
