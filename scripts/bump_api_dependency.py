@@ -219,12 +219,11 @@ def classify_release_notes(
             for item in sections.get(key, []):
                 aggregate[key].append(f"- {tag}: {item}")
 
-    first = releases[0]["tag_name"].lstrip("vV")
     last = releases[-1]["tag_name"].lstrip("vV")
     included = ", ".join(r["tag_name"].lstrip("vV") for r in releases)
 
     body_lines = [
-        f"Bump `{PACKAGE_NAME}` from `{first}` to `{last}`.",
+        f"Bump `{PACKAGE_NAME}` from `{current_pin}` to `{last}`.",
         "",
         f"Upstream versions included in this bump: {included}.",
         "",

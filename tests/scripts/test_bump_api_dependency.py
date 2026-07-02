@@ -35,6 +35,15 @@ def test_classify_release_notes_feat_and_fix():
     assert "- 4.23.0:" in body
 
 
+def test_classify_release_notes_body_uses_current_pin_as_from():
+    # Single skipped release: body must read "from <current_pin> to <last>",
+    # not "from <last> to <last>" (regression guard for the "from" field).
+    releases = [{"tag_name": "v4.22.1", "body": "### Bug Fixes\n- fix a bug\n"}]
+    _commit_type, body = classify_release_notes(releases, "4.22.0")
+    assert "from `4.22.0` to `4.22.1`" in body
+    assert "from `4.22.1` to `4.22.1`" not in body
+
+
 def test_classify_release_notes_breaking_heading():
     releases = [
         {
