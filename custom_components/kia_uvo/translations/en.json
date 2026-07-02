@@ -784,6 +784,12 @@
       "start_hazard_lights_and_horn": {
         "name": "Start Hazard Lights and Horn"
       },
+      "start_valet_mode": {
+        "name": "Start Valet Mode"
+      },
+      "stop_valet_mode": {
+        "name": "Stop Valet Mode"
+      },
       "open_all_windows": {
         "name": "Open All Windows"
       },

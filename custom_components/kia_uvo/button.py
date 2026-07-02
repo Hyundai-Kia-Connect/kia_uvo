@@ -50,6 +50,20 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         enabled_fn=lambda _: False,
     ),
     HyundaiKiaButtonDescription(
+        key="start_valet_mode",
+        translation_key="start_valet_mode",
+        icon="mdi:key-variant",
+        press_action="async_start_valet_mode",
+        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+    ),
+    HyundaiKiaButtonDescription(
+        key="stop_valet_mode",
+        translation_key="stop_valet_mode",
+        icon="mdi:key-variant",
+        press_action="async_stop_valet_mode",
+        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+    ),
+    HyundaiKiaButtonDescription(
         key="open_all_windows",
         translation_key="open_all_windows",
         icon="mdi:window-maximize",
