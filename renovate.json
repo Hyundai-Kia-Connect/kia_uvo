@@ -3,7 +3,8 @@
   "extends": ["config:best-practices"],
   "packageRules": [
     {
-      "matchPackageNames": ["hyundai_kia_connect_api"],
+      "description": "Disable Renovate for hyundai_kia_connect_api; the kia_uvo bump-api-dependency workflow handles this pin with semantic release notes. matchDepNames matches the depName as written in manifest.json (matchPackageNames would match the pypi packageName with dashes and miss).",
+      "matchDepNames": ["hyundai_kia_connect_api"],
       "enabled": false
     }
   ]
