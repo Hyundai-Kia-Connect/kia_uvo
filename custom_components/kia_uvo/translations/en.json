@@ -67,7 +67,7 @@
     },
     "error": {
       "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect servers. Please use the official app to logout and log back in, then try again.",
-      "invalid_credentials": "Invalid username or token/password",
+      "invalid_credentials": "Invalid username or password",
       "unknown": "Unexpected error"
     }
   },
