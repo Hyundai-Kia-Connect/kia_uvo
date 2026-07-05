@@ -7,6 +7,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from bump_api_dependency import (
+    _normalize_issue_refs,
     classify_release_notes,
     get_current_pin,
     main,
@@ -102,6 +103,66 @@ def test_classify_release_notes_empty_body_falls_back_to_ignored_commits(monkeyp
     assert "### Other Changes" in body
     assert "- 4.22.0: cleanup" in body
     assert "- 4.22.0: update readme" in body
+
+
+def test_normalize_issue_refs_qualifies_markdown_link_text():
+    # Real-world shape: API release notes use [#NNN](api-url) markdown links.
+    # semantic-release rewrites unqualified [#NNN] URLs to the release repo;
+    # qualifying the link text as owner/repo#NNN makes the writer leave it alone.
+    owner, repo = "Hyundai-Kia-Connect", "hyundai_kia_connect_api"
+    body = (
+        "closes [#1155](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1155) "
+        "and [#1153](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1153)"
+    )
+    normalized = _normalize_issue_refs(body, owner, repo)
+    assert (
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1155]"
+        "(https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1155)"
+        in normalized
+    )
+    assert (
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1153]"
+        "(https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1153)"
+        in normalized
+    )
+    assert "[#1155]" not in normalized
+    assert "[#1153]" not in normalized
+
+
+def test_normalize_issue_refs_leaves_cross_repo_refs_intact():
+    owner, repo = "Hyundai-Kia-Connect", "hyundai_kia_connect_api"
+    body = "[kia_uvo#1683](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1683)"
+    normalized = _normalize_issue_refs(body, owner, repo)
+    assert body in normalized  # cross-repo qualified ref untouched
+
+
+def test_normalize_issue_refs_qualifies_bare_refs():
+    owner, repo = "Hyundai-Kia-Connect", "hyundai_kia_connect_api"
+    body = "Fixes (#1156) and [#1155]. Also see Hyundai-Kia-Connect/hyundai_kia_connect_api#1153."
+    normalized = _normalize_issue_refs(body, owner, repo)
+    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1156" in normalized
+    assert "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1155]" in normalized
+    assert "(#1156)" not in normalized
+
+
+def test_normalize_issue_refs_leaves_url_anchors_intact():
+    owner, repo = "Hyundai-Kia-Connect", "hyundai_kia_connect_api"
+    body = "https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1683#issuecomment-4728645908"
+    normalized = _normalize_issue_refs(body, owner, repo)
+    assert body in normalized  # the #issuecomment anchor is not an issue ref
+
+
+def test_classify_release_notes_rewrites_api_issue_refs():
+    releases = [
+        {
+            "tag_name": "v4.22.1",
+            "body": "### Bug Fixes\n- replace rotation ([#1156](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1156)), closes #1155 #1153\n",
+        }
+    ]
+    _commit_type, body = classify_release_notes(releases, "4.22.0")
+    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1155" in body
+    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1153" in body
+    assert "[#1156]" not in body  # markdown link text qualified
 
 
 def test_update_manifest(tmp_path):
