@@ -65,7 +65,64 @@ def _tag_name(version_or_tag: str) -> str:
     )
 
 
-def _synthesize_body_from_commits(commits: list[dict[str, Any]]) -> str:
+def _normalize_issue_refs(body: str, owner: str, repo: str) -> str:
+    """Qualify issue/PR references so they survive a cross-repo paste.
+
+    API release notes are written in the API repo's context: ``#123`` and
+    ``[#123](url)`` point at API issues/PRs. ``jossef/action-semantic-release-info``
+    (used by kia_uvo's release workflow) regenerates unqualified ``[#NNN]``
+    references using the *release* repo's URL template, discarding the original
+    explicit URL — so ``[#1156](api-url)`` in the bump commit body becomes
+    ``[#1156](kia_uvo-url)`` in the kia_uvo release notes. Cross-repo-qualified
+    refs (``other-repo#NNN``) are left intact by the writer.
+
+    This helper rewrites every unqualified reference to ``owner/repo#NNN`` so the
+    writer treats it as cross-repo and does not rewrite the URL:
+
+      - ``[#NNN](url)``  -> ``[owner/repo#NNN](url)``  (keep URL, qualify text)
+      - ``[#NNN]``       -> ``[owner/repo#NNN]``
+      - plain ``#NNN``   -> ``owner/repo#NNN``
+
+    Left untouched: already-qualified refs (``owner/repo#NNN``,
+    ``other-repo#NNN``), and ``#`` anchors inside a github URL path
+    (``.../issues/123#comment``).
+    """
+    repo_ref = f"{owner}/{repo}"
+
+    # [#NNN](url) -> [owner/repo#NNN](url)
+    body = re.sub(
+        r"\[#(\d+)\]\(([^)]*)\)",
+        lambda m: f"[{repo_ref}#{m.group(1)}]({m.group(2)})",
+        body,
+    )
+
+    # [#NNN] without a following URL -> [owner/repo#NNN]
+    body = re.sub(
+        r"\[(#\d+)\](?!\()",
+        lambda m: f"[{repo_ref}{m.group(1)}]",
+        body,
+    )
+
+    # Plain #NNN, but not if it is already part of another repo's qualified ref
+    # (other-repo#NNN) or a URL anchor (.../issues/123#comment).
+    def _replace_plain(match: re.Match[str]) -> str:
+        start = match.start()
+        char_before = body[start - 1] if start > 0 else ""
+        # Part of a qualified ref like owner/repo#NNN or other-repo#NNN?
+        if re.match(r"[\w.-]", char_before):
+            return match.group(0)
+        # Anchor inside a github.com URL path (e.g. /issues/123#comment).
+        window = body[max(0, start - 40) : start]
+        if re.search(r"github\.com/.+/(issues|pull)/\d+$", window):
+            return match.group(0)
+        return f"{repo_ref}{match.group(0)}"
+
+    return re.sub(r"#(\d+)", _replace_plain, body)
+
+
+def _synthesize_body_from_commits(
+    commits: list[dict[str, Any]], owner: str = API_OWNER, repo: str = API_REPO
+) -> str:
     feat: list[str] = []
     fix: list[str] = []
     other: list[str] = []
@@ -97,13 +154,13 @@ def _synthesize_body_from_commits(commits: list[dict[str, Any]]) -> str:
         lines.append("BREAKING CHANGES")
     if feat:
         lines.append("### Features")
-        lines.extend(feat)
+        lines.extend(_normalize_issue_refs(line, owner, repo) for line in feat)
     if fix:
         lines.append("### Bug Fixes")
-        lines.extend(fix)
+        lines.extend(_normalize_issue_refs(line, owner, repo) for line in fix)
     if not feat and not fix and other:
         lines.append("### Other Changes")
-        lines.extend(other)
+        lines.extend(_normalize_issue_refs(line, owner, repo) for line in other)
     return "\n".join(lines)
 
 
@@ -135,8 +192,10 @@ def _extract_section(body: str, headings: list[str]) -> str:
     return "\n".join(collected)
 
 
-def _classify_single_release(body: str) -> tuple[str, dict[str, list[str]]]:
-    body = body or ""
+def _classify_single_release(
+    body: str, owner: str = API_OWNER, repo: str = API_REPO
+) -> tuple[str, dict[str, list[str]]]:
+    body = _normalize_issue_refs(body or "", owner, repo)
     sections: dict[str, list[str]] = {
         "breaking": [],
         "features": [],
@@ -210,7 +269,7 @@ def classify_release_notes(
                 body = _synthesize_body_from_commits(compare.get("commits", []))
             except urllib.error.HTTPError:
                 body = ""
-        rel_level, sections = _classify_single_release(body)
+        rel_level, sections = _classify_single_release(body, owner, repo)
         if rel_level != "chore":
             level = max(
                 level, rel_level, key=["chore", "fix", "feat", "breaking"].index
