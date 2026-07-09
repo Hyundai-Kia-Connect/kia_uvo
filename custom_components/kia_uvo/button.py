@@ -14,7 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from hyundai_kia_connect_api import Vehicle
 
-from .const import DOMAIN
+from .const import BRAND_HYUNDAI, DOMAIN, REGION_USA
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -79,6 +79,13 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
             and vehicle.front_left_window_is_open is not None
         ),
     ),
+    HyundaiKiaButtonDescription(
+        key="capture_svm_image",
+        translation_key="capture_svm_image",
+        icon="mdi:camera-iris",
+        press_action="async_request_svm_capture",
+        exists_fn=lambda _: True,
+    ),
 )
 
 
@@ -92,10 +99,17 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in BUTTON_DESCRIPTIONS:
-            if description.exists_fn(vehicle):
-                entities.append(
-                    HyundaiKiaConnectButton(coordinator, description, vehicle)
-                )
+            if not description.exists_fn(vehicle):
+                continue
+            if description.key == "capture_svm_image":
+                if (
+                    coordinator.vehicle_manager.region != REGION_USA
+                    or coordinator.vehicle_manager.brand != BRAND_HYUNDAI
+                ):
+                    continue
+                if not await coordinator.async_supports_svm(vehicle_id):
+                    continue
+            entities.append(HyundaiKiaConnectButton(coordinator, description, vehicle))
 
     async_add_entities(entities)
 
