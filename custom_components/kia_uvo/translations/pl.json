@@ -696,6 +696,27 @@
     "button": {
       "force_refresh": {
         "name": "Wymuś odświeżenie"
+      },
+      "start_hazard_lights": {
+        "name": "Włącz światła awaryjne"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Włącz światła awaryjne i klakson"
+      },
+      "start_valet_mode": {
+        "name": "Włącz tryb valet"
+      },
+      "stop_valet_mode": {
+        "name": "Wyłącz tryb valet"
+      },
+      "open_all_windows": {
+        "name": "Otwórz wszystkie okna"
+      },
+      "close_all_windows": {
+        "name": "Zamknij wszystkie okna"
+      },
+      "vent_all_windows": {
+        "name": "Wentyluj wszystkie okna"
       }
     },
     "switch": {
