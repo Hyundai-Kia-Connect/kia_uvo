@@ -7,6 +7,7 @@ from typing import Final
 from datetime import date
 
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -72,7 +73,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
-        entity_category=EntityCategory.DIAGNOSTIC,
     ),
     SensorEntityDescription(
         key="last_updated_at",
@@ -460,6 +460,16 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         self._attr_device_class = description.device_class
         if description.entity_category:
             self._attr_entity_category = description.entity_category
+        # For electrified vehicles (BEV/PHEV) the traction battery is the
+        # device's primary battery. Drop the battery device_class from the
+        # 12 V auxiliary sensor so Home Assistant's device-page battery picker
+        # (which selects the first sensor with device_class=battery, ignoring
+        # entity_category) shows the EV battery instead of the 12 V level.
+        # HEV/ICE keep the 12 V as their battery. See issue #1749.
+        if description.key == "car_battery_percentage":
+            engine_type = getattr(vehicle, "engine_type", None)
+            if engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV):
+                self._attr_device_class = None
 
     @property
     def native_value(self):
