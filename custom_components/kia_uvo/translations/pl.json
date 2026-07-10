@@ -513,6 +513,21 @@
       },
       "todays_daily_driving_stats": {
         "name": "Dzisiejsze statystyki jazdy"
+      },
+      "tire_pressure_front_left": {
+        "name": "Ciśnienie opon - przednia lewa"
+      },
+      "tire_pressure_front_right": {
+        "name": "Ciśnienie opon - przednia prawa"
+      },
+      "tire_pressure_rear_left": {
+        "name": "Ciśnienie opon - tylna lewa"
+      },
+      "tire_pressure_rear_right": {
+        "name": "Ciśnienie opon - tylna prawa"
+      },
+      "drive_mode": {
+        "name": "Tryb jazdy"
       }
     },
     "binary_sensor": {
@@ -665,6 +680,12 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Podgrzewanie fotela tylnego prawego"
+      },
+      "oil_level_warning_is_on": {
+        "name": "Niski poziom oleju"
+      },
+      "battery_auxiliary_fail_warning_is_on": {
+        "name": "Awaria baterii 12V"
       }
     },
     "lock": {

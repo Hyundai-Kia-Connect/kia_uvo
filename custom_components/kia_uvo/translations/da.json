@@ -452,6 +452,21 @@
       },
       "todays_daily_driving_stats": {
         "name": "Today's Daily Driving Stats"
+      },
+      "tire_pressure_front_left": {
+        "name": "Tire Pressure - Front Left"
+      },
+      "tire_pressure_front_right": {
+        "name": "Tire Pressure - Front Right"
+      },
+      "tire_pressure_rear_left": {
+        "name": "Tire Pressure - Rear Left"
+      },
+      "tire_pressure_rear_right": {
+        "name": "Tire Pressure - Rear Right"
+      },
+      "drive_mode": {
+        "name": "Drive Mode"
       }
     },
     "binary_sensor": {
@@ -616,6 +631,12 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Rear Right Seat Heater"
+      },
+      "oil_level_warning_is_on": {
+        "name": "Oil Level Warning"
+      },
+      "battery_auxiliary_fail_warning_is_on": {
+        "name": "12V Battery Fault"
       }
     },
     "lock": {
