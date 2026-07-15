@@ -452,7 +452,14 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
-            if getattr(vehicle, description.key, None) is not None:
+            # _air_temperature is None while climate is off (USA returns
+            # airTemp.value "OFF"); create the entity anyway so it reports
+            # `unknown` instead of being permanently unavailable after a
+            # restart. The real setpoint arrives on the next poll.
+            if (
+                description.key == "_air_temperature"
+                or getattr(vehicle, description.key, None) is not None
+            ):
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
