@@ -2,7 +2,7 @@ name: Bump API dependency
 
 on:
   schedule:
-    - cron: "0 7 * * *"
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 permissions:
