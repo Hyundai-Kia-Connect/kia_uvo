@@ -8,6 +8,7 @@ from datetime import date
 
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
+from hyundai_kia_connect_api.utils import get_child_value
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -441,6 +442,25 @@ SENSOR_DESCRIPTIONS: Final[tuple[SensorEntityDescription, ...]] = (
 )
 
 
+def _tire_pressure_sensor_supported(vehicle: Vehicle) -> bool:
+    """Whether the vehicle can ever report numeric tire pressures.
+
+    TPMS values are transient on some backends (confirmed live on AU/NZ,
+    kia_uvo #1778 investigation): the cached state carries the 255 no-data
+    sentinel (parsed to None) whenever the car is parked — which is nearly
+    always the case at integration setup, so gating on the value would mean
+    the sensors are never created. Gate on the CCS2 tire structure being
+    present in the raw data instead. Real values arrive with the first
+    poll that lands during or shortly after a drive.
+    """
+    if not vehicle.ccu_ccs2_protocol_support:
+        return False
+    return (
+        get_child_value(vehicle.data, "Chassis.Axle.Row1.Left.Tire.Pressure")
+        is not None
+    )
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -463,6 +483,13 @@ async def async_setup_entry(
                     vehicle.air_control_is_on is not None
                     or vehicle._air_temperature is not None
                 )
+            elif description.key.startswith("tire_pressure_"):
+                # Transient like _air_temperature above — see
+                # _tire_pressure_sensor_supported. A None pressure -> HA
+                # `unknown` until a poll catches the car driving.
+                create = getattr(
+                    vehicle, description.key, None
+                ) is not None or _tire_pressure_sensor_supported(vehicle)
             else:
                 create = getattr(vehicle, description.key, None) is not None
             if create:
