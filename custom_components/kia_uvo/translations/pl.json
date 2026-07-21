@@ -725,6 +725,9 @@
       },
       "climate": {
         "name": "Klimatyzacja"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Ładowanie tylko poza szczytem"
       }
     },
     "climate": {
@@ -746,6 +749,14 @@
     "device_tracker": {
       "location": {
         "name": "Lokalizacja"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Czas początku ładowania poza szczytem"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Czas końca ładowania poza szczytem"
       }
     }
   }

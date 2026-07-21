@@ -587,6 +587,14 @@
       "location": {
         "name": "Location"
       }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Off-peak charge start time"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Off-peak charge end time"
+      }
     }
   }
 }
