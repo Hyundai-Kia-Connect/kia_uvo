@@ -463,6 +463,15 @@ async def async_setup_entry(
                     vehicle.air_control_is_on is not None
                     or vehicle._air_temperature is not None
                 )
+            elif description.key == "car_battery_percentage":
+                # The 12V SoC is transient — None while the telematics unit
+                # is asleep, after a 12V reset, or when the status payload
+                # omits it. Don't gate creation on it: a None at setup (e.g.
+                # a version-update reload) means the entity isn't yielded and
+                # HA marks it "no longer provided", with no return until the
+                # next reload. Always create; None -> HA `unknown`, the real
+                # SoC arrives on the next poll. See #1803.
+                create = True
             else:
                 create = getattr(vehicle, description.key, None) is not None
             if create:
