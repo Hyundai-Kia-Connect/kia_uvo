@@ -448,6 +448,22 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         options.off_peak_charge_only_enabled = enabled
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
+    async def async_set_off_peak_time(
+        self,
+        vehicle_id: str,
+        *,
+        start: dt.time | None = None,
+        end: dt.time | None = None,
+    ) -> None:
+        """Set the off-peak charging window start and/or end time."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        if start is not None:
+            options.off_peak_start_time = start
+        if end is not None:
+            options.off_peak_end_time = end
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
     async def async_set_departure_enabled(
         self, vehicle_id: str, departure_num: int, enabled: bool
     ):
