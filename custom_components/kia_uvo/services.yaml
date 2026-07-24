@@ -497,3 +497,35 @@ set_navigation:
       required: false
       selector:
         text:
+set_off_peak_charging:
+  description: >-
+    Set the off-peak charging schedule mode and optionally the window. "Off"
+    disables scheduled charging. "Time priority" charges only during the
+    off-peak window (may not reach the target SoC). "Target priority" prefers
+    off-peak tariffs but continues past the window to reach the target SoC.
+    Leave the start/end times blank to keep the current window.
+  fields:
+    device_id:
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+    mode:
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Off"
+              value: "off"
+            - label: "Time priority (charge only off-peak)"
+              value: "time"
+            - label: "Target priority (off-peak tariffs, charge to target)"
+              value: "target"
+    off_peak_start_time:
+      required: false
+      selector:
+        time:
+    off_peak_end_time:
+      required: false
+      selector:
+        time:
