@@ -37,6 +37,7 @@ SERVICE_START_VALET_MODE = "start_valet_mode"
 SERVICE_STOP_VALET_MODE = "stop_valet_mode"
 SERVICE_SET_WINDOWS = "set_windows"
 SERVICE_SET_NAVIGATION = "set_navigation"
+SERVICE_SET_OFF_PEAK_CHARGING = "set_off_peak_charging"
 
 SUPPORTED_SERVICES = (
     SERVICE_UPDATE,
@@ -58,6 +59,7 @@ SUPPORTED_SERVICES = (
     SERVICE_STOP_VALET_MODE,
     SERVICE_SET_WINDOWS,
     SERVICE_SET_NAVIGATION,
+    SERVICE_SET_OFF_PEAK_CHARGING,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -271,6 +273,25 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             vehicle_id, schedule_options
         )
 
+    async def async_handle_set_off_peak_charging(call):
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        mode = call.data.get("mode")
+        off_peak_start_time = call.data.get("off_peak_start_time")
+        off_peak_end_time = call.data.get("off_peak_end_time")
+        if off_peak_start_time is not None:
+            off_peak_start_time = datetime.strptime(
+                off_peak_start_time, "%H:%M:%S"
+            ).time()
+        if off_peak_end_time is not None:
+            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+        await coordinator.async_set_off_peak_charging_mode(
+            vehicle_id,
+            mode,
+            start=off_peak_start_time,
+            end=off_peak_end_time,
+        )
+
     async def async_handle_start_hazard_lights(call):
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
@@ -330,6 +351,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_STOP_VALET_MODE: async_handle_stop_valet_mode,
         SERVICE_SET_WINDOWS: async_handle_set_windows,
         SERVICE_SET_NAVIGATION: async_handle_set_navigation,
+        SERVICE_SET_OFF_PEAK_CHARGING: async_handle_set_off_peak_charging,
     }
 
     for service in SUPPORTED_SERVICES:
