@@ -472,6 +472,20 @@ async def async_setup_entry(
                 # next reload. Always create; None -> HA `unknown`, the real
                 # SoC arrives on the next poll. See #1803.
                 create = True
+            elif description.key.startswith("tire_pressure_"):
+                # Transient like _air_temperature above: some backends (AU/NZ)
+                # report the TPMS no-data sentinel whenever the car is parked
+                # — nearly always the case at setup — so don't gate on the
+                # value. The parsed unit is the capability signal: non-None
+                # exactly for direct-TPMS vehicles (known PressureUnit), None
+                # for indirect TPMS (PressureUnit 3, e.g. KONA — #1786) and
+                # old-protocol vehicles, which never report a numeric
+                # pressure. A None pressure -> HA `unknown` until a poll
+                # catches the car driving.
+                create = (
+                    getattr(vehicle, description.key, None) is not None
+                    or vehicle.tire_pressure_unit is not None
+                )
             else:
                 create = getattr(vehicle, description.key, None) is not None
             if create:
