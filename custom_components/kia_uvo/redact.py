@@ -1,14 +1,13 @@
-"""Redact credentials, GPS, and identity data from a diagnostics dump before
-it leaves the user's Home Assistant instance.
+"""Redact credentials, GPS, and identity data from a diagnostics dump.
 
-Vehicle state mixes ordinary data with genuinely sensitive values: access and
-refresh tokens, device id, PIN, GPS coordinates, VIN, account/email. Region
-subclasses add fields with unpredictable names (`gpsLatitude` vs
-`_location_latitude` vs `lat`). Rather than enumerate every known sensitive
-key, this walks the whole dump and redacts any value whose key contains a
-sensitive substring — erring on catching the field by name. Over-redaction
-(redacting a neutral field like `related` or `plate`) is the accepted cost;
-leaking GPS or a token in a public issue attachment is not.
+Walks the dump and redacts any value whose key matches a sensitive pattern.
+Two lists: `_SENSITIVE_SUBSTRINGS` (long, specific: `token`, `deviceid`,
+`latitude`, ...) matched as substrings, and `_SENSITIVE_EXACT` (short,
+collision-prone: `vin`, `pin`, `lat`, `lon`) matched only on exact
+normalized key. `vin`/`pin` as substrings would redact every
+`*_driving_range*` (`driving` contains `vin`) and `*_trip_info*` field
+(`tripinfo` contains `pin`). Keys are normalized (underscores/hyphens
+stripped, lowercased) so `device_id` matches the `deviceid` substring.
 """
 
 from __future__ import annotations
@@ -20,32 +19,39 @@ REDACTED = "**REDACTED**"
 _SENSITIVE_SUBSTRINGS = (
     "token",
     "deviceid",
-    "lat",
-    "lon",
-    "pin",
     "password",
     "stamp",
     "cookie",
     "account",
     "email",
-    "vin",
     "userid",
     "sessionid",
     "rmtoken",
     "secret",
+    "latitude",
+    "longitude",
+    "geocode",
+)
+
+_SENSITIVE_EXACT = frozenset(
+    {
+        "vin",
+        "pin",
+        "lat",
+        "lon",
+    }
 )
 
 
 def _is_sensitive_key(key: str) -> bool:
-    # Strip underscores/hyphens so `device_id` matches the `deviceid` substring
-    # (and `client_device_id` -> `clientdeviceid`). Region subclasses spell the
-    # same concept with and without separators.
     normalized = key.lower().replace("_", "").replace("-", "")
+    if normalized in _SENSITIVE_EXACT:
+        return True
     return any(s in normalized for s in _SENSITIVE_SUBSTRINGS)
 
 
 def redact(obj: Any) -> Any:
-    """Recursively redact dict values whose key matches a sensitive substring."""
+    """Recursively redact dict values whose key matches a sensitive pattern."""
     if isinstance(obj, dict):
         return {
             key: (REDACTED if _is_sensitive_key(key) else redact(value))
