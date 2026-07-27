@@ -14,7 +14,7 @@ from hyundai_kia_connect_api import (
     WindowRequestOptions,
 )
 
-from .const import DOMAIN
+from .const import DOMAIN, OffPeakChargingMode
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 SERVICE_UPDATE = "update"
@@ -284,9 +284,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             ).time()
         if off_peak_end_time is not None:
             off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
-        await coordinator.async_set_off_peak_charging_mode(
+        await coordinator.async_set_off_peak_charging(
             vehicle_id,
-            mode,
+            mode=OffPeakChargingMode(mode) if mode is not None else None,
             start=off_peak_start_time,
             end=off_peak_end_time,
         )

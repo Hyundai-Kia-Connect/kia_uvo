@@ -38,7 +38,7 @@ TIME_DESCRIPTIONS: Final[tuple[HyundaiKiaTimeDescription, ...]] = (
         icon="mdi:clock-time-ten",
         value_fn=lambda vehicle: vehicle.ev_off_peak_start_time,
         exists_fn=lambda vehicle: vehicle.ev_off_peak_start_time is not None,
-        set_fn=lambda coordinator, vid, value: coordinator.async_set_off_peak_time(
+        set_fn=lambda coordinator, vid, value: coordinator.async_set_off_peak_charging(
             vid, start=value
         ),
     ),
@@ -48,7 +48,7 @@ TIME_DESCRIPTIONS: Final[tuple[HyundaiKiaTimeDescription, ...]] = (
         icon="mdi:clock-time-two",
         value_fn=lambda vehicle: vehicle.ev_off_peak_end_time,
         exists_fn=lambda vehicle: vehicle.ev_off_peak_end_time is not None,
-        set_fn=lambda coordinator, vid, value: coordinator.async_set_off_peak_time(
+        set_fn=lambda coordinator, vid, value: coordinator.async_set_off_peak_charging(
             vid, end=value
         ),
     ),

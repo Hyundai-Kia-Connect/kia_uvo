@@ -1,5 +1,7 @@
 """Constants for the Hyundai / Kia Connect integration."""
 
+from enum import StrEnum
+
 DOMAIN: str = "kia_uvo"
 
 CONF_BRAND: str = "brand"
@@ -44,3 +46,16 @@ DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 
 DYNAMIC_UNIT: str = "dynamic_unit"
+
+
+class OffPeakChargingMode(StrEnum):
+    """Off-peak charging schedule mode.
+
+    Maps to the (charging_enabled, off_peak_charge_only_enabled) pair the API
+    expects. Values are the strings exposed in services.yaml so the service
+    payload converts directly: ``OffPeakChargingMode(call.data["mode"])``.
+    """
+
+    OFF = "off"
+    TIME = "time"
+    TARGET = "target"
