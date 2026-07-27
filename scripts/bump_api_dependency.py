@@ -11,7 +11,6 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-
 API_OWNER = "Hyundai-Kia-Connect"
 API_REPO = "hyundai_kia_connect_api"
 BRANCH_NAME = "chore/bump-api-dependency"
@@ -26,7 +25,7 @@ def _http_get(url: str, token: str | None) -> dict[str, Any]:
     if token:
         headers["Authorization"] = f"Bearer {token}"
     req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
+    with urllib.request.urlopen(req, timeout=30) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 

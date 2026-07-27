@@ -6,16 +6,9 @@ import hashlib
 import logging
 from typing import Any
 
-from hyundai_kia_connect_api import Token, VehicleManager
-from hyundai_kia_connect_api.ApiImpl import OTPRequest
-from hyundai_kia_connect_api.exceptions import AuthenticationError
-from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
-
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers.selector import selector
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_PIN,
@@ -26,25 +19,30 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.selector import selector
+from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api.ApiImpl import OTPRequest
+from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
+from hyundai_kia_connect_api.exceptions import AuthenticationError
 
 from .const import (
     BRANDS,
     CONF_BRAND,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_TOKEN,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_PIN,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
     REGIONS,
-    CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_USE_EMAIL_WITH_GEOCODE_API,
-    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
-    DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
 )
 
 _LOGGER = logging.getLogger(__name__)
