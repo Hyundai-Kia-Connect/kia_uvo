@@ -61,6 +61,18 @@ body:
     validations:
       required: false
   - type: textarea
+    id: diagnostics_dump
+    attributes:
+      label: Diagnostics dump (if available)
+      description: |
+        Attach the redacted diagnostics JSON. Download it via
+        Settings → Devices & Services → kia_uvo → ⋮ → Download diagnostics.
+        The dump is auto-redacted (tokens, device id, PIN, GPS, and
+        reverse-geocoded address removed) — safe to share.
+      placeholder: Paste the diagnostics JSON here or attach the file
+    validations:
+      required: false
+  - type: textarea
     id: reproduce
     attributes:
       label: To Reproduce
