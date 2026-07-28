@@ -348,7 +348,7 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
         coordinator = hass.data[DOMAIN][coordinators[0]]
         vehicles = coordinator.vehicle_manager.vehicles
         if len(vehicles) == 1:
-            return list(vehicles.keys())[0]
+            return next(iter(vehicles.keys()))
 
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     for entry in device_entry.identifiers:

@@ -65,7 +65,7 @@ async def async_setup_entry(
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:

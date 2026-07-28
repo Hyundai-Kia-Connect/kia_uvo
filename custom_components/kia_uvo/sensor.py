@@ -447,7 +447,7 @@ async def async_setup_entry(
     """Set up sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
             if description.key == "_air_temperature":
