@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.core import HomeAssistant
 from homeassistant.components.lock import LockEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-
 from hyundai_kia_connect_api import Vehicle
+
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +51,7 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
 
     @property
     def is_locked(self):
-        return getattr(self.vehicle, "is_locked")
+        return self.vehicle.is_locked
 
     async def async_lock(self, **kwargs):
         await self.coordinator.async_lock_vehicle(self.vehicle.id)

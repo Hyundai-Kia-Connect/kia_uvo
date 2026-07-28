@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Final
 from datetime import date
-
-from hyundai_kia_connect_api import Vehicle
-from hyundai_kia_connect_api.const import ENGINE_TYPES
+from typing import Final
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -15,18 +12,19 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
+    EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
     UnitOfPower,
     UnitOfTime,
-    EntityCategory,
 )
-
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .entity import HyundaiKiaConnectEntity
@@ -563,9 +561,9 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def state_attributes(self):
         if self.entity_description.key == "_geocode_name":
-            return {"address": getattr(self.vehicle, "_geocode_address")}
+            return {"address": self.vehicle._geocode_address}
         elif self.entity_description.key == "dtc_count":
-            return {"DTC Text": getattr(self.vehicle, "dtc_descriptions")}
+            return {"DTC Text": self.vehicle.dtc_descriptions}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):

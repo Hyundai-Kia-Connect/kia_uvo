@@ -2,30 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any
-import datetime as dt
-from datetime import timedelta
-import traceback
-import logging
 import asyncio
-
-from hyundai_kia_connect_api import (
-    Vehicle,
-    VehicleManager,
-    ClimateRequestOptions,
-    WindowRequestOptions,
-    ScheduleChargingClimateRequestOptions,
-    POIInfo,
-    Token,
-)
-from hyundai_kia_connect_api.const import WINDOW_STATE
-from hyundai_kia_connect_api.exceptions import (
-    AuthenticationError,
-    UnsupportedControlError,
-)
-
-from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+import datetime as dt
+import logging
+import traceback
+from collections.abc import Callable
+from datetime import timedelta
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -36,24 +19,39 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
+from hyundai_kia_connect_api import (
+    ClimateRequestOptions,
+    POIInfo,
+    ScheduleChargingClimateRequestOptions,
+    Token,
+    Vehicle,
+    VehicleManager,
+    WindowRequestOptions,
+)
+from hyundai_kia_connect_api.const import WINDOW_STATE
+from hyundai_kia_connect_api.exceptions import (
+    AuthenticationError,
+    UnsupportedControlError,
+)
 
 from .const import (
     CONF_BRAND,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
+    CONF_TOKEN,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
-    CONF_USE_EMAIL_WITH_GEOCODE_API,
-    CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_TOKEN,
+    DOMAIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
