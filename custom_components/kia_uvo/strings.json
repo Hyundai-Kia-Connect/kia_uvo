@@ -267,6 +267,9 @@
       },
       "drive_mode": {
         "name": "Drive Mode"
+      },
+      "svm_status": {
+        "name": "SVM Status"
       }
     },
     "binary_sensor": {
@@ -513,6 +516,14 @@
       },
       "vent_all_windows": {
         "name": "Vent All Windows"
+      },
+      "capture_svm_image": {
+        "name": "Capture SVM Image"
+      }
+    },
+    "image": {
+      "svm_image": {
+        "name": "SVM Image"
       }
     },
     "cover": {
