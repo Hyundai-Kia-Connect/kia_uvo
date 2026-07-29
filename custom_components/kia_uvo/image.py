@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry
@@ -69,6 +68,14 @@ class SVMImageEntity(ImageEntity, HyundaiKiaConnectEntity):
         """Initialize the SVM image entity."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_svm_image"
+        details = coordinator.get_cached_svm_details(vehicle.id)
+        self._attr_image_last_updated = details.captured_at if details else None
+
+    def _handle_coordinator_update(self) -> None:
+        """Refresh the capture timestamp when the coordinator pushes an update."""
+        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
+        self._attr_image_last_updated = details.captured_at if details else None
+        super()._handle_coordinator_update()
 
     @property
     def available(self) -> bool:
@@ -79,23 +86,3 @@ class SVMImageEntity(ImageEntity, HyundaiKiaConnectEntity):
         """Return bytes of the latest SVM image."""
         details = self.coordinator.get_cached_svm_details(self.vehicle.id)
         return details.image_bytes if details else None
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return metadata attributes for the captured image."""
-        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
-        if details is None:
-            return {}
-        return {
-            "captured_at": (
-                details.captured_at.isoformat() if details.captured_at else None
-            ),
-            "heading": details.heading,
-            "speed": (
-                {"value": details.speed[0], "unit": details.speed[1]}
-                if details.speed and details.speed[0] is not None
-                else None
-            ),
-            "door_open": details.door_open,
-            "trunk_open": details.trunk_open,
-        }

@@ -542,6 +542,9 @@
       },
       "drive_mode": {
         "name": "Tryb jazdy"
+      },
+      "svm_status": {
+        "name": "Status SVM"
       }
     },
     "binary_sensor": {
