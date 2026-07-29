@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry
@@ -63,19 +64,17 @@ class SVMImageEntity(ImageEntity, HyundaiKiaConnectEntity):
     @property
     def available(self) -> bool:
         """Return True if a cached image is available."""
-        return self.vehicle.id in self.coordinator._svm_details
+        return self.coordinator.get_cached_svm_details(self.vehicle.id) is not None
 
     async def async_image(self) -> bytes | None:
         """Return bytes of the latest SVM image."""
-        details = self.coordinator._svm_details.get(self.vehicle.id)
-        if details is None:
-            details = await self.coordinator.async_get_svm_details(self.vehicle.id)
+        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
         return details.image_bytes if details else None
 
     @property
-    def extra_state_attributes(self) -> dict:
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return metadata attributes for the captured image."""
-        details = self.coordinator._svm_details.get(self.vehicle.id)
+        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
         if details is None:
             return {}
         return {
