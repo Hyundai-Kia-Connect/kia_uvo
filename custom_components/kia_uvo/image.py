@@ -8,7 +8,6 @@ from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from hyundai_kia_connect_api import Vehicle
 
 from .const import BRAND_HYUNDAI, DOMAIN, REGION_USA
