@@ -38,6 +38,15 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
         if await coordinator.async_supports_svm(vehicle_id):
             vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+            # Best-effort: populate the cache so the image entity is available
+            # immediately after restart instead of waiting for a manual capture.
+            # get_svm_details is a cheap cached GET — it does not wake the car.
+            try:
+                await coordinator.async_get_svm_details(vehicle_id)
+            except Exception:
+                _LOGGER.debug(
+                    "SVM initial fetch failed for %s", vehicle_id, exc_info=True
+                )
             entities.append(SVMImageEntity(coordinator, vehicle))
 
     async_add_entities(entities)
