@@ -587,6 +587,9 @@
       },
       "drive_mode": {
         "name": "Drive Mode"
+      },
+      "svm_status": {
+        "name": "SVM Status"
       }
     },
     "binary_sensor": {
