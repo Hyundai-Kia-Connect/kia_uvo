@@ -134,7 +134,7 @@ def _synthesize_body_from_commits(
         lower = message.lower()
         if "breaking change" in lower or "breaking changes" in lower:
             breaking = True
-        if lower.startswith("feat") or lower.startswith("fix"):
+        if lower.startswith(("feat", "fix")):
             clean = re.sub(
                 r"^(feat|fix)(?:\([^)]+\))?!?:\s*", "", message, flags=re.IGNORECASE
             )
@@ -273,9 +273,9 @@ def classify_release_notes(
             level = max(
                 level, rel_level, key=["chore", "fix", "feat", "breaking"].index
             )
-        for key in aggregate:
+        for key, value in aggregate.items():
             for item in sections.get(key, []):
-                aggregate[key].append(f"- {tag}: {item}")
+                value.append(f"- {tag}: {item}")
 
     last = releases[-1]["tag_name"].lstrip("vV")
     included = ", ".join(r["tag_name"].lstrip("vV") for r in releases)

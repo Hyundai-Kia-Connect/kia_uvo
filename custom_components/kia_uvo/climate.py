@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from time import sleep
+from typing import ClassVar
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
@@ -55,14 +56,16 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
     # TODO: if possible in Climate, add possibility to set those
     # as well. Are there maybe additional properties?
-    heat_status_int_to_str: dict[int | None, str | None] = {
+    heat_status_int_to_str: ClassVar[dict[int | None, str | None]] = {
         None: None,
         0: "Off",
         1: "Steering Wheel and Rear Window",
         2: "Rear Window",
         3: "Steering Wheel",
     }
-    heat_status_str_to_int = {v: k for [k, v] in heat_status_int_to_str.items()}
+    heat_status_str_to_int: ClassVar[dict[str | None, int | None]] = {
+        v: k for [k, v] in heat_status_int_to_str.items()
+    }
 
     def get_internal_heat_int_for_climate_request(self):
         if (

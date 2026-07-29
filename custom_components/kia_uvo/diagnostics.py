@@ -93,7 +93,7 @@ def _vehicles_payload(
     for vehicle_id, vehicle in vm.vehicles.items():
         try:
             vehicles.append({"vehicle_id": vehicle_id, "data": asdict(vehicle)})
-        except Exception as exc:  # noqa: BLE001 — diagnostics must be resilient
+        except Exception as exc:
             vehicles.append(
                 {"vehicle_id": vehicle_id, "error": f"{type(exc).__name__}: {exc}"}
             )
