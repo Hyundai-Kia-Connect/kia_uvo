@@ -35,7 +35,7 @@ async def async_setup_entry(
         return
 
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         if await coordinator.async_supports_svm(vehicle_id):
             vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
             # Best-effort: populate the cache so the image entity is available
