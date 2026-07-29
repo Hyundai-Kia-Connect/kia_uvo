@@ -228,6 +228,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             self.vehicle_manager.supports_svm, vehicle_id
         )
 
+    def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
+        """Return cached SVM details for a vehicle, or None if not yet fetched."""
+        return self._svm_details.get(vehicle_id)
+
     async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
         """Fetch the latest cached SVM image and metadata from the API."""
         details = await self.hass.async_add_executor_job(
