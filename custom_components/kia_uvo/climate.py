@@ -128,18 +128,22 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         # TODO: get from lib
         return 0.5
 
-    # TODO: unknown
     @property
     def min_temp(self) -> float:
         """Get the minimum settable temperature."""
-        # TODO: get from lib
+        # TODO: get the exact per-region range from the lib
+        # USA/CA report Fahrenheit; the hardcoded 14-30 °C bounds made the
+        # climate slider unusable (14-30 °F) for those vehicles.
+        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+            return 62
         return 14
 
-    # TODO: unknown
     @property
     def max_temp(self) -> float:
         """Get the maximum settable temperature."""
-        # TODO: get from lib
+        # TODO: get the exact per-region range from the lib
+        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+            return 82
         return 30
 
     @property
