@@ -338,3 +338,35 @@ def test_dedup_closes_refs_removes_duplicates():
 def test_dedup_closes_refs_keeps_first_occurrence_order():
     line = "closes api#1 api#2 api#1 api#3"
     assert _dedup_closes_refs(line) == "closes api#1 api#2 api#3"
+
+
+def test_classify_release_notes_dedup_in_pipeline():
+    # Upstream body with duplicate closes refs in a fix line.
+    releases = [
+        {
+            "tag_name": "v4.26.0",
+            "body": (
+                "### Bug Fixes\n"
+                "* **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
+                "([#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
+                "(a9c5303), closes "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)\n"
+            ),
+        }
+    ]
+    _commit_type, body = classify_release_notes(releases, "4.25.6")
+    # Each duplicated ref appears exactly once in the aggregated PR body.
+    assert body.count("hyundai_kia_connect_api#1195") == 1
+    assert body.count("kia_uvo#1739") == 1
+    assert body.count("kia_uvo#1447") == 1
+    # Distinct ticket retained.
+    assert "hyundai_kia_connect_api#1447" in body
+    # Section structure intact.
+    assert "### Bug Fixes" in body
+    assert "- 4.26.0:" in body

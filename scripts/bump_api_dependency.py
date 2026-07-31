@@ -256,6 +256,9 @@ def _classify_single_release(
     if other and other[0]:
         sections["other"].extend(other)
 
+    for _key in ("breaking", "features", "fixes", "other"):
+        sections[_key] = [_dedup_closes_refs(line) for line in sections.get(_key, [])]
+
     if not any(sections.values()):
         sections["other"].append("No categorized release notes.")
 
