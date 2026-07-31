@@ -175,6 +175,41 @@ def test_update_manifest(tmp_path):
     assert data["requirements"] == ["hyundai_kia_connect_api==4.23.0"]
 
 
+def test_update_manifest_preserves_compact_arrays(tmp_path):
+    # Repo style is compact one-line arrays (enforced by prettier pre-commit hook).
+    # update_manifest must not reserialize the JSON, only the version pin.
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        "{\n"
+        '  "domain": "kia_uvo",\n'
+        '  "codeowners": ["@fuatakgun"],\n'
+        '  "config_flow": true,\n'
+        '  "loggers": ["kia_uvo", "hyundai_kia_connect_api"],\n'
+        '  "requirements": ["hyundai_kia_connect_api==4.21.0"],\n'
+        '  "version": "3.8.1"\n'
+        "}\n"
+    )
+    update_manifest(str(manifest), "4.23.0")
+    text = manifest.read_text()
+    # Only the version string changed; arrays stay one-line.
+    assert '"loggers": ["kia_uvo", "hyundai_kia_connect_api"],' in text
+    assert '"requirements": ["hyundai_kia_connect_api==4.23.0"],' in text
+    assert '"codeowners": ["@fuatakgun"],' in text
+    # No multi-line array expansion anywhere.
+    assert '"loggers": [\n' not in text
+    assert '"requirements": [\n' not in text
+    # Still valid JSON with the new pin.
+    data = json.loads(text)
+    assert data["requirements"] == ["hyundai_kia_connect_api==4.23.0"]
+
+
+def test_update_manifest_raises_when_pin_absent(tmp_path):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"requirements": ["some-other-pkg==1.0.0"]}))
+    with pytest.raises(ValueError, match="hyundai_kia_connect_api not found"):
+        update_manifest(str(manifest), "4.23.0")
+
+
 @pytest.fixture
 def fake_releases(monkeypatch):
     def _fetch(_owner, _repo, _token):

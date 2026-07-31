@@ -299,17 +299,19 @@ def classify_release_notes(
 
 
 def update_manifest(manifest_path: str, new_version: str) -> None:
+    """Replace the pinned version in-place, preserving the file's formatting.
+
+    Reserializing via json.dumps would expand compact arrays to multi-line,
+    forcing pre-commit.ci (prettier) to push a fixup commit on every bump PR.
+    A targeted regex replace touches only the version string.
+    """
     path = Path(manifest_path)
-    data = json.loads(path.read_text(encoding="utf-8"))
-    requirements = data.get("requirements", [])
-    for i, req in enumerate(requirements):
-        if PACKAGE_NAME in req:
-            requirements[i] = f"{PACKAGE_NAME}=={new_version}"
-            break
-    else:
-        requirements.append(f"{PACKAGE_NAME}=={new_version}")
-    data["requirements"] = requirements
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    text = path.read_text(encoding="utf-8")
+    pattern = rf"({re.escape(PACKAGE_NAME)}==)[^\s\"']+"
+    new_text, count = re.subn(pattern, rf"\g<1>{new_version}", text)
+    if count == 0:
+        raise ValueError(f"{PACKAGE_NAME} not found in {manifest_path}")
+    path.write_text(new_text, encoding="utf-8")
 
 
 def main() -> int:
