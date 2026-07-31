@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 import datetime as dt
+import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-import logging
 from typing import Final
 
 from homeassistant.components.time import TimeEntity, TimeEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from hyundai_kia_connect_api import Vehicle
 
 from .const import DOMAIN
@@ -62,7 +61,7 @@ async def async_setup_entry(
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in TIME_DESCRIPTIONS:
             if description.exists_fn(vehicle):
