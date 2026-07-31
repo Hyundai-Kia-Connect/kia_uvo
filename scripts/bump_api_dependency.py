@@ -119,6 +119,35 @@ def _normalize_issue_refs(body: str, owner: str, repo: str) -> str:
     return re.sub(r"#(\d+)", _replace_plain, body)
 
 
+_CLOSES_TAIL_RE = re.compile(r"(.*?\bcloses\s+)(.+)$", re.IGNORECASE)
+
+
+def _dedup_closes_refs(line: str) -> str:
+    """Collapse duplicate refs in a release-note line's ``closes ...`` tail.
+
+    Upstream API release notes (semantic-release) sometimes emit the same
+    ticket twice in the ``closes`` footer of a fix/feat line. The dedup key is
+    the ref's text without its URL parens (e.g.
+    ``Hyundai-Kia-Connect/hyundai_kia_connect_api#1195``), not the bare number,
+    so ``api#1447`` and ``kia_uvo#1447`` stay distinct while a repeated
+    ``api#1195`` collapses to its first occurrence (first URL kept, order kept).
+    """
+    m = _CLOSES_TAIL_RE.match(line)
+    if not m:
+        return line
+    head, tail = m.group(1), m.group(2)
+    tokens = re.findall(r"\[[^\]]+\]\([^)]*\)|[^\s]+", tail)
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for tok in tokens:
+        key = re.sub(r"\]\([^)]*\)$", "", tok).lstrip("[").rstrip("]")
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(tok)
+    return head + " ".join(deduped)
+
+
 def _synthesize_body_from_commits(
     commits: list[dict[str, Any]], owner: str = API_OWNER, repo: str = API_REPO
 ) -> str:

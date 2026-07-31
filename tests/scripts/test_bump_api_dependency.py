@@ -293,3 +293,48 @@ def test_main_at_latest_is_noop(tmp_path, monkeypatch, capsys):
     captured = capsys.readouterr()
     assert '"noop": true' in captured.out
     assert "already at latest version" in captured.out
+
+
+from bump_api_dependency import _dedup_closes_refs
+
+
+def test_dedup_closes_refs_no_closes_unchanged():
+    line = "- 4.26.0: * **CCS2:** parse ev_driving_range for PHEV from DTE.EV ([Hyundai-Kia-Connect/hyundai_kia_connect_api#1261](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1261)) ([584d242](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/commit/584d242))"
+    assert _dedup_closes_refs(line) == line
+
+
+def test_dedup_closes_refs_removes_duplicates():
+    # Real v4.26.0 line, post-normalization: api#1195, kia_uvo#1739, kia_uvo#1447
+    # each appear twice; api#1447 is a distinct ticket from kia_uvo#1447.
+    line = (
+        "- 4.26.0: * **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
+        "([Hyundai-Kia-Connect/hyundai_kia_connect_api#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
+        "(a9c5303), closes "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)"
+    )
+    result = _dedup_closes_refs(line)
+    # Each duplicated ref appears exactly once.
+    assert result.count("hyundai_kia_connect_api#1195") == 1
+    assert result.count("kia_uvo#1739") == 1
+    assert result.count("kia_uvo#1447") == 1
+    # Distinct ticket retained.
+    assert "hyundai_kia_connect_api#1447" in result
+    # Order preserved: api#1195 before kia_uvo#1739 before kia_uvo#1447 before api#1447.
+    idx_1195 = result.index("hyundai_kia_connect_api#1195")
+    idx_1739 = result.index("kia_uvo#1739")
+    idx_1447_kia = result.index("kia_uvo#1447")
+    idx_1447_api = result.index("hyundai_kia_connect_api#1447")
+    assert idx_1195 < idx_1739 < idx_1447_kia < idx_1447_api
+    # First occurrence's URL preserved.
+    assert "issues/1195)" in result
+
+
+def test_dedup_closes_refs_keeps_first_occurrence_order():
+    line = "closes api#1 api#2 api#1 api#3"
+    assert _dedup_closes_refs(line) == "closes api#1 api#2 api#3"
