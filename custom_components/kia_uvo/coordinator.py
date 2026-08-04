@@ -52,6 +52,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
+    OffPeakChargingMode,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -444,6 +445,41 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
         options.off_peak_charge_only_enabled = enabled
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def async_set_off_peak_charging(
+        self,
+        vehicle_id: str,
+        *,
+        mode: OffPeakChargingMode | None = None,
+        start: dt.time | None = None,
+        end: dt.time | None = None,
+    ) -> None:
+        """Set the off-peak charging schedule mode and/or window.
+
+        ``mode`` maps to the (charging_enabled, off_peak_charge_only_enabled)
+        pair the API expects: ``OFF`` disables scheduled charging, ``TIME``
+        charges only during the off-peak window (time priority), ``TARGET``
+        prefers off-peak tariffs but continues past the window to reach the
+        target SoC (target priority). ``mode=None`` preserves the current mode
+        and only adjusts the window — used by the time entities. Other
+        schedule fields (departures) are preserved.
+        """
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        if mode is not None:
+            if mode is OffPeakChargingMode.OFF:
+                options.charging_enabled = False
+            elif mode is OffPeakChargingMode.TIME:
+                options.charging_enabled = True
+                options.off_peak_charge_only_enabled = True
+            elif mode is OffPeakChargingMode.TARGET:
+                options.charging_enabled = True
+                options.off_peak_charge_only_enabled = False
+        if start is not None:
+            options.off_peak_start_time = start
+        if end is not None:
+            options.off_peak_end_time = end
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_departure_enabled(
