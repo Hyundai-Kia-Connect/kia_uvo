@@ -119,6 +119,35 @@ def _normalize_issue_refs(body: str, owner: str, repo: str) -> str:
     return re.sub(r"#(\d+)", _replace_plain, body)
 
 
+_CLOSES_TAIL_RE = re.compile(r"(.*?\bcloses\s+)(.+)$", re.IGNORECASE)
+
+
+def _dedup_closes_refs(line: str) -> str:
+    """Collapse duplicate refs in a release-note line's ``closes ...`` tail.
+
+    Upstream API release notes (semantic-release) sometimes emit the same
+    ticket twice in the ``closes`` footer of a fix/feat line. The dedup key is
+    the ref's text without its URL parens (e.g.
+    ``Hyundai-Kia-Connect/hyundai_kia_connect_api#1195``), not the bare number,
+    so ``api#1447`` and ``kia_uvo#1447`` stay distinct while a repeated
+    ``api#1195`` collapses to its first occurrence (first URL kept, order kept).
+    """
+    m = _CLOSES_TAIL_RE.match(line)
+    if not m:
+        return line
+    head, tail = m.group(1), m.group(2)
+    tokens = re.findall(r"\[[^\]]+\]\([^)]*\)|[^\s]+", tail)
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for tok in tokens:
+        key = re.sub(r"\]\([^)]*\)$", "", tok).lstrip("[").rstrip("]")
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(tok)
+    return head + " ".join(deduped)
+
+
 def _synthesize_body_from_commits(
     commits: list[dict[str, Any]], owner: str = API_OWNER, repo: str = API_REPO
 ) -> str:
@@ -227,6 +256,9 @@ def _classify_single_release(
     if other and other[0]:
         sections["other"].extend(other)
 
+    for _key in ("breaking", "features", "fixes", "other"):
+        sections[_key] = [_dedup_closes_refs(line) for line in sections.get(_key, [])]
+
     if not any(sections.values()):
         sections["other"].append("No categorized release notes.")
 
@@ -299,17 +331,19 @@ def classify_release_notes(
 
 
 def update_manifest(manifest_path: str, new_version: str) -> None:
+    """Replace the pinned version in-place, preserving the file's formatting.
+
+    Reserializing via json.dumps would expand compact arrays to multi-line,
+    forcing pre-commit.ci (prettier) to push a fixup commit on every bump PR.
+    A targeted regex replace touches only the version string.
+    """
     path = Path(manifest_path)
-    data = json.loads(path.read_text(encoding="utf-8"))
-    requirements = data.get("requirements", [])
-    for i, req in enumerate(requirements):
-        if PACKAGE_NAME in req:
-            requirements[i] = f"{PACKAGE_NAME}=={new_version}"
-            break
-    else:
-        requirements.append(f"{PACKAGE_NAME}=={new_version}")
-    data["requirements"] = requirements
-    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+    text = path.read_text(encoding="utf-8")
+    pattern = rf"({re.escape(PACKAGE_NAME)}==)[^\s\"']+"
+    new_text, count = re.subn(pattern, rf"\g<1>{new_version}", text)
+    if count == 0:
+        raise ValueError(f"{PACKAGE_NAME} not found in {manifest_path}")
+    path.write_text(new_text, encoding="utf-8")
 
 
 def main() -> int:

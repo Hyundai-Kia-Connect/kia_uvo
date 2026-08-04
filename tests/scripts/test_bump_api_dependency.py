@@ -175,6 +175,41 @@ def test_update_manifest(tmp_path):
     assert data["requirements"] == ["hyundai_kia_connect_api==4.23.0"]
 
 
+def test_update_manifest_preserves_compact_arrays(tmp_path):
+    # Repo style is compact one-line arrays (enforced by prettier pre-commit hook).
+    # update_manifest must not reserialize the JSON, only the version pin.
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        "{\n"
+        '  "domain": "kia_uvo",\n'
+        '  "codeowners": ["@fuatakgun"],\n'
+        '  "config_flow": true,\n'
+        '  "loggers": ["kia_uvo", "hyundai_kia_connect_api"],\n'
+        '  "requirements": ["hyundai_kia_connect_api==4.21.0"],\n'
+        '  "version": "3.8.1"\n'
+        "}\n"
+    )
+    update_manifest(str(manifest), "4.23.0")
+    text = manifest.read_text()
+    # Only the version string changed; arrays stay one-line.
+    assert '"loggers": ["kia_uvo", "hyundai_kia_connect_api"],' in text
+    assert '"requirements": ["hyundai_kia_connect_api==4.23.0"],' in text
+    assert '"codeowners": ["@fuatakgun"],' in text
+    # No multi-line array expansion anywhere.
+    assert '"loggers": [\n' not in text
+    assert '"requirements": [\n' not in text
+    # Still valid JSON with the new pin.
+    data = json.loads(text)
+    assert data["requirements"] == ["hyundai_kia_connect_api==4.23.0"]
+
+
+def test_update_manifest_raises_when_pin_absent(tmp_path):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"requirements": ["some-other-pkg==1.0.0"]}))
+    with pytest.raises(ValueError, match="hyundai_kia_connect_api not found"):
+        update_manifest(str(manifest), "4.23.0")
+
+
 @pytest.fixture
 def fake_releases(monkeypatch):
     def _fetch(_owner, _repo, _token):
@@ -258,3 +293,80 @@ def test_main_at_latest_is_noop(tmp_path, monkeypatch, capsys):
     captured = capsys.readouterr()
     assert '"noop": true' in captured.out
     assert "already at latest version" in captured.out
+
+
+from bump_api_dependency import _dedup_closes_refs
+
+
+def test_dedup_closes_refs_no_closes_unchanged():
+    line = "- 4.26.0: * **CCS2:** parse ev_driving_range for PHEV from DTE.EV ([Hyundai-Kia-Connect/hyundai_kia_connect_api#1261](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1261)) ([584d242](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/commit/584d242))"
+    assert _dedup_closes_refs(line) == line
+
+
+def test_dedup_closes_refs_removes_duplicates():
+    # Real v4.26.0 line, post-normalization: api#1195, kia_uvo#1739, kia_uvo#1447
+    # each appear twice; api#1447 is a distinct ticket from kia_uvo#1447.
+    line = (
+        "- 4.26.0: * **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
+        "([Hyundai-Kia-Connect/hyundai_kia_connect_api#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
+        "(a9c5303), closes "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)"
+    )
+    result = _dedup_closes_refs(line)
+    # Each duplicated ref appears exactly once.
+    assert result.count("hyundai_kia_connect_api#1195") == 1
+    assert result.count("kia_uvo#1739") == 1
+    assert result.count("kia_uvo#1447") == 1
+    # Distinct ticket retained.
+    assert "hyundai_kia_connect_api#1447" in result
+    # Order preserved: api#1195 before kia_uvo#1739 before kia_uvo#1447 before api#1447.
+    idx_1195 = result.index("hyundai_kia_connect_api#1195")
+    idx_1739 = result.index("kia_uvo#1739")
+    idx_1447_kia = result.index("kia_uvo#1447")
+    idx_1447_api = result.index("hyundai_kia_connect_api#1447")
+    assert idx_1195 < idx_1739 < idx_1447_kia < idx_1447_api
+    # First occurrence's URL preserved.
+    assert "issues/1195)" in result
+
+
+def test_dedup_closes_refs_keeps_first_occurrence_order():
+    line = "closes api#1 api#2 api#1 api#3"
+    assert _dedup_closes_refs(line) == "closes api#1 api#2 api#3"
+
+
+def test_classify_release_notes_dedup_in_pipeline():
+    # Upstream body with duplicate closes refs in a fix line.
+    releases = [
+        {
+            "tag_name": "v4.26.0",
+            "body": (
+                "### Bug Fixes\n"
+                "* **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
+                "([#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
+                "(a9c5303), closes "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
+                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
+                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
+                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)\n"
+            ),
+        }
+    ]
+    _commit_type, body = classify_release_notes(releases, "4.25.6")
+    # Each duplicated ref appears exactly once in the aggregated PR body.
+    assert body.count("hyundai_kia_connect_api#1195") == 1
+    assert body.count("kia_uvo#1739") == 1
+    assert body.count("kia_uvo#1447") == 1
+    # Distinct ticket retained.
+    assert "hyundai_kia_connect_api#1447" in body
+    # Section structure intact.
+    assert "### Bug Fixes" in body
+    assert "- 4.26.0:" in body
