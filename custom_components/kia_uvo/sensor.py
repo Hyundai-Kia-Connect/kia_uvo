@@ -470,6 +470,15 @@ async def async_setup_entry(
                 # next reload. Always create; None -> HA `unknown`, the real
                 # SoC arrives on the next poll. See #1803.
                 create = True
+            elif description.key == "ev_charging_power":
+                # Charging power is transient and usually None at setup while
+                # the vehicle is unplugged. Create the sensor for electrified
+                # vehicles so a later coordinator poll can publish the value
+                # without requiring an integration reload.
+                create = (
+                    vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+                    or vehicle.ev_charging_power is not None
+                )
             elif description.key.startswith("tire_pressure_"):
                 # Transient like _air_temperature above: some backends (AU/NZ)
                 # report the TPMS no-data sentinel whenever the car is parked
