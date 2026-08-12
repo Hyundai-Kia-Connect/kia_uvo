@@ -224,10 +224,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         self.async_set_updated_data(self.data)
 
     async def async_supports_svm(self, vehicle_id: str) -> bool:
-        """Return whether the given vehicle supports SVM."""
-        return await self.hass.async_add_executor_job(
-            self.vehicle_manager.supports_svm, vehicle_id
-        )
+        """Return whether the given vehicle supports SVM.
+
+        Capability is a per-region class attribute stamped on the Vehicle by
+        the API library (like supports_window_control), so this is a plain
+        attribute read — no API call, no executor job needed.
+        """
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if vehicle is None:
+            return False
+        return bool(vehicle.supports_svm)
 
     def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
         """Return cached SVM details for a vehicle, or None if not yet fetched."""
