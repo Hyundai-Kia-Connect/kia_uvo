@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from datetime import date
-from typing import Final
+from typing import Any, Final
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -26,7 +26,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
-from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
+from .const import BRAND_HYUNDAI, CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT, REGION_USA
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -513,6 +513,17 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
+    if (
+        coordinator.vehicle_manager.region == REGION_USA
+        and coordinator.vehicle_manager.brand == BRAND_HYUNDAI
+    ):
+        for vehicle_id in coordinator.vehicle_manager.vehicles:
+            if await coordinator.async_supports_svm(vehicle_id):
+                entities.append(
+                    SVMStatusSensor(
+                        coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+                    )
+                )
     async_add_entities(entities)
     return True
 
@@ -683,3 +694,48 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self):
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
+    """SVM capture metadata sensor (companion to the SVM image entity).
+
+    The image entity cannot expose extra state attributes (ImageEntity
+    finalizes state_attributes), so metadata is exposed here.
+    """
+
+    _attr_translation_key = "svm_status"
+    _attr_icon = "mdi:camera-iris"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, coordinator, vehicle: Vehicle) -> None:
+        """Initialize the SVM status sensor."""
+        super().__init__(coordinator, vehicle)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_svm_status"
+
+    @property
+    def available(self) -> bool:
+        """Return True if cached SVM details are available."""
+        return self.coordinator.get_cached_svm_details(self.vehicle.id) is not None
+
+    @property
+    def native_value(self):
+        """Return the capture timestamp of the latest SVM image."""
+        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
+        return details.captured_at if details else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return SVM metadata attributes."""
+        details = self.coordinator.get_cached_svm_details(self.vehicle.id)
+        if details is None:
+            return {}
+        return {
+            "heading": details.heading,
+            "speed": (
+                {"value": details.speed[0], "unit": details.speed[1]}
+                if details.speed and details.speed[0] is not None
+                else None
+            ),
+            "door_open": details.door_open,
+            "trunk_open": details.trunk_open,
+        }
