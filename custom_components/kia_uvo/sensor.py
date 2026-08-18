@@ -479,6 +479,23 @@ async def async_setup_entry(
                     vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
                     or vehicle.ev_charging_power is not None
                 )
+            elif description.key in (
+                "_ev_target_range_charge_AC",
+                "_ev_target_range_charge_DC",
+            ):
+                # Target charge range is transient — None at setup when the car
+                # is asleep, telematics omits dte.rangeByFuel.totalAvailableRange,
+                # or targetSOClist has a single entry (one of the two indices is
+                # then absent). Value-gating here drops the entity permanently
+                # ("no longer provided") on a version-update reload, and it only
+                # returns on a manual reload while the value happens to be
+                # present. Gate on the stable EV/PHEV capability instead so a
+                # later coordinator poll can publish the range. None -> HA
+                # `unknown` until the next poll. See kia_uvo #1842.
+                create = (
+                    vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+                    or getattr(vehicle, description.key, None) is not None
+                )
             elif description.key.startswith("tire_pressure_"):
                 # Transient like _air_temperature above: some backends (AU/NZ)
                 # report the TPMS no-data sentinel whenever the car is parked
