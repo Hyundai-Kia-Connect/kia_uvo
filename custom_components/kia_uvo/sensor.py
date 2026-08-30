@@ -281,6 +281,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="_geocode_name",
         translation_key="geocode_name",
         icon="mdi:map",
+        # The geocoded address is transient — it lives in memory and is None
+        # right after a restart/reload until a poll with coordinates
+        # succeeds. Don't gate creation on it: a None at setup means the
+        # entity isn't yielded and HA marks it "no longer provided", with no
+        # return until the next reload, even after location recovers
+        # (kia_uvo #1844). Always create; None -> HA `unknown`.
+        exists=lambda _: True,
     ),
     HyundaiKiaSensorEntityDescription(
         key="dtc_count",
