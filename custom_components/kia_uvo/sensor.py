@@ -538,6 +538,17 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
+            if (
+                description.key == "_geocode_name"
+                and not coordinator.vehicle_manager.geocode_api_enable
+            ):
+                # Created only when the geolocation option is on: without it
+                # the library never runs the geocode lookup, so the sensor
+                # would sit `unknown` forever. With the option on, a None at
+                # setup must not gate creation — see the `_geocode_name`
+                # description above. Gated here, not in `exists`, because the
+                # option is coordinator state.
+                continue
             create = (
                 description.exists(vehicle)
                 if description.exists is not None
