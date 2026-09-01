@@ -8,11 +8,13 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 API_OWNER = "Hyundai-Kia-Connect"
 API_REPO = "hyundai_kia_connect_api"
+KIA_UVO_REPO = "kia_uvo"
 BRANCH_NAME = "chore/bump-api-dependency"
 PACKAGE_NAME = "hyundai_kia_connect_api"
 
@@ -119,33 +121,151 @@ def _normalize_issue_refs(body: str, owner: str, repo: str) -> str:
     return re.sub(r"#(\d+)", _replace_plain, body)
 
 
+_SHORT_REPO_REF_RE = re.compile(r"(?<![\w./-])(hyundai_kia_connect_api|kia_uvo)#(\d+)")
+
+
+def _qualify_short_repo_refs(body: str) -> str:
+    """Qualify bare shortname refs (``kia_uvo#1823``) to ``owner/repo#N`` form.
+
+    ``shortname#N`` in a PR body renders as ``github.com/<shortname>/issues/N``
+    — a repo that does not exist — and semantic-release copies it verbatim into
+    release notes. Only refs not already owner-qualified are rewritten; the
+    lookbehind skips the ``.../kia_uvo#N`` inside full ``owner/repo#N`` refs.
+    """
+    return _SHORT_REPO_REF_RE.sub(
+        lambda m: f"{API_OWNER}/{m.group(1)}#{m.group(2)}", body
+    )
+
+
 _CLOSES_TAIL_RE = re.compile(r"(.*?\bcloses\s+)(.+)$", re.IGNORECASE)
+_GITHUB_REF_URL_RE = re.compile(r"github\.com/[\w.-]+/([\w.-]+)/(?:issues|pull)/(\d+)")
+_REF_TEXT_RE = re.compile(r"^(?:[\w.-]+/)?([\w.-]+)#(\d+)$")
 
 
-def _dedup_closes_refs(line: str) -> str:
-    """Collapse duplicate refs in a release-note line's ``closes ...`` tail.
+def _kia_uvo_ref(num: str) -> str:
+    """Canonical markdown form of a kia_uvo issue reference."""
+    return (
+        f"[{API_OWNER}/{KIA_UVO_REPO}#{num}]"
+        f"(https://github.com/{API_OWNER}/{KIA_UVO_REPO}/issues/{num})"
+    )
 
-    Upstream API release notes (semantic-release) sometimes emit the same
-    ticket twice in the ``closes`` footer of a fix/feat line. The dedup key is
-    the ref's text without its URL parens (e.g.
-    ``Hyundai-Kia-Connect/hyundai_kia_connect_api#1195``), not the bare number,
-    so ``api#1447`` and ``kia_uvo#1447`` stay distinct while a repeated
-    ``api#1195`` collapses to its first occurrence (first URL kept, order kept).
+
+def _ref_target(token: str) -> tuple[str, str] | None:
+    """Return (repo, issue number) for one closes-tail token, else None.
+
+    The repo comes from the token's github URL when it has one, else from its
+    text (``owner/repo#N`` / ``shortname#N``). A bare ``#N`` reads in API-repo
+    context, since upstream release notes are written there.
+    """
+    m = re.fullmatch(r"\[([^\]]+)\]\(([^)]*)\)", token)
+    text, url = (m.group(1), m.group(2)) if m else (token, "")
+    url_match = _GITHUB_REF_URL_RE.search(url)
+    if url_match:
+        return url_match.group(1), url_match.group(2)
+    text_match = _REF_TEXT_RE.match(text)
+    if text_match:
+        return text_match.group(1), text_match.group(2)
+    plain_match = re.fullmatch(r"#(\d+)", text)
+    if plain_match:
+        return API_REPO, plain_match.group(1)
+    return None
+
+
+def _issue_exists(owner: str, repo: str, num: str, token: str | None) -> bool | None:
+    """Check that a GitHub issue/PR exists. False on 404, None on lookup failure."""
+    try:
+        _http_get(f"https://api.github.com/repos/{owner}/{repo}/issues/{num}", token)
+    except urllib.error.HTTPError as err:
+        if err.code == 404:
+            return False
+        return None
+    except urllib.error.URLError:
+        return None
+    return True
+
+
+def _make_closes_resolver(token: str | None) -> Callable[[str], str | None]:
+    """Build the existence-check resolver for closes-tail issue numbers.
+
+    For a number it returns ``"api"`` (exists in the API repo), ``"kia_uvo"``
+    (404 there but exists in kia_uvo — a misattributed ref), ``None`` (missing
+    in both repos), or ``"unknown"`` (the check itself failed; callers fail
+    open). Results are cached per number.
+    """
+    cache: dict[str, str | None] = {}
+
+    def _resolve(num: str) -> str | None:
+        if num in cache:
+            return cache[num]
+        exists = _issue_exists(API_OWNER, API_REPO, num, token)
+        if exists is None:
+            result: str | None = "unknown"
+        elif exists:
+            result = "api"
+        else:
+            in_uvo = _issue_exists(API_OWNER, KIA_UVO_REPO, num, token)
+            result = "kia_uvo" if in_uvo else (None if in_uvo is False else "unknown")
+        cache[num] = result
+        return result
+
+    return _resolve
+
+
+def _sanitize_closes_refs(line: str, resolver: Callable[[str], str | None]) -> str:
+    """Rewrite a release-note line's ``closes ...`` tail for the kia_uvo bump.
+
+    Upstream API release notes derive their ``closes`` footers from squash-merge
+    commit messages, which embed the full PR body — including loose ``#NNN``
+    prose references. Those get resolved against the API repo even when they
+    point at kia_uvo issues (``#1652``, ``#1823``), emitted as shortname refs
+    that render as dead ``github.com/kia_uvo`` links, and duplicated across
+    forms.
+
+    A deps-bump release for kia_uvo should close kia_uvo issues only (API-side
+    context stays in the line's PR link), so this helper keeps kia_uvo refs in
+    full ``Hyundai-Kia-Connect/kia_uvo#N`` form and drops everything else:
+
+      - kia_uvo refs kept, deduplicated by issue number, URL canonicalized;
+      - API-repo refs resolved via ``resolver``: existing in the API repo ->
+        dropped; 404 there but present in kia_uvo -> rewritten (rescued
+        misattribution); missing in both repos -> dropped (dead link);
+        lookup failed -> token kept unchanged (fail-open);
+      - refs to any other repo -> token left untouched.
+
+    A tail whose refs all disappear loses its ``closes`` keyword too.
     """
     m = _CLOSES_TAIL_RE.match(line)
     if not m:
         return line
     head, tail = m.group(1), m.group(2)
     tokens = re.findall(r"\[[^\]]+\]\([^)]*\)|[^\s]+", tail)
+    kept: list[str] = []
     seen: set[str] = set()
-    deduped: list[str] = []
     for tok in tokens:
-        key = re.sub(r"\]\([^)]*\)$", "", tok).lstrip("[").rstrip("]")
-        if key in seen:
+        target = _ref_target(tok)
+        if target is None:
+            kept.append(tok)
             continue
-        seen.add(key)
-        deduped.append(tok)
-    return head + " ".join(deduped)
+        repo_name, num = target
+        if repo_name == KIA_UVO_REPO:
+            out = _kia_uvo_ref(num)
+        elif repo_name == API_REPO:
+            verdict = resolver(num)
+            if verdict == "kia_uvo":
+                out = _kia_uvo_ref(num)
+            elif verdict == "unknown":
+                out = tok  # fail-open: a possibly-wrong link beats a lost one
+            else:
+                continue  # verified API-repo ref, or missing in both repos
+        else:
+            out = tok  # ref to a repo we don't manage: leave untouched
+        if num in seen:
+            continue
+        seen.add(num)
+        kept.append(out)
+    if not kept:
+        return re.sub(r"[,\s]*closes\s*$", "", head, flags=re.IGNORECASE).rstrip()
+    return head + " ".join(kept)
 
 
 def _synthesize_body_from_commits(
@@ -182,13 +302,22 @@ def _synthesize_body_from_commits(
         lines.append("BREAKING CHANGES")
     if feat:
         lines.append("### Features")
-        lines.extend(_normalize_issue_refs(line, owner, repo) for line in feat)
+        lines.extend(
+            _qualify_short_repo_refs(_normalize_issue_refs(line, owner, repo))
+            for line in feat
+        )
     if fix:
         lines.append("### Bug Fixes")
-        lines.extend(_normalize_issue_refs(line, owner, repo) for line in fix)
+        lines.extend(
+            _qualify_short_repo_refs(_normalize_issue_refs(line, owner, repo))
+            for line in fix
+        )
     if not feat and not fix and other:
         lines.append("### Other Changes")
-        lines.extend(_normalize_issue_refs(line, owner, repo) for line in other)
+        lines.extend(
+            _qualify_short_repo_refs(_normalize_issue_refs(line, owner, repo))
+            for line in other
+        )
     return "\n".join(lines)
 
 
@@ -221,9 +350,13 @@ def _extract_section(body: str, headings: list[str]) -> str:
 
 
 def _classify_single_release(
-    body: str, owner: str = API_OWNER, repo: str = API_REPO
+    body: str,
+    owner: str = API_OWNER,
+    repo: str = API_REPO,
+    token: str | None = None,
 ) -> tuple[str, dict[str, list[str]]]:
-    body = _normalize_issue_refs(body or "", owner, repo)
+    body = _qualify_short_repo_refs(_normalize_issue_refs(body or "", owner, repo))
+    resolver = _make_closes_resolver(token)
     sections: dict[str, list[str]] = {
         "breaking": [],
         "features": [],
@@ -257,7 +390,9 @@ def _classify_single_release(
         sections["other"].extend(other)
 
     for _key in ("breaking", "features", "fixes", "other"):
-        sections[_key] = [_dedup_closes_refs(line) for line in sections.get(_key, [])]
+        sections[_key] = [
+            _sanitize_closes_refs(line, resolver) for line in sections.get(_key, [])
+        ]
 
     if not any(sections.values()):
         sections["other"].append("No categorized release notes.")
@@ -300,7 +435,7 @@ def classify_release_notes(
                 body = _synthesize_body_from_commits(compare.get("commits", []))
             except urllib.error.HTTPError:
                 body = ""
-        rel_level, sections = _classify_single_release(body, owner, repo)
+        rel_level, sections = _classify_single_release(body, owner, repo, token)
         if rel_level != "chore":
             level = max(
                 level, rel_level, key=["chore", "fix", "feat", "breaking"].index
