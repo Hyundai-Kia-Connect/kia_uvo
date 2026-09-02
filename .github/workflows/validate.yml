@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: "3.13"
+          python-version: "3.14"
       - name: Install mypy and dependencies
         run: |
           pip install mypy==2.3.1 homeassistant==2026.2.3 hyundai_kia_connect_api==4.27.2
