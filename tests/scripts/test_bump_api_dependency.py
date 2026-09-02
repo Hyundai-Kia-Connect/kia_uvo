@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from bump_api_dependency import (
     _normalize_issue_refs,
+    _qualify_short_repo_refs,
+    _sanitize_closes_refs,
     classify_release_notes,
     get_current_pin,
     main,
@@ -152,7 +154,13 @@ def test_normalize_issue_refs_leaves_url_anchors_intact():
     assert body in normalized  # the #issuecomment anchor is not an issue ref
 
 
-def test_classify_release_notes_rewrites_api_issue_refs():
+def test_classify_release_notes_rewrites_pr_link_and_drops_api_closes(monkeypatch):
+    # Bare closes refs read as API-repo refs; existing ones are dropped from the
+    # bump PR body (API context stays in the line's PR link), the PR link itself
+    # is still qualified.
+    monkeypatch.setattr(
+        "bump_api_dependency._issue_exists", lambda _o, _r, _n, _t: True
+    )
     releases = [
         {
             "tag_name": "v4.22.1",
@@ -160,9 +168,10 @@ def test_classify_release_notes_rewrites_api_issue_refs():
         }
     ]
     _commit_type, body = classify_release_notes(releases, "4.22.0")
-    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1155" in body
-    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1153" in body
-    assert "[#1156]" not in body  # markdown link text qualified
+    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1156" in body  # PR link kept
+    assert "closes" not in body  # API closes dropped, keyword removed with them
+    assert "#1155" not in body
+    assert "#1153" not in body
 
 
 def test_update_manifest(tmp_path):
@@ -295,78 +304,135 @@ def test_main_at_latest_is_noop(tmp_path, monkeypatch, capsys):
     assert "already at latest version" in captured.out
 
 
-from bump_api_dependency import _dedup_closes_refs
-
-
-def test_dedup_closes_refs_no_closes_unchanged():
+def test_sanitize_closes_refs_no_closes_unchanged():
     line = "- 4.26.0: * **CCS2:** parse ev_driving_range for PHEV from DTE.EV ([Hyundai-Kia-Connect/hyundai_kia_connect_api#1261](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1261)) ([584d242](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/commit/584d242))"
-    assert _dedup_closes_refs(line) == line
+
+    def _fail(_num):
+        raise AssertionError("resolver must not be called without a closes tail")
+
+    assert _sanitize_closes_refs(line, _fail) == line
 
 
-def test_dedup_closes_refs_removes_duplicates():
-    # Real v4.26.0 line, post-normalization: api#1195, kia_uvo#1739, kia_uvo#1447
-    # each appear twice; api#1447 is a distinct ticket from kia_uvo#1447.
+def test_sanitize_closes_refs_dedups_kia_uvo_by_number():
+    # Real v4.27.2 shape: the same kia_uvo ticket appears twice in the closes
+    # tail (once canonical, once short-form with a dead github.com/kia_uvo URL).
     line = (
-        "- 4.26.0: * **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
-        "([Hyundai-Kia-Connect/hyundai_kia_connect_api#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
-        "(a9c5303), closes "
-        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
-        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
-        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
-        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
-        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
-        "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
-        "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)"
+        "- 4.27.2: * **ccs2:** map BatteryPreCondition.Status per the official app "
+        "([Hyundai-Kia-Connect/hyundai_kia_connect_api#1293](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1293)) "
+        "([e90f16c](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/commit/e90f16c)), closes "
+        "[Hyundai-Kia-Connect/kia_uvo#1823](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1823) "
+        "[kia_uvo#1823](https://github.com/kia_uvo/issues/1823) "
+        "[Hyundai-Kia-Connect/kia_uvo#1823](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1823)"
     )
-    result = _dedup_closes_refs(line)
-    # Each duplicated ref appears exactly once.
-    assert result.count("hyundai_kia_connect_api#1195") == 1
-    assert result.count("kia_uvo#1739") == 1
-    assert result.count("kia_uvo#1447") == 1
-    # Distinct ticket retained.
-    assert "hyundai_kia_connect_api#1447" in result
-    # Order preserved: api#1195 before kia_uvo#1739 before kia_uvo#1447 before api#1447.
-    idx_1195 = result.index("hyundai_kia_connect_api#1195")
-    idx_1739 = result.index("kia_uvo#1739")
-    idx_1447_kia = result.index("kia_uvo#1447")
-    idx_1447_api = result.index("hyundai_kia_connect_api#1447")
-    assert idx_1195 < idx_1739 < idx_1447_kia < idx_1447_api
-    # First occurrence's URL preserved.
-    assert "issues/1195)" in result
+
+    def _fail(_num):
+        raise AssertionError("resolver must not be called for kia_uvo refs")
+
+    result = _sanitize_closes_refs(line, _fail)
+    assert result.count("closes") == 1
+    assert result.count("kia_uvo#1823") == 1
+    # Canonical URL rebuilt even for the short-form ref with the dead URL.
+    assert (
+        "[Hyundai-Kia-Connect/kia_uvo#1823](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1823)"
+        in result
+    )
+    assert "github.com/kia_uvo/" not in result
+    # The bump PR link in the line body is untouched.
+    assert "hyundai_kia_connect_api#1293" in result
 
 
-def test_dedup_closes_refs_keeps_first_occurrence_order():
-    line = "closes api#1 api#2 api#1 api#3"
-    assert _dedup_closes_refs(line) == "closes api#1 api#2 api#3"
+def test_sanitize_closes_refs_drops_existing_api_refs():
+    # api#1259 is a merged API PR — it exists, but is not a kia_uvo close.
+    line = (
+        "- 4.27.1: * **BR:** surface 4xx body ([#1285](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1285)) "
+        "(b9661b4), closes "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1259](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1259)"
+    )
+    result = _sanitize_closes_refs(line, lambda _num: "api")
+    assert "closes" not in result
+    assert "#1259" not in result
+    assert result.rstrip().endswith("(b9661b4)")
 
 
-def test_classify_release_notes_dedup_in_pipeline():
-    # Upstream body with duplicate closes refs in a fix line.
+def test_sanitize_closes_refs_rescues_misattributed_api_ref():
+    # #1652/#1823 are kia_uvo issues that landed in the notes as API-repo refs
+    # (bare #N resolved against the API repo).
+    line = (
+        "- 4.27.2: * **ccs2:** fix ([#1293](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1293)), closes "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1652](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1652) "
+        "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1823](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1823)"
+    )
+    result = _sanitize_closes_refs(
+        line, lambda num: "kia_uvo" if num in {"1652", "1823"} else "api"
+    )
+    assert result.count("kia_uvo#1652") == 1
+    assert result.count("kia_uvo#1823") == 1
+    assert "hyundai_kia_connect_api/issues/1652" not in result
+
+
+def test_sanitize_closes_refs_drops_refs_missing_in_both_repos():
+    line = "- 4.27.1: * fix something ([#1285](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1285)), closes [Hyundai-Kia-Connect/hyundai_kia_connect_api#999999](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/999999)"
+    result = _sanitize_closes_refs(line, lambda _num: None)
+    assert "closes" not in result
+    assert "#999999" not in result
+
+
+def test_sanitize_closes_refs_fails_open_on_unknown():
+    # Resolver can't decide (network error): keep the token as-is.
+    line = "- 4.27.1: * fix something ([#1285](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1285)), closes [Hyundai-Kia-Connect/hyundai_kia_connect_api#1259](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1259)"
+    result = _sanitize_closes_refs(line, lambda _num: "unknown")
+    assert "closes" in result
+    assert "hyundai_kia_connect_api#1259" in result
+
+
+def test_sanitize_closes_refs_keeps_foreign_repo_refs():
+    line = "- 4.27.1: * fix something ([#1285](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1285)), closes [acme/other#42](https://github.com/acme/other/issues/42)"
+    result = _sanitize_closes_refs(line, lambda _num: "api")
+    assert "[acme/other#42](https://github.com/acme/other/issues/42)" in result
+
+
+def test_qualify_short_repo_refs():
+    body = (
+        "exact reporter-dump case from kia_uvo#1823 and hyundai_kia_connect_api#1195; "
+        "full Hyundai-Kia-Connect/kia_uvo#1823 stays untouched"
+    )
+    result = _qualify_short_repo_refs(body)
+    assert "case from Hyundai-Kia-Connect/kia_uvo#1823 and" in result
+    assert "Hyundai-Kia-Connect/hyundai_kia_connect_api#1195;" in result
+    # The already-qualified full form was not re-qualified (still one occurrence).
+    assert result.count("Hyundai-Kia-Connect/kia_uvo#1823") == 2
+
+
+def test_classify_release_notes_v4272_real_body(monkeypatch):
+    # Regression test from kia_uvo release v3.11.0: upstream v4.27.2 notes
+    # carried a duplicated closes tail mixing a dead shortname link
+    # (github.com/kia_uvo — no such repo) with API-repo refs for kia_uvo
+    # tickets (#1652, #1823).
+    monkeypatch.setattr(
+        "bump_api_dependency._issue_exists",
+        lambda _o, repo, _n, _t: repo == "kia_uvo",
+    )
     releases = [
         {
-            "tag_name": "v4.26.0",
+            "tag_name": "v4.27.2",
             "body": (
-                "### Bug Fixes\n"
-                "* **CCS2:** start_climate sideRearMirrorHeating + RHD front seat swap "
-                "([#1260](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1260)) "
-                "(a9c5303), closes "
-                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
-                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
-                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447) "
-                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1447](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1447) "
-                "[Hyundai-Kia-Connect/hyundai_kia_connect_api#1195](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1195) "
-                "[Hyundai-Kia-Connect/kia_uvo#1739](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1739) "
-                "[Hyundai-Kia-Connect/kia_uvo#1447](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1447)\n"
+                "### Bug Fixes\n\n"
+                "* **ccs2:** map BatteryPreCondition.Status per the official app (0/2/6 off, 3/4 on) "
+                "([#1293](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1293)) "
+                "([e90f16c](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/commit/e90f16c150ccf1eeee2e616c6061162865a9b14b)), closes "
+                "[Hyundai-Kia-Connect/kia_uvo#1823](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1823) "
+                "[kia_uvo#1823](https://github.com/kia_uvo/issues/1823) "
+                "[#1652](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1652) "
+                "[#1823](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api/issues/1823) "
+                "[Hyundai-Kia-Connect/kia_uvo#1823](https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1823)\n"
             ),
         }
     ]
-    _commit_type, body = classify_release_notes(releases, "4.25.6")
-    # Each duplicated ref appears exactly once in the aggregated PR body.
-    assert body.count("hyundai_kia_connect_api#1195") == 1
-    assert body.count("kia_uvo#1739") == 1
-    assert body.count("kia_uvo#1447") == 1
-    # Distinct ticket retained.
-    assert "hyundai_kia_connect_api#1447" in body
-    # Section structure intact.
+    _commit_type, body = classify_release_notes(releases, "4.27.1")
+    # Exactly one, correct, fully-qualified kia_uvo ref survives.
+    assert body.count("Hyundai-Kia-Connect/kia_uvo#1823") == 1
+    assert "github.com/kia_uvo/" not in body  # dead shortname URL gone
+    assert "hyundai_kia_connect_api/issues/1652" not in body  # misattribution rescued
+    assert "hyundai_kia_connect_api/issues/1823" not in body
     assert "### Bug Fixes" in body
-    assert "- 4.26.0:" in body
+    assert "- 4.27.2:" in body
