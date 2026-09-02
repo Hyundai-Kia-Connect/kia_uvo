@@ -1,10 +1,11 @@
 import logging
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry
 from hyundai_kia_connect_api import (
     ClimateRequestOptions,
@@ -68,16 +69,16 @@ _LOGGER = logging.getLogger(__name__)
 def async_setup_services(hass: HomeAssistant) -> bool:
     """Set up services for Hyundai Kia Connect"""
 
-    async def async_handle_force_update(call):
+    async def async_handle_force_update(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_force_update_all()
 
-    async def async_handle_update(call):
+    async def async_handle_update(call: ServiceCall) -> None:
         _LOGGER.debug(f"Call:{call.data}")
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_update_all()
 
-    async def async_handle_start_climate(call):
+    async def async_handle_start_climate(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         duration = call.data.get("duration")
@@ -119,42 +120,42 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         )
         await coordinator.async_start_climate(vehicle_id, climate_request_options)
 
-    async def async_handle_stop_climate(call):
+    async def async_handle_stop_climate(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_stop_climate(vehicle_id)
 
-    async def async_handle_lock(call):
+    async def async_handle_lock(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_lock_vehicle(vehicle_id)
 
-    async def async_handle_unlock(call):
+    async def async_handle_unlock(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_unlock_vehicle(vehicle_id)
 
-    async def async_handle_open_charge_port(call):
+    async def async_handle_open_charge_port(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_open_charge_port(vehicle_id)
 
-    async def async_handle_close_charge_port(call):
+    async def async_handle_close_charge_port(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_close_charge_port(vehicle_id)
 
-    async def async_handle_start_charge(call):
+    async def async_handle_start_charge(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_start_charge(vehicle_id)
 
-    async def async_handle_stop_charge(call):
+    async def async_handle_stop_charge(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_stop_charge(vehicle_id)
 
-    async def async_handle_set_charge_limit(call):
+    async def async_handle_set_charge_limit(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         ac = call.data.get("ac_limit")
@@ -167,7 +168,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 f"{DOMAIN} - Enable to set charge limits.  Both AC and DC value required, but not provided."
             )
 
-    async def async_handle_set_windows(call):
+    async def async_handle_set_windows(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         window_options = WindowRequestOptions(
@@ -187,7 +188,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         else:
             _LOGGER.error(f"{DOMAIN} -  All windows value required, but not provided.")
 
-    async def async_handle_set_charging_current(call):
+    async def async_handle_set_charging_current(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         current_level = call.data.get("level")
@@ -199,7 +200,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 f"{DOMAIN} - Enable to set charging current.  Level required, but not provided."
             )
 
-    async def async_handle_schedule_charging_and_climate(call):
+    async def async_handle_schedule_charging_and_climate(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         first_departure_enabled = call.data.get("first_departure_enabled")
@@ -219,8 +220,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
         # Confirm values are correct datatype
         def initialize_departure_option(
-            departure_enabled, departure_days, departure_time
-        ):
+            departure_enabled: Any, departure_days: Any, departure_time: Any
+        ) -> ScheduleChargingClimateRequestOptions.DepartureOptions:
             return ScheduleChargingClimateRequestOptions.DepartureOptions(
                 enabled=None if departure_enabled is None else bool(departure_enabled),
                 days=None
@@ -272,7 +273,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             vehicle_id, schedule_options
         )
 
-    async def async_handle_set_off_peak_charging(call):
+    async def async_handle_set_off_peak_charging(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         mode = call.data.get("mode")
@@ -291,27 +292,27 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             end=off_peak_end_time,
         )
 
-    async def async_handle_start_hazard_lights(call):
+    async def async_handle_start_hazard_lights(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_start_hazard_lights(vehicle_id)
 
-    async def async_handle_start_hazard_lights_and_horn(call):
+    async def async_handle_start_hazard_lights_and_horn(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_start_hazard_lights_and_horn(vehicle_id)
 
-    async def async_handle_start_valet_mode(call):
+    async def async_handle_start_valet_mode(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_start_valet_mode(vehicle_id)
 
-    async def async_handle_stop_valet_mode(call):
+    async def async_handle_stop_valet_mode(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         await coordinator.async_stop_valet_mode(vehicle_id)
 
-    async def async_handle_set_navigation(call):
+    async def async_handle_set_navigation(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         latitude = call.data["latitude"]
@@ -359,7 +360,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
 
 @callback
-def async_unload_services(hass) -> None:
+def async_unload_services(hass: HomeAssistant) -> None:
     for service in SUPPORTED_SERVICES:
         hass.services.async_remove(DOMAIN, service)
 
@@ -367,12 +368,16 @@ def async_unload_services(hass) -> None:
 def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
     coordinators = list(hass.data[DOMAIN].keys())
     if len(coordinators) == 1:
-        coordinator = hass.data[DOMAIN][coordinators[0]]
+        coordinator = cast(
+            HyundaiKiaConnectDataUpdateCoordinator, hass.data[DOMAIN][coordinators[0]]
+        )
         vehicles = coordinator.vehicle_manager.vehicles
         if len(vehicles) == 1:
-            return next(iter(vehicles.keys()))
+            return cast(str, next(iter(vehicles.keys())))
 
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
+    if device_entry is None:
+        raise HomeAssistantError(f"Device {call.data[ATTR_DEVICE_ID]} not found")
     for entry in device_entry.identifiers:
         if entry[0] == DOMAIN:
             vehicle_id = entry[1]
@@ -384,11 +389,15 @@ def _get_coordinator_from_device(
 ) -> HyundaiKiaConnectDataUpdateCoordinator:
     coordinators = list(hass.data[DOMAIN].keys())
     if len(coordinators) == 1:
-        return hass.data[DOMAIN][coordinators[0]]
+        return cast(
+            HyundaiKiaConnectDataUpdateCoordinator, hass.data[DOMAIN][coordinators[0]]
+        )
     else:
         device_entry = device_registry.async_get(hass).async_get(
             call.data[ATTR_DEVICE_ID]
         )
+        if device_entry is None:
+            raise HomeAssistantError(f"Device {call.data[ATTR_DEVICE_ID]} not found")
         config_entry_ids = device_entry.config_entries
         config_entry_id = next(
             (
@@ -402,7 +411,15 @@ def _get_coordinator_from_device(
             ),
             None,
         )
-        config_entry_unique_id = hass.config_entries.async_get_entry(
-            config_entry_id
-        ).unique_id
-        return hass.data[DOMAIN][config_entry_unique_id]
+        if config_entry_id is None:
+            raise HomeAssistantError(
+                f"No {DOMAIN} config entry found for device {call.data[ATTR_DEVICE_ID]}"
+            )
+        config_entry = hass.config_entries.async_get_entry(config_entry_id)
+        if config_entry is None:
+            raise HomeAssistantError(f"Config entry {config_entry_id} not found")
+        config_entry_unique_id = config_entry.unique_id
+        return cast(
+            HyundaiKiaConnectDataUpdateCoordinator,
+            hass.data[DOMAIN][config_entry_unique_id],
+        )
