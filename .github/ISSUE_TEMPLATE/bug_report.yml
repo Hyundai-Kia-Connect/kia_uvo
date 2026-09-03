@@ -20,6 +20,7 @@ body:
         - China
         - India
         - NZ
+        - BR
     validations:
       required: true
   - type: dropdown
@@ -38,7 +39,7 @@ body:
     attributes:
       label: Version of the Integration
       description: Provide the version number you are using
-      placeholder: e.g., 0.4.1
+      placeholder: e.g., 3.11.0
     validations:
       required: true
   - type: textarea
