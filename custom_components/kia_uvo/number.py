@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Final
+from typing import Final, cast
 
 from homeassistant.components.number import (
     NumberEntity,
@@ -74,7 +74,6 @@ async def async_setup_entry(
                 )
 
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 1
@@ -98,10 +97,10 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
     @property
     def native_value(self) -> float | None:
         """Return the entity value to represent the entity state."""
-        return getattr(self.vehicle, self._key)
+        return cast(float | None, getattr(self.vehicle, self._key))
 
     @staticmethod
-    def _is_valid_charge_limit(val) -> bool:
+    def _is_valid_charge_limit(val: float | None) -> bool:
         """Check if a charge limit value is a valid integer 50-100 in steps of 10."""
         return isinstance(val, (int, float)) and int(val) in range(50, 101, 10)
 
@@ -152,30 +151,29 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
                 )
             await self.coordinator.async_set_charge_limits(self.vehicle.id, int(ac), dc)
         elif self.entity_description.key == V2L_LIMIT_KEY:
-            v2l = value
-            await self.coordinator.async_set_v2l_limit(self.vehicle.id, v2l)
+            await self.coordinator.async_set_v2l_limit(self.vehicle.id, int(value))
 
         self.async_write_ha_state()
 
     @property
-    def native_min_value(self):
+    def native_min_value(self) -> float:
         """Return native_min_value as reported in by the sensor"""
-        return self.entity_description.native_min_value
+        return cast(float, self.entity_description.native_min_value)
 
     @property
-    def native_max_value(self):
+    def native_max_value(self) -> float:
         """Returnnative_max_value as reported in by the sensor"""
-        return self.entity_description.native_max_value
+        return cast(float, self.entity_description.native_max_value)
 
     @property
-    def native_step(self):
+    def native_step(self) -> float | None:
         """Return step value as reported in by the sensor"""
         return self.entity_description.native_step
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> str | None:
         """Return the unit the value was reported in by the sensor"""
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
-            return getattr(self.vehicle, self._key + "_unit")
+            return cast(str | None, getattr(self.vehicle, self._key + "_unit"))
         else:
             return self.entity_description.native_unit_of_measurement

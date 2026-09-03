@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from typing import cast
 
-from homeassistant.components.device_tracker import TrackerEntity
+from homeassistant.components.device_tracker.config_entry import TrackerEntity
 from homeassistant.components.device_tracker.const import SourceType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -31,7 +32,6 @@ async def async_setup_entry(
             entities.append(HyundaiKiaConnectTracker(coordinator, vehicle))
 
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 0
@@ -42,20 +42,20 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
-    ):
+    ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_location"
         self._attr_translation_key = "location"
         self._attr_icon = "mdi:map-marker-outline"
 
     @property
-    def latitude(self):
-        return self.vehicle.location_latitude
+    def latitude(self) -> float | None:
+        return cast(float | None, self.vehicle.location_latitude)
 
     @property
-    def longitude(self):
-        return self.vehicle.location_longitude
+    def longitude(self) -> float | None:
+        return cast(float | None, self.vehicle.location_longitude)
 
     @property
-    def source_type(self):
+    def source_type(self) -> SourceType:
         return SourceType.GPS

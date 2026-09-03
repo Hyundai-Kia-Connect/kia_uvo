@@ -124,7 +124,7 @@ class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self.entity_description = description
+        self.entity_description: HyundaiKiaButtonDescription = description
         self._key = description.key
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = description.icon

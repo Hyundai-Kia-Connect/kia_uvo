@@ -25,7 +25,7 @@ from .entity import HyundaiKiaConnectEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     """A class that describes custom binary sensor entities."""
 
@@ -574,7 +574,6 @@ async def async_setup_entry(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 0
@@ -604,12 +603,12 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
         return None
 
     @property
-    def icon(self):
+    def icon(self) -> str | None:
         """Return the icon to use in the frontend, if any."""
         if (
             self.entity_description.on_icon == self.entity_description.off_icon
         ) is None:
-            return BinarySensorEntity.icon
+            return BinarySensorEntity.icon.__get__(self)
         return (
             self.entity_description.on_icon
             if self.is_on

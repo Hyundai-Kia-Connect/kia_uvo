@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import ClassVar
+from typing import Any, ClassVar, cast
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
@@ -64,7 +64,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         v: k for [k, v] in heat_status_int_to_str.items()
     }
 
-    def get_internal_heat_int_for_climate_request(self):
+    def get_internal_heat_int_for_climate_request(self) -> int:
         if (
             self.vehicle.steering_wheel_heater_is_on
             and self.vehicle.back_window_heater_is_on
@@ -110,13 +110,13 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def current_temperature(self) -> float | None:
         """Get the current in-car temperature."""
-        return self.vehicle.air_temperature
+        return cast(float | None, self.vehicle.air_temperature)
 
     @property
     def target_temperature(self) -> float | None:
         """Get the desired in-car target temperature."""
         # TODO: use Coordinator data, not internal state
-        return self.climate_config.set_temp
+        return cast(float | None, self.climate_config.set_temp)
 
     @property
     def target_temperature_step(self) -> float | None:
@@ -143,7 +143,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         return 30
 
     @property
-    def hvac_mode(self) -> str:
+    def hvac_mode(self) -> HVACMode | None:
         """Get the configured climate control operation mode."""
 
         if not self.vehicle.air_control_is_on:
@@ -165,7 +165,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         return HVACMode.AUTO
 
     @property
-    def hvac_action(self) -> str | None:
+    def hvac_action(self) -> HVACAction | None:
         # TODO: use Coordinator data, not internal state
         """
         Get what the in-car climate control is currently doing.
@@ -195,7 +195,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         return HVACAction.OFF
 
     @property
-    def hvac_modes(self) -> list[str]:
+    def hvac_modes(self) -> list[HVACMode]:
         """Supported in-car climate control modes."""
         return [
             HVACMode.OFF,
@@ -206,11 +206,11 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         ]
 
     @property
-    def supported_features(self) -> int:
+    def supported_features(self) -> ClimateEntityFeature:
         """Supported in-car climate control features."""
         return ClimateEntityFeature.TARGET_TEMPERATURE
 
-    async def async_set_hvac_mode(self, hvac_mode):
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the operation mode of the in-car climate control."""
 
         if hvac_mode == HVACMode.OFF:
@@ -221,7 +221,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             )
         self.async_write_ha_state()
 
-    async def async_set_temperature(self, **kwargs):
+    async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the desired in-car temperature. Does not turn on the AC."""
         old_temp = self.climate_config.set_temp
         self.climate_config.set_temp = kwargs.get(ATTR_TEMPERATURE)
