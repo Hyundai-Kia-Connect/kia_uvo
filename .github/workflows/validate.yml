@@ -32,13 +32,22 @@ jobs:
         run: |
           pip install mypy==2.3.1 homeassistant==2026.2.3 hyundai_kia_connect_api==4.27.2
       - name: Run mypy
-        # Phase 1: core non-platform files. Extend to the whole
-        # custom_components/kia_uvo/ package once the platform files are
-        # strict-clean as well.
+        # Phase 2: core non-platform files + platform files except sensor.py.
+        # Extend to the whole custom_components/kia_uvo/ package (sensor.py is
+        # the last remaining file) once it is strict-clean as well.
         run: |
           mypy --strict --ignore-missing-imports \
             custom_components/kia_uvo/__init__.py \
             custom_components/kia_uvo/config_flow.py \
             custom_components/kia_uvo/coordinator.py \
             custom_components/kia_uvo/entity.py \
-            custom_components/kia_uvo/services.py
+            custom_components/kia_uvo/services.py \
+            custom_components/kia_uvo/binary_sensor.py \
+            custom_components/kia_uvo/button.py \
+            custom_components/kia_uvo/climate.py \
+            custom_components/kia_uvo/cover.py \
+            custom_components/kia_uvo/device_tracker.py \
+            custom_components/kia_uvo/lock.py \
+            custom_components/kia_uvo/number.py \
+            custom_components/kia_uvo/switch.py \
+            custom_components/kia_uvo/time.py
