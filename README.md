@@ -32,9 +32,9 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - Reconfigure flow is available from the integration options (change credentials or set PIN).
-- Cached update - fetches cached information from servers every 30 minutes. **Configurable**
-- Force update - asks your car for the latest data every 4 hours. **Configurable**
-- Force update is disabled between 10PM and 6AM by default. **Configurable**
+- Scan Interval - fetches cached information from servers every 30 minutes. **Configurable**
+- Force Refresh Interval - asks your car for the latest data every 4 hours. **Configurable**
+- Force Refresh is disabled between 10PM and 6AM by default. **Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure each entity if you would like other units.
 
 ## Supported entities
