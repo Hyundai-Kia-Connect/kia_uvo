@@ -13,14 +13,14 @@ body:
       label: Region
       description: Select your region
       options:
-        - EU
-        - CA
-        - USA
-        - AUS
+        - Europe
+        - Canada
+        - United States
+        - Australia
         - China
         - India
-        - NZ
-        - BR
+        - New Zealand
+        - Brazil
     validations:
       required: true
   - type: dropdown
