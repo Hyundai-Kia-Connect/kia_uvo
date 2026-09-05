@@ -1,0 +1,68 @@
+name: "Feature Request"
+description: "Suggest an idea for this project"
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check the README first:
+        https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
+  - type: dropdown
+    id: region
+    attributes:
+      label: Region
+      description: Select your region
+      options:
+        - Europe
+        - Canada
+        - United States
+        - Australia
+        - China
+        - India
+        - New Zealand
+        - Brazil
+    validations:
+      required: true
+  - type: dropdown
+    id: brand
+    attributes:
+      label: Brand of Car
+      description: Select the vehicle brand
+      options:
+        - Hyundai
+        - Kia
+        - Genesis
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version of the Integration
+      description: Provide the version number you are using
+      placeholder: e.g., 3.11.0
+    validations:
+      required: true
+  - type: textarea
+    id: describe_feature
+    attributes:
+      label: Describe the Feature
+      description: A clear and concise description of what you want to happen. If it is related to a sensor, include the logs of the end point from Data in HA.
+      placeholder: Describe the feature you would like
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: A clear and concise description of any alternative solutions or features you've considered
+      placeholder: Alternatives you've considered
+    validations:
+      required: false
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any other context or screenshots about the feature request here
+      placeholder: Additional notes or screenshots
+    validations:
+      required: false
