@@ -390,6 +390,16 @@
           "description": "Action for the rear right window"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Capture SVM Image",
+      "description": "Trigger a fresh Surround View Monitor capture. The vehicle wakes up and captures a 360 image.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
     }
   },
   "entity": {
@@ -573,6 +583,9 @@
       },
       "drive_mode": {
         "name": "Drive Mode"
+      },
+      "svm_status": {
+        "name": "SVM Status"
       }
     },
     "binary_sensor": {
@@ -819,6 +832,26 @@
       },
       "vent_all_windows": {
         "name": "Vent All Windows"
+      },
+      "capture_svm_image": {
+        "name": "Capture SVM Image"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM Front Camera"
+      },
+      "svm_rear": {
+        "name": "SVM Rear Camera"
+      },
+      "svm_left": {
+        "name": "SVM Left Camera"
+      },
+      "svm_right": {
+        "name": "SVM Right Camera"
+      },
+      "svm_top": {
+        "name": "SVM Bird's-eye View"
       }
     },
     "cover": {
@@ -871,6 +904,9 @@
       },
       "valet_mode_control": {
         "name": "Valet Mode"
+      },
+      "svm_dewarp": {
+        "name": "SVM Dewarp"
       }
     },
     "climate": {

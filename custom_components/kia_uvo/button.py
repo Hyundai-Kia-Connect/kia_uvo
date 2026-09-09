@@ -92,6 +92,13 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
             and vehicle.front_left_window_is_open is not None
         ),
     ),
+    HyundaiKiaButtonDescription(
+        key="capture_svm_image",
+        translation_key="capture_svm_image",
+        icon="mdi:camera-iris",
+        press_action="async_request_svm_capture",
+        exists_fn=lambda vehicle: bool(vehicle.supports_svm),
+    ),
 )
 
 
@@ -105,10 +112,9 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in BUTTON_DESCRIPTIONS:
-            if description.exists_fn(vehicle):
-                entities.append(
-                    HyundaiKiaConnectButton(coordinator, description, vehicle)
-                )
+            if not description.exists_fn(vehicle):
+                continue
+            entities.append(HyundaiKiaConnectButton(coordinator, description, vehicle))
 
     async_add_entities(entities)
 

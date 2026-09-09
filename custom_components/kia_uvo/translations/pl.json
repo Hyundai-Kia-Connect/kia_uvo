@@ -390,6 +390,16 @@
           "description": "Akcja dla tylnego prawego okna"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Wykonaj obraz SVM",
+      "description": "Wyzwala nowe zdjęcie Surround View Monitor. Pojazd się budzi i wykonuje zdjęcie 360.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
     }
   },
   "entity": {
@@ -528,6 +538,9 @@
       },
       "drive_mode": {
         "name": "Tryb jazdy"
+      },
+      "svm_status": {
+        "name": "Status SVM"
       }
     },
     "binary_sensor": {
@@ -717,6 +730,26 @@
       },
       "vent_all_windows": {
         "name": "Wentyluj wszystkie okna"
+      },
+      "capture_svm_image": {
+        "name": "Wykonaj obraz SVM"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM Kamera przednia"
+      },
+      "svm_rear": {
+        "name": "SVM Kamera tylna"
+      },
+      "svm_left": {
+        "name": "SVM Kamera lewa"
+      },
+      "svm_right": {
+        "name": "SVM Kamera prawa"
+      },
+      "svm_top": {
+        "name": "SVM Widok z lotu ptaka"
       }
     },
     "switch": {
@@ -728,6 +761,9 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Ładowanie tylko poza szczytem"
+      },
+      "svm_dewarp": {
+        "name": "Korekcja SVM (dewarp)"
       }
     },
     "climate": {

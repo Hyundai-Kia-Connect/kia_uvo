@@ -9,8 +9,10 @@ from typing import Any, Final
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_ON, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from hyundai_kia_connect_api import Vehicle
 
 from .const import DOMAIN
@@ -190,7 +192,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    entities = []
+    entities: list[SwitchEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SWITCH_DESCRIPTIONS:
@@ -198,6 +200,8 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectSwitch(coordinator, description, vehicle)
                 )
+        if vehicle.supports_svm:
+            entities.append(SVMDewarpSwitch(coordinator, vehicle))
 
     async_add_entities(entities)
 
@@ -228,3 +232,49 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self.entity_description.off_fn(self.coordinator, self.vehicle.id)
+
+
+class SVMDewarpSwitch(SwitchEntity, HyundaiKiaConnectEntity, RestoreEntity):
+    """Toggle fisheye dewarp on this vehicle's SVM camera views.
+
+    Presentation preference, not a vehicle command, so it does not use the
+    SWITCH_DESCRIPTIONS table (whose value_fn/exists_fn take only the Vehicle).
+    State lives on the coordinator so the SVM image entities read it at render
+    time; RestoreEntity re-applies it after a restart.
+    """
+
+    _attr_icon = "mdi:panorama-variant-outline"
+    _attr_translation_key = "svm_dewarp"
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ) -> None:
+        """Initialize the SVM dewarp toggle."""
+        HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_svm_dewarp"
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if dewarp is enabled for this vehicle."""
+        return self.coordinator.svm_dewarp_enabled(self.vehicle.id)
+
+    async def async_added_to_hass(self) -> None:
+        """Restore the dewarp preference after a restart."""
+        await super().async_added_to_hass()
+        state = await self.async_get_last_state()
+        self.coordinator.set_svm_dewarp(
+            self.vehicle.id, state is not None and state.state == STATE_ON
+        )
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable dewarp."""
+        self.coordinator.set_svm_dewarp(self.vehicle.id, True)
+        self.async_write_ha_state()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable dewarp."""
+        self.coordinator.set_svm_dewarp(self.vehicle.id, False)
+        self.async_write_ha_state()

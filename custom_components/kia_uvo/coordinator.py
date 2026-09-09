@@ -26,6 +26,7 @@ from hyundai_kia_connect_api import (
     ClimateRequestOptions,
     POIInfo,
     ScheduleChargingClimateRequestOptions,
+    SVMDetails,
     Token,
     Vehicle,
     VehicleManager,
@@ -65,6 +66,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
+        self._svm_details: dict[str, SVMDetails] = {}
+        # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
+        self._svm_dewarp: dict[str, bool] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -220,6 +224,49 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
         )
         self.async_set_updated_data(self.data)
+
+    async def async_supports_svm(self, vehicle_id: str) -> bool:
+        """Return whether the given vehicle supports SVM.
+
+        Capability is a per-region class attribute stamped on the Vehicle by
+        the API library (like supports_window_control), so this is a plain
+        attribute read — no API call, no executor job needed.
+        """
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if vehicle is None:
+            return False
+        return bool(vehicle.supports_svm)
+
+    def svm_dewarp_enabled(self, vehicle_id: str) -> bool:
+        """Return the per-vehicle SVM fisheye dewarp preference."""
+        return self._svm_dewarp.get(vehicle_id, False)
+
+    def set_svm_dewarp(self, vehicle_id: str, enabled: bool) -> None:
+        """Set the per-vehicle SVM fisheye dewarp preference."""
+        self._svm_dewarp[vehicle_id] = enabled
+
+    def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
+        """Return cached SVM details for a vehicle, or None if not yet fetched."""
+        return self._svm_details.get(vehicle_id)
+
+    async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
+        """Fetch the latest cached SVM image and metadata from the API."""
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.get_svm_details, vehicle_id
+        )
+        self._svm_details[vehicle_id] = details
+        return details
+
+    async def async_request_svm_capture(self, vehicle_id: str) -> SVMDetails:
+        """Trigger a fresh SVM capture and update the cached details."""
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.request_svm_capture,
+            vehicle_id,
+            True,  # acknowledged_warning — capture is always a user-initiated action
+        )
+        self._svm_details[vehicle_id] = details
+        self.async_set_updated_data(self.data)
+        return details
 
     async def async_check_and_refresh_token(self) -> None:
         """Refresh token if needed via library."""
