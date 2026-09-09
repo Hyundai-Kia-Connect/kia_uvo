@@ -538,7 +538,3 @@ capture_svm_image:
       selector:
         device:
           integration: kia_uvo
-    acknowledged_warning:
-      required: true
-      selector:
-        boolean:

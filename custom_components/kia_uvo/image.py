@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 
-from .const import BRAND_HYUNDAI, DOMAIN, REGION_USA
+from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -27,16 +27,10 @@ async def async_setup_entry(
         config_entry.unique_id
     ]
 
-    if (
-        coordinator.vehicle_manager.region != REGION_USA
-        or coordinator.vehicle_manager.brand != BRAND_HYUNDAI
-    ):
-        return
-
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
-        if await coordinator.async_supports_svm(vehicle_id):
-            vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        if vehicle.supports_svm:
             # Best-effort: populate the cache so the image entity is available
             # immediately after restart instead of waiting for a manual capture.
             # get_svm_details is a cheap cached GET — it does not wake the car.

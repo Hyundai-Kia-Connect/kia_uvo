@@ -393,15 +393,11 @@
     },
     "capture_svm_image": {
       "name": "Wykonaj obraz SVM",
-      "description": "Wyzwala nowe zdjęcie Surround View Monitor. acknowledged_warning musi być True.",
+      "description": "Wyzwala nowe zdjęcie Surround View Monitor. Pojazd się budzi i wykonuje zdjęcie 360.",
       "fields": {
         "device_id": {
           "name": "Pojazd",
           "description": "Docelowy pojazd"
-        },
-        "acknowledged_warning": {
-          "name": "Potwierdź ostrzeżenie",
-          "description": "Potwierdź, że rozumiesz — to polecenie budzi pojazd i wykonuje zdjęcie 360."
         }
       }
     }

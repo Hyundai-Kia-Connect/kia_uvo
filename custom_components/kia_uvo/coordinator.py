@@ -252,7 +252,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         details = await self.hass.async_add_executor_job(
             self.vehicle_manager.request_svm_capture,
             vehicle_id,
-            True,  # acknowledged_warning — enforced by the capture service
+            True,  # acknowledged_warning — capture is always a user-initiated action
         )
         self._svm_details[vehicle_id] = details
         self.async_set_updated_data(self.data)

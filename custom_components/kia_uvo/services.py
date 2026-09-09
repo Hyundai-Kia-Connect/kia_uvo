@@ -336,12 +336,6 @@ def async_setup_services(hass: HomeAssistant) -> bool:
     async def async_handle_capture_svm_image(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
-        acknowledged_warning = call.data.get("acknowledged_warning")
-
-        if not acknowledged_warning:
-            raise HomeAssistantError(
-                "acknowledged_warning must be True to trigger SVM capture."
-            )
 
         if not await coordinator.async_supports_svm(vehicle_id):
             raise HomeAssistantError("SVM is not available for this vehicle.")
