@@ -67,6 +67,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
         self._svm_details: dict[str, SVMDetails] = {}
+        # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
+        self._svm_dewarp: dict[str, bool] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -234,6 +236,14 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         if vehicle is None:
             return False
         return bool(vehicle.supports_svm)
+
+    def svm_dewarp_enabled(self, vehicle_id: str) -> bool:
+        """Return the per-vehicle SVM fisheye dewarp preference."""
+        return self._svm_dewarp.get(vehicle_id, False)
+
+    def set_svm_dewarp(self, vehicle_id: str, enabled: bool) -> None:
+        """Set the per-vehicle SVM fisheye dewarp preference."""
+        self._svm_dewarp[vehicle_id] = enabled
 
     def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
         """Return cached SVM details for a vehicle, or None if not yet fetched."""

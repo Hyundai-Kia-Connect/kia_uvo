@@ -522,8 +522,20 @@
       }
     },
     "image": {
-      "svm_image": {
-        "name": "SVM Image"
+      "svm_front": {
+        "name": "SVM Front Camera"
+      },
+      "svm_rear": {
+        "name": "SVM Rear Camera"
+      },
+      "svm_left": {
+        "name": "SVM Left Camera"
+      },
+      "svm_right": {
+        "name": "SVM Right Camera"
+      },
+      "svm_top": {
+        "name": "SVM Bird's-eye View"
       }
     },
     "cover": {
@@ -576,6 +588,9 @@
       },
       "valet_mode_control": {
         "name": "Valet Mode"
+      },
+      "svm_dewarp": {
+        "name": "SVM Dewarp"
       }
     },
     "climate": {

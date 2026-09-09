@@ -736,8 +736,20 @@
       }
     },
     "image": {
-      "svm_image": {
-        "name": "Obraz SVM"
+      "svm_front": {
+        "name": "SVM Kamera przednia"
+      },
+      "svm_rear": {
+        "name": "SVM Kamera tylna"
+      },
+      "svm_left": {
+        "name": "SVM Kamera lewa"
+      },
+      "svm_right": {
+        "name": "SVM Kamera prawa"
+      },
+      "svm_top": {
+        "name": "SVM Widok z lotu ptaka"
       }
     },
     "switch": {
@@ -749,6 +761,9 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Ładowanie tylko poza szczytem"
+      },
+      "svm_dewarp": {
+        "name": "Korekcja SVM (dewarp)"
       }
     },
     "climate": {
