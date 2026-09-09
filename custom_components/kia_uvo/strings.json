@@ -20,6 +20,14 @@
           "pin": "[%key:common::config_flow::data::pin%]"
         }
       },
+      "credentials_browser": {
+        "title": "MyHyundai Korea sign-in",
+        "description": "Open [MyHyundai sign-in]({authorization_url}) in a new browser tab. On the Hyundai login page, turn on the `Pleos account login` (`Pleos 계정 로그인`) switch at the bottom before entering your Pleos credentials. Before signing in, open the browser developer tools, select Network, and enable Preserve log. After login reaches the Hyundai website, filter the requests for `oneapp.hyundai.com/redirect`, copy that request's complete URL, and paste it below. Home Assistant stores renewable tokens, not your account password.",
+        "data": {
+          "oauth_redirect_url": "Complete oneapp.hyundai.com redirect request URL",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "[%key:component::hyundai_kia_connect::config::step::user::title%]",
         "description": "[%key:component::hyundai_kia_connect::config::step::user::description%]",
@@ -68,6 +76,7 @@
     "error": {
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
       "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
+      "unsupported_region_brand": "MyHyundai Korea currently supports Hyundai vehicles only.",
       "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]"
     }
   },

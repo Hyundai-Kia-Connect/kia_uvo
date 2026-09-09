@@ -15,7 +15,7 @@ from hyundai_kia_connect_api import (
     WindowRequestOptions,
 )
 
-from .const import DOMAIN, OffPeakChargingMode
+from .const import DOMAIN, REGION_KOREA, REGIONS, OffPeakChargingMode
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 SERVICE_UPDATE = "update"
@@ -65,6 +65,16 @@ SUPPORTED_SERVICES = (
 _LOGGER = logging.getLogger(__name__)
 
 
+def _seat_climate_state(value: Any, region: int) -> int | None:
+    """Convert a service seat value to the region's API representation."""
+    if value is None:
+        return None
+    state = int(value)
+    if REGIONS[region] == REGION_KOREA and state == 0:
+        return 2
+    return state
+
+
 @callback
 def async_setup_services(hass: HomeAssistant) -> bool:
     """Set up services for Hyundai Kia Connect"""
@@ -95,14 +105,11 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         # Confirm values are correct datatype
         if heating is not None:
             heating = int(heating)
-        if front_left_seat is not None:
-            front_left_seat = int(front_left_seat)
-        if front_right_seat is not None:
-            front_right_seat = int(front_right_seat)
-        if rear_left_seat is not None:
-            rear_left_seat = int(rear_left_seat)
-        if rear_right_seat is not None:
-            rear_right_seat = int(rear_right_seat)
+        region = coordinator.vehicle_manager.region
+        front_left_seat = _seat_climate_state(front_left_seat, region)
+        front_right_seat = _seat_climate_state(front_right_seat, region)
+        rear_left_seat = _seat_climate_state(rear_left_seat, region)
+        rear_right_seat = _seat_climate_state(rear_right_seat, region)
         if steering_wheel is not None:
             steering_wheel = int(steering_wheel)
 
