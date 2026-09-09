@@ -42,9 +42,10 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 Choose **Korea** and **Hyundai** in the config flow. Home Assistant will show a MyHyundai authorization link. The registered OAuth callback forwards desktop browsers immediately, so capture it with the browser network log:
 
 1. Open the browser developer tools and select **Network**.
-2. Enable **Preserve log**, then open the authorization link and sign in with Pleos.
-3. After the browser reaches the Hyundai website, filter the requests for `oneapp.hyundai.com/redirect`.
-4. Copy that request's complete URL and paste it into Home Assistant with your vehicle-control PIN.
+2. Enable **Preserve log**, then open the authorization link.
+3. On the Hyundai login page, turn on the **Pleos account login** (`Pleos 계정 로그인`) switch at the bottom before entering your Pleos credentials.
+4. After the browser reaches the Hyundai website, filter the requests for `oneapp.hyundai.com/redirect`.
+5. Copy that request's complete URL and paste it into Home Assistant with your vehicle-control PIN.
 
 Home Assistant stores the renewable token set in the config entry. It does not store the MyHyundai account password. The integration saves rotated refresh credentials after each token refresh. Browser login is only required again if Hyundai expires or revokes those credentials.
 

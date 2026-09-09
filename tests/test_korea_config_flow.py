@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -81,6 +83,16 @@ async def test_korea_hyundai_routes_to_browser_login() -> None:
     assert result["description_placeholders"] == {
         "authorization_url": "https://idpconnect-kr.hyundai.com/authorize"
     }
+
+
+def test_korea_login_instructions_select_pleos_account() -> None:
+    """Tell users how to switch away from the legacy Hyundai login form."""
+    strings_path = Path(__file__).parents[1] / "custom_components/kia_uvo/strings.json"
+    description = json.loads(strings_path.read_text())["config"]["step"][
+        "credentials_browser"
+    ]["description"]
+
+    assert "Pleos account login" in description
 
 
 @pytest.mark.asyncio
