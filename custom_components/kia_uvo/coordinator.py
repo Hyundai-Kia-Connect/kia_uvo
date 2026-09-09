@@ -8,7 +8,7 @@ import logging
 import traceback
 from collections.abc import Callable
 from datetime import timedelta
-from typing import Any, cast
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -67,11 +67,6 @@ def _token_from_config(
     token = Token.from_dict(token_data)
     token.pin = pin
     return token
-
-
-def _token_for_config(token: Token) -> dict[str, Any]:
-    """Serialize renewable credentials without transient control secrets."""
-    return cast(dict[str, Any], token.to_persistent_dict())
 
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -640,7 +635,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Persist the latest token into the config entry."""
         config_entry = self.config_entry
         assert config_entry is not None
-        new_token = _token_for_config(self.vehicle_manager.token)
+        new_token = self.vehicle_manager.token.to_persistent_dict()
         # Only update if token actually changed
         if new_token and new_token != config_entry.data.get(CONF_TOKEN):
             updated_data = {**config_entry.data, CONF_TOKEN: new_token}

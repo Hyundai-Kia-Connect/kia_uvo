@@ -20,7 +20,7 @@ from custom_components.kia_uvo.const import (
     CONF_TOKEN,
     REGIONS,
 )
-from custom_components.kia_uvo.coordinator import _token_for_config, _token_from_config
+from custom_components.kia_uvo.coordinator import _token_from_config
 from custom_components.kia_uvo.services import _seat_climate_state
 
 
@@ -190,7 +190,7 @@ def test_config_token_round_trip_injects_pin_only_at_runtime() -> None:
         control_token_expiry=123,
     )
 
-    stored = _token_for_config(token)
+    stored = token.to_persistent_dict()
     restored = _token_from_config(stored, "5678")
 
     assert stored["refresh_token"] == "refresh-token"
@@ -223,5 +223,4 @@ def test_korea_seat_off_uses_gen2_off_state() -> None:
 def test_seat_heater_binary_sensor_uses_status_meaning(
     status: str, expected: bool
 ) -> None:
-    vehicle = MagicMock(front_left_seat_status=status)
-    assert _seat_heater_is_on(vehicle, "front_left_seat_status") is expected
+    assert _seat_heater_is_on(status) is expected

@@ -237,15 +237,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         assert self._region_data is not None
         errors: dict[str, str] = {}
         pin = user_input.get(CONF_PIN, DEFAULT_PIN) if user_input else DEFAULT_PIN
-        vehicle_manager = VehicleManager(
-            region=self._region_data[CONF_REGION],
-            brand=self._region_data[CONF_BRAND],
-            language=self.hass.config.language,
-            username="",
-            password="",
-            pin=pin,
-        )
-        self._vehicle_manager = vehicle_manager
+        vehicle_manager = self._create_browser_vehicle_manager(pin)
 
         if user_input is not None:
             try:
@@ -259,37 +251,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception during MyHyundai login")
                 errors["base"] = "unknown"
             else:
-                token = vehicle_manager.token
-                full_config = {
-                    **self._region_data,
-                    CONF_USERNAME: "",
-                    CONF_PASSWORD: "",
-                    CONF_PIN: pin,
-                    CONF_TOKEN: token.to_persistent_dict(),
-                }
-                if self._is_reconfigure:
-                    return self.async_update_reload_and_abort(
-                        self._get_reconfigure_entry(),
-                        data_updates=full_config,
-                    )
-                if self.reauth_entry is not None:
-                    self.hass.config_entries.async_update_entry(
-                        self.reauth_entry, data=full_config
-                    )
-                    await self.hass.config_entries.async_reload(
-                        self.reauth_entry.entry_id
-                    )
-                    return self.async_abort(reason="reauth_successful")
-
-                account_id = token.user_id or token.cc_id
-                if not account_id and vehicle_manager.vehicles:
-                    account_id = next(iter(vehicle_manager.vehicles))
-                title = f"{BRAND_HYUNDAI} {REGION_KOREA}"
-                await self.async_set_unique_id(
-                    hashlib.sha256(f"{title} {account_id or ''}".encode()).hexdigest()
-                )
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=title, data=full_config)
+                return await self._async_finish_browser_login(vehicle_manager, pin)
 
         authorization_url = vehicle_manager.get_authorization_url()
         return self.async_show_form(
@@ -298,6 +260,65 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
             description_placeholders={"authorization_url": authorization_url},
         )
+
+    def _create_browser_vehicle_manager(self, pin: str) -> VehicleManager:
+        """Create the manager used by the Korea browser-login step."""
+        assert self._region_data is not None
+        vehicle_manager = VehicleManager(
+            region=self._region_data[CONF_REGION],
+            brand=self._region_data[CONF_BRAND],
+            language=self.hass.config.language,
+            username="",
+            password="",
+            pin=pin,
+        )
+        self._vehicle_manager = vehicle_manager
+        return vehicle_manager
+
+    async def _async_finish_browser_login(
+        self, vehicle_manager: VehicleManager, pin: str
+    ) -> ConfigFlowResult:
+        """Store a completed Korea browser login in the active config flow."""
+        assert self._region_data is not None
+        token = vehicle_manager.token
+        full_config = {
+            **self._region_data,
+            CONF_USERNAME: "",
+            CONF_PASSWORD: "",
+            CONF_PIN: pin,
+            CONF_TOKEN: token.to_persistent_dict(),
+        }
+        if self._is_reconfigure:
+            return self.async_update_reload_and_abort(
+                self._get_reconfigure_entry(),
+                data_updates=full_config,
+            )
+        if self.reauth_entry is not None:
+            self.hass.config_entries.async_update_entry(
+                self.reauth_entry, data=full_config
+            )
+            await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+            return self.async_abort(reason="reauth_successful")
+
+        account_id = token.user_id or token.cc_id
+        if not account_id and vehicle_manager.vehicles:
+            account_id = next(iter(vehicle_manager.vehicles))
+        title = f"{BRAND_HYUNDAI} {REGION_KOREA}"
+        await self.async_set_unique_id(
+            hashlib.sha256(f"{title} {account_id or ''}".encode()).hexdigest()
+        )
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title=title, data=full_config)
+
+    async def _async_step_korea_browser_for_entry(
+        self, entry: ConfigEntry
+    ) -> ConfigFlowResult:
+        """Start Korea browser authentication using an existing entry."""
+        self._region_data = {
+            CONF_REGION: entry.data[CONF_REGION],
+            CONF_BRAND: entry.data[CONF_BRAND],
+        }
+        return await self.async_step_credentials_browser()
 
     async def async_step_credentials_password(
         self, user_input: dict[str, Any] | None = None
@@ -496,11 +517,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._is_reconfigure = True
                 entry = self._get_reconfigure_entry()
                 if REGIONS[entry.data[CONF_REGION]] == REGION_KOREA:
-                    self._region_data = {
-                        CONF_REGION: entry.data[CONF_REGION],
-                        CONF_BRAND: entry.data[CONF_BRAND],
-                    }
-                    return await self.async_step_credentials_browser()
+                    return await self._async_step_korea_browser_for_entry(entry)
                 return await self.async_step_user()
             else:
                 return await self.async_step_reconfigure_pin()
@@ -554,11 +571,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self.reauth_entry is not None
             and REGIONS[self.reauth_entry.data[CONF_REGION]] == REGION_KOREA
         ):
-            self._region_data = {
-                CONF_REGION: self.reauth_entry.data[CONF_REGION],
-                CONF_BRAND: self.reauth_entry.data[CONF_BRAND],
-            }
-            return await self.async_step_credentials_browser()
+            return await self._async_step_korea_browser_for_entry(self.reauth_entry)
         return await self.async_step_user()
 
 
