@@ -26,9 +26,9 @@ A custom integration for Kia Uvo / Hyundai Bluelink. This project uses our under
 
 ### Configuration
 
-After installation, go to **Settings** → **Devices & Services** → **Integrations** and search for **Kia Uvo**. Configure your vehicle using your username and password.
+After installation, go to **Settings** → **Devices & Services** → **Integrations** and search for **Kia Uvo**. Configure your vehicle using your username and password. MyHyundai Korea uses the browser login described below instead of storing an account password.
 
-- AU, EU, CA, CH, IN, NZ, BR and US is supported. USA, India, China and Brazil support is limited.
+- AU, EU, CA, CH, IN, NZ, BR, KR and US are supported. USA, India, China, Brazil and Korea support is limited.
 - Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - Reconfigure flow is available from the integration options (change credentials or set PIN).
@@ -36,6 +36,17 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 - Force Refresh Interval - asks your car for the latest data every 4 hours. **Configurable**
 - Force Refresh is disabled between 10PM and 6AM by default. **Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure each entity if you would like other units.
+
+#### MyHyundai Korea login
+
+Choose **Korea** and **Hyundai** in the config flow. Home Assistant will show a MyHyundai authorization link. The registered OAuth callback forwards desktop browsers immediately, so capture it with the browser network log:
+
+1. Open the browser developer tools and select **Network**.
+2. Enable **Preserve log**, then open the authorization link and sign in with Pleos.
+3. After the browser reaches the Hyundai website, filter the requests for `oneapp.hyundai.com/redirect`.
+4. Copy that request's complete URL and paste it into Home Assistant with your vehicle-control PIN.
+
+Home Assistant stores the renewable token set in the config entry. It does not store the MyHyundai account password. The integration saves rotated refresh credentials after each token refresh. Browser login is only required again if Hyundai expires or revokes those credentials.
 
 ## Supported entities
 
@@ -135,22 +146,22 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 ### Service availability by region
 
-| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
-| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
-| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
-| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
-| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
-| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
-| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
-| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Navigation _(WIP)_        |     | ✔                 |     |         |             |             |       |       |        |
+| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil | Korea |
+| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ | ----- |
+| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      | ✔     |
+| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      | ✔     |
+| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      | ✔     |
+| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      | ✔     |
+| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | ✖     |
+| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | ✖     |
+| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | ✖     |
+| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | ✖     |
+| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | ✖     |
+| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | ✖     |
+| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      | ✖     |
+| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | ✖     |
+| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | ✖     |
+| Set Navigation _(WIP)_        |     | ✔                 |     |         |             |             |       |       |        |       |
 
 ## Screenshots
 
@@ -161,6 +172,6 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 If you receive an error while trying to login, please go through these steps:
 
-1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada and Brazil. If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
+1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada, Brazil and Korea. If you are outside these regions, you are welcome to create an issue and become a test user. USA, Brazil and Korea coverage is limited.
 2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**. See [Home Assistant troubleshooting: enabling debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#enabling-debug-logging) for details.
 3. You can download a redacted diagnostics snapshot to attach to a bug report. Go to **Settings → Devices & Services → kia_uvo**, open the integration entry, click the menu (⋮) and select **Download diagnostics**. The dump is auto-redacted (tokens, device id, PIN, GPS coordinates, and reverse-geocoded addresses are removed) — safe to share. It contains the parsed vehicle state, API class, and version info, which helps diagnose field-mapping and region-specific issues.

@@ -25,6 +25,16 @@ from .entity import HyundaiKiaConnectEntity
 _LOGGER = logging.getLogger(__name__)
 
 
+def _seat_heater_is_on(vehicle: Vehicle, attribute: str) -> bool:
+    """Return whether a seat status represents active heating."""
+    return getattr(vehicle, attribute, None) in {
+        "On",
+        "Low Heat",
+        "Medium Heat",
+        "High Heat",
+    }
+
+
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     """A class that describes custom binary sensor entities."""
@@ -440,7 +450,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
         translation_key="front_left_seat_heater_on",
-        is_on=lambda vehicle: vehicle.front_left_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle, "front_left_seat_status"),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -448,7 +458,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_seat_heater_on",
         translation_key="front_right_seat_heater_on",
-        is_on=lambda vehicle: vehicle.front_right_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle, "front_right_seat_status"),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -456,7 +466,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_left_seat_heater_on",
         translation_key="rear_left_seat_heater_on",
-        is_on=lambda vehicle: vehicle.rear_left_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle, "rear_left_seat_status"),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -464,7 +474,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_right_seat_heater_on",
         translation_key="rear_right_seat_heater_on",
-        is_on=lambda vehicle: vehicle.rear_right_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle, "rear_right_seat_status"),
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,

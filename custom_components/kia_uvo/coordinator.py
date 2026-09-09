@@ -8,7 +8,7 @@ import logging
 import traceback
 from collections.abc import Callable
 from datetime import timedelta
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -58,6 +58,22 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
+def _token_from_config(
+    token_data: dict[str, Any] | None, pin: str | None
+) -> Token | None:
+    """Restore renewable credentials and add the separately stored PIN."""
+    if not token_data:
+        return None
+    token = Token.from_dict(token_data)
+    token.pin = pin
+    return token
+
+
+def _token_for_config(token: Token) -> dict[str, Any]:
+    """Serialize renewable credentials without transient control secrets."""
+    return cast(dict[str, Any], token.to_persistent_dict())
+
+
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
 
@@ -66,12 +82,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
 
+        pin = config_entry.data.get(CONF_PIN)
+        token_data = config_entry.data.get(CONF_TOKEN)
+        token = _token_from_config(token_data, pin)
+
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
             brand=config_entry.data.get(CONF_BRAND),
             username=config_entry.data.get(CONF_USERNAME),
             password=config_entry.data.get(CONF_PASSWORD),
-            pin=config_entry.data.get(CONF_PIN),
+            pin=pin,
             geocode_api_enable=config_entry.options.get(
                 CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
             ),
@@ -79,9 +99,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
-            token=Token.from_dict(config_entry.data.get(CONF_TOKEN, None))
-            if config_entry.data.get(CONF_TOKEN, None)
-            else None,
+            token=token,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
@@ -622,7 +640,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Persist the latest token into the config entry."""
         config_entry = self.config_entry
         assert config_entry is not None
-        new_token = self.vehicle_manager.token.to_dict()
+        new_token = _token_for_config(self.vehicle_manager.token)
         # Only update if token actually changed
         if new_token and new_token != config_entry.data.get(CONF_TOKEN):
             updated_data = {**config_entry.data, CONF_TOKEN: new_token}
