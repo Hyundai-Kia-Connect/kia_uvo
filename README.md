@@ -156,21 +156,21 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 | Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
 | ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
-| Update                        | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✔     |
-| Force Update                  | ✔  | not tested        | ✔  | ✔      |             |             | ✔    | ✔    | ✔     |
-| Lock / Unlock                 | ✔  | ✔                | ✔  | ✔      | ✔          | ✔          | ✔    | ✔    | ✖     |
-| Start / Stop Climate          | ✔  | ✔                | ✔  | ✔      | ✔          |             | ✔    | ✔    | ✖     |
-| Start / Stop Charge           | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖     |
-| Set Charge Limits             | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖     |
-| Set Charging Current          | ✔  | ✔                | ✔  | ✔      | ✔          |             |       |       | ✖     |
-| Open / Close Charge Port      | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
-| Set Windows                   | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
-| Start / Stop Hazard Lights    | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
-| Start / Stop Hazard + Horn    | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    | ✔    | ✖     |
-| Schedule Charging and Climate | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
-| Start / Stop Valet Mode       | ✖  | ✔                | ✖  | ✖      | ✖          | ✖          | ✖    |       | ✖     |
-| Set Navigation                |     | ✔                |     |         |             |             |       |       |        |
-| Capture SVM Image (Hyundai)   | ✔  |                   |     |         | ✔          |             |       |       |        |
+| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
+| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
+| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
+| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
+| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
+| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        |
+| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        |
 
 SVM entities and `capture_svm_image` are created only for vehicles that expose the surround-view capability (Hyundai).
 
