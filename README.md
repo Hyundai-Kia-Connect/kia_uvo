@@ -54,6 +54,8 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 - EV Charging Power, EV Charging Current
 - Geocoded Location (optional, disabled by default)
 - Location Last Updated
+- Daily Driving Stats, Today's Daily Driving Stats
+- SVM Status (time of the last surround-view capture)
 
 ### EV Diagnostics (CCS2 vehicles)
 
@@ -85,8 +87,12 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 - Climate Control
 - EV Charging
-- EV Schedule Charge Enabled
-- EV Off-Peak Charge Only Enabled
+- Charge Port (open/close)
+- Valet Mode
+- Scheduled Charging
+- Off-Peak Charge Only
+- EV Scheduled Departure 1 / 2 — enable, climate and defrost toggles (EVs with departure schedules)
+- SVM Dewarp — rectifies the SVM fisheye camera views (presentation preference only; no vehicle command)
 
 ### Number Entities
 
@@ -103,12 +109,23 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 ### Climate
 
-- Climate Control (temperature, mode, defrost) _(WIP — pending merge)_
+- Climate Control (temperature, mode, defrost)
 
 ### Buttons
 
 - Force Refresh
-- Open/Close Charge Port, Start/Stop Hazard Lights, Start/Stop Valet Mode, Open/Close Windows _(WIP — pending merge)_
+- Start Hazard Lights / Start Hazard Lights and Horn
+- Start Valet Mode / Stop Valet Mode
+- Open All Windows / Close All Windows / Vent All Windows
+- Capture SVM Image (triggers a fresh surround-view capture — a remote command that can wake the vehicle)
+
+### Image Entities
+
+SVM / 360° surround view, where the vehicle supports it (Hyundai only):
+
+- SVM Front Camera, SVM Rear Camera, SVM Left Camera, SVM Right Camera — the side-camera views cropped from the latest capture
+- SVM Bird's-eye View — the top-down view
+- The side cameras are raw fisheye output; the **SVM Dewarp** switch (under Switches) rectifies them using the per-camera field of view when the API provides it, and falls back to the raw fisheye otherwise
 
 ### Device Tracker
 
@@ -130,8 +147,10 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 - `start_hazard_lights` / `stop_hazard_lights`: hazard lights only
 - `start_hazard_lights_and_horn` / `stop_hazard_lights_and_horn`: panic mode
 - `schedule_charging_and_climate`: set planned departure schedule
+- `set_off_peak_charging`: set the off-peak charging mode and window (EVs)
 - `start_valet_mode` / `stop_valet_mode`: valet mode
-- `set_navigation`: send a destination to the vehicle's navigation system _(WIP — pending merge)_
+- `set_navigation`: send a destination to the vehicle's navigation system
+- `capture_svm_image`: trigger a fresh SVM / surround-view capture
 
 ### Service availability by region
 
@@ -150,7 +169,10 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 | Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
 | Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
 | Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Navigation _(WIP)_        |     | ✔                 |     |         |             |             |       |       |        |
+| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        |
+| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        |
+
+SVM entities and `capture_svm_image` are created only for vehicles that expose the surround-view capability (Hyundai).
 
 ## Screenshots
 
