@@ -27,8 +27,13 @@ class HyundaiKiaConnectEntity(
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information to use for this entity."""
+        identifiers = {(DOMAIN, self.vehicle.id)}
+        if vin := self.vehicle.VIN:
+            # Hyundai may replace its internal vehicle id after an account or
+            # subscription migration. The VIN keeps HA attached to the same car.
+            identifiers.add((DOMAIN, f"vin:{vin}"))
         return DeviceInfo(
-            identifiers={(DOMAIN, self.vehicle.id)},
+            identifiers=identifiers,
             manufacturer=f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
             model=self.vehicle.model,
             name=self.vehicle.name,
