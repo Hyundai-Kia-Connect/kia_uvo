@@ -180,25 +180,33 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="ev_estimated_current_charge_duration",
         translation_key="ev_estimated_current_charge_duration",
         icon="mdi:ev-station",
+        device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_estimated_fast_charge_duration",
         translation_key="ev_estimated_fast_charge_duration",
         icon="mdi:ev-station",
+        device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_estimated_portable_charge_duration",
         translation_key="ev_estimated_portable_charge_duration",
         icon="mdi:ev-station",
+        device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_estimated_station_charge_duration",
         translation_key="ev_estimated_station_charge_duration",
         icon="mdi:ev-station",
+        device_class=SensorDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     # Target charge range is transient — None at setup when the car is
     # asleep, telematics omits dte.rangeByFuel.totalAvailableRange, or
