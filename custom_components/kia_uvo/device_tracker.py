@@ -5,7 +5,11 @@ from __future__ import annotations
 import logging
 from typing import cast
 
-from homeassistant.components.device_tracker.config_entry import TrackerEntity
+# Canonical import path since HA 2026.6 (config_entry alias removed 2027.6);
+# the ignore covers HA's implicit re-export, rejected by mypy --strict.
+from homeassistant.components.device_tracker import (  # type: ignore[attr-defined]
+    TrackerEntity,
+)
 from homeassistant.components.device_tracker.const import SourceType
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
