@@ -92,9 +92,11 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
     - "library_version": "X.Y.Z" — no-op when the installed dist already
       matches; otherwise pip-installs the manifest requirement rebuilt with
       the requested version (keeping any extras, e.g. [image]).
-    - "library_pip_spec": "<pip requirement>" — installed verbatim on every
-      setup (version comparison is not possible for arbitrary specs, e.g.
-      git+https PR branches; pip skips the work when already satisfied).
+    - "library_pip_spec": "<pip requirement>" — installed verbatim once per
+      HA start (version comparison is not possible for arbitrary specs, e.g.
+      git+https PR branches; --force-reinstall guarantees the package swap
+      even when the installed version matches, --no-deps leaves dependency
+      versions untouched).
 
     A missing file is a no-op. On an install, the loaded library and
     integration modules are purged so the setup retry imports the fresh
@@ -116,6 +118,10 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
             )
             return
         target_spec = pip_spec
+        # A git/local/URL spec resolving to the already-installed version is
+        # reported as satisfied and skipped by pip; force the package swap.
+        # --no-deps keeps dependency installs out of every HA start.
+        pip_args = ["--force-reinstall", "--no-deps"]
     elif isinstance(requested, str) and requested:
         if installed == requested:
             return
@@ -132,6 +138,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
             str(requirement).rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
         )
         target_spec = f"{base_spec}=={requested}"
+        pip_args = []
     else:
         return
 
@@ -153,6 +160,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
         "pip",
         "install",
         "--quiet",
+        *pip_args,
         target_spec,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
