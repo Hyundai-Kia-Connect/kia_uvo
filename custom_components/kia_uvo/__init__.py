@@ -6,6 +6,7 @@ import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as importlib_version
 from pathlib import Path
+from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -62,6 +63,19 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     return True
 
 
+def _read_override_file(override_path: Path) -> dict[str, Any]:
+    """Read the optional override file; return {} when absent or invalid."""
+    try:
+        return cast(
+            dict[str, Any], json.loads(override_path.read_text(encoding="utf-8"))
+        )
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError) as ex:  # fmt: skip
+        _LOGGER.warning("Could not read %s: %s", override_path, ex)
+        return {}
+
+
 async def _async_install_library_override(hass: HomeAssistant) -> None:
     """Install the library version requested in <config_dir>/kia_uvo_overrides.json.
 
@@ -79,13 +93,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
     raises ConfigEntryNotReady so HA retries with the pinned version.
     """
     override_path = Path(hass.config.config_dir) / OVERRIDES_FILENAME
-    try:
-        override = json.loads(override_path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        return
-    except (OSError, json.JSONDecodeError) as ex:  # fmt: skip
-        _LOGGER.warning("Could not read %s: %s", override_path, ex)
-        return
+    override = await hass.async_add_executor_job(_read_override_file, override_path)
 
     try:
         installed = importlib_version(LIB_PACKAGE_NAME)
