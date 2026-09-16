@@ -46,9 +46,12 @@ DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 
 # Optional library version override (see README: runtime version override).
-# File lives in the HA config directory: {"library_version": "X.Y.Z"}.
+# File lives in the HA config directory:
+#   {"library_version": "X.Y.Z"}              — version from the manifest spec
+#   {"library_pip_spec": "<pip requirement>"} — full pip spec (e.g. git+https)
 OVERRIDES_FILENAME: str = "kia_uvo_overrides.json"
 OVERRIDE_LIBRARY_VERSION_KEY: str = "library_version"
+OVERRIDE_PIP_SPEC_KEY: str = "library_pip_spec"
 LIB_PACKAGE_NAME: str = "hyundai_kia_connect_api"
 
 DYNAMIC_UNIT: str = "dynamic_unit"

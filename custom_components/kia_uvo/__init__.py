@@ -34,6 +34,7 @@ from .const import (
     DOMAIN,
     LIB_PACKAGE_NAME,
     OVERRIDE_LIBRARY_VERSION_KEY,
+    OVERRIDE_PIP_SPEC_KEY,
     OVERRIDES_FILENAME,
     REGIONS,
 )
@@ -64,12 +65,18 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
 async def _async_install_library_override(hass: HomeAssistant) -> None:
     """Install the library version requested in <config_dir>/kia_uvo_overrides.json.
 
-    Reads an optional override file ({"library_version": "X.Y.Z"}). A missing
-    file or an already-matching installed version is a no-op. On a mismatch,
-    pip-installs the requested version and purges the loaded library and
-    integration modules so the setup retry imports the fresh library, then
-    raises ConfigEntryNotReady. A failed install also raises ConfigEntryNotReady
-    so HA retries with the pinned version.
+    Reads an optional override file with either key:
+    - "library_version": "X.Y.Z" — no-op when the installed dist already
+      matches; otherwise pip-installs the manifest requirement rebuilt with
+      the requested version (keeping any extras, e.g. [image]).
+    - "library_pip_spec": "<pip requirement>" — installed verbatim on every
+      setup (version comparison is not possible for arbitrary specs, e.g.
+      git+https PR branches; pip skips the work when already satisfied).
+
+    A missing file is a no-op. On an install, the loaded library and
+    integration modules are purged so the setup retry imports the fresh
+    library, then ConfigEntryNotReady is raised. A failed install also
+    raises ConfigEntryNotReady so HA retries with the pinned version.
     """
     override_path = Path(hass.config.config_dir) / OVERRIDES_FILENAME
     try:
@@ -80,28 +87,40 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
         _LOGGER.warning("Could not read %s: %s", override_path, ex)
         return
 
-    requested = override.get(OVERRIDE_LIBRARY_VERSION_KEY)
-    if not isinstance(requested, str) or not requested:
-        return
-
     try:
         installed = importlib_version(LIB_PACKAGE_NAME)
     except PackageNotFoundError:
         installed = None
-    if installed == requested:
-        return
 
-    integration = await async_get_integration(hass, DOMAIN)
-    requirement = next(
-        (
-            req
-            for req in integration.manifest["requirements"]
-            if str(req).startswith(LIB_PACKAGE_NAME)
-        ),
-        None,
-    )
-    base_spec = str(requirement).rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
-    target_spec = f"{base_spec}=={requested}"
+    pip_spec = override.get(OVERRIDE_PIP_SPEC_KEY)
+    requested = override.get(OVERRIDE_LIBRARY_VERSION_KEY)
+    if isinstance(pip_spec, str) and pip_spec:
+        if pip_spec.startswith("-"):
+            _LOGGER.warning(
+                "%s: %s value must be a pip requirement, not a pip flag",
+                override_path,
+                OVERRIDE_PIP_SPEC_KEY,
+            )
+            return
+        target_spec = pip_spec
+    elif isinstance(requested, str) and requested:
+        if installed == requested:
+            return
+        integration = await async_get_integration(hass, DOMAIN)
+        requirement = next(
+            (
+                req
+                for req in integration.manifest["requirements"]
+                if str(req).startswith(LIB_PACKAGE_NAME)
+            ),
+            None,
+        )
+        base_spec = (
+            str(requirement).rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
+        )
+        target_spec = f"{base_spec}=={requested}"
+    else:
+        return
 
     _LOGGER.warning(
         "[kia_uvo] VERSION OVERRIDE: %s requested, but %s is installed. "
