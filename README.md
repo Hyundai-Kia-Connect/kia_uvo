@@ -65,6 +65,8 @@ The value is a pip requirement string, installed verbatim. This is how you test 
 
 What you can paste (pip requirement forms):
 
+> The spaces around `@` are part of the pip requirement syntax (PEP 508) and must stay — `pkg@git+https://...` without them is not a valid requirement.
+
 - **Pull request head**: `hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head` — replace the repository with the one the PR belongs to and `1314` with the PR number.
 - **A branch from a fork**: `hyundai_kia_connect_api @ git+https://github.com/<user>/hyundai_kia_connect_api@<branch>`
 - **A specific commit**: same URL with `@<full-or-short-commit-sha>` instead of the branch name.
