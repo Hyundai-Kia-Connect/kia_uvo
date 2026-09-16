@@ -34,6 +34,7 @@ from .const import (
     DEFAULT_PIN,
     DOMAIN,
     LIB_PACKAGE_NAME,
+    OVERRIDE_APPLIED_KEY,
     OVERRIDE_LIBRARY_VERSION_KEY,
     OVERRIDE_PIP_SPEC_KEY,
     OVERRIDES_FILENAME,
@@ -134,6 +135,12 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
     else:
         return
 
+    # An unpinned pip_spec always triggers a (re)install; without this marker
+    # the ConfigEntryNotReady retry would loop forever. The marker does not
+    # survive an HA restart, so a pip_spec override reinstalls once per start.
+    if hass.data.get(OVERRIDE_APPLIED_KEY) == target_spec:
+        return
+
     _LOGGER.warning(
         "[kia_uvo] VERSION OVERRIDE: %s requested, but %s is installed. "
         "Attempting to install override...",
@@ -174,6 +181,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
     # The loader caches the imported component in hass.data[DATA_COMPONENTS];
     # reset it so the retry re-imports instead of reusing the old module.
     hass.data[DATA_COMPONENTS].pop(DOMAIN, None)
+    hass.data[OVERRIDE_APPLIED_KEY] = target_spec
 
     _LOGGER.warning(
         "[kia_uvo] VERSION OVERRIDE: installed %s (was %s); reloading integration",

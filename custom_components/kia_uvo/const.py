@@ -52,6 +52,9 @@ DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 OVERRIDES_FILENAME: str = "kia_uvo_overrides.json"
 OVERRIDE_LIBRARY_VERSION_KEY: str = "library_version"
 OVERRIDE_PIP_SPEC_KEY: str = "library_pip_spec"
+# hass.data key marking the override applied in this HA session, so the
+# ConfigEntryNotReady retry does not reinstall an unpinned pip_spec.
+OVERRIDE_APPLIED_KEY: str = "kia_uvo_library_override_applied"
 LIB_PACKAGE_NAME: str = "hyundai_kia_connect_api"
 
 DYNAMIC_UNIT: str = "dynamic_unit"
