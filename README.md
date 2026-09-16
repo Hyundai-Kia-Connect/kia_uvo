@@ -126,6 +126,7 @@ SVM / 360° surround view, where the vehicle supports it (Hyundai only):
 - SVM Front Camera, SVM Rear Camera, SVM Left Camera, SVM Right Camera — the side-camera views cropped from the latest capture
 - SVM Bird's-eye View — the top-down view
 - The side cameras are raw fisheye output; the **SVM Dewarp** switch (under Switches) rectifies them using the per-camera field of view when the API provides it, and falls back to the raw fisheye otherwise
+- Views are cropped, rectified and encoded by the library (`hyundai_kia_connect_api[image]`); the **SVM Dewarp** switch refreshes the image entities immediately — no new capture needed
 
 ### Device Tracker
 
