@@ -1,5 +1,11 @@
+import asyncio
 import hashlib
+import json
 import logging
+import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as importlib_version
+from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -14,6 +20,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntry
+from homeassistant.loader import DATA_COMPONENTS, async_get_integration
 
 from .const import (
     BRANDS,
@@ -25,6 +32,9 @@ from .const import (
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_PIN,
     DOMAIN,
+    LIB_PACKAGE_NAME,
+    OVERRIDE_LIBRARY_VERSION_KEY,
+    OVERRIDES_FILENAME,
     REGIONS,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -51,8 +61,100 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     return True
 
 
+async def _async_install_library_override(hass: HomeAssistant) -> None:
+    """Install the library version requested in <config_dir>/kia_uvo_overrides.json.
+
+    Reads an optional override file ({"library_version": "X.Y.Z"}). A missing
+    file or an already-matching installed version is a no-op. On a mismatch,
+    pip-installs the requested version and purges the loaded library and
+    integration modules so the setup retry imports the fresh library, then
+    raises ConfigEntryNotReady. A failed install also raises ConfigEntryNotReady
+    so HA retries with the pinned version.
+    """
+    override_path = Path(hass.config.config_dir) / OVERRIDES_FILENAME
+    try:
+        override = json.loads(override_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return
+    except (OSError, json.JSONDecodeError) as ex:  # fmt: skip
+        _LOGGER.warning("Could not read %s: %s", override_path, ex)
+        return
+
+    requested = override.get(OVERRIDE_LIBRARY_VERSION_KEY)
+    if not isinstance(requested, str) or not requested:
+        return
+
+    try:
+        installed = importlib_version(LIB_PACKAGE_NAME)
+    except PackageNotFoundError:
+        installed = None
+    if installed == requested:
+        return
+
+    integration = await async_get_integration(hass, DOMAIN)
+    requirement = next(
+        (
+            req
+            for req in integration.manifest["requirements"]
+            if str(req).startswith(LIB_PACKAGE_NAME)
+        ),
+        None,
+    )
+    base_spec = str(requirement).rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
+    target_spec = f"{base_spec}=={requested}"
+
+    _LOGGER.warning(
+        "[kia_uvo] VERSION OVERRIDE: %s requested, but %s is installed. "
+        "Attempting to install override...",
+        target_spec,
+        installed or "not installed",
+    )
+    proc = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--quiet",
+        target_spec,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.STDOUT,
+    )
+    _stdout, _ = await proc.communicate()
+    if proc.returncode != 0:
+        _LOGGER.error(
+            "[kia_uvo] VERSION OVERRIDE: pip install %s failed (%s): %s",
+            target_spec,
+            proc.returncode,
+            _stdout.decode(errors="replace"),
+        )
+        raise ConfigEntryNotReady(f"Library override install failed ({target_spec})")
+
+    # Drop the loaded library and integration modules so the setup retry
+    # re-imports both from disk (the library binding in coordinator.py is
+    # created at import time and would otherwise keep the old version).
+    for module_name in [
+        name
+        for name in sys.modules
+        if name.startswith(
+            (LIB_PACKAGE_NAME, f"{LIB_PACKAGE_NAME}.", "custom_components.kia_uvo")
+        )
+    ]:
+        del sys.modules[module_name]
+    # The loader caches the imported component in hass.data[DATA_COMPONENTS];
+    # reset it so the retry re-imports instead of reusing the old module.
+    hass.data[DATA_COMPONENTS].pop(DOMAIN, None)
+
+    _LOGGER.warning(
+        "[kia_uvo] VERSION OVERRIDE: installed %s (was %s); reloading integration",
+        target_spec,
+        installed,
+    )
+    raise ConfigEntryNotReady(f"Library override installed ({target_spec}); reloading")
+
+
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Hyundai / Kia Connect from a config entry."""
+    await _async_install_library_override(hass)
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()
