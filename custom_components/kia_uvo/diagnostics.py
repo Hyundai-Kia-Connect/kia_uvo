@@ -44,9 +44,9 @@ def _library_source() -> dict[str, Any] | None:
     """Install source of the library, from the dist's direct_url.json.
 
     Shows where the installed version actually came from — PyPI installs
-    have no direct_url.json (returns None), while a runtime override via
-    kia_uvo_overrides.json reports its git URL, ref, and commit (or the
-    file:// URL of a local install).
+    have no direct_url.json (returns None), while a runtime override from
+    the options flow reports its git URL, ref, and commit (or the file://
+    URL of a local install).
     """
     try:
         raw = distribution("hyundai_kia_connect_api").read_text("direct_url.json")
