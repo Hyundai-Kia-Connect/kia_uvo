@@ -76,6 +76,14 @@ def _read_override_file(override_path: Path) -> dict[str, Any]:
         return {}
 
 
+def _get_installed_library_version() -> str | None:
+    """Return the installed library version, or None when not installed."""
+    try:
+        return importlib_version(LIB_PACKAGE_NAME)
+    except PackageNotFoundError:
+        return None
+
+
 async def _async_install_library_override(hass: HomeAssistant) -> None:
     """Install the library version requested in <config_dir>/kia_uvo_overrides.json.
 
@@ -94,11 +102,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
     """
     override_path = Path(hass.config.config_dir) / OVERRIDES_FILENAME
     override = await hass.async_add_executor_job(_read_override_file, override_path)
-
-    try:
-        installed = importlib_version(LIB_PACKAGE_NAME)
-    except PackageNotFoundError:
-        installed = None
+    installed = await hass.async_add_executor_job(_get_installed_library_version)
 
     pip_spec = override.get(OVERRIDE_PIP_SPEC_KEY)
     requested = override.get(OVERRIDE_LIBRARY_VERSION_KEY)
