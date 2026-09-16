@@ -10,10 +10,11 @@ before the dump leaves their Home Assistant instance.
 
 from __future__ import annotations
 
+import json
 from dataclasses import asdict
-from importlib.metadata import PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, distribution
 from importlib.metadata import version as pkg_version
-from typing import Any
+from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_REGION, CONF_SCAN_INTERVAL
@@ -37,6 +38,26 @@ from .const import (
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .redact import redact
+
+
+def _library_source() -> dict[str, Any] | None:
+    """Install source of the library, from the dist's direct_url.json.
+
+    Shows where the installed version actually came from — PyPI installs
+    have no direct_url.json (returns None), while a runtime override via
+    kia_uvo_overrides.json reports its git URL, ref, and commit (or the
+    file:// URL of a local install).
+    """
+    try:
+        raw = distribution("hyundai_kia_connect_api").read_text("direct_url.json")
+    except PackageNotFoundError:
+        return None
+    if raw is None:
+        return None
+    try:
+        return cast(dict[str, Any], json.loads(raw))
+    except json.JSONDecodeError:
+        return None
 
 
 def _token_meta(token: Any) -> dict[str, Any]:
@@ -118,6 +139,7 @@ async def async_get_config_entry_diagnostics(
         )
     except PackageNotFoundError:
         library_version = None
+    library_source = await hass.async_add_executor_job(_library_source)
 
     payload: dict[str, Any] = {
         "region": entry.data.get(CONF_REGION),
@@ -125,6 +147,7 @@ async def async_get_config_entry_diagnostics(
         "api_class": type(vm.api).__name__,
         "integration_version": integration.version,
         "library_version": library_version,
+        "library_source": library_source,
         "config_options": _config_options(entry),
         "auth": _token_meta(vm.token),
         "vehicle_count": len(vm.vehicles),

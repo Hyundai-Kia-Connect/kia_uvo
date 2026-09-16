@@ -45,8 +45,8 @@ DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH: int = 7
 DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 
-# Optional library version override (see README: runtime version override).
-# File lives in the HA config directory:
+# Optional library version override (see README: Runtime library version
+# override). File lives in the HA config directory:
 #   {"library_version": "X.Y.Z"}              — version from the manifest spec
 #   {"library_pip_spec": "<pip requirement>"} — full pip spec (e.g. git+https)
 OVERRIDES_FILENAME: str = "kia_uvo_overrides.json"
