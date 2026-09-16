@@ -81,7 +81,8 @@
           "no_force_refresh_hour_start": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_start%]",
           "no_force_refresh_hour_finish": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_finish%]",
           "enable_geolocation_entity": "[%key:component::hyundai_kia_connect::options::step::init::data::enable_geolocation_entity%]",
-          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]"
+          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]",
+          "library_override": "Library version override (advanced; empty = version pinned in the manifest). Accepts a version (4.28.0), an == pin, or any pip requirement verbatim, e.g. hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head"
         }
       }
     }

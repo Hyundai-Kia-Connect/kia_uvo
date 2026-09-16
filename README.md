@@ -39,48 +39,31 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 ## Runtime library version override (advanced)
 
-The integration depends on a fixed version of [hyundai_kia_connect_api](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api), pinned in `manifest.json`. For testing you can run a different version of that library **without editing the manifest or reinstalling the integration**: create a file named `kia_uvo_overrides.json` in your Home Assistant configuration directory (the same directory as `configuration.yaml`).
+The integration depends on a fixed version of [hyundai_kia_connect_api](https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api), pinned in `manifest.json`. For testing you can run a different version of that library **without editing the manifest or reinstalling the integration**, from the integration's own options UI: **Settings → Devices & Services → kia_uvo → Configure (options)** and fill in **Library version override** (empty = the pinned version).
 
-The file is read every time the integration starts. Delete it (and restart Home Assistant) to go back to the pinned version. Use either key, not both:
+Save the options and the integration reloads itself with the requested library — no restart, no file edits.
 
-### `library_version` — switch to another released version
+### What you can paste
 
-```json
-{
-  "library_version": "4.28.0"
-}
-```
+One free-text field, interpreted automatically:
 
-Any version available on PyPI. On startup the integration compares the installed version with the requested one and, when they differ, pip-installs `hyundai_kia_connect_api[image]==<version>` — the extras from the manifest requirement (e.g. `[image]`) are kept automatically — and reloads itself. When the versions match it is a no-op.
+- **A released version** — `4.28.0` (or `==4.28.0`). The extras from the manifest requirement (e.g. `[image]`) are kept automatically; when the installed version already matches, nothing is installed.
+- **A pull request head** — `hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head` (replace the repository with the one the PR belongs to and `1314` with the PR number).
+- **A branch from a fork** — `hyundai_kia_connect_api @ git+https://github.com/<user>/hyundai_kia_connect_api@<branch>`
+- **A specific commit** — same URL with `@<full-or-short-commit-sha>` instead of the branch name.
+- **A local wheel/sdist** — `hyundai_kia_connect_api @ file:///config/<path-to-file>` (paths must be reachable from Home Assistant).
 
-### `library_pip_spec` — install an arbitrary pip requirement
+The spaces around `@` are part of the pip requirement syntax (PEP 508) and must stay — `pkg@git+https://...` without them is not a valid requirement.
 
-The value is a pip requirement string, installed verbatim. This is how you test unreleased code — pull requests, branches, or a local checkout:
-
-```json
-{
-  "library_pip_spec": "hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head"
-}
-```
-
-What you can paste (pip requirement forms):
-
-> The spaces around `@` are part of the pip requirement syntax (PEP 508) and must stay — `pkg@git+https://...` without them is not a valid requirement.
-
-- **Pull request head**: `hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head` — replace the repository with the one the PR belongs to and `1314` with the PR number.
-- **A branch from a fork**: `hyundai_kia_connect_api @ git+https://github.com/<user>/hyundai_kia_connect_api@<branch>`
-- **A specific commit**: same URL with `@<full-or-short-commit-sha>` instead of the branch name.
-- **A local wheel/sdist**: `hyundai_kia_connect_api @ file:///config/<path-to-file>` (paths inside the container must be reachable from it).
-- **A plain version pin**: `hyundai_kia_connect_api==4.28.0`
-
-Unlike `library_version`, a verbatim `library_pip_spec` does **not** inherit the manifest extras — add `[image]` yourself if the code needs it (e.g. `hyundai_kia_connect_api[image] @ git+...`).
+A verbatim pip requirement does **not** inherit the manifest extras — add `[image]` yourself if the code needs it (e.g. `hyundai_kia_connect_api[image] @ git+...`).
 
 ### Behavior and caveats
 
-- The override runs before the integration sets up; on install the integration reloads itself, so a short "Setting up…" retry in the logs is expected and harmless.
-- `library_pip_spec` is reinstalled once on every Home Assistant start (there is no version to compare) and installs with `--no-deps`, leaving dependency versions untouched.
-- The overridden version must still be compatible with the integration; an older version may fail on import with a clear error in the logs (in that case remove the file and restart).
-- Values starting with `-` are rejected, so the file cannot inject pip flags.
+- The install runs before the integration sets up; on install the integration reloads itself, so a short "Setting up…" retry in the logs is expected and harmless.
+- A git/URL requirement is reinstalled once on every Home Assistant start (there is no version to compare) and installs with `--no-deps`, leaving dependency versions untouched.
+- The library is a single install shared by all kia_uvo entries: if you run several accounts, the first entry that applies an override wins and a second entry with a different override only logs a warning.
+- Clearing the field restores the manifest-pinned version on the next Home Assistant start.
+- The overridden version must still be compatible with the integration; an older version may fail on import with a clear error in the logs (in that case clear the field and restart).
 - The [diagnostics dump](#troubleshooting) reports the actually installed library version and its install source (git URL + ref + commit for a PR/branch override, `file://` for a local install, nothing for a PyPI pin).
 
 ## Supported entities

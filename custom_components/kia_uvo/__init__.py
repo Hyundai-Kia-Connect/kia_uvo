@@ -1,12 +1,9 @@
 import asyncio
 import hashlib
-import json
 import logging
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as importlib_version
-from pathlib import Path
-from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -28,6 +25,7 @@ from .const import (
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
+    CONF_LIBRARY_OVERRIDE,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
@@ -35,9 +33,6 @@ from .const import (
     DOMAIN,
     LIB_PACKAGE_NAME,
     OVERRIDE_APPLIED_KEY,
-    OVERRIDE_LIBRARY_VERSION_KEY,
-    OVERRIDE_PIP_SPEC_KEY,
-    OVERRIDES_FILENAME,
     REGIONS,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -64,19 +59,6 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     return True
 
 
-def _read_override_file(override_path: Path) -> dict[str, Any]:
-    """Read the optional override file; return {} when absent or invalid."""
-    try:
-        return cast(
-            dict[str, Any], json.loads(override_path.read_text(encoding="utf-8"))
-        )
-    except FileNotFoundError:
-        return {}
-    except (OSError, json.JSONDecodeError) as ex:  # fmt: skip
-        _LOGGER.warning("Could not read %s: %s", override_path, ex)
-        return {}
-
-
 def _get_installed_library_version() -> str | None:
     """Return the installed library version, or None when not installed."""
     try:
@@ -85,45 +67,54 @@ def _get_installed_library_version() -> str | None:
         return None
 
 
-async def _async_install_library_override(hass: HomeAssistant) -> None:
-    """Install the library version requested in <config_dir>/kia_uvo_overrides.json.
+def _build_version_target(value: str, requirement: str | None) -> str:
+    """Rebuild the manifest requirement with the requested version.
 
-    Reads an optional override file with either key:
-    - "library_version": "X.Y.Z" — no-op when the installed dist already
-      matches; otherwise pip-installs the manifest requirement rebuilt with
-      the requested version (keeping any extras, e.g. [image]).
-    - "library_pip_spec": "<pip requirement>" — installed verbatim once per
-      HA start (version comparison is not possible for arbitrary specs, e.g.
-      git+https PR branches; --force-reinstall guarantees the package swap
-      even when the installed version matches, --no-deps leaves dependency
-      versions untouched).
-
-    A missing file is a no-op. On an install, the loaded library and
-    integration modules are purged so the setup retry imports the fresh
-    library, then ConfigEntryNotReady is raised. A failed install also
-    raises ConfigEntryNotReady so HA retries with the pinned version.
+    "4.28.0" and "==4.28.0" both become "<manifest-base>==4.28.0", keeping
+    any extras from the manifest (e.g. [image]).
     """
-    override_path = Path(hass.config.config_dir) / OVERRIDES_FILENAME
-    override = await hass.async_add_executor_job(_read_override_file, override_path)
+    requested = value.removeprefix("==")
+    base_spec = requirement.rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
+    return f"{base_spec}=={requested}"
+
+
+async def _async_install_library_override(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> None:
+    """Install the library version requested in the integration options.
+
+    The value comes from entry.options["library_override"] (options flow):
+    empty means the manifest-pinned version, anything else is interpreted by
+    _build_override_target.
+
+    On a version change (or every start for a git/URL spec) the override is
+    pip-installed, the loaded library and integration modules are purged so
+    the setup retry imports the fresh library, then ConfigEntryNotReady is
+    raised. A failed install also raises ConfigEntryNotReady so HA retries
+    with the pinned version.
+
+    The library is a single site-packages install shared by all kia_uvo
+    entries: the first entry whose setup installs an override wins, and an
+    entry requesting a different override this session only logs a warning.
+    """
+    value = str(config_entry.options.get(CONF_LIBRARY_OVERRIDE) or "").strip()
+    if not value:
+        return
+
     installed = await hass.async_add_executor_job(_get_installed_library_version)
 
-    pip_spec = override.get(OVERRIDE_PIP_SPEC_KEY)
-    requested = override.get(OVERRIDE_LIBRARY_VERSION_KEY)
-    if isinstance(pip_spec, str) and pip_spec:
-        if pip_spec.startswith("-"):
-            _LOGGER.warning(
-                "%s: %s value must be a pip requirement, not a pip flag",
-                override_path,
-                OVERRIDE_PIP_SPEC_KEY,
-            )
-            return
-        target_spec = pip_spec
-        # A git/local/URL spec resolving to the already-installed version is
-        # reported as satisfied and skipped by pip; force the package swap.
-        # --no-deps keeps dependency installs out of every HA start.
+    if any(ch in value for ch in "@/:"):
+        # A verbatim pip requirement (git+https, file://, ...): pip reports a
+        # spec resolving to the already-installed version as satisfied, so
+        # force the package swap. --no-deps keeps dependency installs out of
+        # every start/reload.
+        target_spec = value
         pip_args = ["--force-reinstall", "--no-deps"]
-    elif isinstance(requested, str) and requested:
-        if installed == requested:
+    else:
+        # A bare version or "==" pin: no-op when already installed, else
+        # rebuild the manifest requirement with the requested version
+        # (keeping extras such as [image]).
+        if installed == value.removeprefix("=="):
             return
         integration = await async_get_integration(hass, DOMAIN)
         requirement = next(
@@ -134,18 +125,19 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
             ),
             None,
         )
-        base_spec = (
-            str(requirement).rsplit("==", 1)[0] if requirement else LIB_PACKAGE_NAME
-        )
-        target_spec = f"{base_spec}=={requested}"
+        target_spec = _build_version_target(value, requirement)
         pip_args = []
-    else:
-        return
 
-    # An unpinned pip_spec always triggers a (re)install; without this marker
-    # the ConfigEntryNotReady retry would loop forever. The marker does not
-    # survive an HA restart, so a pip_spec override reinstalls once per start.
-    if hass.data.get(OVERRIDE_APPLIED_KEY) == target_spec:
+    # The library install is global; a second entry must not fight over pip.
+    applied = hass.data.get(OVERRIDE_APPLIED_KEY)
+    if applied is not None:
+        if applied != target_spec:
+            _LOGGER.warning(
+                "Library override %s requested by this config entry, but %s "
+                "is already active (set by another entry) — ignoring",
+                target_spec,
+                applied,
+            )
         return
 
     _LOGGER.warning(
@@ -201,7 +193,7 @@ async def _async_install_library_override(hass: HomeAssistant) -> None:
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Hyundai / Kia Connect from a config entry."""
-    await _async_install_library_override(hass)
+    await _async_install_library_override(hass, config_entry)
     coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()

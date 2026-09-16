@@ -45,15 +45,16 @@ DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH: int = 7
 DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 
-# Optional library version override (see README: Runtime library version
-# override). File lives in the HA config directory:
-#   {"library_version": "X.Y.Z"}              — version from the manifest spec
-#   {"library_pip_spec": "<pip requirement>"} — full pip spec (e.g. git+https)
-OVERRIDES_FILENAME: str = "kia_uvo_overrides.json"
-OVERRIDE_LIBRARY_VERSION_KEY: str = "library_version"
-OVERRIDE_PIP_SPEC_KEY: str = "library_pip_spec"
-# hass.data key marking the override applied in this HA session, so the
-# ConfigEntryNotReady retry does not reinstall an unpinned pip_spec.
+# Optional library version override, set from the integration options flow
+# (entry.options["library_override"]). Empty = the manifest-pinned version.
+# Accepts a bare version ("4.28.0", extras from the manifest are kept), a
+# "==" pin ("==4.28.0"), or any pip requirement verbatim (e.g.
+# "hyundai_kia_connect_api @ git+https://github.com/...@refs/pull/N/head").
+# See README: Runtime library version override.
+CONF_LIBRARY_OVERRIDE: str = "library_override"
+# hass.data key holding the override target installed in this HA session, so
+# the ConfigEntryNotReady retry does not reinstall, and so a second config
+# entry requesting a different version warns instead of fighting over pip.
 OVERRIDE_APPLIED_KEY: str = "kia_uvo_library_override_applied"
 LIB_PACKAGE_NAME: str = "hyundai_kia_connect_api"
 
