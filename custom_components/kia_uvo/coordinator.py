@@ -301,7 +301,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         cached = self._svm_views.get(vehicle_id)
         if cached is not None and cached[0] == key:
             return cached[1]
-        views = await self.hass.async_add_executor_job(
+        views: dict[str, bytes] = await self.hass.async_add_executor_job(
             partial(render_views, details, dewarp=key[1])
         )
         self._svm_views[vehicle_id] = (key, views)
