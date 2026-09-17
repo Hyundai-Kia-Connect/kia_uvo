@@ -85,7 +85,7 @@
           "library_override": "Nadpisanie wersji biblioteki (zaawansowane)"
         },
         "data_description": {
-          "library_override": "Puste = wersja przypięta w manifeście.\n\nPrzyjmuje wersję (`4.28.0`), pin `==`, lub dowolny pip requirement, np. head PR-a:\n\n`hyundai_kia_connect_api @ git+https://github.com/OWNER/REPO@refs/pull/N/head`\n\nSpacje wokół `@` są wymagane (PEP 508). Szczegóły w README, sekcja *Runtime library version override*."
+          "library_override": "Puste = wersja przypięta w manifeście.\n\nPrzyjmuje wersję (`4.28.0`), pin `==`, lub dowolny pip requirement — git requirement z `@refs/pull/N/head` dla heada PR-a, branch, commit, albo plik lokalny. Gotowe przykłady: README, sekcja *Runtime library version override*."
         }
       }
     }
