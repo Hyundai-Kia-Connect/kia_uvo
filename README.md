@@ -48,7 +48,7 @@ Save the options and the integration reloads itself with the requested library �
 One free-text field, interpreted automatically:
 
 - **A released version** — `4.28.0` (or `==4.28.0`). The extras from the manifest requirement (e.g. `[image]`) are kept automatically; when the installed version already matches, nothing is installed.
-- **A pull request head** — `hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head` (replace the repository with the one the PR belongs to and `1314` with the PR number).
+- **A pull request head** — `hyundai_kia_connect_api @ git+https://github.com/Hyundai-Kia-Connect/hyundai_kia_connect_api@refs/pull/1314/head` (replace the repository with the one the PR belongs to and `1314` with the PR number). Paste the **git ref** `@refs/pull/N/head` — not the `.../pull/N/head` page URL from the browser; the integration detects that mistake and tells you the corrected form.
 - **A branch from a fork** — `hyundai_kia_connect_api @ git+https://github.com/<user>/hyundai_kia_connect_api@<branch>`
 - **A specific commit** — same URL with `@<full-or-short-commit-sha>` instead of the branch name.
 - **A local wheel/sdist** — `hyundai_kia_connect_api @ file:///config/<path-to-file>` (paths must be reachable from Home Assistant).
@@ -59,7 +59,7 @@ A verbatim pip requirement does **not** inherit the manifest extras — add `[im
 
 ### Behavior and caveats
 
-- The install runs before the integration sets up; on install the integration reloads itself, so a short "Setting up…" retry in the logs is expected and harmless.
+- The install runs before the integration sets up; on install the integration reloads itself, so a short "Setting up…" retry in the logs is expected and harmless. An install that fails (bad URL, unreachable source) fails fast: the entry shows an error in the UI instead of retrying forever — fix the value, save the options, and the entry reloads with a fresh attempt.
 - A git/URL requirement is reinstalled once on every Home Assistant start (there is no version to compare) and installs with `--no-deps`, leaving dependency versions untouched.
 - The library is a single install shared by all kia_uvo entries: if you run several accounts, the first entry that applies an override wins and a second entry with a different override only logs a warning.
 - Clearing the field restores the manifest-pinned version on the next Home Assistant start.

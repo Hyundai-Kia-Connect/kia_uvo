@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import logging
+import re
 import sys
 from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as importlib_version
@@ -15,7 +16,11 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.exceptions import (
+    ConfigEntryAuthFailed,
+    ConfigEntryError,
+    ConfigEntryNotReady,
+)
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntry
 from homeassistant.loader import DATA_COMPONENTS, async_get_integration
@@ -90,8 +95,9 @@ async def _async_install_library_override(
     On a version change (or every start for a git/URL spec) the override is
     pip-installed, the loaded library and integration modules are purged so
     the setup retry imports the fresh library, then ConfigEntryNotReady is
-    raised. A failed install also raises ConfigEntryNotReady so HA retries
-    with the pinned version.
+    raised. A failed install raises ConfigEntryError instead, so the entry
+    shows the error in the UI rather than retrying the install forever;
+    fixing the value and saving the options reloads the entry and retries.
 
     The library is a single site-packages install shared by all kia_uvo
     entries: the first entry whose setup installs an override wins, and an
@@ -104,6 +110,19 @@ async def _async_install_library_override(
     installed = await hass.async_add_executor_job(_get_installed_library_version)
 
     if any(ch in value for ch in "@/:"):
+        # A PR page URL pasted from the browser is not a git ref; fail with
+        # the corrected form instead of a confusing git-clone error.
+        if "/pull/" in value and "refs/pull/" not in value:
+            suggestion = re.sub(r"/pull/(\d+)/", r"@refs/pull/\1/", value)
+            _LOGGER.warning(
+                "Library override %s is a PR page URL, not a git ref — use %s",
+                value,
+                suggestion,
+            )
+            raise ConfigEntryError(
+                f"Library override {value!r} is a PR page URL; "
+                f"use a git ref: {suggestion}"
+            )
         # A verbatim pip requirement (git+https, file://, ...): pip reports a
         # spec resolving to the already-installed version as satisfied, so
         # force the package swap. --no-deps keeps dependency installs out of
@@ -165,7 +184,11 @@ async def _async_install_library_override(
             proc.returncode,
             _stdout.decode(errors="replace"),
         )
-        raise ConfigEntryNotReady(f"Library override install failed ({target_spec})")
+        # Fail fast: ConfigEntryError marks the entry as errored in the UI
+        # instead of retrying the install forever (a bad spec would never
+        # succeed). Fixing the value and saving the options reloads the
+        # entry, which tries again.
+        raise ConfigEntryError(f"Library override install failed ({target_spec})")
 
     # Drop the loaded library and integration modules so the setup retry
     # re-imports both from disk (the library binding in coordinator.py is
