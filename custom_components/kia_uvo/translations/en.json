@@ -85,7 +85,7 @@
           "library_override": "Library version override (advanced)"
         },
         "data_description": {
-          "library_override": "Empty = the version pinned in the manifest.\n\nAccepts a version (`4.28.0`), an `==` pin, or any pip requirement verbatim, e.g. a PR head:\n\n`hyundai_kia_connect_api @ git+https://github.com/<owner>/<repo>@refs/pull/N/head`\n\nSpaces around `@` are required (PEP 508). See the README, section *Runtime library version override*."
+          "library_override": "Empty = the version pinned in the manifest.\n\nAccepts a version (`4.28.0`), an `==` pin, or any pip requirement verbatim, e.g. a PR head:\n\n`hyundai_kia_connect_api @ git+https://github.com/OWNER/REPO@refs/pull/N/head`\n\nSpaces around `@` are required (PEP 508). See the README, section *Runtime library version override*."
         }
       }
     }
