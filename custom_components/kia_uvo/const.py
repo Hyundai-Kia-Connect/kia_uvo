@@ -52,10 +52,14 @@ DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
 # "hyundai_kia_connect_api @ git+https://github.com/...@refs/pull/N/head").
 # See README: Runtime library version override.
 CONF_LIBRARY_OVERRIDE: str = "library_override"
-# hass.data key holding the override target installed in this HA session, so
-# the ConfigEntryNotReady retry does not reinstall, and so a second config
+# hass.data key holding {"entry_id", "spec"} for the override installed in
+# this HA session, so the ConfigEntryNotReady retry does not reinstall, the
+# entry that applied it can change or clear its own override, and a second
 # entry requesting a different version warns instead of fighting over pip.
 OVERRIDE_APPLIED_KEY: str = "kia_uvo_library_override_applied"
+# hass.data key holding an asyncio.Lock serializing override installs, so two
+# config entries starting at once cannot run pip concurrently.
+OVERRIDE_LOCK_KEY: str = "kia_uvo_library_override_lock"
 LIB_PACKAGE_NAME: str = "hyundai_kia_connect_api"
 
 DYNAMIC_UNIT: str = "dynamic_unit"

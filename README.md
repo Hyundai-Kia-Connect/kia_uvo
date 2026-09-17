@@ -61,8 +61,8 @@ A verbatim pip requirement does **not** inherit the manifest extras — add `[im
 
 - The install runs before the integration sets up; on install the integration reloads itself, so a short "Setting up…" retry in the logs is expected and harmless. An install that fails (bad URL, unreachable source) fails fast: the entry shows an error in the UI instead of retrying forever — fix the value, save the options, and the entry reloads with a fresh attempt.
 - A git/URL requirement is reinstalled once on every Home Assistant start (there is no version to compare) and installs with `--no-deps`, leaving dependency versions untouched.
-- The library is a single install shared by all kia_uvo entries: if you run several accounts, the first entry that applies an override wins and a second entry with a different override only logs a warning.
-- Clearing the field restores the manifest-pinned version on the next Home Assistant start.
+- The library is a single install shared by all kia_uvo entries: if you run several accounts, the first entry that applies an override wins and a second entry with a different override only logs a warning. The entry that applied an override can change or clear it freely.
+- Clearing the field restores the manifest-pinned version: saving the options reinstalls the pinned version and the entry reloads (`VERSION OVERRIDE cleared` lines in the logs confirm it). On later starts the pin is enforced again as long as no entry requests an override.
 - The overridden version must still be compatible with the integration; an older version may fail on import with a clear error in the logs (in that case clear the field and restart).
 - The [diagnostics dump](#troubleshooting) reports the actually installed library version and its install source (git URL + ref + commit for a PR/branch override, `file://` for a local install, nothing for a PyPI pin).
 
