@@ -29,6 +29,7 @@ from .const import (
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
+    CONF_LIBRARY_OVERRIDE,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_TOKEN,
@@ -126,6 +127,9 @@ OPTIONS_SCHEMA = vol.Schema(
             CONF_USE_EMAIL_WITH_GEOCODE_API,
             default=DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
         ): bool,
+        vol.Optional(CONF_LIBRARY_OVERRIDE, default=""): selector(
+            {"text": {"multiline": False}}
+        ),
     }
 )
 
