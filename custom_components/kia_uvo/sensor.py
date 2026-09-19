@@ -64,6 +64,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.DISTANCE,
         state_class=SensorStateClass.TOTAL_INCREASING,
+        # Odometer is a stable vehicle capability, but its value can be absent
+        # during setup. Keep the entity so a later refresh can populate it.
+        exists=lambda _: True,
     ),
     HyundaiKiaSensorEntityDescription(
         key="_last_service_distance",
