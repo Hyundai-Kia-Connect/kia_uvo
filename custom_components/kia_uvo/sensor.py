@@ -239,9 +239,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
-        exists=lambda vehicle: (
-            _is_electrified(vehicle) or vehicle.total_power_consumed is not None
-        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="total_power_regenerated",
@@ -250,9 +247,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=UnitOfEnergy.WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL,
-        exists=lambda vehicle: (
-            _is_electrified(vehicle) or vehicle.total_power_regenerated is not None
-        ),
     ),
     # Need to remove km hard coding.  Underlying API needs this fixed first.  EU always does KM.
     HyundaiKiaSensorEntityDescription(
@@ -261,9 +255,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         icon="mdi:car-electric",
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=f"{UnitOfEnergy.WATT_HOUR}/km",
-        exists=lambda vehicle: (
-            _is_electrified(vehicle) or vehicle.power_consumption_30d is not None
-        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="front_left_seat_status",
@@ -570,7 +561,7 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
-        if vehicle.daily_stats or _is_electrified(vehicle):
+        if vehicle.daily_stats:
             entities.append(
                 DailyDrivingStatsEntity(
                     coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
