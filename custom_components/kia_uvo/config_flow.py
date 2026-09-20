@@ -244,10 +244,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     return await self.async_step_select_otp_method()
                 if self._is_reconfigure:
-                    # validate_input performed a full login with the new
-                    # credentials; persist the fresh token so the reload does
-                    # not start from the stale one kept by the data_updates
-                    # merge (the OTP path below already does this).
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
                         data_updates={
