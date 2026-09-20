@@ -246,7 +246,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 if self._is_reconfigure:
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
-                        data_updates=full_config,
+                        data_updates={
+                            **full_config,
+                            CONF_TOKEN: self._vehicle_manager.token.to_dict(),
+                        },
                     )
                 elif self.reauth_entry is None:
                     title = f"{BRANDS[self._region_data[CONF_BRAND]]} {REGIONS[self._region_data[CONF_REGION]]} {user_input[CONF_USERNAME]}"
