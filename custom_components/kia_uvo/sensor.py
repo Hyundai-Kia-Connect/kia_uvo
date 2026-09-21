@@ -29,7 +29,19 @@ from homeassistant.helpers.typing import StateType
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
-from .const import BRAND_HYUNDAI, CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT, REGION_USA
+from .const import (
+    BRAND_HYUNDAI,
+    CHARGING_CURRENTS,
+    DOMAIN,
+    DYNAMIC_UNIT,
+    REGION_AUSTRALIA,
+    REGION_CHINA,
+    REGION_EUROPE,
+    REGION_INDIA,
+    REGION_NZ,
+    REGION_USA,
+    REGIONS,
+)
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -46,6 +58,31 @@ class HyundaiKiaSensorEntityDescription(SensorEntityDescription):
 def _is_electrified(vehicle: Vehicle) -> bool:
     """Return True for BEV and PHEV vehicles."""
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+
+
+# Sensors fed by the POST /drvhistory endpoint. Which regions poll it, and
+# for which engine types, mirrors the gates in the library's region
+# implementations (VehicleManager.get_implementation_by_region_brand): the
+# EU and India implementations poll for EV/PHEV, China for EV only, Australia
+# (also used for NZ Kia) for EV/PHEV; CA/USA/BR never poll. The AU and CN
+# implementations never parse regenPwr, so total_power_regenerated stays
+# limited to EU/India. Non-matching vehicles never have values and must not
+# get the entities (they would sit `unknown` forever).
+_DRVHISTORY_KEYS: Final[tuple[str, ...]] = (
+    "total_power_consumed",
+    "total_power_regenerated",
+    "power_consumption_30d",
+)
+_DRVHISTORY_ENGINE_TYPES: Final[dict[str, frozenset[ENGINE_TYPES]]] = {
+    REGION_EUROPE: frozenset((ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)),
+    REGION_CHINA: frozenset((ENGINE_TYPES.EV,)),
+    REGION_AUSTRALIA: frozenset((ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)),
+    REGION_NZ: frozenset((ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)),
+    REGION_INDIA: frozenset((ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)),
+}
+_DRVHISTORY_REGEN_REGIONS: Final[frozenset[str]] = frozenset(
+    (REGION_EUROPE, REGION_INDIA)
+)
 
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
@@ -550,6 +587,19 @@ async def async_setup_entry(
     entities: list[SensorEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        # /drvhistory sensors: an electrified vehicle in a polling region can
+        # legitimately have no data at setup (idle car, empty endpoint
+        # response — every region implementation returns None then, so the
+        # fields and daily_stats read back None). Data presence must not
+        # gate creation for those: entities dropped here only come back
+        # after the next reload (#1896). Same pattern as `_geocode_name`
+        # (#1844).
+        # `region` is the int index into REGIONS (config_flow stores ints);
+        # entity.py already relies on that.
+        region_name: str = REGIONS.get(coordinator.vehicle_manager.region, "")
+        drvhistory_vehicle = vehicle.engine_type in _DRVHISTORY_ENGINE_TYPES.get(
+            region_name, frozenset()
+        )
         for description in SENSOR_DESCRIPTIONS:
             if (
                 description.key == "_geocode_name"
@@ -562,16 +612,24 @@ async def async_setup_entry(
                 # description above. Gated here, not in `exists`, because the
                 # option is coordinator state.
                 continue
-            create = (
-                description.exists(vehicle)
-                if description.exists is not None
-                else getattr(vehicle, description.key, None) is not None
-            )
+            if description.key in _DRVHISTORY_KEYS:
+                create = drvhistory_vehicle and (
+                    description.key != "total_power_regenerated"
+                    or region_name in _DRVHISTORY_REGEN_REGIONS
+                )
+            else:
+                create = (
+                    description.exists(vehicle)
+                    if description.exists is not None
+                    else getattr(vehicle, description.key, None) is not None
+                )
             if create:
                 entities.append(
                     HyundaiKiaConnectSensor(coordinator, description, vehicle)
                 )
-        if vehicle.daily_stats:
+        if drvhistory_vehicle:
+            # Always created in /drvhistory-polling regions (#1896): the
+            # entities report `unknown` when the endpoint returns no data.
             entities.append(
                 DailyDrivingStatsEntity(
                     coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
@@ -702,12 +760,17 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_value(self) -> StateType:
+        # Created unconditionally for EU electrified vehicles (#1896): an
+        # empty/None daily_stats (idle car, empty /drvhistory response)
+        # reports `unknown` instead of a misleading 0 days.
+        if not self.vehicle.daily_stats:
+            return None
         return len(self.vehicle.daily_stats)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         m: dict[str, Any] = {}
-        for day in self.vehicle.daily_stats:
+        for day in self.vehicle.daily_stats or []:
             key = day.date.strftime("%Y-%m-%d")
             value = {
                 "total_consumed": day.total_consumed,
@@ -760,7 +823,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
             "regenerated_energy": 0,
             "distance": 0,
         }
-        for day in self.vehicle.daily_stats:
+        for day in self.vehicle.daily_stats or []:
             key = day.date.strftime("%Y-%m-%d")
             if key == todayskey:
                 todayvalue = {
