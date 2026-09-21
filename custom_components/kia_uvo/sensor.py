@@ -9,6 +9,7 @@ from datetime import date, datetime
 from typing import Any, Final, cast
 
 from homeassistant.components.sensor import (
+    RestoreSensor,
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
@@ -602,7 +603,7 @@ async def async_setup_entry(
 PARALLEL_UPDATES = 0
 
 
-class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect sensor class."""
 
     def __init__(
@@ -615,6 +616,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._key = description.key
+        self._last_dynamic_unit: str | None = None
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = description.icon
         self._attr_state_class = description.state_class
@@ -644,11 +646,28 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             return cast(StateType | datetime, value)
         return cast(StateType | datetime, value)
 
+    async def async_added_to_hass(self) -> None:
+        """Restore the last known dynamic unit after a restart."""
+        await super().async_added_to_hass()
+        last_sensor_data = await self.async_get_last_sensor_data()
+        if last_sensor_data is not None and last_sensor_data.native_unit_of_measurement:
+            self._last_dynamic_unit = last_sensor_data.native_unit_of_measurement
+
     @property
     def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value was reported in by the sensor"""
+        """Return the reported unit, falling back to the last known unit.
+
+        A poll whose payload omits the unit block would otherwise publish a
+        unitless state for DYNAMIC_UNIT sensors while the device_class stays,
+        which trips the recorder units_changed repair on every dropout
+        (issue #1894).
+        """
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
-            return cast(str | None, getattr(self.vehicle, self._key + "_unit"))
+            unit = cast(str | None, getattr(self.vehicle, self._key + "_unit", None))
+            if unit is not None:
+                self._last_dynamic_unit = unit
+                return unit
+            return self._last_dynamic_unit
         return self.entity_description.native_unit_of_measurement
 
     @property
