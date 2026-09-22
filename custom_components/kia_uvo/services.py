@@ -390,10 +390,24 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     if device_entry is None:
         raise HomeAssistantError(f"Device {call.data[ATTR_DEVICE_ID]} not found")
-    for entry in device_entry.identifiers:
-        if entry[0] == DOMAIN:
-            vehicle_id = entry[1]
-    return vehicle_id
+
+    coordinator = _get_coordinator_from_device(hass, call)
+    known_vehicle_ids = coordinator.vehicle_manager.vehicles.keys()
+
+    matches = {
+        identifier
+        for domain, identifier in device_entry.identifiers
+        if domain == DOMAIN and identifier in known_vehicle_ids
+    }
+    if len(matches) == 1:
+        return matches.pop()
+    if not matches:
+        raise HomeAssistantError(
+            f"No active vehicle found for device {call.data[ATTR_DEVICE_ID]}"
+        )
+    raise HomeAssistantError(
+        f"Multiple active vehicles found for device {call.data[ATTR_DEVICE_ID]}"
+    )
 
 
 def _get_coordinator_from_device(
