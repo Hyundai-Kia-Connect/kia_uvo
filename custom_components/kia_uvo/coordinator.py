@@ -8,6 +8,7 @@ import logging
 import traceback
 from collections.abc import Callable
 from datetime import timedelta
+from functools import partial
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -20,6 +21,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 from hyundai_kia_connect_api import (
@@ -37,6 +39,7 @@ from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
     UnsupportedControlError,
 )
+from hyundai_kia_connect_api.svm_image import render_views
 
 from .const import (
     CONF_BRAND,
@@ -58,6 +61,10 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+# Render-invalidation signal for the SVM image entities: sent by
+# set_svm_dewarp, consumed in image.py.
+SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
+
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
@@ -69,6 +76,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._svm_details: dict[str, SVMDetails] = {}
         # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
         self._svm_dewarp: dict[str, bool] = {}
+        # Rendered SVM views cache: vehicle_id -> ((captured_at, dewarp), views).
+        # Invalidated by key change on a new capture or a switch toggle — no
+        # explicit invalidation hooks needed.
+        self._svm_views: dict[
+            str, tuple[tuple[dt.datetime | None, bool], dict[str, bytes]]
+        ] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -244,6 +257,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     def set_svm_dewarp(self, vehicle_id: str, enabled: bool) -> None:
         """Set the per-vehicle SVM fisheye dewarp preference."""
         self._svm_dewarp[vehicle_id] = enabled
+        # The render key changes with the toggle, but captured_at does not —
+        # without this signal the image proxy keeps serving the pre-toggle
+        # image until the next capture.
+        async_dispatcher_send(self.hass, SIGNAL_SVM_RENDER.format(vehicle_id))
 
     def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
         """Return cached SVM details for a vehicle, or None if not yet fetched."""
@@ -267,6 +284,28 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._svm_details[vehicle_id] = details
         self.async_set_updated_data(self.data)
         return details
+
+    async def async_get_svm_views(self, vehicle_id: str) -> dict[str, bytes] | None:
+        """Return the 5 rendered SVM views (front/rear/left/right/top) as JPEG.
+
+        Renders once per (captured_at, dewarp switch) state: every image
+        entity serves from the same dict, and a new capture or a switch
+        toggle invalidates it by key change. The render runs in an executor
+        thread (dewarp is CPU-bound numpy work); render errors (e.g. missing
+        Pillow) propagate to the caller.
+        """
+        details = self.get_cached_svm_details(vehicle_id)
+        if details is None or not details.image_bytes or not details.image_sizes:
+            return None
+        key = (details.captured_at, self.svm_dewarp_enabled(vehicle_id))
+        cached = self._svm_views.get(vehicle_id)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        views: dict[str, bytes] = await self.hass.async_add_executor_job(
+            partial(render_views, details, dewarp=key[1])
+        )
+        self._svm_views[vehicle_id] = (key, views)
+        return views
 
     async def async_check_and_refresh_token(self) -> None:
         """Refresh token if needed via library."""

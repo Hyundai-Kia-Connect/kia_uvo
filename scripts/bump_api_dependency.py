@@ -34,7 +34,7 @@ def _http_get(url: str, token: str | None) -> dict[str, Any]:
 def get_current_pin(manifest_path: str) -> str:
     data = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
     for req in data.get("requirements", []):
-        match = re.search(rf"{re.escape(PACKAGE_NAME)}==([^\s\"]+)", req)
+        match = re.search(rf"{re.escape(PACKAGE_NAME)}(?:\[[^\]]*\])?==([^\s\"]+)", req)
         if match:
             return match.group(1)
     raise ValueError(f"{PACKAGE_NAME} not found in {manifest_path} requirements")
@@ -474,7 +474,9 @@ def update_manifest(manifest_path: str, new_version: str) -> None:
     """
     path = Path(manifest_path)
     text = path.read_text(encoding="utf-8")
-    pattern = rf"({re.escape(PACKAGE_NAME)}==)[^\s\"']+"
+    # The optional [extras] group is part of the captured prefix, so a bump
+    # rewrites only the version and preserves e.g. hyundai_kia_connect_api[image]==.
+    pattern = rf"({re.escape(PACKAGE_NAME)}(?:\[[^\]]*\])?==)[^\s\"']+"
     new_text, count = re.subn(pattern, rf"\g<1>{new_version}", text)
     if count == 0:
         raise ValueError(f"{PACKAGE_NAME} not found in {manifest_path}")
