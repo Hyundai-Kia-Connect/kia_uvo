@@ -29,7 +29,7 @@ from homeassistant.helpers.typing import StateType
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
-from .const import BRAND_HYUNDAI, CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT, REGION_USA
+from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -585,17 +585,13 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
-    if (
-        coordinator.vehicle_manager.region == REGION_USA
-        and coordinator.vehicle_manager.brand == BRAND_HYUNDAI
-    ):
-        for vehicle_id in coordinator.vehicle_manager.vehicles:
-            if await coordinator.async_supports_svm(vehicle_id):
-                entities.append(
-                    SVMStatusSensor(
-                        coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
-                    )
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
+        if await coordinator.async_supports_svm(vehicle_id):
+            entities.append(
+                SVMStatusSensor(
+                    coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
                 )
+            )
     async_add_entities(entities)
 
 
