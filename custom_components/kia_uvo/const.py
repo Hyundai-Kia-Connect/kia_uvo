@@ -13,6 +13,7 @@ CONF_USE_EMAIL_WITH_GEOCODE_API: str = "use_email_with_geocode_api"
 CONF_TOKEN: str = "token"
 
 REGION_EUROPE: str = "Europe"
+REGION_EUROPE_CCI: str = "Europe (OneApp)"
 REGION_CANADA: str = "Canada"
 REGION_USA: str = "USA"
 REGION_CHINA: str = "China"
@@ -29,6 +30,7 @@ REGIONS = {
     6: REGION_INDIA,
     7: REGION_NZ,
     8: REGION_BRAZIL,
+    9: REGION_EUROPE_CCI,
 }
 BRAND_KIA: str = "Kia"
 BRAND_HYUNDAI: str = "Hyundai"
