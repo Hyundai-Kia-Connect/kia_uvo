@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-import logging
 from typing import Final
-
-from homeassistant.const import EntityCategory
-from hyundai_kia_connect_api import Vehicle
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -16,8 +13,10 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from hyundai_kia_connect_api import Vehicle
 
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -26,7 +25,7 @@ from .entity import HyundaiKiaConnectEntity
 _LOGGER = logging.getLogger(__name__)
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     """A class that describes custom binary sensor entities."""
 
@@ -351,6 +350,38 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     HyundaiKiaBinarySensorEntityDescription(
+        key="headlamp_left_high",
+        translation_key="headlamp_left_high",
+        is_on=lambda vehicle: vehicle.headlamp_left_high,
+        on_icon="mdi:lightbulb-alert-outline",
+        off_icon="mdi:lightbulb-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="headlamp_right_high",
+        translation_key="headlamp_right_high",
+        is_on=lambda vehicle: vehicle.headlamp_right_high,
+        on_icon="mdi:lightbulb-alert-outline",
+        off_icon="mdi:lightbulb-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="headlamp_left_bifunc",
+        translation_key="headlamp_left_bifunc",
+        is_on=lambda vehicle: vehicle.headlamp_left_bifunc,
+        on_icon="mdi:lightbulb-alert-outline",
+        off_icon="mdi:lightbulb-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="headlamp_right_bifunc",
+        translation_key="headlamp_right_bifunc",
+        is_on=lambda vehicle: vehicle.headlamp_right_bifunc,
+        on_icon="mdi:lightbulb-alert-outline",
+        off_icon="mdi:lightbulb-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
         key="stop_lamp_left",
         translation_key="stop_lamp_left",
         is_on=lambda vehicle: vehicle.stop_lamp_left,
@@ -506,6 +537,24 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         icon="mdi:ev-station",
         is_on=lambda vehicle: vehicle.ev_v2x_status,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="oil_level_warning_is_on",
+        translation_key="oil_level_warning_is_on",
+        is_on=lambda vehicle: vehicle.oil_level_warning_is_on,
+        on_icon="mdi:oil",
+        off_icon="mdi:oil",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="battery_auxiliary_fail_warning_is_on",
+        translation_key="battery_auxiliary_fail_warning_is_on",
+        is_on=lambda vehicle: vehicle.battery_auxiliary_fail_warning_is_on,
+        on_icon="mdi:car-battery",
+        off_icon="mdi:car-battery",
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
 )
 
 
@@ -517,7 +566,7 @@ async def async_setup_entry(
     """Set up binary_sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities: list[HyundaiKiaConnectBinarySensor] = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
             if getattr(vehicle, description.key, None) is not None:
@@ -525,7 +574,6 @@ async def async_setup_entry(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
     async_add_entities(entities)
-    return True
 
 
 PARALLEL_UPDATES = 0
@@ -555,12 +603,12 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
         return None
 
     @property
-    def icon(self):
+    def icon(self) -> str | None:
         """Return the icon to use in the frontend, if any."""
         if (
             self.entity_description.on_icon == self.entity_description.off_icon
         ) is None:
-            return BinarySensorEntity.icon
+            return BinarySensorEntity.icon.__get__(self)
         return (
             self.entity_description.on_icon
             if self.is_on

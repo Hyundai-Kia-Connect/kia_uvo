@@ -390,6 +390,16 @@
           "description": "Akcja dla tylnego prawego okna"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Wykonaj obraz SVM",
+      "description": "Wyzwala nowe zdjęcie Surround View Monitor. Pojazd się budzi i wykonuje zdjęcie 360.",
+      "fields": {
+        "device_id": {
+          "name": "Pojazd",
+          "description": "Docelowy pojazd"
+        }
+      }
     }
   },
   "entity": {
@@ -411,6 +421,9 @@
       },
       "last_updated_at": {
         "name": "Ostatnia aktualizacja"
+      },
+      "last_scanned_at": {
+        "name": "Ostatni skan"
       },
       "ev_battery_percentage": {
         "name": "Poziom baterii EV"
@@ -510,6 +523,24 @@
       },
       "todays_daily_driving_stats": {
         "name": "Dzisiejsze statystyki jazdy"
+      },
+      "tire_pressure_front_left": {
+        "name": "Ciśnienie opon - przednia lewa"
+      },
+      "tire_pressure_front_right": {
+        "name": "Ciśnienie opon - przednia prawa"
+      },
+      "tire_pressure_rear_left": {
+        "name": "Ciśnienie opon - tylna lewa"
+      },
+      "tire_pressure_rear_right": {
+        "name": "Ciśnienie opon - tylna prawa"
+      },
+      "drive_mode": {
+        "name": "Tryb jazdy"
+      },
+      "svm_status": {
+        "name": "Status SVM"
       }
     },
     "binary_sensor": {
@@ -662,6 +693,12 @@
       },
       "rear_right_seat_heater_on": {
         "name": "Podgrzewanie fotela tylnego prawego"
+      },
+      "oil_level_warning_is_on": {
+        "name": "Niski poziom oleju"
+      },
+      "battery_auxiliary_fail_warning_is_on": {
+        "name": "Awaria baterii 12V"
       }
     },
     "lock": {
@@ -672,6 +709,47 @@
     "button": {
       "force_refresh": {
         "name": "Wymuś odświeżenie"
+      },
+      "start_hazard_lights": {
+        "name": "Włącz światła awaryjne"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Włącz światła awaryjne i klakson"
+      },
+      "start_valet_mode": {
+        "name": "Włącz tryb valet"
+      },
+      "stop_valet_mode": {
+        "name": "Wyłącz tryb valet"
+      },
+      "open_all_windows": {
+        "name": "Otwórz wszystkie okna"
+      },
+      "close_all_windows": {
+        "name": "Zamknij wszystkie okna"
+      },
+      "vent_all_windows": {
+        "name": "Wentyluj wszystkie okna"
+      },
+      "capture_svm_image": {
+        "name": "Wykonaj obraz SVM"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM Kamera przednia"
+      },
+      "svm_rear": {
+        "name": "SVM Kamera tylna"
+      },
+      "svm_left": {
+        "name": "SVM Kamera lewa"
+      },
+      "svm_right": {
+        "name": "SVM Kamera prawa"
+      },
+      "svm_top": {
+        "name": "SVM Widok z lotu ptaka"
       }
     },
     "switch": {
@@ -680,6 +758,12 @@
       },
       "climate": {
         "name": "Klimatyzacja"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Ładowanie tylko poza szczytem"
+      },
+      "svm_dewarp": {
+        "name": "Korekcja SVM (dewarp)"
       }
     },
     "climate": {
@@ -701,6 +785,14 @@
     "device_tracker": {
       "location": {
         "name": "Lokalizacja"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Czas początku ładowania poza szczytem"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Czas końca ładowania poza szczytem"
       }
     }
   }

@@ -1,31 +1,31 @@
+import hashlib
 import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    Platform,
-    CONF_USERNAME,
-    CONF_REGION,
-    CONF_PIN,
     CONF_PASSWORD,
+    CONF_PIN,
+    CONF_REGION,
     CONF_SCAN_INTERVAL,
+    CONF_USERNAME,
+    Platform,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady, ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntry
 
-import hashlib
-
 from .const import (
-    DOMAIN,
-    CONF_BRAND,
-    DEFAULT_PIN,
     BRANDS,
-    REGIONS,
+    CONF_BRAND,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
-    CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_PIN,
+    DOMAIN,
+    REGIONS,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .services import async_setup_services, async_unload_services
@@ -42,10 +42,12 @@ PLATFORMS: list[str] = [
     Platform.NUMBER,
     Platform.SWITCH,
     Platform.CLIMATE,
+    Platform.IMAGE,
+    Platform.TIME,
 ]
 
 
-async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry):
+async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     return True
 
 
@@ -77,7 +79,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return unload_ok
 
 
-async def async_migrate_entry(hass, config_entry: ConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     if config_entry.version == 1:
         _LOGGER.debug(f"{DOMAIN} - config data- {config_entry}")
         username = config_entry.data.get(CONF_USERNAME)
@@ -112,10 +114,8 @@ async def async_migrate_entry(hass, config_entry: ConfigEntry):
             CONF_FORCE_REFRESH_INTERVAL: force_refresh_interval,
             CONF_SCAN_INTERVAL: scan_interval,
         }
-        registry = hass.helpers.entity_registry.async_get(hass)
-        entities = hass.helpers.entity_registry.async_entries_for_config_entry(
-            registry, config_entry.entry_id
-        )
+        registry = er.async_get(hass)
+        entities = er.async_entries_for_config_entry(registry, config_entry.entry_id)
         for entity in entities:
             registry.async_remove(entity.entity_id)
 

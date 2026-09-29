@@ -10,19 +10,16 @@ Required field validation (latitude, longitude, name) is enforced by
 services.yaml (required: true), not by the Python handler.
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from hyundai_kia_connect_api.ApiImpl import POICoord, POIInfo
-
 
 # --- Minimal stubs (no HA dependency) ---
 
 
 class HomeAssistantError(Exception):
     """Stub for HA's HomeAssistantError."""
-
-    pass
 
 
 # --- Tests: POIInfo construction from service call data ---

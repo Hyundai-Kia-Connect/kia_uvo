@@ -2,29 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any
-import datetime as dt
-from datetime import timedelta
-import traceback
-import logging
 import asyncio
-
-from hyundai_kia_connect_api import (
-    Vehicle,
-    VehicleManager,
-    ClimateRequestOptions,
-    WindowRequestOptions,
-    ScheduleChargingClimateRequestOptions,
-    POIInfo,
-    Token,
-)
-from hyundai_kia_connect_api.exceptions import (
-    AuthenticationError,
-    UnsupportedControlError,
-)
-
-from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+import datetime as dt
+import logging
+import traceback
+from collections.abc import Callable
+from datetime import timedelta
+from functools import partial
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -35,30 +20,53 @@ from homeassistant.const import (
     CONF_USERNAME,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
+from hyundai_kia_connect_api import (
+    ClimateRequestOptions,
+    POIInfo,
+    ScheduleChargingClimateRequestOptions,
+    SVMDetails,
+    Token,
+    Vehicle,
+    VehicleManager,
+    WindowRequestOptions,
+)
+from hyundai_kia_connect_api.const import WINDOW_STATE
+from hyundai_kia_connect_api.exceptions import (
+    AuthenticationError,
+    UnsupportedControlError,
+)
+from hyundai_kia_connect_api.svm_image import render_views
 
 from .const import (
     CONF_BRAND,
+    CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
+    CONF_TOKEN,
+    CONF_USE_EMAIL_WITH_GEOCODE_API,
+    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-    DEFAULT_ENABLE_GEOLOCATION_ENTITY,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
-    CONF_USE_EMAIL_WITH_GEOCODE_API,
-    CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_TOKEN,
+    DOMAIN,
+    OffPeakChargingMode,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
+# Render-invalidation signal for the SVM image entities: sent by
+# set_svm_dewarp, consumed in image.py.
+SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 
-class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
+
+class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
@@ -70,6 +78,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         # meaning the endpoint is not implemented for this region. Resets on
         # HA restart so a firmware/API change is picked up on next boot.
         self.day_trip_unsupported: set[str] = set()
+        self._svm_details: dict[str, SVMDetails] = {}
+        # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
+        self._svm_dewarp: dict[str, bool] = {}
+        # Rendered SVM views cache: vehicle_id -> ((captured_at, dewarp), views).
+        # Invalidated by key change on a new capture or a switch toggle — no
+        # explicit invalidation hooks needed.
+        self._svm_views: dict[
+            str, tuple[tuple[dt.datetime | None, bool], dict[str, bytes]]
+        ] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -118,13 +135,30 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                 seconds=min(self.scan_interval, self.force_refresh_interval)
             ),
         )
+        _LOGGER.debug(
+            "%s - Polling configured: scan_interval=%ds, "
+            "force_refresh_interval=%ds, update_interval=%ds, "
+            "no_force_refresh_hours=%d-%d",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+            min(self.scan_interval, self.force_refresh_interval),
+            self.no_force_refresh_hour_start,
+            self.no_force_refresh_hour_finish,
+        )
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library. Called by update_coordinator periodically.
 
         Allow to update for the first time without further checking
         Allow force update, if time diff between latest update and `now` is greater than force refresh delta
         """
+        _LOGGER.debug(
+            "%s - _async_update_data called, scan_interval=%ds, force_refresh_interval=%ds",
+            DOMAIN,
+            self.scan_interval,
+            self.force_refresh_interval,
+        )
         try:
             await self.async_check_and_refresh_token()
         except AuthenticationError as AuthError:
@@ -237,14 +271,85 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         )
         self.async_set_updated_data(self.data)
 
-    async def async_check_and_refresh_token(self):
+    async def async_supports_svm(self, vehicle_id: str) -> bool:
+        """Return whether the given vehicle supports SVM.
+
+        Capability is a per-region class attribute stamped on the Vehicle by
+        the API library (like supports_window_control), so this is a plain
+        attribute read — no API call, no executor job needed.
+        """
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if vehicle is None:
+            return False
+        return bool(vehicle.supports_svm)
+
+    def svm_dewarp_enabled(self, vehicle_id: str) -> bool:
+        """Return the per-vehicle SVM fisheye dewarp preference."""
+        return self._svm_dewarp.get(vehicle_id, False)
+
+    def set_svm_dewarp(self, vehicle_id: str, enabled: bool) -> None:
+        """Set the per-vehicle SVM fisheye dewarp preference."""
+        self._svm_dewarp[vehicle_id] = enabled
+        # The render key changes with the toggle, but captured_at does not —
+        # without this signal the image proxy keeps serving the pre-toggle
+        # image until the next capture.
+        async_dispatcher_send(self.hass, SIGNAL_SVM_RENDER.format(vehicle_id))
+
+    def get_cached_svm_details(self, vehicle_id: str) -> SVMDetails | None:
+        """Return cached SVM details for a vehicle, or None if not yet fetched."""
+        return self._svm_details.get(vehicle_id)
+
+    async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
+        """Fetch the latest cached SVM image and metadata from the API."""
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.get_svm_details, vehicle_id
+        )
+        self._svm_details[vehicle_id] = details
+        return details
+
+    async def async_request_svm_capture(self, vehicle_id: str) -> SVMDetails:
+        """Trigger a fresh SVM capture and update the cached details."""
+        details = await self.hass.async_add_executor_job(
+            self.vehicle_manager.request_svm_capture,
+            vehicle_id,
+            True,  # acknowledged_warning — capture is always a user-initiated action
+        )
+        self._svm_details[vehicle_id] = details
+        self.async_set_updated_data(self.data)
+        return details
+
+    async def async_get_svm_views(self, vehicle_id: str) -> dict[str, bytes] | None:
+        """Return the 5 rendered SVM views (front/rear/left/right/top) as JPEG.
+
+        Renders once per (captured_at, dewarp switch) state: every image
+        entity serves from the same dict, and a new capture or a switch
+        toggle invalidates it by key change. The render runs in an executor
+        thread (dewarp is CPU-bound numpy work); render errors (e.g. missing
+        Pillow) propagate to the caller.
+        """
+        details = self.get_cached_svm_details(vehicle_id)
+        if details is None or not details.image_bytes or not details.image_sizes:
+            return None
+        key = (details.captured_at, self.svm_dewarp_enabled(vehicle_id))
+        cached = self._svm_views.get(vehicle_id)
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        views: dict[str, bytes] = await self.hass.async_add_executor_job(
+            partial(render_views, details, dewarp=key[1])
+        )
+        self._svm_views[vehicle_id] = (key, views)
+        return views
+
+    async def async_check_and_refresh_token(self) -> None:
         """Refresh token if needed via library."""
         await self.hass.async_add_executor_job(
             self.vehicle_manager.check_and_refresh_token
         )
         await self._async_save_token()
 
-    async def async_await_action_and_refresh(self, vehicle_id, action_id):
+    async def async_await_action_and_refresh(
+        self, vehicle_id: str, action_id: str
+    ) -> None:
         try:
             await asyncio.sleep(5)
             await self.hass.async_add_executor_job(
@@ -257,7 +362,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         finally:
             await self.async_refresh()
 
-    async def async_await_action_and_force_refresh(self, vehicle_id, action_id):
+    async def async_await_action_and_force_refresh(
+        self, vehicle_id: str, action_id: str
+    ) -> None:
         """Wait for action then force refresh to get fresh vehicle data.
 
         Used after setting charge limits because the soft refresh (cmm/gvi)
@@ -294,7 +401,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
         error_label: str,
         *,
         force_refresh: bool = False,
-    ):
+    ) -> None:
         """Send a vehicle action, wait for completion, and refresh data.
 
         Serializes actions with a lock to prevent DuplicateRequestError
@@ -334,76 +441,76 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
                     error_label,
                 )
 
-    async def async_lock_vehicle(self, vehicle_id: str):
+    async def async_lock_vehicle(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.lock(vehicle_id),
             "lock vehicle",
         )
 
-    async def async_unlock_vehicle(self, vehicle_id: str):
+    async def async_unlock_vehicle(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.unlock(vehicle_id),
             "unlock vehicle",
         )
 
-    async def async_open_charge_port(self, vehicle_id: str):
+    async def async_open_charge_port(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.open_charge_port(vehicle_id),
             "open charge port",
         )
 
-    async def async_close_charge_port(self, vehicle_id: str):
+    async def async_close_charge_port(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.close_charge_port(vehicle_id),
             "close charge port",
         )
 
-    async def async_start_climate_default(self, vehicle_id: str):
+    async def async_start_climate_default(self, vehicle_id: str) -> None:
         """Start climate with default options (API fills sensible defaults)."""
         await self.async_start_climate(vehicle_id, ClimateRequestOptions())
 
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
-    ):
+    ) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_climate(vehicle_id, climate_options),
             "start climate",
         )
 
-    async def async_stop_climate(self, vehicle_id: str):
+    async def async_stop_climate(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_climate(vehicle_id),
             "stop climate",
         )
 
-    async def async_start_charge(self, vehicle_id: str):
+    async def async_start_charge(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_charge(vehicle_id),
             "start charge",
         )
 
-    async def async_stop_charge(self, vehicle_id: str):
+    async def async_stop_charge(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_charge(vehicle_id),
             "stop charge",
         )
 
-    async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int):
+    async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charge_limits(vehicle_id, ac, dc),
             "set charge limits",
         )
 
-    async def async_set_charging_current(self, vehicle_id: str, level: int):
+    async def async_set_charging_current(self, vehicle_id: str, level: int) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charging_current(vehicle_id, level),
@@ -412,7 +519,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_schedule_charging_and_climate(
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
-    ):
+    ) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.schedule_charging_and_climate(
@@ -447,7 +554,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
-    async def async_set_schedule_charge_enabled(self, vehicle_id: str, enabled: bool):
+    async def async_set_schedule_charge_enabled(
+        self, vehicle_id: str, enabled: bool
+    ) -> None:
         """Toggle scheduled charging on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
@@ -456,16 +565,51 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_off_peak_charge_only_enabled(
         self, vehicle_id: str, enabled: bool
-    ):
+    ) -> None:
         """Toggle off-peak charge only on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
         options.off_peak_charge_only_enabled = enabled
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
+    async def async_set_off_peak_charging(
+        self,
+        vehicle_id: str,
+        *,
+        mode: OffPeakChargingMode | None = None,
+        start: dt.time | None = None,
+        end: dt.time | None = None,
+    ) -> None:
+        """Set the off-peak charging schedule mode and/or window.
+
+        ``mode`` maps to the (charging_enabled, off_peak_charge_only_enabled)
+        pair the API expects: ``OFF`` disables scheduled charging, ``TIME``
+        charges only during the off-peak window (time priority), ``TARGET``
+        prefers off-peak tariffs but continues past the window to reach the
+        target SoC (target priority). ``mode=None`` preserves the current mode
+        and only adjusts the window — used by the time entities. Other
+        schedule fields (departures) are preserved.
+        """
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        options = self._build_schedule_options_from_vehicle(vehicle)
+        if mode is not None:
+            if mode is OffPeakChargingMode.OFF:
+                options.charging_enabled = False
+            elif mode is OffPeakChargingMode.TIME:
+                options.charging_enabled = True
+                options.off_peak_charge_only_enabled = True
+            elif mode is OffPeakChargingMode.TARGET:
+                options.charging_enabled = True
+                options.off_peak_charge_only_enabled = False
+        if start is not None:
+            options.off_peak_start_time = start
+        if end is not None:
+            options.off_peak_end_time = end
+        await self.async_schedule_charging_and_climate(vehicle_id, options)
+
     async def async_set_departure_enabled(
         self, vehicle_id: str, departure_num: int, enabled: bool
-    ):
+    ) -> None:
         """Toggle a departure schedule on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
@@ -483,7 +627,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_departure_climate_enabled(
         self, vehicle_id: str, departure_num: int, enabled: bool
-    ):
+    ) -> None:
         """Toggle departure climate on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
@@ -492,42 +636,42 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_departure_defrost(
         self, vehicle_id: str, departure_num: int, enabled: bool
-    ):
+    ) -> None:
         """Toggle departure defrost on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
         options.defrost = enabled
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
-    async def async_start_hazard_lights(self, vehicle_id: str):
+    async def async_start_hazard_lights(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights(vehicle_id),
             "start hazard lights",
         )
 
-    async def async_start_hazard_lights_and_horn(self, vehicle_id: str):
+    async def async_start_hazard_lights_and_horn(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights_and_horn(vehicle_id),
             "start hazard lights and horn",
         )
 
-    async def async_start_valet_mode(self, vehicle_id: str):
+    async def async_start_valet_mode(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_valet_mode(vehicle_id),
             "start valet mode",
         )
 
-    async def async_stop_valet_mode(self, vehicle_id: str):
+    async def async_stop_valet_mode(self, vehicle_id: str) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_valet_mode(vehicle_id),
             "stop valet mode",
         )
 
-    async def async_set_v2l_limit(self, vehicle_id: str, limit: int):
+    async def async_set_v2l_limit(self, vehicle_id: str, limit: int) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_vehicle_to_load_discharge_limit(
@@ -538,26 +682,67 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def async_set_windows(
         self, vehicle_id: str, windowOptions: WindowRequestOptions
-    ):
+    ) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, windowOptions),
             "set windows",
         )
 
-    async def async_set_navigation(self, vehicle_id: str, poi_list: list[POIInfo]):
+    async def async_set_navigation(
+        self, vehicle_id: str, poi_list: list[POIInfo]
+    ) -> None:
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
             "set navigation",
         )
 
-    async def _async_save_token(self):
+    async def async_open_all_windows(self, vehicle_id: str) -> None:
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.OPEN,
+            front_right=WINDOW_STATE.OPEN,
+            back_left=WINDOW_STATE.OPEN,
+            back_right=WINDOW_STATE.OPEN,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "open all windows",
+        )
+
+    async def async_close_all_windows(self, vehicle_id: str) -> None:
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.CLOSED,
+            front_right=WINDOW_STATE.CLOSED,
+            back_left=WINDOW_STATE.CLOSED,
+            back_right=WINDOW_STATE.CLOSED,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "close all windows",
+        )
+
+    async def async_vent_all_windows(self, vehicle_id: str) -> None:
+        options = WindowRequestOptions(
+            front_left=WINDOW_STATE.VENTILATION,
+            front_right=WINDOW_STATE.VENTILATION,
+            back_left=WINDOW_STATE.VENTILATION,
+            back_right=WINDOW_STATE.VENTILATION,
+        )
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
+            "vent all windows",
+        )
+
+    async def _async_save_token(self) -> None:
         """Persist the latest token into the config entry."""
+        config_entry = self.config_entry
+        assert config_entry is not None
         new_token = self.vehicle_manager.token.to_dict()
         # Only update if token actually changed
-        if new_token and new_token != self.config_entry.data.get(CONF_TOKEN):
-            updated_data = {**self.config_entry.data, CONF_TOKEN: new_token}
-            self.hass.config_entries.async_update_entry(
-                self.config_entry, data=updated_data
-            )
+        if new_token and new_token != config_entry.data.get(CONF_TOKEN):
+            updated_data = {**config_entry.data, CONF_TOKEN: new_token}
+            self.hass.config_entries.async_update_entry(config_entry, data=updated_data)

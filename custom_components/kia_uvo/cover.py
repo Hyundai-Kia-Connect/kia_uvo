@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
-from typing import Final
+from dataclasses import dataclass
+from typing import Any, Final
 
 from homeassistant.components.cover import (
+    ATTR_POSITION,
     CoverEntity,
     CoverEntityDescription,
     CoverEntityFeature,
@@ -15,7 +16,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from hyundai_kia_connect_api import Vehicle, WindowRequestOptions
 from hyundai_kia_connect_api.const import WINDOW_STATE
 
@@ -66,7 +66,7 @@ async def async_setup_entry(
 ) -> None:
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
-    for vehicle_id in coordinator.vehicle_manager.vehicles.keys():
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         if not vehicle.supports_window_control:
             continue
@@ -98,7 +98,7 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
-        self.entity_description = description
+        self.entity_description: HyundaiKiaCoverDescription = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
 
     @property
@@ -117,25 +117,26 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
             return 100
         return 0
 
-    async def async_open_cover(self, **kwargs) -> None:
+    async def async_open_cover(self, **kwargs: Any) -> None:
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.OPEN}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
-    async def async_close_cover(self, **kwargs) -> None:
+    async def async_close_cover(self, **kwargs: Any) -> None:
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
-    async def async_stop_cover(self, **kwargs) -> None:
+    async def async_stop_cover(self, **kwargs: Any) -> None:
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
-    async def async_set_cover_position(self, position: int, **kwargs) -> None:
+    async def async_set_cover_position(self, **kwargs: Any) -> None:
+        position = kwargs[ATTR_POSITION]
         if position == 0:
             state = WINDOW_STATE.CLOSED
         elif position <= 49:

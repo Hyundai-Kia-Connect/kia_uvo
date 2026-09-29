@@ -8,15 +8,34 @@ jobs:
   validate-hassfest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@868e6cb4607727d764341a158d98872cd63fa658 # master
+        uses: home-assistant/actions/hassfest@58bff37c8947f690ace498be413a9b78d6f30f93 # master
 
   validate-hacs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: HACS validation
-        uses: hacs/action@dcb30e72781db3f207d5236b861172774ab0b485 # main
+        uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
         with:
           category: integration
+
+  validate-mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install mypy and dependencies
+        # hyundai_kia_connect_api pin follows manifest.json; homeassistant pin
+        # tracks the current stable release.
+        run: |
+          pip install mypy==2.3.1 homeassistant==2026.9.2 hyundai_kia_connect_api==4.31.0
+      - name: Run mypy
+        # Whole custom_components/kia_uvo/ package is strict-clean; this also
+        # covers new files automatically.
+        run: |
+          mypy --strict --ignore-missing-imports \
+            custom_components/kia_uvo/

@@ -1,0 +1,75 @@
+name: Bump API dependency
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-api-dependency:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: Determine and apply API bump
+        id: bump
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python scripts/bump_api_dependency.py custom_components/kia_uvo/manifest.json > bump_result.json
+          cat bump_result.json
+          echo "noop=$(jq -r '.noop' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "branch=$(jq -r '.branch' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "commit_title=$(jq -r '.commit_title' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "commit_body<<EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.commit_body' bump_result.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$(jq -r '.pr_title' bump_result.json)" >> "$GITHUB_OUTPUT"
+          echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.pr_body' bump_result.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          jq -r '.commit_body' bump_result.json > commit_body.md
+          jq -r '.pr_body' bump_result.json > pr_body.md
+
+      - name: Commit and push branch
+        if: ${{ steps.bump.outputs.noop == 'false' }}
+        run: |
+          set -euo pipefail
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout -B ${{ steps.bump.outputs.branch }}
+          git add custom_components/kia_uvo/manifest.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 1
+          fi
+          printf '%s\n\n' "${{ steps.bump.outputs.commit_title }}" > commit_msg.txt
+          cat commit_body.md >> commit_msg.txt
+          git commit -F commit_msg.txt
+          git push --force-with-lease origin ${{ steps.bump.outputs.branch }}
+
+      - name: Create or update PR
+        if: ${{ steps.bump.outputs.noop == 'false' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list --head ${{ steps.bump.outputs.branch }} --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
+          else
+            gh pr create --base master --head ${{ steps.bump.outputs.branch }} --title "${{ steps.bump.outputs.pr_title }}" --body-file pr_body.md
+          fi

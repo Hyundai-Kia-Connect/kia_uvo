@@ -67,7 +67,7 @@
     },
     "error": {
       "invalid_auth": "Login failed into Hyundai (Bluelink) / Kia (Uvo) Connect servers. Please use the official app to logout and log back in, then try again.",
-      "invalid_credentials": "Invalid username or token/password",
+      "invalid_credentials": "Invalid username or password",
       "unknown": "Unexpected error"
     }
   },
@@ -390,6 +390,16 @@
           "description": "Action for the rear right window"
         }
       }
+    },
+    "capture_svm_image": {
+      "name": "Capture SVM Image",
+      "description": "Trigger a fresh Surround View Monitor capture. The vehicle wakes up and captures a 360 image.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
     }
   },
   "entity": {
@@ -496,6 +506,9 @@
       "last_updated_at": {
         "name": "Last Updated At"
       },
+      "last_scanned_at": {
+        "name": "Last Scanned At"
+      },
       "next_service_distance": {
         "name": "Next Service"
       },
@@ -558,6 +571,24 @@
       },
       "ev_v2l_target_soc": {
         "name": "V2L target SoC"
+      },
+      "tire_pressure_front_left": {
+        "name": "Tire Pressure - Front Left"
+      },
+      "tire_pressure_front_right": {
+        "name": "Tire Pressure - Front Right"
+      },
+      "tire_pressure_rear_left": {
+        "name": "Tire Pressure - Rear Left"
+      },
+      "tire_pressure_rear_right": {
+        "name": "Tire Pressure - Rear Right"
+      },
+      "drive_mode": {
+        "name": "Drive Mode"
+      },
+      "svm_status": {
+        "name": "SVM Status"
       }
     },
     "binary_sensor": {
@@ -653,6 +684,18 @@
       },
       "headlamp_right_low": {
         "name": "Front Right Lamp Fault"
+      },
+      "headlamp_left_high": {
+        "name": "Headlamp Left High Fault"
+      },
+      "headlamp_right_high": {
+        "name": "Headlamp Right High Fault"
+      },
+      "headlamp_left_bifunc": {
+        "name": "Headlamp Left Bifunctional Fault"
+      },
+      "headlamp_right_bifunc": {
+        "name": "Headlamp Right Bifunctional Fault"
       },
       "headlamp_status": {
         "name": "Headlamp Status"
@@ -755,6 +798,12 @@
       },
       "ev_v2x_status": {
         "name": "V2X status"
+      },
+      "oil_level_warning_is_on": {
+        "name": "Oil Level Warning"
+      },
+      "battery_auxiliary_fail_warning_is_on": {
+        "name": "12V Battery Fault"
       }
     },
     "lock": {
@@ -765,6 +814,47 @@
     "button": {
       "force_refresh": {
         "name": "Force Refresh"
+      },
+      "start_hazard_lights": {
+        "name": "Start Hazard Lights"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Start Hazard Lights and Horn"
+      },
+      "start_valet_mode": {
+        "name": "Start Valet Mode"
+      },
+      "stop_valet_mode": {
+        "name": "Stop Valet Mode"
+      },
+      "open_all_windows": {
+        "name": "Open All Windows"
+      },
+      "close_all_windows": {
+        "name": "Close All Windows"
+      },
+      "vent_all_windows": {
+        "name": "Vent All Windows"
+      },
+      "capture_svm_image": {
+        "name": "Capture SVM Image"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM Front Camera"
+      },
+      "svm_rear": {
+        "name": "SVM Rear Camera"
+      },
+      "svm_left": {
+        "name": "SVM Left Camera"
+      },
+      "svm_right": {
+        "name": "SVM Right Camera"
+      },
+      "svm_top": {
+        "name": "SVM Bird's-eye View"
       }
     },
     "cover": {
@@ -811,6 +901,15 @@
       },
       "ev_schedule_charge_enabled": {
         "name": "Scheduled charging"
+      },
+      "ev_charge_port_door": {
+        "name": "Charge Port"
+      },
+      "valet_mode_control": {
+        "name": "Valet Mode"
+      },
+      "svm_dewarp": {
+        "name": "SVM Dewarp"
       }
     },
     "climate": {
@@ -832,6 +931,14 @@
     "device_tracker": {
       "location": {
         "name": "Location"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Off-peak charge start time"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Off-peak charge end time"
       }
     }
   }

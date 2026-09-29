@@ -13,13 +13,14 @@ body:
       label: Region
       description: Select your region
       options:
-        - EU
-        - CA
-        - USA
-        - AUS
+        - Europe
+        - Canada
+        - United States
+        - Australia
         - China
         - India
-        - NZ
+        - New Zealand
+        - Brazil
     validations:
       required: true
   - type: dropdown
@@ -38,7 +39,7 @@ body:
     attributes:
       label: Version of the Integration
       description: Provide the version number you are using
-      placeholder: e.g., 0.4.1
+      placeholder: e.g., 3.11.0
     validations:
       required: true
   - type: textarea
@@ -58,6 +59,18 @@ body:
         Provide logs if available. Instructions:
         https://github.com/Hyundai-Kia-Connect/kia_uvo/blob/master/README.md
       placeholder: Paste logs here
+    validations:
+      required: false
+  - type: textarea
+    id: diagnostics_dump
+    attributes:
+      label: Diagnostics dump (if available)
+      description: |
+        Attach the redacted diagnostics JSON. Download it via
+        Settings → Devices & Services → kia_uvo → ⋮ → Download diagnostics.
+        The dump is auto-redacted (tokens, device id, PIN, GPS, and
+        reverse-geocoded address removed) — safe to share.
+      placeholder: Paste the diagnostics JSON here or attach the file
     validations:
       required: false
   - type: textarea
