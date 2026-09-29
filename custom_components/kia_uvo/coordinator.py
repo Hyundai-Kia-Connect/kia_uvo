@@ -73,10 +73,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
-        # Vehicle IDs where update_day_trip_info() returned without exception
-        # but left day_trip_info as None — indicates the base-class no-op ran,
-        # meaning the endpoint is not implemented for this region. Resets on
-        # HA restart so a firmware/API change is picked up on next boot.
+        # Vehicle IDs whose region does not implement update_day_trip_info()
+        # (the library raises NotImplementedError). In-memory only, so a
+        # library update that adds the region is picked up on next boot.
         self.day_trip_unsupported: set[str] = set()
         self._svm_details: dict[str, SVMDetails] = {}
         # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
@@ -217,35 +216,51 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
-        # Per-trip data for today. Skipped for vehicles where the endpoint is
-        # confirmed unsupported (see day_trip_unsupported). On exception the
-        # endpoint exists but returned no data (e.g. no trips yet) — keep
-        # polling. No exception but day_trip_info still None means the library's
-        # base-class no-op ran — endpoint unsupported, stop polling.
+        await self._async_update_day_trip_info()
+
+        return self.data
+
+    async def _async_update_day_trip_info(self) -> None:
+        """Fetch today's per-trip data for every vehicle.
+
+        A region without the endpoint raises NotImplementedError: the vehicle is
+        added to day_trip_unsupported and skipped until HA restarts. A call that
+        returns with day_trip_info None is a supported vehicle with no trips
+        today (the library only builds a DayTripInfo from a non-empty day).
+        """
         today_str = dt_util.now().strftime("%Y%m%d")
-        for vehicle_id in self.vehicle_manager.vehicles:
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
             if vehicle_id in self.day_trip_unsupported:
                 continue
+            # Day rollover: drop the previous day's trips so a failed fetch
+            # after midnight cannot report them as today's.
+            if (
+                vehicle.day_trip_info is not None
+                and vehicle.day_trip_info.yyyymmdd != today_str
+            ):
+                vehicle.day_trip_info = None
+            previous = vehicle.day_trip_info
             try:
                 await self.hass.async_add_executor_job(
                     self.vehicle_manager.update_day_trip_info,
                     vehicle_id,
                     today_str,
                 )
-                if self.vehicle_manager.vehicles[vehicle_id].day_trip_info is None:
-                    self.day_trip_unsupported.add(vehicle_id)
-                    _LOGGER.debug(
-                        "Day trip info not supported for vehicle %s — skipping future polls",
-                        vehicle_id,
-                    )
+            except NotImplementedError:
+                self.day_trip_unsupported.add(vehicle_id)
+                _LOGGER.debug(
+                    "Day trip info not supported for vehicle %s, skipping future polls",
+                    vehicle_id,
+                )
             except Exception as exc:
+                # The library clears day_trip_info before the request; keep
+                # today's last good data instead of dropping to 0 trips.
+                vehicle.day_trip_info = previous
                 _LOGGER.debug(
                     "Day trip info fetch failed for vehicle %s: %s",
                     vehicle_id,
                     exc,
                 )
-
-        return self.data
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""

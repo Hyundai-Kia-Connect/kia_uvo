@@ -23,11 +23,14 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.typing import StateType
+from homeassistant.util import dt as dt_util
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
+from hyundai_kia_connect_api.Vehicle import DayTripInfo
 
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -790,8 +793,8 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     (start time, drive/idle time, distance, avg/max speed).
 
     Three possible states:
-    - ``unavailable`` — endpoint not supported for this vehicle/region (coordinator
-      confirmed by seeing no exception but day_trip_info still None after the call).
+    - ``unavailable`` — the library does not implement the endpoint for this
+      region (vehicle is in ``coordinator.day_trip_unsupported``).
     - ``0`` — endpoint supported, no trips recorded yet today.
     - positive integer — number of trips driven today.
     """
@@ -799,22 +802,55 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     _attr_translation_key = "day_trip_info"
     _attr_icon = "mdi:calendar"
 
-    def __init__(self, coordinator, vehicle: Vehicle):
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ) -> None:
         super().__init__(coordinator, vehicle)
 
-    @property
-    def state(self):
-        if self.vehicle.id in self.coordinator.day_trip_unsupported:
-            return None
-        if self.vehicle.day_trip_info is None:
-            return 0
-        return len(self.vehicle.day_trip_info.trip_list)
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        # Coordinator polls are 30+ min apart; write state at midnight so the
+        # count drops to 0 right away instead of at the first poll of the day.
+        self.async_on_remove(
+            async_track_time_change(
+                self.hass, self._async_midnight, hour=0, minute=0, second=0
+            )
+        )
+
+    @callback
+    def _async_midnight(self, _now: datetime) -> None:
+        self.async_write_ha_state()
 
     @property
-    def state_attributes(self):
-        if self.vehicle.day_trip_info is None:
-            return {}
-        info = self.vehicle.day_trip_info
+    def available(self) -> bool:
+        return (
+            super().available
+            and self.vehicle.id not in self.coordinator.day_trip_unsupported
+        )
+
+    def _today_info(self) -> DayTripInfo | None:
+        """Return day_trip_info if it is for today, else None."""
+        info = cast(DayTripInfo | None, self.vehicle.day_trip_info)
+        if info is None or info.yyyymmdd != dt_util.now().strftime("%Y%m%d"):
+            return None
+        return info
+
+    @property
+    def native_value(self) -> int:
+        info = self._today_info()
+        return 0 if info is None else len(info.trip_list)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        info = self._today_info()
+        if info is None:
+            return {
+                "date": dt_util.now().date().isoformat(),
+                "summary": None,
+                "trip_list": [],
+            }
         date_iso = _iso_date(info.yyyymmdd)
         summary = info.summary
         return {
@@ -845,25 +881,27 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
         }
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> str:
         return f"{DOMAIN}-day-trip-info-{self.vehicle.id}"
 
 
-def _iso_date(yyyymmdd):
+def _iso_date(yyyymmdd: str | None) -> str | None:
     """Convert YYYYMMDD packed string to ISO YYYY-MM-DD, or None if unset."""
     if not yyyymmdd or len(yyyymmdd) != 8:
         return None
     return f"{yyyymmdd[0:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
 
 
-def _iso_datetime(date_iso, hhmmss):
+def _iso_datetime(date_iso: str | None, hhmmss: str | None) -> str | None:
     """Combine an ISO date with a packed HHMMSS string into ISO 8601."""
     if not date_iso or not hhmmss or len(hhmmss) != 6:
         return None
     return f"{date_iso}T{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:6]}"
 
 
-def _iso_datetime_add(date_iso, hhmmss, minutes):
+def _iso_datetime_add(
+    date_iso: str | None, hhmmss: str | None, minutes: int
+) -> str | None:
     """Return the naive ISO 8601 timestamp `minutes` after (date_iso, hhmmss)."""
     start_iso = _iso_datetime(date_iso, hhmmss)
     if start_iso is None:
