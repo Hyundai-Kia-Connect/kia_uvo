@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any, Final, cast
 
 from homeassistant.components.sensor import (
@@ -24,11 +24,14 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTime,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_time_change
 from homeassistant.helpers.typing import StateType
+from homeassistant.util import dt as dt_util
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
+from hyundai_kia_connect_api.Vehicle import DayTripInfo
 
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -586,6 +589,11 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
+        entities.append(
+            DayTripInfoEntity(
+                coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
+            )
+        )
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         if await coordinator.async_supports_svm(vehicle_id):
             entities.append(
@@ -795,6 +803,152 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Per-trip sensor for today.
+
+    State is the number of trips today; attributes carry the full per-trip list
+    (start time, drive/idle time, distance, avg/max speed).
+
+    Three possible states:
+    - ``unavailable`` — the library does not implement the endpoint for this
+      region (vehicle is in ``coordinator.day_trip_unsupported``).
+    - ``0`` — endpoint supported, no trips recorded yet today.
+    - positive integer — number of trips driven today.
+
+    Once a day the coordinator re-fetches the previous day (see
+    ``DAY_TRIP_CATCH_UP_HOUR``). If it holds more trips than were shown, e.g. a
+    trip that crossed midnight, one extra state is written with that day's
+    ``date``, full count and trip list, directly followed by today's state.
+    Consumers of trip history must therefore group by the ``date`` attribute
+    and each trip's ``start_time``, never by the state timestamp.
+    """
+
+    _attr_translation_key = "day_trip_info"
+    _attr_icon = "mdi:calendar"
+
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ) -> None:
+        super().__init__(coordinator, vehicle)
+        # Previous day's data, set only while its catch-up state is written.
+        self._catch_up: DayTripInfo | None = None
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        # Coordinator polls are 30+ min apart; write state at midnight so the
+        # count drops to 0 right away instead of at the first poll of the day.
+        self.async_on_remove(
+            async_track_time_change(
+                self.hass, self._async_midnight, hour=0, minute=0, second=0
+            )
+        )
+
+    @callback
+    def _async_midnight(self, _now: datetime) -> None:
+        self.async_write_ha_state()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._catch_up = self.coordinator.day_trip_catch_up.pop(self.vehicle.id, None)
+        if self._catch_up is not None:
+            self.async_write_ha_state()
+            self._catch_up = None
+        super()._handle_coordinator_update()
+
+    @property
+    def available(self) -> bool:
+        return (
+            super().available
+            and self.vehicle.id not in self.coordinator.day_trip_unsupported
+        )
+
+    def _shown_info(self) -> DayTripInfo | None:
+        """Return the catch-up day while it is written, else today's data."""
+        if self._catch_up is not None:
+            return self._catch_up
+        info = cast(DayTripInfo | None, self.vehicle.day_trip_info)
+        if info is None or info.yyyymmdd != dt_util.now().strftime("%Y%m%d"):
+            return None
+        return info
+
+    @property
+    def native_value(self) -> int:
+        info = self._shown_info()
+        return 0 if info is None else len(info.trip_list)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        info = self._shown_info()
+        if info is None:
+            return {
+                "date": dt_util.now().date().isoformat(),
+                "summary": None,
+                "trip_list": [],
+            }
+        date_iso = _iso_date(info.yyyymmdd)
+        summary = info.summary
+        return {
+            "date": date_iso,
+            "summary": {
+                "drive_time": summary.drive_time,
+                "idle_time": summary.idle_time,
+                "distance": summary.distance,
+                "avg_speed": summary.avg_speed,
+                "max_speed": summary.max_speed,
+            }
+            if summary is not None
+            else None,
+            "trip_list": [
+                {
+                    "start_time": _iso_datetime(date_iso, t.hhmmss),
+                    "end_time": _iso_datetime_add(
+                        date_iso, t.hhmmss, (t.drive_time or 0) + (t.idle_time or 0)
+                    ),
+                    "drive_time": t.drive_time,
+                    "idle_time": t.idle_time,
+                    "distance": t.distance,
+                    "avg_speed": t.avg_speed,
+                    "max_speed": t.max_speed,
+                }
+                for t in info.trip_list
+            ],
+        }
+
+    @property
+    def unique_id(self) -> str:
+        return f"{DOMAIN}-day-trip-info-{self.vehicle.id}"
+
+
+def _iso_date(yyyymmdd: str | None) -> str | None:
+    """Convert YYYYMMDD packed string to ISO YYYY-MM-DD, or None if unset."""
+    if not yyyymmdd or len(yyyymmdd) != 8:
+        return None
+    return f"{yyyymmdd[0:4]}-{yyyymmdd[4:6]}-{yyyymmdd[6:8]}"
+
+
+def _iso_datetime(date_iso: str | None, hhmmss: str | None) -> str | None:
+    """Combine an ISO date with a packed HHMMSS string into ISO 8601."""
+    if not date_iso or not hhmmss or len(hhmmss) != 6:
+        return None
+    return f"{date_iso}T{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:6]}"
+
+
+def _iso_datetime_add(
+    date_iso: str | None, hhmmss: str | None, minutes: int
+) -> str | None:
+    """Return the naive ISO 8601 timestamp `minutes` after (date_iso, hhmmss)."""
+    start_iso = _iso_datetime(date_iso, hhmmss)
+    if start_iso is None:
+        return None
+    try:
+        start = datetime.fromisoformat(start_iso)
+    except (TypeError, ValueError):
+        return None
+    return (start + timedelta(minutes=int(minutes))).isoformat(timespec="seconds")
 
 
 class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):

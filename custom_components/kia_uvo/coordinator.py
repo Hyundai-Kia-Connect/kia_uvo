@@ -40,6 +40,7 @@ from hyundai_kia_connect_api.exceptions import (
     UnsupportedControlError,
 )
 from hyundai_kia_connect_api.svm_image import render_views
+from hyundai_kia_connect_api.Vehicle import DayTripInfo
 
 from .const import (
     CONF_BRAND,
@@ -65,6 +66,14 @@ _LOGGER = logging.getLogger(__name__)
 # set_svm_dewarp, consumed in image.py.
 SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 
+# Local hour from which the previous day's trips are fetched once more. Hyundai
+# uploads a trip only after it ends and books it on the day it started, so a
+# trip crossing midnight shows up in the previous day's list only after the car
+# parks. 04:00 leaves four hours for such night drives and for late uploads,
+# and lands before most first drives, so the catch-up state rarely interleaves
+# with today's trips in the history.
+DAY_TRIP_CATCH_UP_HOUR = 4
+
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
@@ -73,6 +82,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
+        # Vehicle IDs whose region does not implement update_day_trip_info()
+        # (the library raises NotImplementedError). In-memory only, so a
+        # library update that adds the region is picked up on next boot.
+        self.day_trip_unsupported: set[str] = set()
+        # Trip count the sensor showed, per vehicle and day, for today and
+        # yesterday only: the baseline the catch-up fetch is compared to.
+        self._day_trip_shown: dict[str, dict[str, int]] = {}
+        # Last day each vehicle's catch-up fetch was attempted for.
+        self._day_trip_caught_up: dict[str, str] = {}
+        # Previous day's complete data, written by the sensor as one extra
+        # state and then popped.
+        self.day_trip_catch_up: dict[str, DayTripInfo] = {}
         self._svm_details: dict[str, SVMDetails] = {}
         # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
         self._svm_dewarp: dict[str, bool] = {}
@@ -212,7 +233,104 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
+        await self._async_update_day_trip_info()
+
         return self.data
+
+    async def _async_update_day_trip_info(self) -> None:
+        """Fetch today's per-trip data for every vehicle.
+
+        A region without the endpoint raises NotImplementedError: the vehicle is
+        added to day_trip_unsupported and skipped until HA restarts. A call that
+        returns with day_trip_info None is a supported vehicle with no trips
+        today (the library only builds a DayTripInfo from a non-empty day).
+
+        From DAY_TRIP_CATCH_UP_HOUR on, the previous day is fetched once more
+        first; see _async_catch_up_day_trip_info.
+        """
+        now = dt_util.now()
+        today_str = now.strftime("%Y%m%d")
+        yesterday_str = (now.date() - timedelta(days=1)).strftime("%Y%m%d")
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
+            if vehicle_id in self.day_trip_unsupported:
+                continue
+            # Day rollover: drop the previous day's trips so a failed fetch
+            # after midnight cannot report them as today's.
+            if (
+                vehicle.day_trip_info is not None
+                and vehicle.day_trip_info.yyyymmdd != today_str
+            ):
+                vehicle.day_trip_info = None
+            previous = vehicle.day_trip_info
+            try:
+                if (
+                    now.hour >= DAY_TRIP_CATCH_UP_HOUR
+                    and self._day_trip_caught_up.get(vehicle_id) != yesterday_str
+                ):
+                    await self._async_catch_up_day_trip_info(
+                        vehicle_id, vehicle, yesterday_str
+                    )
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.update_day_trip_info,
+                    vehicle_id,
+                    today_str,
+                )
+            except NotImplementedError:
+                self.day_trip_unsupported.add(vehicle_id)
+                _LOGGER.debug(
+                    "Day trip info not supported for vehicle %s, skipping future polls",
+                    vehicle_id,
+                )
+                continue
+            except Exception as exc:
+                # The library clears day_trip_info before the request; keep
+                # today's last good data instead of dropping to 0 trips.
+                vehicle.day_trip_info = previous
+                _LOGGER.debug(
+                    "Day trip info fetch failed for vehicle %s: %s",
+                    vehicle_id,
+                    exc,
+                )
+            info = vehicle.day_trip_info
+            shown = self._day_trip_shown.get(vehicle_id, {})
+            self._day_trip_shown[vehicle_id] = {
+                yesterday_str: shown.get(yesterday_str, 0),
+                today_str: len(info.trip_list) if info is not None else 0,
+            }
+
+    async def _async_catch_up_day_trip_info(
+        self, vehicle_id: str, vehicle: Vehicle, yyyymmdd: str
+    ) -> None:
+        """Fetch the previous day once more for trips uploaded after midnight.
+
+        Covers trips that cross midnight (booked on their start day, uploaded
+        after they end) and trips a car uploads late. When the day has more
+        trips than the sensor showed, it is handed to the sensor through
+        day_trip_catch_up. Attempted once per day: a failure is only logged.
+        Overwrites vehicle.day_trip_info; the caller fetches today next.
+        """
+        self._day_trip_caught_up[vehicle_id] = yyyymmdd
+        try:
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.update_day_trip_info, vehicle_id, yyyymmdd
+            )
+        except NotImplementedError:
+            raise
+        except Exception as exc:
+            _LOGGER.debug(
+                "Day trip catch-up fetch of %s failed for vehicle %s: %s",
+                yyyymmdd,
+                vehicle_id,
+                exc,
+            )
+            return
+        info = vehicle.day_trip_info
+        # After an HA restart the shown count is unknown and taken as 0: the
+        # day is written again, which is harmless to consumers that key trips
+        # by date and start_time, while skipping it could lose a trip.
+        shown = self._day_trip_shown.get(vehicle_id, {}).get(yyyymmdd, 0)
+        if info is not None and len(info.trip_list) > shown:
+            self.day_trip_catch_up[vehicle_id] = info
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""
