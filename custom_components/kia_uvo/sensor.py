@@ -797,6 +797,13 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
       region (vehicle is in ``coordinator.day_trip_unsupported``).
     - ``0`` — endpoint supported, no trips recorded yet today.
     - positive integer — number of trips driven today.
+
+    Once a day the coordinator re-fetches the previous day (see
+    ``DAY_TRIP_CATCH_UP_HOUR``). If it holds more trips than were shown, e.g. a
+    trip that crossed midnight, one extra state is written with that day's
+    ``date``, full count and trip list, directly followed by today's state.
+    Consumers of trip history must therefore group by the ``date`` attribute
+    and each trip's ``start_time``, never by the state timestamp.
     """
 
     _attr_translation_key = "day_trip_info"
@@ -808,6 +815,8 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
         vehicle: Vehicle,
     ) -> None:
         super().__init__(coordinator, vehicle)
+        # Previous day's data, set only while its catch-up state is written.
+        self._catch_up: DayTripInfo | None = None
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -823,6 +832,14 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
     def _async_midnight(self, _now: datetime) -> None:
         self.async_write_ha_state()
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._catch_up = self.coordinator.day_trip_catch_up.pop(self.vehicle.id, None)
+        if self._catch_up is not None:
+            self.async_write_ha_state()
+            self._catch_up = None
+        super()._handle_coordinator_update()
+
     @property
     def available(self) -> bool:
         return (
@@ -830,8 +847,10 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
             and self.vehicle.id not in self.coordinator.day_trip_unsupported
         )
 
-    def _today_info(self) -> DayTripInfo | None:
-        """Return day_trip_info if it is for today, else None."""
+    def _shown_info(self) -> DayTripInfo | None:
+        """Return the catch-up day while it is written, else today's data."""
+        if self._catch_up is not None:
+            return self._catch_up
         info = cast(DayTripInfo | None, self.vehicle.day_trip_info)
         if info is None or info.yyyymmdd != dt_util.now().strftime("%Y%m%d"):
             return None
@@ -839,12 +858,12 @@ class DayTripInfoEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_value(self) -> int:
-        info = self._today_info()
+        info = self._shown_info()
         return 0 if info is None else len(info.trip_list)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        info = self._today_info()
+        info = self._shown_info()
         if info is None:
             return {
                 "date": dt_util.now().date().isoformat(),
