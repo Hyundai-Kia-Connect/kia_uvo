@@ -537,6 +537,100 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         translation_key="drive_mode",
         icon="mdi:car-cog",
     ),
+    # ── GSPA stored-status extras (EU CCI region, lib #1330) ──
+    # Always-created blocks: the underlying stored-status blocks are
+    # cached server-side and reported regardless of vehicle state, so a
+    # transient None must not remove the entity (vanishing-entity class,
+    # cf. #1894/#1896). A None value surfaces as HA `unknown`.
+    HyundaiKiaSensorEntityDescription(
+        key="gear_position",
+        translation_key="gear_position",
+        icon="mdi:car-shift-pattern",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="steering_wheel_heat_step",
+        translation_key="steering_wheel_heat_step",
+        icon="mdi:steering",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_charge_expected_start_time",
+        translation_key="ev_charge_expected_start_time",
+        icon="mdi:clock-outline",
+        # Electrified-domain feature: always created on EV/PHEV — the lib
+        # maps the unconfigured sentinel to None (unknown), so a value
+        # gate would drop the entity exactly when the user has not yet
+        # configured a window.
+        exists=_is_electrified,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_charge_expected_end_time",
+        translation_key="ev_charge_expected_end_time",
+        icon="mdi:clock-outline",
+        exists=_is_electrified,
+    ),
+    # Feature-scoped blocks: created only when the vehicle model reports
+    # the block at all (V2L capability, fuel economy, charge-complete
+    # alarm options). The gate is on block presence — a transient None
+    # value inside an existing block keeps the entity (HA `unknown`).
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_discharge_remain_time",
+        translation_key="ev_v2l_discharge_remain_time",
+        icon="mdi:battery-charging-low",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_discharge_dte",
+        translation_key="ev_v2l_discharge_dte",
+        icon="mdi:road-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_mode",
+        translation_key="ev_v2l_mode",
+        icon="mdi:speedometer",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_accumulated",
+        translation_key="average_fuel_economy_accumulated",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        # Unit enum untranslated in the lib (differs per powertrain);
+        # values ship without a native unit rather than a wrong one.
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_drive",
+        translation_key="average_fuel_economy_drive",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_after_refuel",
+        translation_key="average_fuel_economy_after_refuel",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
 )
 
 
@@ -585,6 +679,10 @@ async def async_setup_entry(
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
         )
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
+        vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
+        if ChargeCompleteAlarmSensor._reported(vehicle):
+            entities.append(ChargeCompleteAlarmSensor(coordinator, vehicle))
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         if await coordinator.async_supports_svm(vehicle_id):
             entities.append(
@@ -776,6 +874,57 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
     @property
     def unique_id(self) -> str:
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
+
+
+_ALARM_FLAG_FIELDS = (
+    "ev_charge_complete_alarm_before_10min",
+    "ev_charge_complete_alarm_before_20min",
+    "ev_charge_complete_alarm_before_30min",
+    "ev_charge_complete_alarm_off",
+)
+_ALARM_STATE_BY_FIELD = {
+    "ev_charge_complete_alarm_before_10min": "before_10min",
+    "ev_charge_complete_alarm_before_20min": "before_20min",
+    "ev_charge_complete_alarm_before_30min": "before_30min",
+    "ev_charge_complete_alarm_off": "off",
+}
+
+
+class ChargeCompleteAlarmSensor(SensorEntity, HyundaiKiaConnectEntity):
+    """Charge-complete alarm preset (GSPA CompleteAlarm options).
+
+    The app models the alarm as a radio-style preset: exactly one of the
+    four flags (10/20/30 minutes before, or off) is set. Exposed as one
+    sensor instead of four binary sensors.
+    """
+
+    _attr_translation_key = "ev_charge_complete_alarm"
+    _attr_icon = "mdi:bell-ring-outline"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+    ) -> None:
+        """Initialize the alarm preset sensor."""
+        super().__init__(coordinator, vehicle)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_ev_charge_complete_alarm"
+
+    @staticmethod
+    def _reported(vehicle: Vehicle) -> bool:
+        """True when the vehicle reports the CompleteAlarm block at all."""
+        return any(
+            getattr(vehicle, field, None) is not None for field in _ALARM_FLAG_FIELDS
+        )
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the active preset, or None when none of the flags is set."""
+        for field in _ALARM_FLAG_FIELDS:
+            if getattr(self.vehicle, field, None):
+                return _ALARM_STATE_BY_FIELD[field]
+        return None
 
 
 class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
