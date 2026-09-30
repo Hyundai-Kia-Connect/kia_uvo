@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   validate-hassfest:
     runs-on: ubuntu-latest
@@ -39,3 +42,19 @@ jobs:
         run: |
           mypy --strict --ignore-missing-imports \
             custom_components/kia_uvo/
+
+  validate-pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - name: Install test dependencies
+        # hyundai_kia_connect_api is read from manifest.json so the tests
+        # always run against the library version the integration ships with.
+        run: |
+          pip install homeassistant==2026.9.2 pytest==9.1.1 pytest-asyncio==1.4.0 \
+            "$(jq -r '.requirements[0]' custom_components/kia_uvo/manifest.json)"
+      - name: Run pytest
+        run: pytest
