@@ -93,9 +93,16 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate_control"
 
         # set the Climate Request to the current actual state of the car
+        #
+        # `climate` is deliberately NOT seeded from air_control_is_on: this
+        # object is only ever used as the payload of a *start* request, and
+        # the backends serialise it as `airCtrl`. Seeding it from the car's
+        # current state meant that whenever climate was off -- i.e. exactly
+        # when you want to start it -- we sent a start request carrying
+        # airCtrl=0 and the car correctly did nothing.
         self.climate_config = ClimateRequestOptions(
             set_temp=self.vehicle.air_temperature,
-            climate=self.vehicle.air_control_is_on,
+            climate=True,
             heating=self.get_internal_heat_int_for_climate_request(),
             defrost=self.vehicle.defrost_is_on,
         )
@@ -180,7 +187,19 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def supported_features(self) -> ClimateEntityFeature:
         """Supported in-car climate control features."""
-        return ClimateEntityFeature.TARGET_TEMPERATURE
+        return (
+            ClimateEntityFeature.TARGET_TEMPERATURE
+            | ClimateEntityFeature.TURN_ON
+            | ClimateEntityFeature.TURN_OFF
+        )
+
+    async def async_turn_on(self) -> None:
+        """Turn the in-car climate control on."""
+        await self.async_set_hvac_mode(HVACMode.HEAT)
+
+    async def async_turn_off(self) -> None:
+        """Turn the in-car climate control off."""
+        await self.async_set_hvac_mode(HVACMode.OFF)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the operation mode of the in-car climate control."""
@@ -188,6 +207,11 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         if hvac_mode == HVACMode.OFF:
             await self.coordinator.async_stop_climate(self.vehicle.id)
         else:
+            # The car has no heat/cool mode of its own -- it is given a
+            # target temperature and decides -- so HEAT and COOL map onto
+            # the same request. Force airCtrl on: the request may have
+            # been left with climate=False by a previous stop.
+            self.climate_config.climate = True
             await self.coordinator.async_start_climate(
                 self.vehicle.id, self.climate_config
             )
@@ -206,6 +230,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             # Wait, because the car ignores the start_climate command if it comes too fast after stopping
             # TODO: replace with some more event driven method
             await asyncio.sleep(5)
+            # Same reason as in async_set_hvac_mode: without this the
+            # stop/start cycle would stop the climate and fail to bring
+            # it back.
+            self.climate_config.climate = True
             await self.coordinator.async_start_climate(
                 self.vehicle.id, self.climate_config
             )
