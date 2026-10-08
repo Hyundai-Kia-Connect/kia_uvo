@@ -325,6 +325,48 @@
         }
       }
     },
+    "set_departure_schedule": {
+      "name": "Set Departure Schedule",
+      "description": "Configure scheduled departure time, repeating days, cabin temperature, and defrost settings in a single atomic vehicle update.",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle Device",
+          "description": "Select your Kia or Hyundai vehicle."
+        },
+        "departure_num": {
+          "name": "Departure Slot",
+          "description": "Select which departure schedule to update (1 or 2)."
+        },
+        "enabled": {
+          "name": "Schedule Enabled",
+          "description": "Activate or deactivate this scheduled departure."
+        },
+        "time": {
+          "name": "Departure Time",
+          "description": "Target departure time."
+        },
+        "days": {
+          "name": "Repeat Days",
+          "description": "Select days of the week to repeat this departure."
+        },
+        "climate_enabled": {
+          "name": "Preconditioning Climate",
+          "description": "Turn on cabin pre-conditioning before departure."
+        },
+        "temperature": {
+          "name": "Target Temperature",
+          "description": "Cabin target temperature (°C)."
+        },
+        "temperature_unit": {
+          "name": "Temperature Unit",
+          "description": "Temperature unit (0 for Celsius, 1 for Fahrenheit)."
+        },
+        "defrost": {
+          "name": "Defrost",
+          "description": "Turn on windscreen and window defrosting."
+        }
+      }
+    },
     "start_hazard_lights": {
       "name": "Turn on the hazard lights",
       "description": "Turn on the hazard lights for 30 seconds.",
@@ -465,7 +507,7 @@
         "name": "Estimated Station Charge Duration"
       },
       "ev_first_departure_time": {
-        "name": "First departure time"
+        "name": "Departure 1: Time"
       },
       "ev_off_peak_end_time": {
         "name": "EV Off Peak End Time"
@@ -474,7 +516,7 @@
         "name": "EV Off Peak Start Time"
       },
       "ev_second_departure_time": {
-        "name": "Second departure time"
+        "name": "Departure 2: Time"
       },
       "ev_target_range_charge_ac": {
         "name": "Target Range of Charge AC"
@@ -540,16 +582,16 @@
         "name": "Vehicle Identification Number"
       },
       "ev_first_departure_climate_temperature": {
-        "name": "First departure climate temperature"
+        "name": "Departure 1: Temperature"
       },
       "ev_first_departure_days": {
-        "name": "First departure days"
+        "name": "Departure 1: Days"
       },
       "ev_second_departure_climate_temperature": {
-        "name": "Second departure climate temperature"
+        "name": "Departure 2: Temperature"
       },
       "ev_second_departure_days": {
-        "name": "Second departure days"
+        "name": "Departure 2: Days"
       },
       "ev_power_consumption_air_conditioning": {
         "name": "EV Power Consumption Air Conditioning"
@@ -644,10 +686,10 @@
         "name": "EV Charge Port"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "Departure 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "Departure 2"
       },
       "front_left_door_is_locked": {
         "name": "Front Left Door Lock"
@@ -876,22 +918,64 @@
         "name": "Climate"
       },
       "ev_first_departure_climate_defrost": {
-        "name": "First departure defrost"
+        "name": "Departure 1: Defrost"
       },
       "ev_first_departure_climate_enabled": {
-        "name": "First departure climate"
+        "name": "Departure 1: Climate"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "Departure 1"
       },
       "ev_second_departure_climate_defrost": {
-        "name": "Second departure defrost"
+        "name": "Departure 2: Defrost"
       },
       "ev_second_departure_climate_enabled": {
-        "name": "Second departure climate"
+        "name": "Departure 2: Climate"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "Departure 2"
+      },
+      "ev_first_departure_day_mon": {
+        "name": "Departure 1: Monday"
+      },
+      "ev_first_departure_day_tue": {
+        "name": "Departure 1: Tuesday"
+      },
+      "ev_first_departure_day_wed": {
+        "name": "Departure 1: Wednesday"
+      },
+      "ev_first_departure_day_thu": {
+        "name": "Departure 1: Thursday"
+      },
+      "ev_first_departure_day_fri": {
+        "name": "Departure 1: Friday"
+      },
+      "ev_first_departure_day_sat": {
+        "name": "Departure 1: Saturday"
+      },
+      "ev_first_departure_day_sun": {
+        "name": "Departure 1: Sunday"
+      },
+      "ev_second_departure_day_mon": {
+        "name": "Departure 2: Monday"
+      },
+      "ev_second_departure_day_tue": {
+        "name": "Departure 2: Tuesday"
+      },
+      "ev_second_departure_day_wed": {
+        "name": "Departure 2: Wednesday"
+      },
+      "ev_second_departure_day_thu": {
+        "name": "Departure 2: Thursday"
+      },
+      "ev_second_departure_day_fri": {
+        "name": "Departure 2: Friday"
+      },
+      "ev_second_departure_day_sat": {
+        "name": "Departure 2: Saturday"
+      },
+      "ev_second_departure_day_sun": {
+        "name": "Departure 2: Sunday"
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Off-peak charge only"
@@ -923,6 +1007,12 @@
       },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Departure 1: Temperature"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Departure 2: Temperature"
       }
     },
     "device_tracker": {
@@ -936,6 +1026,20 @@
       },
       "ev_off_peak_end_time": {
         "name": "Off-peak charge end time"
+      },
+      "ev_first_departure_time": {
+        "name": "Departure 1: Time"
+      },
+      "ev_second_departure_time": {
+        "name": "Departure 2: Time"
+      }
+    },
+    "select": {
+      "ev_first_departure_repeat": {
+        "name": "Departure 1: Repeat"
+      },
+      "ev_second_departure_repeat": {
+        "name": "Departure 2: Repeat"
       }
     }
   }

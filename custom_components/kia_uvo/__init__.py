@@ -44,6 +44,7 @@ PLATFORMS: list[str] = [
     Platform.CLIMATE,
     Platform.IMAGE,
     Platform.TIME,
+    Platform.SELECT,
 ]
 
 

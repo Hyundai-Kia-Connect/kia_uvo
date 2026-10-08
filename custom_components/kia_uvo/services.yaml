@@ -353,7 +353,6 @@ schedule_charging_and_climate:
               value: "6"
     first_departure_time:
       required: false
-      default: false
       selector:
         time:
     second_departure_enabled:
@@ -386,17 +385,14 @@ schedule_charging_and_climate:
               value: "6"
     second_departure_time:
       required: false
-      default: false
       selector:
         time:
     off_peak_start_time:
       required: false
-      default: false
       selector:
         time:
     off_peak_end_time:
       required: false
-      default: false
       selector:
         time:
     off_peak_charge_only_enabled:
@@ -531,6 +527,100 @@ set_off_peak_charging:
       required: false
       selector:
         time:
+set_departure_schedule:
+  name: Set Departure Schedule
+  description: >-
+    Configure scheduled departure time, repeating days, cabin temperature, and
+    defrost settings in a single atomic vehicle update.
+  fields:
+    device_id:
+      name: Vehicle Device
+      description: Select your Kia or Hyundai vehicle.
+      required: false
+      selector:
+        device:
+          integration: kia_uvo
+    departure_num:
+      name: Departure Slot
+      description: Select which departure schedule to update (1 or 2).
+      required: false
+      default: "1"
+      selector:
+        select:
+          options:
+            - label: "Departure 1"
+              value: "1"
+            - label: "Departure 2"
+              value: "2"
+    enabled:
+      name: Schedule Enabled
+      description: Activate or deactivate this scheduled departure.
+      required: false
+      selector:
+        boolean: {}
+    time:
+      name: Departure Time
+      description: Target departure time.
+      required: false
+      selector:
+        time: {}
+    days:
+      name: Repeat Days
+      description: Select days of the week to repeat this departure.
+      required: false
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+            - label: Sunday
+              value: "0"
+    climate_enabled:
+      name: Preconditioning Climate
+      description: Turn on cabin pre-conditioning before departure.
+      required: false
+      selector:
+        boolean: {}
+    temperature:
+      name: Target Temperature
+      description: Cabin target temperature (°C).
+      required: false
+      default: 22.0
+      selector:
+        number:
+          min: 17.0
+          max: 27.0
+          step: 0.5
+          mode: slider
+          unit_of_measurement: "°C"
+    temperature_unit:
+      name: Temperature Unit
+      description: Temperature unit (0 for Celsius, 1 for Fahrenheit).
+      required: false
+      selector:
+        select:
+          options:
+            - label: "Celsius (°C)"
+              value: "0"
+            - label: "Fahrenheit (°F)"
+              value: "1"
+    defrost:
+      name: Defrost
+      description: Turn on windscreen and window defrosting.
+      required: false
+      selector:
+        boolean: {}
 capture_svm_image:
   fields:
     device_id:

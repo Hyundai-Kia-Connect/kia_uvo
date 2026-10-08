@@ -1,3 +1,4 @@
+import datetime as dt
 import logging
 from datetime import datetime
 from typing import Any, cast
@@ -31,6 +32,7 @@ SERVICE_SET_CHARGING_CURRENT = "set_charging_current"
 SERVICE_OPEN_CHARGE_PORT = "open_charge_port"
 SERVICE_CLOSE_CHARGE_PORT = "close_charge_port"
 SERVICE_SCHEDULE_CHARGING_AND_CLIMATE = "schedule_charging_and_climate"
+SERVICE_SET_DEPARTURE_SCHEDULE = "set_departure_schedule"
 SERVICE_START_HAZARD_LIGHTS = "start_hazard_lights"
 SERVICE_START_HAZARD_LIGHTS_AND_HORN = "start_hazard_lights_and_horn"
 SERVICE_START_VALET_MODE = "start_valet_mode"
@@ -54,6 +56,7 @@ SUPPORTED_SERVICES = (
     SERVICE_OPEN_CHARGE_PORT,
     SERVICE_CLOSE_CHARGE_PORT,
     SERVICE_SCHEDULE_CHARGING_AND_CLIMATE,
+    SERVICE_SET_DEPARTURE_SCHEDULE,
     SERVICE_START_HAZARD_LIGHTS,
     SERVICE_START_HAZARD_LIGHTS_AND_HORN,
     SERVICE_START_VALET_MODE,
@@ -65,6 +68,26 @@ SUPPORTED_SERVICES = (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _parse_time_value(val: Any) -> dt.time | None:
+    """Parse time from various representation formats or return None."""
+    if val is None or isinstance(val, bool):
+        return None
+    if isinstance(val, dt.time):
+        return val
+    if isinstance(val, datetime):
+        return val.time()
+    if isinstance(val, str):
+        val = val.strip()
+        if not val or val.lower() in ("none", "false", "null"):
+            return None
+        for fmt in ("%H:%M:%S", "%H:%M"):
+            try:
+                return datetime.strptime(val, fmt).time()
+            except ValueError:
+                continue
+    return None
 
 
 @callback
@@ -229,9 +252,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 days=None
                 if departure_days is None
                 else [int(day) for day in departure_days],
-                time=None
-                if departure_time is None
-                else datetime.strptime(departure_time, "%H:%M:%S").time(),
+                time=_parse_time_value(departure_time),
             )
 
         first_departure = initialize_departure_option(
@@ -242,12 +263,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         )
         if charging_enabled is not None:
             charging_enabled = bool(charging_enabled)
-        if off_peak_start_time is not None:
-            off_peak_start_time = datetime.strptime(
-                off_peak_start_time, "%H:%M:%S"
-            ).time()
-        if off_peak_end_time is not None:
-            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+        parsed_off_peak_start = _parse_time_value(off_peak_start_time)
+        parsed_off_peak_end = _parse_time_value(off_peak_end_time)
         if off_peak_charge_only_enabled is not None:
             off_peak_charge_only_enabled = bool(off_peak_charge_only_enabled)
         if climate_enabled is not None:
@@ -263,8 +280,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             first_departure=first_departure,
             second_departure=second_departure,
             charging_enabled=charging_enabled,
-            off_peak_start_time=off_peak_start_time,
-            off_peak_end_time=off_peak_end_time,
+            off_peak_start_time=parsed_off_peak_start,
+            off_peak_end_time=parsed_off_peak_end,
             off_peak_charge_only_enabled=off_peak_charge_only_enabled,
             climate_enabled=climate_enabled,
             temperature=temperature,
@@ -275,18 +292,58 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             vehicle_id, schedule_options
         )
 
+    async def async_handle_set_departure_schedule(call: ServiceCall) -> None:
+        coordinator = _get_coordinator_from_device(hass, call)
+        vehicle_id = _get_vehicle_id_from_device(hass, call)
+        departure_num = int(call.data.get("departure_num", 1))
+
+        def _parse_bool(val: Any) -> bool | None:
+            if val is None:
+                return None
+            if isinstance(val, bool):
+                return val
+            if isinstance(val, str):
+                return val.lower() in ("true", "1", "yes", "on")
+            return bool(val)
+
+        enabled = _parse_bool(call.data.get("enabled"))
+        climate_enabled = _parse_bool(call.data.get("climate_enabled"))
+        defrost = _parse_bool(call.data.get("defrost"))
+        time = _parse_time_value(call.data.get("time"))
+
+        days_raw = call.data.get("days")
+        parsed_days: list[int] | None = None
+        if days_raw is not None:
+            if isinstance(days_raw, str):
+                parsed_days = [
+                    int(d.strip()) for d in days_raw.split(",") if d.strip().isdigit()
+                ]
+            elif isinstance(days_raw, (list, tuple, set)):
+                parsed_days = [int(d) for d in days_raw if str(d).isdigit()]
+
+        temp_raw = call.data.get("temperature")
+        temp = float(temp_raw) if temp_raw is not None and str(temp_raw).strip() != "" else None
+        unit_raw = call.data.get("temperature_unit")
+        unit = int(unit_raw) if unit_raw is not None and str(unit_raw).strip() != "" else None
+
+        await coordinator.async_set_departure_schedule(
+            vehicle_id,
+            departure_num=departure_num,
+            enabled=enabled,
+            days=parsed_days,
+            time=time,
+            climate_enabled=climate_enabled,
+            temperature=temp,
+            temperature_unit=unit,
+            defrost=defrost,
+        )
+
     async def async_handle_set_off_peak_charging(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
         vehicle_id = _get_vehicle_id_from_device(hass, call)
         mode = call.data.get("mode")
-        off_peak_start_time = call.data.get("off_peak_start_time")
-        off_peak_end_time = call.data.get("off_peak_end_time")
-        if off_peak_start_time is not None:
-            off_peak_start_time = datetime.strptime(
-                off_peak_start_time, "%H:%M:%S"
-            ).time()
-        if off_peak_end_time is not None:
-            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+        off_peak_start_time = _parse_time_value(call.data.get("off_peak_start_time"))
+        off_peak_end_time = _parse_time_value(call.data.get("off_peak_end_time"))
         await coordinator.async_set_off_peak_charging(
             vehicle_id,
             mode=OffPeakChargingMode(mode) if mode is not None else None,
@@ -356,6 +413,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         SERVICE_CLOSE_CHARGE_PORT: async_handle_close_charge_port,
         SERVICE_SET_CHARGING_CURRENT: async_handle_set_charging_current,
         SERVICE_SCHEDULE_CHARGING_AND_CLIMATE: async_handle_schedule_charging_and_climate,
+        SERVICE_SET_DEPARTURE_SCHEDULE: async_handle_set_departure_schedule,
         SERVICE_START_HAZARD_LIGHTS: async_handle_start_hazard_lights,
         SERVICE_START_HAZARD_LIGHTS_AND_HORN: async_handle_start_hazard_lights_and_horn,
         SERVICE_START_VALET_MODE: async_handle_start_valet_mode,
