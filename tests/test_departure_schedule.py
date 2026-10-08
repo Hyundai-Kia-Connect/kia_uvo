@@ -277,21 +277,27 @@ async def test_coordinator_toggle_departure_day():
     coordinator.async_schedule_charging_and_climate = mock_schedule
 
     # Toggle Wednesday (3) ON
-    await coordinator.async_toggle_departure_day("car-1", departure_num=1, day=3, enabled=True, debounce=False)
+    await coordinator.async_toggle_departure_day(
+        "car-1", departure_num=1, day=3, enabled=True, debounce=False
+    )
     assert len(captured_options) == 1
     assert captured_options[0][1].first_departure.days == [1, 2, 3]
 
     # Toggle Monday (1) OFF
     mock_vehicle.ev_first_departure_days = [1, 2, 3]
     captured_options.clear()
-    await coordinator.async_toggle_departure_day("car-1", departure_num=1, day=1, enabled=False, debounce=False)
+    await coordinator.async_toggle_departure_day(
+        "car-1", departure_num=1, day=1, enabled=False, debounce=False
+    )
     assert len(captured_options) == 1
     assert captured_options[0][1].first_departure.days == [2, 3]
 
     # Toggle remaining off -> reverts to [9]
     mock_vehicle.ev_first_departure_days = [2]
     captured_options.clear()
-    await coordinator.async_toggle_departure_day("car-1", departure_num=1, day=2, enabled=False, debounce=False)
+    await coordinator.async_toggle_departure_day(
+        "car-1", departure_num=1, day=2, enabled=False, debounce=False
+    )
     assert len(captured_options) == 1
     assert captured_options[0][1].first_departure.days == [9]
 
@@ -326,10 +332,18 @@ async def test_coordinator_departure_debounce_coalescing():
     coordinator.async_schedule_charging_and_climate = mock_schedule
 
     # Perform 4 rapid edits with debounce=True (default)
-    await coordinator.async_set_departure_temperature("car-1", departure_num=1, temperature=23.5)
-    await coordinator.async_set_departure_climate_enabled("car-1", departure_num=1, enabled=True)
-    await coordinator.async_set_departure_defrost("car-1", departure_num=1, enabled=True)
-    await coordinator.async_set_departure_days("car-1", departure_num=1, days=[1, 2, 3, 4, 5])
+    await coordinator.async_set_departure_temperature(
+        "car-1", departure_num=1, temperature=23.5
+    )
+    await coordinator.async_set_departure_climate_enabled(
+        "car-1", departure_num=1, enabled=True
+    )
+    await coordinator.async_set_departure_defrost(
+        "car-1", departure_num=1, enabled=True
+    )
+    await coordinator.async_set_departure_days(
+        "car-1", departure_num=1, days=[1, 2, 3, 4, 5]
+    )
 
     # 1. Verify in-memory vehicle state was optimistically updated immediately
     assert mock_vehicle.ev_first_departure_climate_temperature == 23.5
@@ -357,7 +371,6 @@ async def test_coordinator_departure_debounce_coalescing():
     assert opts.second_departure.defrost is False
 
 
-
 def test_departure_day_switch_descriptions():
     """Verify all 14 departure day switches exist and map to correct days."""
     from custom_components.kia_uvo.switch import SWITCH_DESCRIPTIONS
@@ -367,7 +380,7 @@ def test_departure_day_switch_descriptions():
     mock_vehicle = MagicMock()
     mock_vehicle.ev_first_departure_days = [1, 3, 5]  # Mon, Wed, Fri
     mock_vehicle.ev_first_departure_enabled = True
-    mock_vehicle.ev_second_departure_days = [0, 6]    # Sun, Sat
+    mock_vehicle.ev_second_departure_days = [0, 6]  # Sun, Sat
     mock_vehicle.ev_second_departure_enabled = True
 
     # Slot 1 day checks
@@ -416,15 +429,19 @@ def test_departure_repeat_select_descriptions():
     mock_vehicle.ev_first_departure_days = [1, 2, 3, 4, 5]
     mock_vehicle.ev_second_departure_days = [9]
 
-    assert select_map["ev_first_departure_repeat"].value_fn(mock_vehicle) == PRESET_MON_FRI
-    assert select_map["ev_second_departure_repeat"].value_fn(mock_vehicle) == PRESET_NEVER
+    assert (
+        select_map["ev_first_departure_repeat"].value_fn(mock_vehicle) == PRESET_MON_FRI
+    )
+    assert (
+        select_map["ev_second_departure_repeat"].value_fn(mock_vehicle) == PRESET_NEVER
+    )
 
 
 @pytest.mark.asyncio
 async def test_service_handle_set_departure_schedule():
     """Verify async_handle_set_departure_schedule parses input robustly and dispatches to coordinator."""
+
     from custom_components.kia_uvo.services import async_setup_services
-    from homeassistant.core import ServiceCall
 
     mock_hass = MagicMock()
     registered_services = {}
@@ -457,7 +474,9 @@ async def test_service_handle_set_departure_schedule():
             "entry-1": mock_coordinator,
         }
     }
-    mock_hass.helpers.device_registry.async_get.return_value.async_get.return_value = mock_dev_entry
+    mock_hass.helpers.device_registry.async_get.return_value.async_get.return_value = (
+        mock_dev_entry
+    )
 
     service_call = MagicMock(
         domain="kia_uvo",
@@ -487,6 +506,3 @@ async def test_service_handle_set_departure_schedule():
         temperature_unit=None,
         defrost=False,
     )
-
-
-

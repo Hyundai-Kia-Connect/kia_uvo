@@ -322,9 +322,17 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 parsed_days = [int(d) for d in days_raw if str(d).isdigit()]
 
         temp_raw = call.data.get("temperature")
-        temp = float(temp_raw) if temp_raw is not None and str(temp_raw).strip() != "" else None
+        temp = (
+            float(temp_raw)
+            if temp_raw is not None and str(temp_raw).strip() != ""
+            else None
+        )
         unit_raw = call.data.get("temperature_unit")
-        unit = int(unit_raw) if unit_raw is not None and str(unit_raw).strip() != "" else None
+        unit = (
+            int(unit_raw)
+            if unit_raw is not None and str(unit_raw).strip() != ""
+            else None
+        )
 
         await coordinator.async_set_departure_schedule(
             vehicle_id,

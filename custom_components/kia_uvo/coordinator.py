@@ -548,7 +548,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         return ScheduleChargingClimateRequestOptions(
             first_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
                 enabled=vehicle.ev_first_departure_enabled or False,
-                days=list(vehicle.ev_first_departure_days) if vehicle.ev_first_departure_days is not None else [],
+                days=list(vehicle.ev_first_departure_days)
+                if vehicle.ev_first_departure_days is not None
+                else [],
                 time=vehicle.ev_first_departure_time or dt.time(),
                 climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
                 temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
@@ -556,7 +558,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             ),
             second_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
                 enabled=vehicle.ev_second_departure_enabled or False,
-                days=list(vehicle.ev_second_departure_days) if vehicle.ev_second_departure_days is not None else [],
+                days=list(vehicle.ev_second_departure_days)
+                if vehicle.ev_second_departure_days is not None
+                else [],
                 time=vehicle.ev_second_departure_time or dt.time(),
                 climate_enabled=vehicle.ev_second_departure_climate_enabled or False,
                 temperature=vehicle.ev_second_departure_climate_temperature or 21.0,
