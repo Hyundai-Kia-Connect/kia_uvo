@@ -700,8 +700,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         if hasattr(self, "async_update_listeners"):
             try:
                 self.async_update_listeners()
-            except Exception:
-                pass
+            except Exception as err:
+                _LOGGER.debug("Failed to update listeners: %s", err)
 
         timer = self._departure_debounce_timers_map.pop(vehicle_id, None)
         if timer:
@@ -770,13 +770,19 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                     )
                 else:
                     self.vehicle_manager.force_refresh_vehicle_state(vehicle_id)
-            except Exception:
-                pass
+            except Exception as refresh_err:
+                _LOGGER.debug(
+                    "Failed to refresh vehicle state after update failure: %s",
+                    refresh_err,
+                )
             if hasattr(self, "async_update_listeners"):
                 try:
                     self.async_update_listeners()
-                except Exception:
-                    pass
+                except Exception as update_err:
+                    _LOGGER.debug(
+                        "Failed to update listeners after rollback: %s",
+                        update_err,
+                    )
             raise
 
     async def async_flush_departure_update(self, vehicle_id: str) -> None:
