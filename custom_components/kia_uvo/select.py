@@ -135,7 +135,7 @@ class HyundaiKiaConnectSelectEntity(SelectEntity, HyundaiKiaConnectEntity):
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
-        self._attr_options = description.options
+        self._attr_options = list(description.options or [])
 
     @property
     def current_option(self) -> str | None:
