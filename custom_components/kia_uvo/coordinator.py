@@ -9,7 +9,7 @@ import traceback
 from collections.abc import Callable
 from datetime import timedelta
 from functools import partial
-from typing import Any
+from typing import Any, Final
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -60,6 +60,19 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+DEPARTURE_DEBOUNCE_SECONDS: Final[float] = 2.5
+
+
+def round_time_to_10_minutes(time_val: dt.time) -> dt.time:
+    """Round a datetime.time object to the nearest 10-minute interval."""
+    rounded_minute = ((time_val.minute + 5) // 10) * 10
+    hour = time_val.hour
+    if rounded_minute >= 60:
+        rounded_minute = 0
+        hour = (hour + 1) % 24
+    return dt.time(hour=hour, minute=rounded_minute)
+
 
 # Render-invalidation signal for the SVM image entities: sent by
 # set_svm_dewarp, consumed in image.py.
@@ -141,6 +154,24 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.no_force_refresh_hour_start,
             self.no_force_refresh_hour_finish,
         )
+        self._pending_departure_options: dict[
+            str, ScheduleChargingClimateRequestOptions
+        ] = {}
+        self._departure_debounce_timers: dict[str, Any] = {}
+
+    @property
+    def _pending_departure_options_map(
+        self,
+    ) -> dict[str, ScheduleChargingClimateRequestOptions]:
+        if not hasattr(self, "_pending_departure_options"):
+            self._pending_departure_options = {}
+        return self._pending_departure_options
+
+    @property
+    def _departure_debounce_timers_map(self) -> dict[str, Any]:
+        if not hasattr(self, "_departure_debounce_timers"):
+            self._departure_debounce_timers = {}
+        return self._departure_debounce_timers
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library. Called by update_coordinator periodically.
@@ -521,12 +552,61 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
+    def _build_departure_options_from_vehicle(
+        self, vehicle: Vehicle
+    ) -> ScheduleChargingClimateRequestOptions:
+        """Build schedule options for departure-only updates, leaving charging scope None."""
+        return ScheduleChargingClimateRequestOptions(
+            first_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
+                enabled=vehicle.ev_first_departure_enabled or False,
+                days=[d for d in vehicle.ev_first_departure_days if d != 9]
+                if vehicle.ev_first_departure_days is not None
+                else [],
+                time=vehicle.ev_first_departure_time or dt.time(),
+                climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
+                temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
+                defrost=vehicle.ev_first_departure_climate_defrost or False,
+            ),
+            second_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
+                enabled=vehicle.ev_second_departure_enabled or False,
+                days=[d for d in vehicle.ev_second_departure_days if d != 9]
+                if vehicle.ev_second_departure_days is not None
+                else [],
+                time=vehicle.ev_second_departure_time or dt.time(),
+                climate_enabled=vehicle.ev_second_departure_climate_enabled or False,
+                temperature=vehicle.ev_second_departure_climate_temperature or 21.0,
+                defrost=vehicle.ev_second_departure_climate_defrost or False,
+            ),
+            charging_enabled=None,
+            off_peak_start_time=None,
+            off_peak_end_time=None,
+            off_peak_charge_only_enabled=None,
+        )
+
+    def _build_charge_options_from_vehicle(
+        self, vehicle: Vehicle
+    ) -> ScheduleChargingClimateRequestOptions:
+        """Build schedule options for charge-only updates, leaving departure scope None."""
+        return ScheduleChargingClimateRequestOptions(
+            first_departure=None,
+            second_departure=None,
+            charging_enabled=vehicle.ev_schedule_charge_enabled or False,
+            off_peak_start_time=vehicle.ev_off_peak_start_time or dt.time(),
+            off_peak_end_time=vehicle.ev_off_peak_end_time or dt.time(),
+            off_peak_charge_only_enabled=vehicle.ev_off_peak_charge_only_enabled
+            or False,
+            climate_enabled=None,
+            temperature=None,
+            temperature_unit=None,
+            defrost=None,
+        )
+
     async def async_set_schedule_charge_enabled(
         self, vehicle_id: str, enabled: bool
     ) -> None:
         """Toggle scheduled charging on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
+        options = self._build_charge_options_from_vehicle(vehicle)
         options.charging_enabled = enabled
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
@@ -535,7 +615,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     ) -> None:
         """Toggle off-peak charge only on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
+        options = self._build_charge_options_from_vehicle(vehicle)
         options.off_peak_charge_only_enabled = enabled
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
@@ -547,18 +627,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         start: dt.time | None = None,
         end: dt.time | None = None,
     ) -> None:
-        """Set the off-peak charging schedule mode and/or window.
-
-        ``mode`` maps to the (charging_enabled, off_peak_charge_only_enabled)
-        pair the API expects: ``OFF`` disables scheduled charging, ``TIME``
-        charges only during the off-peak window (time priority), ``TARGET``
-        prefers off-peak tariffs but continues past the window to reach the
-        target SoC (target priority). ``mode=None`` preserves the current mode
-        and only adjusts the window — used by the time entities. Other
-        schedule fields (departures) are preserved.
-        """
+        """Set the off-peak charging schedule mode and/or window."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
+        options = self._build_charge_options_from_vehicle(vehicle)
         if mode is not None:
             if mode is OffPeakChargingMode.OFF:
                 options.charging_enabled = False
@@ -569,46 +640,306 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 options.charging_enabled = True
                 options.off_peak_charge_only_enabled = False
         if start is not None:
-            options.off_peak_start_time = start
+            start_val = round_time_to_10_minutes(start)
+            options.off_peak_start_time = start_val
+            vehicle.ev_off_peak_start_time = start_val
         if end is not None:
-            options.off_peak_end_time = end
+            end_val = round_time_to_10_minutes(end)
+            options.off_peak_end_time = end_val
+            vehicle.ev_off_peak_end_time = end_val
         await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    async def _async_stage_departure_update(
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        *,
+        debounce: bool = True,
+        **updates: Any,
+    ) -> None:
+        """Stage a departure schedule update, optimistically updating vehicle state and debouncing API calls."""
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        if vehicle_id not in self._pending_departure_options_map:
+            options = self._build_departure_options_from_vehicle(vehicle)
+            self._pending_departure_options_map[vehicle_id] = options
+        else:
+            options = self._pending_departure_options_map[vehicle_id]
+
+        target = (
+            options.first_departure if departure_num == 1 else options.second_departure
+        )
+
+        if "enabled" in updates and updates["enabled"] is not None:
+            target.enabled = updates["enabled"]
+            if departure_num == 1:
+                vehicle.ev_first_departure_enabled = updates["enabled"]
+            else:
+                vehicle.ev_second_departure_enabled = updates["enabled"]
+
+        if "days" in updates and updates["days"] is not None:
+            target.days = updates["days"]
+            if departure_num == 1:
+                vehicle.ev_first_departure_days = updates["days"]
+            else:
+                vehicle.ev_second_departure_days = updates["days"]
+
+        if "time" in updates and updates["time"] is not None:
+            time_val = round_time_to_10_minutes(updates["time"])
+            target.time = time_val
+            if departure_num == 1:
+                vehicle.ev_first_departure_time = time_val
+            else:
+                vehicle.ev_second_departure_time = time_val
+
+        if "climate_enabled" in updates and updates["climate_enabled"] is not None:
+            target.climate_enabled = updates["climate_enabled"]
+            if departure_num == 1:
+                vehicle.ev_first_departure_climate_enabled = updates["climate_enabled"]
+            else:
+                vehicle.ev_second_departure_climate_enabled = updates["climate_enabled"]
+
+        if "temperature" in updates and updates["temperature"] is not None:
+            temp_val = float(updates["temperature"])
+            target.temperature = temp_val
+            if departure_num == 1:
+                vehicle.ev_first_departure_climate_temperature = temp_val
+            else:
+                vehicle.ev_second_departure_climate_temperature = temp_val
+
+        if "defrost" in updates and updates["defrost"] is not None:
+            target.defrost = updates["defrost"]
+            if departure_num == 1:
+                vehicle.ev_first_departure_climate_defrost = updates["defrost"]
+            else:
+                vehicle.ev_second_departure_climate_defrost = updates["defrost"]
+
+        if hasattr(self, "async_update_listeners"):
+            try:
+                self.async_update_listeners()
+            except Exception as err:
+                _LOGGER.debug("Failed to update listeners: %s", err)
+
+        timer = self._departure_debounce_timers_map.pop(vehicle_id, None)
+        if timer:
+            timer.cancel()
+
+        if not debounce:
+            await self._async_flush_departure_update(vehicle_id)
+            return
+
+        def _on_timeout() -> None:
+            self._departure_debounce_timers_map.pop(vehicle_id, None)
+            if (
+                hasattr(self, "hass")
+                and self.hass is not None
+                and hasattr(self.hass, "async_create_task")
+            ):
+                self.hass.async_create_task(
+                    self._async_flush_departure_update(vehicle_id)
+                )
+            else:
+                asyncio.create_task(self._async_flush_departure_update(vehicle_id))
+
+        loop = (
+            self.hass.loop
+            if hasattr(self, "hass")
+            and self.hass is not None
+            and hasattr(self.hass, "loop")
+            else asyncio.get_running_loop()
+        )
+        self._departure_debounce_timers_map[vehicle_id] = loop.call_later(
+            DEPARTURE_DEBOUNCE_SECONDS, _on_timeout
+        )
+
+    async def _async_flush_departure_update(self, vehicle_id: str) -> None:
+        """Transmit batched departure options to the vehicle."""
+        timer = self._departure_debounce_timers_map.pop(vehicle_id, None)
+        if timer:
+            timer.cancel()
+        options = self._pending_departure_options_map.pop(vehicle_id, None)
+        if options is None:
+            return
+        _LOGGER.debug(
+            "%s - Flushing batched departure schedule for %s: slot1=%s, slot2=%s",
+            DOMAIN,
+            vehicle_id,
+            options.first_departure,
+            options.second_departure,
+        )
+        try:
+            await self.async_schedule_charging_and_climate(vehicle_id, options)
+        except Exception as err:
+            _LOGGER.error(
+                "%s - Failed to dispatch batched departure schedule for %s: %s",
+                DOMAIN,
+                vehicle_id,
+                err,
+            )
+            try:
+                if (
+                    hasattr(self, "hass")
+                    and self.hass is not None
+                    and hasattr(self.hass, "async_add_executor_job")
+                ):
+                    await self.hass.async_add_executor_job(
+                        self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
+                    )
+                else:
+                    self.vehicle_manager.force_refresh_vehicle_state(vehicle_id)
+            except Exception as refresh_err:
+                _LOGGER.debug(
+                    "Failed to refresh vehicle state after update failure: %s",
+                    refresh_err,
+                )
+            if hasattr(self, "async_update_listeners"):
+                try:
+                    self.async_update_listeners()
+                except Exception as update_err:
+                    _LOGGER.debug(
+                        "Failed to update listeners after rollback: %s",
+                        update_err,
+                    )
+            raise
+
+    async def async_flush_departure_update(self, vehicle_id: str) -> None:
+        """Immediately flush and transmit any pending batched departure schedule for the vehicle."""
+        await self._async_flush_departure_update(vehicle_id)
 
     async def async_set_departure_enabled(
-        self, vehicle_id: str, departure_num: int, enabled: bool
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        enabled: bool,
+        *,
+        debounce: bool = True,
     ) -> None:
         """Toggle a departure schedule on/off."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        if departure_num == 1:
-            options.first_departure.enabled = enabled
-        else:
-            options.second_departure.enabled = enabled
-        # reservFlag (charging_enabled) must be 1 for departure slots to take
-        # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
-        # (None), the builder defaults it to False, causing the API to accept
-        # the request but ignore per-slot reservChargeSet.
-        if enabled and not options.charging_enabled:
-            options.charging_enabled = True
-        await self.async_schedule_charging_and_climate(vehicle_id, options)
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, enabled=enabled, debounce=debounce
+        )
+
+    async def async_set_departure_time(
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        time: dt.time,
+        *,
+        debounce: bool = True,
+    ) -> None:
+        """Set departure time for slot 1 or 2."""
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, time=time, debounce=debounce
+        )
+
+    async def async_set_departure_temperature(
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        temperature: float,
+        *,
+        debounce: bool = True,
+    ) -> None:
+        """Set departure climate temperature."""
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, temperature=temperature, debounce=debounce
+        )
 
     async def async_set_departure_climate_enabled(
-        self, vehicle_id: str, departure_num: int, enabled: bool
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        enabled: bool,
+        *,
+        debounce: bool = True,
     ) -> None:
         """Toggle departure climate on/off."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        options.climate_enabled = enabled
-        await self.async_schedule_charging_and_climate(vehicle_id, options)
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, climate_enabled=enabled, debounce=debounce
+        )
 
     async def async_set_departure_defrost(
-        self, vehicle_id: str, departure_num: int, enabled: bool
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        enabled: bool,
+        *,
+        debounce: bool = True,
     ) -> None:
         """Toggle departure defrost on/off."""
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, defrost=enabled, debounce=debounce
+        )
+
+    async def async_set_departure_days(
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        days: list[int],
+        *,
+        debounce: bool = True,
+    ) -> None:
+        """Set departure repeating days for slot 1 or 2."""
+        await self._async_stage_departure_update(
+            vehicle_id, departure_num, days=days, debounce=debounce
+        )
+
+    async def async_toggle_departure_day(
+        self,
+        vehicle_id: str,
+        departure_num: int,
+        day: int,
+        enabled: bool,
+        *,
+        debounce: bool = True,
+    ) -> None:
+        """Toggle a specific repeating day for departure slot 1 or 2."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        options.defrost = enabled
-        await self.async_schedule_charging_and_climate(vehicle_id, options)
+        current_days = list(
+            (
+                vehicle.ev_first_departure_days
+                if departure_num == 1
+                else vehicle.ev_second_departure_days
+            )
+            or []
+        )
+        current_days = [d for d in current_days if d != 9]
+        if enabled:
+            if day not in current_days:
+                current_days.append(day)
+                current_days.sort()
+        else:
+            if day in current_days:
+                current_days.remove(day)
+        await self.async_set_departure_days(
+            vehicle_id, departure_num, current_days, debounce=debounce
+        )
+
+    async def async_set_departure_schedule(
+        self,
+        vehicle_id: str,
+        departure_num: int = 1,
+        *,
+        enabled: bool | None = None,
+        days: list[int] | None = None,
+        time: dt.time | None = None,
+        climate_enabled: bool | None = None,
+        temperature: float | None = None,
+        temperature_unit: int | None = None,
+        defrost: bool | None = None,
+        debounce: bool = False,
+    ) -> None:
+        """Set full departure schedule and preconditioning climate."""
+        await self._async_stage_departure_update(
+            vehicle_id,
+            departure_num,
+            enabled=enabled,
+            days=days,
+            time=time,
+            climate_enabled=climate_enabled,
+            temperature=temperature,
+            defrost=defrost,
+            debounce=debounce,
+        )
 
     async def async_start_hazard_lights(self, vehicle_id: str) -> None:
         await self._async_send_action(

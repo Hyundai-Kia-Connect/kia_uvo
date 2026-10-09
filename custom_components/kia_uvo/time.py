@@ -10,12 +10,16 @@ from typing import Final
 
 from homeassistant.components.time import TimeEntity, TimeEntityDescription
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 
 from .const import DOMAIN
-from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .coordinator import (
+    HyundaiKiaConnectDataUpdateCoordinator,
+    round_time_to_10_minutes,
+)
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,6 +53,28 @@ TIME_DESCRIPTIONS: Final[tuple[HyundaiKiaTimeDescription, ...]] = (
         exists_fn=lambda vehicle: vehicle.ev_off_peak_end_time is not None,
         set_fn=lambda coordinator, vid, value: coordinator.async_set_off_peak_charging(
             vid, end=value
+        ),
+    ),
+    HyundaiKiaTimeDescription(
+        key="ev_first_departure_time",
+        translation_key="ev_first_departure_time",
+        icon="mdi:clock-outline",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: vehicle.ev_first_departure_time,
+        exists_fn=lambda vehicle: vehicle.ev_first_departure_time is not None,
+        set_fn=lambda coordinator, vid, value: coordinator.async_set_departure_time(
+            vid, 1, value
+        ),
+    ),
+    HyundaiKiaTimeDescription(
+        key="ev_second_departure_time",
+        translation_key="ev_second_departure_time",
+        icon="mdi:clock-outline",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: vehicle.ev_second_departure_time,
+        exists_fn=lambda vehicle: vehicle.ev_second_departure_time is not None,
+        set_fn=lambda coordinator, vid, value: coordinator.async_set_departure_time(
+            vid, 2, value
         ),
     ),
 )
@@ -94,5 +120,8 @@ class HyundaiKiaConnectTimeEntity(TimeEntity, HyundaiKiaConnectEntity):
         return self.entity_description.value_fn(self.vehicle)
 
     async def async_set_value(self, value: dt.time) -> None:
-        await self.entity_description.set_fn(self.coordinator, self.vehicle.id, value)
+        rounded_val = round_time_to_10_minutes(value)
+        await self.entity_description.set_fn(
+            self.coordinator, self.vehicle.id, rounded_val
+        )
         self.async_write_ha_state()

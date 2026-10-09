@@ -26,6 +26,8 @@ _LOGGER = logging.getLogger(__name__)
 AC_CHARGING_LIMIT_KEY = "ev_charge_limits_ac"
 DC_CHARGING_LIMIT_KEY = "ev_charge_limits_dc"
 V2L_LIMIT_KEY = "ev_v2l_discharge_limit"
+FIRST_DEPARTURE_TEMP_KEY = "ev_first_departure_climate_temperature"
+SECOND_DEPARTURE_TEMP_KEY = "ev_second_departure_climate_temperature"
 
 NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
     NumberEntityDescription(
@@ -54,6 +56,24 @@ NUMBER_DESCRIPTIONS: Final[tuple[NumberEntityDescription, ...]] = (
         native_max_value=80,
         native_step=10,
         native_unit_of_measurement=PERCENTAGE,
+    ),
+    NumberEntityDescription(
+        key=FIRST_DEPARTURE_TEMP_KEY,
+        translation_key="ev_first_departure_climate_temperature",
+        icon="mdi:thermometer",
+        native_min_value=17,
+        native_max_value=27,
+        native_step=0.5,
+        native_unit_of_measurement=DYNAMIC_UNIT,
+    ),
+    NumberEntityDescription(
+        key=SECOND_DEPARTURE_TEMP_KEY,
+        translation_key="ev_second_departure_climate_temperature",
+        icon="mdi:thermometer",
+        native_min_value=17,
+        native_max_value=27,
+        native_step=0.5,
+        native_unit_of_measurement=DYNAMIC_UNIT,
     ),
 )
 
@@ -152,17 +172,33 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
             await self.coordinator.async_set_charge_limits(self.vehicle.id, int(ac), dc)
         elif self.entity_description.key == V2L_LIMIT_KEY:
             await self.coordinator.async_set_v2l_limit(self.vehicle.id, int(value))
+        elif self.entity_description.key == FIRST_DEPARTURE_TEMP_KEY:
+            await self.coordinator.async_set_departure_temperature(
+                self.vehicle.id, 1, float(value)
+            )
+        elif self.entity_description.key == SECOND_DEPARTURE_TEMP_KEY:
+            await self.coordinator.async_set_departure_temperature(
+                self.vehicle.id, 2, float(value)
+            )
 
         self.async_write_ha_state()
 
     @property
     def native_min_value(self) -> float:
         """Return native_min_value as reported in by the sensor"""
+        if self._key in (FIRST_DEPARTURE_TEMP_KEY, SECOND_DEPARTURE_TEMP_KEY):
+            if getattr(self.vehicle, self._key + "_unit", None) == "°F":
+                return 62.0
+            return 17.0
         return cast(float, self.entity_description.native_min_value)
 
     @property
     def native_max_value(self) -> float:
-        """Returnnative_max_value as reported in by the sensor"""
+        """Return native_max_value as reported in by the sensor"""
+        if self._key in (FIRST_DEPARTURE_TEMP_KEY, SECOND_DEPARTURE_TEMP_KEY):
+            if getattr(self.vehicle, self._key + "_unit", None) == "°F":
+                return 82.0
+            return 27.0
         return cast(float, self.entity_description.native_max_value)
 
     @property

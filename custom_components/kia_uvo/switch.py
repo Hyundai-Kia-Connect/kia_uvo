@@ -53,7 +53,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_first_departure_enabled",
         translation_key="ev_first_departure_enabled",
-        icon="mdi:clock-outline",
+        icon="mdi:calendar-clock",
         value_fn=lambda vehicle: vehicle.ev_first_departure_enabled,
         exists_fn=lambda vehicle: vehicle.ev_first_departure_enabled is not None,
         on_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
@@ -66,7 +66,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_second_departure_enabled",
         translation_key="ev_second_departure_enabled",
-        icon="mdi:clock-outline",
+        icon="mdi:calendar-clock",
         value_fn=lambda vehicle: vehicle.ev_second_departure_enabled,
         exists_fn=lambda vehicle: vehicle.ev_second_departure_enabled is not None,
         on_fn=lambda coordinator, vid: coordinator.async_set_departure_enabled(
@@ -79,7 +79,8 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_first_departure_climate_enabled",
         translation_key="ev_first_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
+        entity_category=EntityCategory.CONFIG,
         value_fn=lambda vehicle: vehicle.ev_first_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_first_departure_climate_enabled is not None
@@ -94,7 +95,8 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_second_departure_climate_enabled",
         translation_key="ev_second_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
+        entity_category=EntityCategory.CONFIG,
         value_fn=lambda vehicle: vehicle.ev_second_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_second_departure_climate_enabled is not None
@@ -109,7 +111,8 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_first_departure_climate_defrost",
         translation_key="ev_first_departure_climate_defrost",
-        icon="mdi:car-defrost-rear",
+        icon="mdi:car-defrost-front",
+        entity_category=EntityCategory.CONFIG,
         value_fn=lambda vehicle: vehicle.ev_first_departure_climate_defrost,
         exists_fn=lambda vehicle: (
             vehicle.ev_first_departure_climate_defrost is not None
@@ -124,7 +127,8 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_second_departure_climate_defrost",
         translation_key="ev_second_departure_climate_defrost",
-        icon="mdi:car-defrost-rear",
+        icon="mdi:car-defrost-front",
+        entity_category=EntityCategory.CONFIG,
         value_fn=lambda vehicle: vehicle.ev_second_departure_climate_defrost,
         exists_fn=lambda vehicle: (
             vehicle.ev_second_departure_climate_defrost is not None
@@ -134,6 +138,274 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         ),
         off_fn=lambda coordinator, vid: coordinator.async_set_departure_defrost(
             vid, 2, False
+        ),
+    ),
+    # Departure 1 repeat day switches
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_mon",
+        translation_key="ev_first_departure_day_mon",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 1 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 1, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 1, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_tue",
+        translation_key="ev_first_departure_day_tue",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 2 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 2, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 2, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_wed",
+        translation_key="ev_first_departure_day_wed",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 3 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 3, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 3, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_thu",
+        translation_key="ev_first_departure_day_thu",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 4 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 4, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 4, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_fri",
+        translation_key="ev_first_departure_day_fri",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 5 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 5, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 5, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_sat",
+        translation_key="ev_first_departure_day_sat",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 6 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 6, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 6, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_first_departure_day_sun",
+        translation_key="ev_first_departure_day_sun",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_first_departure_days and 0 in vehicle.ev_first_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_first_departure_days is not None
+            or vehicle.ev_first_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 0, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 1, 0, False
+        ),
+    ),
+    # Departure 2 repeat day switches
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_mon",
+        translation_key="ev_second_departure_day_mon",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 1 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 1, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 1, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_tue",
+        translation_key="ev_second_departure_day_tue",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 2 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 2, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 2, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_wed",
+        translation_key="ev_second_departure_day_wed",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 3 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 3, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 3, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_thu",
+        translation_key="ev_second_departure_day_thu",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 4 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 4, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 4, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_fri",
+        translation_key="ev_second_departure_day_fri",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 5 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 5, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 5, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_sat",
+        translation_key="ev_second_departure_day_sat",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 6 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 6, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 6, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_second_departure_day_sun",
+        translation_key="ev_second_departure_day_sun",
+        icon="mdi:calendar-check",
+        entity_category=EntityCategory.CONFIG,
+        value_fn=lambda vehicle: bool(
+            vehicle.ev_second_departure_days and 0 in vehicle.ev_second_departure_days
+        ),
+        exists_fn=lambda vehicle: (
+            vehicle.ev_second_departure_days is not None
+            or vehicle.ev_second_departure_enabled is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 0, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_toggle_departure_day(
+            vid, 2, 0, False
         ),
     ),
     # Charging schedule switches

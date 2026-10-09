@@ -1,0 +1,93 @@
+{
+  "entity": {
+    "switch": {
+      "ev_first_departure_enabled": {
+        "default": "mdi:calendar-clock"
+      },
+      "ev_second_departure_enabled": {
+        "default": "mdi:calendar-clock"
+      },
+      "ev_first_departure_climate_enabled": {
+        "default": "mdi:air-conditioner"
+      },
+      "ev_second_departure_climate_enabled": {
+        "default": "mdi:air-conditioner"
+      },
+      "ev_first_departure_climate_defrost": {
+        "default": "mdi:car-defrost-front"
+      },
+      "ev_second_departure_climate_defrost": {
+        "default": "mdi:car-defrost-front"
+      },
+      "ev_first_departure_day_mon": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_tue": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_wed": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_thu": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_fri": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_sat": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_first_departure_day_sun": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_mon": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_tue": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_wed": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_thu": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_fri": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_sat": {
+        "default": "mdi:calendar-check"
+      },
+      "ev_second_departure_day_sun": {
+        "default": "mdi:calendar-check"
+      }
+    },
+    "number": {
+      "ev_first_departure_climate_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "ev_second_departure_climate_temperature": {
+        "default": "mdi:thermometer"
+      }
+    },
+    "select": {
+      "ev_first_departure_repeat": {
+        "default": "mdi:calendar-repeat"
+      },
+      "ev_second_departure_repeat": {
+        "default": "mdi:calendar-repeat"
+      }
+    },
+    "time": {
+      "ev_first_departure_time": {
+        "default": "mdi:clock-outline"
+      },
+      "ev_second_departure_time": {
+        "default": "mdi:clock-outline"
+      }
+    }
+  },
+  "services": {
+    "set_departure_schedule": "mdi:calendar-clock"
+  }
+}
