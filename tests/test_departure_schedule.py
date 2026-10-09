@@ -173,7 +173,7 @@ async def test_coordinator_async_set_departure_schedule():
     assert vid == "car-1"
     assert opts.first_departure.enabled is True
     assert opts.first_departure.days == [1, 2, 3, 4, 5]
-    assert opts.first_departure.time == dt.time(7, 45)
+    assert opts.first_departure.time == dt.time(7, 50)
     assert opts.first_departure.climate_enabled is True
     assert opts.first_departure.temperature == 22.5
     assert opts.first_departure.defrost is True
@@ -241,7 +241,7 @@ async def test_coordinator_departure_slot2_isolation():
     # Departure 2 is updated
     assert opts.second_departure.enabled is True
     assert opts.second_departure.days == [0, 6]
-    assert opts.second_departure.time == dt.time(9, 15)
+    assert opts.second_departure.time == dt.time(9, 20)
     assert opts.second_departure.climate_enabled is True
     assert opts.second_departure.temperature == 19.5
     assert opts.second_departure.defrost is False
@@ -292,14 +292,14 @@ async def test_coordinator_toggle_departure_day():
     assert len(captured_options) == 1
     assert captured_options[0][1].first_departure.days == [2, 3]
 
-    # Toggle remaining off -> reverts to [9]
+    # Toggle remaining off -> clears all days to []
     mock_vehicle.ev_first_departure_days = [2]
     captured_options.clear()
     await coordinator.async_toggle_departure_day(
         "car-1", departure_num=1, day=2, enabled=False, debounce=False
     )
     assert len(captured_options) == 1
-    assert captured_options[0][1].first_departure.days == [9]
+    assert captured_options[0][1].first_departure.days == []
 
 
 @pytest.mark.asyncio
@@ -500,9 +500,153 @@ async def test_service_handle_set_departure_schedule():
         departure_num=1,
         enabled=True,
         days=[1, 2, 3, 4, 5],
-        time=dt.time(8, 15),
+        time=dt.time(8, 20),
         climate_enabled=True,
         temperature=23.5,
         temperature_unit=None,
         defrost=False,
     )
+
+
+def test_round_time_to_10_minutes():
+    """Verify symmetric half-up rounding of times to 10-minute intervals."""
+    from custom_components.kia_uvo.coordinator import round_time_to_10_minutes
+
+    assert round_time_to_10_minutes(dt.time(7, 0)) == dt.time(7, 0)
+    assert round_time_to_10_minutes(dt.time(7, 4)) == dt.time(7, 0)
+    assert round_time_to_10_minutes(dt.time(7, 5)) == dt.time(7, 10)
+    assert round_time_to_10_minutes(dt.time(7, 14)) == dt.time(7, 10)
+    assert round_time_to_10_minutes(dt.time(7, 15)) == dt.time(7, 20)
+    assert round_time_to_10_minutes(dt.time(7, 24)) == dt.time(7, 20)
+    assert round_time_to_10_minutes(dt.time(7, 25)) == dt.time(7, 30)
+    assert round_time_to_10_minutes(dt.time(7, 54)) == dt.time(7, 50)
+    assert round_time_to_10_minutes(dt.time(7, 55)) == dt.time(8, 0)
+    assert round_time_to_10_minutes(dt.time(23, 56)) == dt.time(0, 0)
+
+
+@pytest.mark.asyncio
+async def test_departure_repeat_never_selection_and_switch_state():
+    """Verify selecting Never sets days to [] and turns off all day switches."""
+    from custom_components.kia_uvo.select import (
+        PRESET_NEVER,
+        SELECT_DESCRIPTIONS,
+        _days_to_preset,
+    )
+    from custom_components.kia_uvo.switch import SWITCH_DESCRIPTIONS
+
+    assert _days_to_preset([]) == PRESET_NEVER
+
+    select_map = {d.key: d for d in SELECT_DESCRIPTIONS}
+    d1 = select_map["ev_first_departure_repeat"]
+
+    mock_coordinator = MagicMock()
+    mock_coordinator.async_set_departure_days = MagicMock()
+
+    async def mock_async_set(*args, **kwargs):
+        pass
+
+    mock_coordinator.async_set_departure_days.side_effect = mock_async_set
+
+    # Selecting "Never" calls coordinator with empty list []
+    await d1.select_fn(mock_coordinator, "veh-1", PRESET_NEVER)
+    mock_coordinator.async_set_departure_days.assert_called_once_with("veh-1", 1, [])
+
+    # When days is empty list [], all 7 day switches evaluate to False
+    mock_vehicle = MagicMock()
+    mock_vehicle.ev_first_departure_days = []
+    day_switches = [
+        d for d in SWITCH_DESCRIPTIONS if d.key.startswith("ev_first_departure_day_")
+    ]
+    assert len(day_switches) == 7
+    for s in day_switches:
+        assert s.value_fn(mock_vehicle) is False
+
+
+@pytest.mark.asyncio
+async def test_service_handle_set_departure_schedule_never_repeat():
+    """Verify service call with repeat='Never' or empty days dispatches empty days list []."""
+    from custom_components.kia_uvo.services import async_setup_services
+
+    mock_hass = MagicMock()
+    registered_services = {}
+
+    def mock_register(domain, service_name, handler, schema=None):
+        registered_services[service_name] = handler
+
+    mock_hass.services.async_register = mock_register
+    async_setup_services(mock_hass)
+
+    handler = registered_services["set_departure_schedule"]
+    mock_coordinator = MagicMock()
+
+    async def mock_async_set(*args, **kwargs):
+        pass
+
+    mock_coordinator.async_set_departure_schedule.side_effect = mock_async_set
+    mock_vehicle = MagicMock()
+    mock_vehicle.id = "veh-123"
+    mock_coordinator.vehicle_manager.vehicles = {"veh-123": mock_vehicle}
+
+    mock_dev_entry = MagicMock()
+    mock_dev_entry.config_entries = {"entry-1"}
+    mock_hass.data = {"kia_uvo": {"entry-1": mock_coordinator}}
+    mock_hass.helpers.device_registry.async_get.return_value.async_get.return_value = (
+        mock_dev_entry
+    )
+
+    # Test repeat="Never"
+    service_call = MagicMock(
+        domain="kia_uvo",
+        service="set_departure_schedule",
+        data={
+            "device_id": "dev-1",
+            "departure_num": "1",
+            "repeat": "Never",
+            "time": "07:14",
+        },
+    )
+    await handler(service_call)
+
+    mock_coordinator.async_set_departure_schedule.assert_called_once_with(
+        "veh-123",
+        departure_num=1,
+        enabled=None,
+        days=[],
+        time=dt.time(7, 10),
+        climate_enabled=None,
+        temperature=None,
+        temperature_unit=None,
+        defrost=None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_time_entity_set_value_rounds_to_10_minutes():
+    """Verify time entity async_set_value rounds input time to 10 minutes."""
+    from custom_components.kia_uvo.time import (
+        TIME_DESCRIPTIONS,
+        HyundaiKiaConnectTimeEntity,
+    )
+
+    mock_coordinator = MagicMock()
+    mock_coordinator.async_set_departure_time = MagicMock()
+
+    async def mock_async_set(*args, **kwargs):
+        pass
+
+    mock_coordinator.async_set_departure_time.side_effect = mock_async_set
+
+    mock_vehicle = MagicMock()
+    mock_vehicle.id = "veh-123"
+    mock_vehicle.ev_first_departure_time = dt.time(7, 0)
+
+    desc = next(d for d in TIME_DESCRIPTIONS if d.key == "ev_first_departure_time")
+    entity = HyundaiKiaConnectTimeEntity(mock_coordinator, desc, mock_vehicle)
+    entity.async_write_ha_state = MagicMock()
+
+    await entity.async_set_value(dt.time(7, 23))
+
+    mock_coordinator.async_set_departure_time.assert_called_once_with(
+        "veh-123", 1, dt.time(7, 20)
+    )
+    entity.async_write_ha_state.assert_called_once()

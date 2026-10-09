@@ -38,7 +38,7 @@ REPEAT_PRESET_DAYS: Final[dict[str, list[int]]] = {
     PRESET_EVERYDAY: [0, 1, 2, 3, 4, 5, 6],
     PRESET_MON_FRI: [1, 2, 3, 4, 5],
     PRESET_SAT_SUN: [0, 6],
-    PRESET_NEVER: [9],
+    PRESET_NEVER: [],
 }
 
 

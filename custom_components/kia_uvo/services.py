@@ -17,7 +17,11 @@ from hyundai_kia_connect_api import (
 )
 
 from .const import DOMAIN, OffPeakChargingMode
-from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .coordinator import (
+    HyundaiKiaConnectDataUpdateCoordinator,
+    round_time_to_10_minutes,
+)
+from .select import REPEAT_PRESET_DAYS
 
 SERVICE_UPDATE = "update"
 SERVICE_FORCE_UPDATE = "force_update"
@@ -310,16 +314,36 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         climate_enabled = _parse_bool(call.data.get("climate_enabled"))
         defrost = _parse_bool(call.data.get("defrost"))
         time = _parse_time_value(call.data.get("time"))
+        if time is not None:
+            time = round_time_to_10_minutes(time)
 
+        repeat_raw = call.data.get("repeat")
         days_raw = call.data.get("days")
         parsed_days: list[int] | None = None
+
+        if repeat_raw is not None and str(repeat_raw).strip() != "":
+            repeat_val = str(repeat_raw).strip()
+            if repeat_val in REPEAT_PRESET_DAYS:
+                parsed_days = list(REPEAT_PRESET_DAYS[repeat_val])
+            elif repeat_val.lower() == "never":
+                parsed_days = []
+
         if days_raw is not None:
             if isinstance(days_raw, str):
-                parsed_days = [
-                    int(d.strip()) for d in days_raw.split(",") if d.strip().isdigit()
-                ]
+                cleaned = days_raw.strip().lower()
+                if cleaned in ("never", "none", "off", "[]", ""):
+                    parsed_days = []
+                else:
+                    parsed_days = [
+                        int(d.strip())
+                        for d in days_raw.split(",")
+                        if d.strip().isdigit()
+                    ]
             elif isinstance(days_raw, (list, tuple, set)):
-                parsed_days = [int(d) for d in days_raw if str(d).isdigit()]
+                if not days_raw or "never" in [str(d).lower() for d in days_raw]:
+                    parsed_days = []
+                else:
+                    parsed_days = [int(d) for d in days_raw if str(d).isdigit()]
 
         temp_raw = call.data.get("temperature")
         temp = (
@@ -352,6 +376,10 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         mode = call.data.get("mode")
         off_peak_start_time = _parse_time_value(call.data.get("off_peak_start_time"))
         off_peak_end_time = _parse_time_value(call.data.get("off_peak_end_time"))
+        if off_peak_start_time is not None:
+            off_peak_start_time = round_time_to_10_minutes(off_peak_start_time)
+        if off_peak_end_time is not None:
+            off_peak_end_time = round_time_to_10_minutes(off_peak_end_time)
         await coordinator.async_set_off_peak_charging(
             vehicle_id,
             mode=OffPeakChargingMode(mode) if mode is not None else None,

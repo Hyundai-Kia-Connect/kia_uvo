@@ -63,6 +63,17 @@ _LOGGER = logging.getLogger(__name__)
 
 DEPARTURE_DEBOUNCE_SECONDS: Final[float] = 2.5
 
+
+def round_time_to_10_minutes(time_val: dt.time) -> dt.time:
+    """Round a datetime.time object to the nearest 10-minute interval."""
+    rounded_minute = ((time_val.minute + 5) // 10) * 10
+    hour = time_val.hour
+    if rounded_minute >= 60:
+        rounded_minute = 0
+        hour = (hour + 1) % 24
+    return dt.time(hour=hour, minute=rounded_minute)
+
+
 # Render-invalidation signal for the SVM image entities: sent by
 # set_svm_dewarp, consumed in image.py.
 SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
@@ -548,7 +559,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         return ScheduleChargingClimateRequestOptions(
             first_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
                 enabled=vehicle.ev_first_departure_enabled or False,
-                days=list(vehicle.ev_first_departure_days)
+                days=[d for d in vehicle.ev_first_departure_days if d != 9]
                 if vehicle.ev_first_departure_days is not None
                 else [],
                 time=vehicle.ev_first_departure_time or dt.time(),
@@ -558,7 +569,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             ),
             second_departure=ScheduleChargingClimateRequestOptions.DepartureOptions(
                 enabled=vehicle.ev_second_departure_enabled or False,
-                days=list(vehicle.ev_second_departure_days)
+                days=[d for d in vehicle.ev_second_departure_days if d != 9]
                 if vehicle.ev_second_departure_days is not None
                 else [],
                 time=vehicle.ev_second_departure_time or dt.time(),
@@ -629,9 +640,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 options.charging_enabled = True
                 options.off_peak_charge_only_enabled = False
         if start is not None:
-            options.off_peak_start_time = start
+            start_val = round_time_to_10_minutes(start)
+            options.off_peak_start_time = start_val
+            vehicle.ev_off_peak_start_time = start_val
         if end is not None:
-            options.off_peak_end_time = end
+            end_val = round_time_to_10_minutes(end)
+            options.off_peak_end_time = end_val
+            vehicle.ev_off_peak_end_time = end_val
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def _async_stage_departure_update(
@@ -669,11 +684,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 vehicle.ev_second_departure_days = updates["days"]
 
         if "time" in updates and updates["time"] is not None:
-            target.time = updates["time"]
+            time_val = round_time_to_10_minutes(updates["time"])
+            target.time = time_val
             if departure_num == 1:
-                vehicle.ev_first_departure_time = updates["time"]
+                vehicle.ev_first_departure_time = time_val
             else:
-                vehicle.ev_second_departure_time = updates["time"]
+                vehicle.ev_second_departure_time = time_val
 
         if "climate_enabled" in updates and updates["climate_enabled"] is not None:
             target.climate_enabled = updates["climate_enabled"]
@@ -894,8 +910,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         else:
             if day in current_days:
                 current_days.remove(day)
-        if not current_days:
-            current_days = [9]
         await self.async_set_departure_days(
             vehicle_id, departure_num, current_days, debounce=debounce
         )

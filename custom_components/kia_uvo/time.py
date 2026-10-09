@@ -16,7 +16,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 
 from .const import DOMAIN
-from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .coordinator import (
+    HyundaiKiaConnectDataUpdateCoordinator,
+    round_time_to_10_minutes,
+)
 from .entity import HyundaiKiaConnectEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -117,5 +120,8 @@ class HyundaiKiaConnectTimeEntity(TimeEntity, HyundaiKiaConnectEntity):
         return self.entity_description.value_fn(self.vehicle)
 
     async def async_set_value(self, value: dt.time) -> None:
-        await self.entity_description.set_fn(self.coordinator, self.vehicle.id, value)
+        rounded_val = round_time_to_10_minutes(value)
+        await self.entity_description.set_fn(
+            self.coordinator, self.vehicle.id, rounded_val
+        )
         self.async_write_ha_state()

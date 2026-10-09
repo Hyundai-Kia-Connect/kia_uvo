@@ -520,13 +520,17 @@ set_off_peak_charging:
             - label: "Target priority (off-peak tariffs, charge to target)"
               value: "target"
     off_peak_start_time:
+      name: Off-Peak Start Time
+      description: Start time of off-peak charging window (automatically aligned to 10-minute intervals).
       required: false
       selector:
-        time:
+        time: {}
     off_peak_end_time:
+      name: Off-Peak End Time
+      description: End time of off-peak charging window (automatically aligned to 10-minute intervals).
       required: false
       selector:
-        time:
+        time: {}
 set_departure_schedule:
   name: Set Departure Schedule
   description: >-
@@ -560,13 +564,30 @@ set_departure_schedule:
         boolean: {}
     time:
       name: Departure Time
-      description: Target departure time.
+      description: Target departure time (automatically aligned to 10-minute intervals).
       required: false
       selector:
         time: {}
+    repeat:
+      name: Repeat Preset
+      description: Select a repeat schedule preset, or select specific days below. Selecting "Never" clears all repeating days.
+      required: false
+      selector:
+        select:
+          options:
+            - label: "Everyday"
+              value: "Everyday"
+            - label: "Mon - Fri"
+              value: "Mon - Fri"
+            - label: "Sat - Sun"
+              value: "Sat - Sun"
+            - label: "Never (Clear all days)"
+              value: "Never"
+            - label: "Custom"
+              value: "Custom"
     days:
       name: Repeat Days
-      description: Select days of the week to repeat this departure.
+      description: Select days of the week to repeat this departure. Leave empty to clear all days.
       required: false
       selector:
         select:

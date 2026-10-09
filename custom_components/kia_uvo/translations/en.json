@@ -343,11 +343,15 @@
         },
         "time": {
           "name": "Departure Time",
-          "description": "Target departure time."
+          "description": "Target departure time (automatically aligned to 10-minute intervals)."
+        },
+        "repeat": {
+          "name": "Repeat Preset",
+          "description": "Select a repeat schedule preset, or select specific days below. Selecting 'Never' clears all repeating days."
         },
         "days": {
           "name": "Repeat Days",
-          "description": "Select days of the week to repeat this departure."
+          "description": "Select days of the week to repeat this departure. Leave empty to clear all days."
         },
         "climate_enabled": {
           "name": "Preconditioning Climate",
