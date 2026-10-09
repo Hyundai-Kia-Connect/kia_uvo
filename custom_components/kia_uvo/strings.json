@@ -91,6 +91,15 @@
       "air_temperature": {
         "name": "Set Temperature"
       },
+      "average_fuel_economy_accumulated": {
+        "name": "Average Fuel Economy (Accumulated)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Average Fuel Economy (Drive)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Average Fuel Economy (After Refuel)"
+      },
       "car_battery_percentage": {
         "name": "Car Battery Level"
       },
@@ -126,6 +135,15 @@
       },
       "ev_battery_water_temperature": {
         "name": "EV Battery Water Temperature"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Charge Complete Alarm"
+      },
+      "ev_charge_expected_end_time": {
+        "name": "Expected Charge End"
+      },
+      "ev_charge_expected_start_time": {
+        "name": "Expected Charge Start"
       },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
@@ -177,6 +195,9 @@
       },
       "fuel_level": {
         "name": "Fuel Level"
+      },
+      "gear_position": {
+        "name": "Gear Position"
       },
       "geocode_name": {
         "name": "Geocoded Location"
@@ -278,6 +299,12 @@
       },
       "air_control_is_on": {
         "name": "Air Conditioner"
+      },
+      "air_cleaning_is_on": {
+        "name": "Air Cleaning"
+      },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Auto-Cut Battery Pre-Warning"
       },
       "back_left_door_is_locked": {
         "name": "Back Left Door Lock"
@@ -381,6 +408,9 @@
       "headlamp_status": {
         "name": "Headlamp Status"
       },
+      "hazard_lights_on": {
+        "name": "Hazard Lights"
+      },
       "hood_is_open": {
         "name": "Hood"
       },
@@ -407,6 +437,9 @@
       },
       "smart_key_battery_warning_is_on": {
         "name": "Smart Key Battery Warning"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Steering Wheel Heat Step"
       },
       "steering_wheel_heater_is_on": {
         "name": "Steering Wheel Heater"
@@ -452,6 +485,9 @@
       },
       "turn_signal_right_rear": {
         "name": "Turn Signal Right Rear"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Windshield Heater"
       },
       "washer_fluid_warning_is_on": {
         "name": "Washer Fluid Warning"
@@ -605,8 +641,17 @@
       "ev_charge_limits_dc": {
         "name": "DC Charging Limit"
       },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L Discharge DTE"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L Discharge Remaining Time"
+      },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L Mode"
       }
     },
     "device_tracker": {
