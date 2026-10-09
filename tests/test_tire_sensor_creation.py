@@ -13,6 +13,9 @@ The payload fixtures run through the REAL API-library CCS2 parser so these
 tests pin the whole contract, not a re-implementation of it.
 """
 
+from unittest.mock import AsyncMock, MagicMock
+
+from homeassistant.components.sensor import SensorExtraStoredData
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.KiaUvoApiAU import KiaUvoApiAU
 
@@ -39,6 +42,9 @@ def _ccs2_state(pressure_unit: int, tire_pressure: int) -> dict:
 # Real AU/NZ shape while parked: direct TPMS (PressureUnit 0 = psi),
 # pressures at the 255 no-data sentinel.
 _DIRECT_TPMS_PARKED = _ccs2_state(pressure_unit=0, tire_pressure=255)
+
+# AU/NZ shape while driving: valid pressure readings (e.g. 34 psi).
+_DIRECT_TPMS_DRIVING = _ccs2_state(pressure_unit=0, tire_pressure=34)
 
 # KONA EV shape from kia_uvo #1786: indirect TPMS (PressureUnit 3), no direct
 # sensors — the vehicle can never report a per-tire pressure.
@@ -80,3 +86,62 @@ async def test_no_tpms_data_creates_no_sensors(setup_sensors) -> None:
     vehicle = _parsed_vehicle(None)
     assert vehicle.tire_pressure_unit is None
     assert await _created_tire_keys(setup_sensors, vehicle) == []
+
+
+async def test_tire_pressure_sensor_retains_last_known_value_when_parked(
+    setup_sensors,
+) -> None:
+    """Sensor retains its last reported reading when car parks (None sentinel)."""
+    vehicle = _parsed_vehicle(_DIRECT_TPMS_DRIVING)
+    sensors = await setup_sensors(vehicle)
+    sensor = sensors["tire_pressure_front_left"]
+    assert sensor.native_value == 34
+    assert sensor.native_unit_of_measurement == "psi"
+
+    # Car parks: telematics sends 255 sentinel (parsed to None)
+    api = KiaUvoApiAU(region=5, brand=2, language="en")
+    api._update_vehicle_properties_ccs2(vehicle, _DIRECT_TPMS_PARKED)
+    assert vehicle.tire_pressure_front_left is None
+    # Sensor retains the last known value and unit while parked
+    assert sensor.native_value == 34
+    assert sensor.native_unit_of_measurement == "psi"
+
+    # Car drives again: new live reading updates sensor
+    api._update_vehicle_properties_ccs2(
+        vehicle, _ccs2_state(pressure_unit=0, tire_pressure=36)
+    )
+    assert sensor.native_value == 36
+
+
+async def test_tire_pressure_sensor_restores_from_last_sensor_data(
+    setup_sensors,
+) -> None:
+    """Sensor restores its last known value and unit after Home Assistant restart."""
+    vehicle = _parsed_vehicle(_DIRECT_TPMS_PARKED)
+    sensors = await setup_sensors(vehicle)
+    sensor = sensors["tire_pressure_front_left"]
+    assert sensor.native_value is None
+
+    sensor.async_get_last_sensor_data = AsyncMock(
+        return_value=SensorExtraStoredData(
+            native_value=33.5, native_unit_of_measurement="psi"
+        )
+    )
+    await sensor.async_added_to_hass()
+    assert sensor.native_value == 33.5
+    assert sensor.native_unit_of_measurement == "psi"
+
+
+async def test_tire_pressure_sensor_restores_from_last_state_fallback(
+    setup_sensors,
+) -> None:
+    """Sensor restores from last state when extra sensor data is unavailable."""
+    vehicle = _parsed_vehicle(_DIRECT_TPMS_PARKED)
+    sensors = await setup_sensors(vehicle)
+    sensor = sensors["tire_pressure_front_left"]
+    assert sensor.native_value is None
+
+    sensor.async_get_last_sensor_data = AsyncMock(return_value=None)
+    sensor.async_get_last_state = AsyncMock(return_value=MagicMock(state="34.0"))
+    await sensor.async_added_to_hass()
+    assert sensor.native_value == 34.0
