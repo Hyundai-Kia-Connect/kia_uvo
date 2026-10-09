@@ -686,4 +686,3 @@ def test_departure_days_sensor_display_none():
     mock_vehicle.ev_second_departure_time = dt.time(8, 0)
     mock_vehicle.ev_second_departure_days = None
     assert desc2.exists(mock_vehicle) is True
-
