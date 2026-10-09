@@ -650,3 +650,40 @@ async def test_time_entity_set_value_rounds_to_10_minutes():
         "veh-123", 1, dt.time(7, 20)
     )
     entity.async_write_ha_state.assert_called_once()
+
+
+def test_departure_days_sensor_display_none():
+    """Verify departure days sensor displays 'None' when days are None or empty."""
+    from custom_components.kia_uvo.sensor import (
+        SENSOR_DESCRIPTIONS,
+        HyundaiKiaConnectSensor,
+    )
+
+    desc1 = next(d for d in SENSOR_DESCRIPTIONS if d.key == "ev_first_departure_days")
+    desc2 = next(d for d in SENSOR_DESCRIPTIONS if d.key == "ev_second_departure_days")
+    mock_coordinator = MagicMock()
+    mock_vehicle = MagicMock()
+
+    # When days is None
+    mock_vehicle.ev_first_departure_days = None
+    sensor1 = HyundaiKiaConnectSensor(mock_coordinator, desc1, mock_vehicle)
+    assert sensor1.native_value == "None"
+
+    # When days is empty list
+    mock_vehicle.ev_first_departure_days = []
+    assert sensor1.native_value == "None"
+
+    # When days is empty string
+    mock_vehicle.ev_first_departure_days = ""
+    assert sensor1.native_value == "None"
+
+    # When days has values
+    mock_vehicle.ev_first_departure_days = [1, 2, 3]
+    assert sensor1.native_value == "1, 2, 3"
+
+    # Verify exists predicate allows sensor creation when departure is supported
+    mock_vehicle.ev_second_departure_enabled = True
+    mock_vehicle.ev_second_departure_time = dt.time(8, 0)
+    mock_vehicle.ev_second_departure_days = None
+    assert desc2.exists(mock_vehicle) is True
+
