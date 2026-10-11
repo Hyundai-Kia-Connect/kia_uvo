@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle
 
-from .const import DOMAIN
+from .const import BRAND_HYUNDAI, BRANDS, DOMAIN, REGION_USA, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -108,8 +108,21 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         )
 
     @property
+    def _is_hyundai_usa(self) -> bool:
+        """Whether climate requests use the Hyundai USA Fahrenheit backend."""
+        return (
+            REGIONS.get(self.coordinator.vehicle_manager.region) == REGION_USA
+            and BRANDS.get(self.coordinator.vehicle_manager.brand) == BRAND_HYUNDAI
+        )
+
+    @property
     def temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
+        # This backend always sends Fahrenheit, including when cached airTemp
+        # is OFF/missing. A Celsius fallback lets HA convert a pending target
+        # to Celsius before the first valid Fahrenheit status arrives.
+        if self._is_hyundai_usa:
+            return UnitOfTemperature.FAHRENHEIT
         if self.vehicle._air_temperature_unit:
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
         return UnitOfTemperature.CELSIUS
@@ -133,6 +146,8 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     def target_temperature_step(self) -> float | None:
         """Get the step size for adjusting the in-car target temperature."""
         # TODO: get from lib
+        if self._is_hyundai_usa:
+            return 1
         return 0.5
 
     @property
