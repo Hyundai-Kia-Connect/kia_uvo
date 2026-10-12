@@ -81,7 +81,8 @@
           "no_force_refresh_hour_start": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_start%]",
           "no_force_refresh_hour_finish": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_finish%]",
           "enable_geolocation_entity": "[%key:component::hyundai_kia_connect::options::step::init::data::enable_geolocation_entity%]",
-          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]"
+          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]",
+          "enable_mqtt": "Enable MQTT push notifications (CCI/EU only)"
         }
       }
     }
@@ -308,6 +309,9 @@
       },
       "engine_is_running": {
         "name": "Engine"
+      },
+      "mqtt_connected": {
+        "name": "MQTT Connected"
       },
       "ev_battery_heating_state": {
         "name": "EV battery heating"
