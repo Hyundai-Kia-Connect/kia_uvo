@@ -97,7 +97,7 @@
           "description": "Einstellen der Temperatur der Klimasteuerung. Die Einheit ist regionsabhängig."
         },
         "defrost": {
-          "name": "Einteisen",
+          "name": "Enteisen",
           "description": "Frontscheibenenteisung"
         },
         "heating": {
