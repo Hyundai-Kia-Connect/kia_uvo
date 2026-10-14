@@ -97,8 +97,8 @@
           "description": "Einstellen der Temperatur der Klimasteuerung. Die Einheit ist regionsabhängig."
         },
         "defrost": {
-          "name": "Entfrosten",
-          "description": "Frontscheibenentfrostung"
+          "name": "Einteisen",
+          "description": "Frontscheibenenteisung"
         },
         "heating": {
           "name": "Heizung",
@@ -302,16 +302,16 @@
         "description": "Durchschnittlicher Energieverbrauch der letzten 30 Tage"
       },
       "front_left_seat_status": {
-        "name": "Sitz vorne links"
+        "name": "Vordersitz links"
       },
       "front_right_seat_status": {
-        "name": "Sitz vorne rechts"
+        "name": "Vordersitz rechts"
       },
       "rear_left_seat_status": {
-        "name": "Sitz hinten links"
+        "name": "Rücksitz links"
       },
       "rear_right_seat_status": {
-        "name": "Sitz hinten rechts"
+        "name": "Rücksitz rechts"
       },
       "geocode_name": {
         "name": "Geocoded Location"
@@ -537,7 +537,7 @@
     },
     "lock": {
       "door_lock": {
-        "name": "Türschloss"
+        "name": "Zentralverriegelung"
       }
     },
     "button": {
