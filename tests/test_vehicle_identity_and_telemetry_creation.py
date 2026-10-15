@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 
 from hyundai_kia_connect_api import Vehicle
 
-from custom_components.kia_uvo import sensor as sensor_platform
 from custom_components.kia_uvo.const import DOMAIN
 from custom_components.kia_uvo.entity import HyundaiKiaConnectEntity
 
@@ -28,23 +27,9 @@ def test_vin_keeps_device_identity_when_backend_id_changes() -> None:
     assert before["identifiers"] & after["identifiers"]
 
 
-async def test_odometer_entity_survives_empty_setup_payload() -> None:
+async def test_odometer_entity_survives_empty_setup_payload(setup_sensors) -> None:
     """A transiently absent odometer value must not remove its entity."""
     vehicle = _vehicle()
     vehicle._odometer = None
 
-    coordinator = MagicMock()
-    coordinator.vehicle_manager.vehicles = {vehicle.id: vehicle}
-    hass = MagicMock()
-    config_entry = MagicMock(unique_id="uid")
-    hass.data = {DOMAIN: {"uid": coordinator}}
-    created = []
-
-    await sensor_platform.async_setup_entry(hass, config_entry, created.extend)
-
-    description_keys = {
-        entity.entity_description.key
-        for entity in created
-        if getattr(entity, "entity_description", None) is not None
-    }
-    assert "_odometer" in description_keys
+    assert "_odometer" in await setup_sensors(vehicle)
