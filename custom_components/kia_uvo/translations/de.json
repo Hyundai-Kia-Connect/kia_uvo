@@ -2,6 +2,24 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+    "credentials_password": {
+        "title": "Hyundai / Kia Connect - Logininformationen",
+        "description": "Deine Logininformationen eingeben.",
+        "data": {
+          "username": "Benutzername",
+          "password": "Passwort",
+          "pin": "Pin"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Logininformationen",
+        "description": "Gib deine Logininformationen ein. Europa benötigt einen speziellen Token — siehe README.",
+        "data": {
+          "username": "Username",
+          "password": "Token",
+          "pin": "Pin"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Anmelden",
         "description": "Hyundai Bluelink / Kia Uvo Connect Anmeldung für Home Assistant.",
@@ -223,6 +241,148 @@
           "description": "Kapazität des Ladestroms in Prozent"
         }
       }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Laden und Klimaanlage planen",
+      "description": "Bitte vorsichtig benutzen. Nicht alle Optioenn sind für alle Fahrzeuge bzw. Regionen verfügbar. Vergleiche die Optionen mit denen, die in der offiziellen App verfügbar sind.",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        },
+        "charging_enabled": {
+          "name": "geplantes Laden",
+          "description": "aktiviere geplantes Laden"
+        },
+        "first_departure_enabled": {
+          "name": "Abfahrt 1",
+          "description": "Abfahrt 1 aktivieren"
+        },
+        "first_departure_days": {
+          "name": "Tage Abfahrt 1",
+          "description": "An welchen Tagen gilt die Abfahrt 1. Darf nicht leer sein."
+        },
+        "first_departure_time": {
+          "name": "Zeit Abfahrt 1",
+          "description": "Zeit für Abfahrt 1. Nutze nur 00, 10, 20, 30, 40 oder 50 als Minuten und 00 als Sekunden."
+        },
+        "second_departure_enabled": {
+          "name": "Abfahrt 2",
+          "description": "Abfahrt 2 aktivieren"
+        },
+        "second_departure_days": {
+          "name": "Tage Abfahrt 2",
+          "description": "An welchen Tagen gilt die Abfahrt 2. Darf nicht leer sein."
+        },
+        "second_departure_time": {
+          "name": "Zeit Abfahrt 2",
+          "description": "Zeit für Abfahrt 2. Nutze nur 00, 10, 20, 30, 40 oder 50 als Minuten und 00 als Sekunden."
+        },
+        "off_peak_start_time": {
+          "name": "Startzeit für den Niedertarifbetrieb.",
+          "description": "Startzeit für den EV-Niedertarifbetrieb. Nutze nur 00, 10, 20, 30, 40 oder 50 als Minuten und 00 als Sekunden."
+        },
+        "off_peak_end_time": {
+          "name": Endzeit für den Niedertarifbetrieb",
+          "description": "Endzeit für den EV-Niedertarifbetrieb. Nutze nur 00, 10, 20, 30, 40 oder 50 als Minuten und 00 als Sekunden."
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Nur Niedertarifbetrieb",
+          "description": "Wenn wahr, nur während der Zeit des Niedertarifbetriebs laden. Andernfalls kann das Laden ggf. vor der Zeit starten."
+        },
+        "climate_enabled": {
+          "name": "Klimaanlage",
+          "description": "Starte die Klimaanlage vor der Abfahrt."
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Setze die Temperatur der Klimaanlage. Einheiten (Celsius/Fahrenheit) gemäß Region."
+        },
+        "temperature_unit": {
+          "name": "Temperatur-Einheit",
+          "description": "Setze die Temperatur der Klimaanlage. Einheiten (Celsius/Fahrenheit) gemäß Region."
+        },
+        "defrost": {
+          "name": "Enteisen",
+          "description": "Windschutzscheibe vor der Abfahrt enteisen"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Warnblinklichter aktivieren",
+      "description": "Die Warnblinklichter für 30 Sekunden aktivieren",
+      "fields": {
+        "device_id": {
+          "name": "Vehicle",
+          "description": "Target vehicle"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Warnblinklichter und Hupe aktivieren",
+      "description": "Die Warnblinklichter und die Hupe für 30 Sekunden aktivieren",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Valet-Modus aktivieren",
+      "description": "Aktiviere den Valet-Modus. Wenn der Valet-Modus während der Fahrt aktiviert wird, wird die Infotainment-Anzeige deaktiviert.",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Valet-Modus deaktivieren",
+      "description": "Deaktiviere den Valet-Modus.",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Fensterscheiben einstellen",
+      "description": "Öffne oder schließe die Fensterscheiben des Fahrzeugs.",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        },
+        "flwindow": {
+          "name": "Fenster vorne links",
+          "description": "Action for the front left window"
+        },
+        "frwindow": {
+          "name": "Fenster vorne rechts",
+          "description": "Action for the front right window"
+        },
+        "rlwindow": {
+          "name": "Fenster hinten links",
+          "description": "Action for the rear left window"
+        },
+        "rrwindow": {
+          "name": "Fenster hinten rechts",
+          "description": "Action for the rear right window"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "Capture SVM Image",
+      "description": "Trigger a fresh Surround View Monitor capture. The vehicle wakes up and captures a 360 image.",
+      "fields": {
+        "device_id": {
+          "name": "Fahrzeug",
+          "description": "Zielfahrzeug"
+        }
+      }
     }
   },
   "entity": {
@@ -286,10 +446,10 @@
         "name": "Geschätze Ladedauer (Ladestation)"
       },
       "ev_target_range_charge_ac": {
-        "name": "Zielbereich der Ladung AC"
+        "name": "Zielreichweite bei Ladung AC"
       },
       "ev_target_range_charge_dc": {
-        "name": "Zielbereich der Ladung DC"
+        "name": "Zielreichweite bei Ladung DC"
       },
       "total_power_consumed": {
         "name": "90-Tage Energieverbrauch"
@@ -344,7 +504,7 @@
         "name": "Daten"
       },
       "daily_driving_stats": {
-        "name": "Täglicher Fahrstatus"
+        "name": "Tägliche Fahrstatistik"
       },
       "todays_daily_driving_stats": {
         "name": "Today's Daily Driving Stats"
