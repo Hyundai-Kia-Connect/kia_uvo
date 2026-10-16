@@ -18,6 +18,8 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     PERCENTAGE,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -47,6 +49,16 @@ class HyundaiKiaSensorEntityDescription(SensorEntityDescription):
 def _is_electrified(vehicle: Vehicle) -> bool:
     """Return True for BEV and PHEV vehicles."""
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+
+
+TIRE_PRESSURE_KEYS: Final[frozenset[str]] = frozenset(
+    {
+        "tire_pressure_front_left",
+        "tire_pressure_front_right",
+        "tire_pressure_rear_left",
+        "tire_pressure_rear_right",
+    }
+)
 
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
@@ -486,9 +498,10 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
     # exactly for direct-TPMS vehicles (known PressureUnit), None
     # for indirect TPMS (PressureUnit 3, e.g. KONA — #1786) and
     # old-protocol vehicles, which never report a numeric
-    # pressure. A None pressure -> HA `unknown` until a poll
-    # catches the car driving. The same gate applies to all four
-    # tire_pressure_* sensors below.
+    # pressure. While parked the backend reports no-data sentinels,
+    # so the sensor retains its last known reading and restores it
+    # across restarts rather than dropping to `unknown`. The same
+    # gate applies to all four tire_pressure_* sensors below.
     HyundaiKiaSensorEntityDescription(
         key="tire_pressure_front_left",
         translation_key="tire_pressure_front_left",
@@ -613,6 +626,11 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
         self.entity_description = description
         self._key = description.key
         self._last_dynamic_unit: str | None = None
+        self._last_known_value: StateType | None = None
+        if self._key in TIRE_PRESSURE_KEYS:
+            initial_value = getattr(vehicle, self._key, None)
+            if initial_value is not None:
+                self._last_known_value = cast(StateType, initial_value)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = description.icon
         self._attr_state_class = description.state_class
@@ -640,14 +658,40 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
             if isinstance(value, list):
                 return ", ".join(str(d) for d in value)
             return cast(StateType | datetime, value)
+        if self._key in TIRE_PRESSURE_KEYS:
+            if value is not None:
+                self._last_known_value = cast(StateType, value)
+            return self._last_known_value
         return cast(StateType | datetime, value)
 
     async def async_added_to_hass(self) -> None:
-        """Restore the last known dynamic unit after a restart."""
+        """Restore the last known dynamic unit and value after a restart."""
         await super().async_added_to_hass()
         last_sensor_data = await self.async_get_last_sensor_data()
-        if last_sensor_data is not None and last_sensor_data.native_unit_of_measurement:
-            self._last_dynamic_unit = last_sensor_data.native_unit_of_measurement
+        if last_sensor_data is not None:
+            if last_sensor_data.native_unit_of_measurement:
+                self._last_dynamic_unit = last_sensor_data.native_unit_of_measurement
+            if (
+                self._key in TIRE_PRESSURE_KEYS
+                and self._last_known_value is None
+                and last_sensor_data.native_value is not None
+            ):
+                self._last_known_value = cast(StateType, last_sensor_data.native_value)
+
+        if (
+            self._key in TIRE_PRESSURE_KEYS
+            and self._last_known_value is None
+            and (last_state := await self.async_get_last_state()) is not None
+            and last_state.state not in (STATE_UNKNOWN, STATE_UNAVAILABLE)
+        ):
+            try:
+                self._last_known_value = (
+                    float(last_state.state)
+                    if "." in last_state.state
+                    else int(last_state.state)
+                )
+            except ValueError:
+                pass
 
     @property
     def native_unit_of_measurement(self) -> str | None:
