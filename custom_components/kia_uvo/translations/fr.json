@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Identifiants",
+        "description": "Saisissez les identifiants de votre compte.",
+        "data": {
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "pin": "Code PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Identifiants",
+        "description": "Saisissez les identifiants de votre compte. L'Europe nécessite une procédure spécifique pour le jeton — consultez le README.",
+        "data": {
+          "username": "Nom d'utilisateur",
+          "password": "Jeton",
+          "pin": "Code PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Authentification",
         "description": "Configurez votre Hyundai (Bluelink) / Kia (Uvo) Connect pour l'intégrer à Home Assistant.",
         "data": {
-          "username": "Nom d'utilisateur",
-          "password": "Mot de passe",
           "region": "Région",
-          "brand": "Marque",
-          "pin": "Code pin"
+          "brand": "Marque"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Ré-authentification",
         "description": "Echec d'authentification. Clickez Soumettre pour recommencer la configuration."
+      },
+      "select_otp_method": {
+        "title": "Choisir la méthode OTP",
+        "description": "Votre compte nécessite une vérification. Choisissez comment vous souhaitez recevoir votre mot de passe à usage unique.",
+        "data": {
+          "method": "Méthode d'envoi de l'OTP"
+        }
+      },
+      "enter_otp": {
+        "title": "Saisir le mot de passe à usage unique",
+        "description": "Saisissez le code de vérification envoyé via la méthode choisie.",
+        "data": {
+          "otp": "Mot de passe à usage unique"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Reconfigurer",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "Périférique déjà configuré",
+      "reauth_successful": "Réauthentification réussie",
       "reconfigure_successful": "Reconfiguration réussie"
     },
     "error": {
       "invalid_auth": "Authentification échouée aux serveurs Hyundai (Bluelink) / Kia (Uvo) Connect. Déconnectez-vous et reconnectez-vous sur l'application officielle puis ré-essayez!",
+      "invalid_credentials": "Nom d'utilisateur ou mot de passe invalide",
       "unknown": "Erreur non gérée"
     }
   },
@@ -103,6 +134,10 @@
         "heating": {
           "name": "Chauffage",
           "description": "Fonctionnalités de chauffage telles que le volant chauffant ou lunette arrière."
+        },
+        "steering_wheel": {
+          "name": "Volant chauffant",
+          "description": "Niveau de chauffage du volant. Europe uniquement, les autres régions utilisent le réglage de chauffage."
         },
         "flseat": {
           "name": "Siège avant gauche",
@@ -209,353 +244,698 @@
           "description": "Capacité maximale de charge avec chargeur AC (courrant alternatif)."
         }
       }
+    },
+    "set_charging_current": {
+      "name": "Régler le courant de charge AC",
+      "description": "Règle la capacité du courant de charge AC",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        },
+        "level": {
+          "name": "Courant de charge",
+          "description": "Capacité du courant de charge en pourcentage"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Programmer la charge et la climatisation",
+      "description": "À utiliser avec précaution - Programme la charge et la climatisation. Toutes les options ne sont pas disponibles sur toutes les voitures ou dans toutes les régions. Utilisez l'application mobile de votre voiture comme guide et choisissez les options disponibles pour votre voiture.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        },
+        "charging_enabled": {
+          "name": "Charge programmée",
+          "description": "Activer la charge programmée"
+        },
+        "first_departure_enabled": {
+          "name": "1er départ",
+          "description": "Activer le premier départ"
+        },
+        "first_departure_days": {
+          "name": "Jours du 1er départ",
+          "description": "Jours auxquels s'applique le premier départ. Ne peut pas être vide."
+        },
+        "first_departure_time": {
+          "name": "Heure du 1er départ",
+          "description": "Heure du premier départ. Utilisez 00, 10, 20, 30, 40 ou 50 pour les minutes et 00 pour les secondes"
+        },
+        "second_departure_enabled": {
+          "name": "2e départ",
+          "description": "Activer le second départ"
+        },
+        "second_departure_days": {
+          "name": "Jours du 2e départ",
+          "description": "Jours auxquels s'applique le second départ. Ne peut pas être vide."
+        },
+        "second_departure_time": {
+          "name": "Heure du 2e départ",
+          "description": "Heure du second départ. Utilisez 00, 10, 20, 30, 40 ou 50 pour les minutes et 00 pour les secondes"
+        },
+        "off_peak_start_time": {
+          "name": "Début des heures creuses",
+          "description": "Heure de début des heures creuses. Utilisez 00, 10, 20, 30, 40 ou 50 pour les minutes et 00 pour les secondes"
+        },
+        "off_peak_end_time": {
+          "name": "Fin des heures creuses",
+          "description": "Heure de fin des heures creuses. Utilisez 00, 10, 20, 30, 40 ou 50 pour les minutes et 00 pour les secondes"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Heures creuses uniquement",
+          "description": "Si activé, la charge n'a lieu que pendant les heures creuses définies, sinon la charge peut commencer avant les heures creuses"
+        },
+        "climate_enabled": {
+          "name": "Climatisation",
+          "description": "Activer la climatisation avant le départ"
+        },
+        "temperature": {
+          "name": "Température",
+          "description": "Régler la température de la climatisation. L'unité dépend de la région."
+        },
+        "temperature_unit": {
+          "name": "Unité de température",
+          "description": "Régler l'unité de température de la climatisation. L'unité dépend de la région."
+        },
+        "defrost": {
+          "name": "Dégivrage",
+          "description": "Dégivrage du pare-brise avant le départ"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Allumer les feux de détresse",
+      "description": "Allume les feux de détresse pendant 30 secondes.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Allumer les feux de détresse et le klaxon",
+      "description": "Allume les feux de détresse et le klaxon pendant 30 secondes.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Activer le mode voiturier",
+      "description": "Active le mode voiturier. Si le mode voiturier est activé à distance pendant la conduite, l'écran du véhicule est désactivé.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Désactiver le mode voiturier",
+      "description": "Désactive le mode voiturier.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Commander les vitres",
+      "description": "Commande les vitres du véhicule. Ouvrez ou fermez les vitres selon vos besoins.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        },
+        "flwindow": {
+          "name": "Vitre avant gauche",
+          "description": "Action pour la vitre avant gauche"
+        },
+        "frwindow": {
+          "name": "Vitre avant droite",
+          "description": "Action pour la vitre avant droite"
+        },
+        "rlwindow": {
+          "name": "Vitre arrière gauche",
+          "description": "Action pour la vitre arrière gauche"
+        },
+        "rrwindow": {
+          "name": "Vitre arrière droite",
+          "description": "Action pour la vitre arrière droite"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "Capturer une image SVM",
+      "description": "Déclenche une nouvelle capture du Surround View Monitor. Le véhicule se réveille et capture une image à 360°.",
+      "fields": {
+        "device_id": {
+          "name": "Véhicule",
+          "description": "Véhicule cible"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Autonomie totale"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Compteur kilométrique"
+      },
+      "outside_temperature": {
+        "name": "Température extérieure"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Dernier entretien"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Prochain entretien"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Niveau de la batterie"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Dernière mise à jour"
       },
       "last_scanned_at": {
         "name": "Dernière interrogation"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "Niveau de la batterie EV"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "État de santé de la batterie EV"
+      },
+      "ev_battery_temperature_max": {
+        "name": "Température max de la batterie EV"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Température min de la batterie EV"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Température du liquide de refroidissement de la batterie EV"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "Énergie restante de la batterie EV"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "Capacité de la batterie EV"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "Tension du pack batterie EV"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "Autonomie EV"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Autonomie carburant"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Niveau de carburant"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Température réglée"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Durée de charge estimée"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Durée de charge rapide estimée"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Durée de charge portable estimée"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Durée de charge en borne estimée"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "Autonomie cible de charge AC"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "Autonomie cible de charge DC"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "Consommation d'énergie sur 90 jours"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Énergie totale régénérée"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Consommation d'énergie moyenne"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Siège avant gauche"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Siège avant droit"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Siège arrière gauche"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Siège arrière droit"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Emplacement géocodé"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "Nombre de codes DTC"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Heure du premier départ"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Heure du second départ"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "Début des heures creuses EV"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "Fin des heures creuses EV"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "Limite du courant de charge EV"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "Puissance de charge EV"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Numéro d'identification du véhicule"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Température de climatisation du premier départ"
+      },
+      "ev_first_departure_days": {
+        "name": "Jours du premier départ"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Température de climatisation du second départ"
+      },
+      "ev_second_departure_days": {
+        "name": "Jours du second départ"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Consommation EV de la climatisation"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Consommation EV du refroidissement de la batterie"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Consommation EV du chauffage de la batterie"
+      },
+      "location_last_updated_at": {
+        "name": "Dernière mise à jour de la position"
+      },
+      "ev_v2l_max_power": {
+        "name": "Puissance max V2L"
+      },
+      "ev_v2l_target_soc": {
+        "name": "SoC cible V2L"
       },
       "data": {
-        "name": "Data"
+        "name": "Données"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Statistiques de conduite quotidiennes"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Statistiques de conduite du jour"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Pression des pneus - Avant gauche"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Pression des pneus - Avant droit"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Pression des pneus - Arrière gauche"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Pression des pneus - Arrière droit"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Mode de conduite"
+      },
+      "svm_status": {
+        "name": "État SVM"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Moteur"
+      },
+      "ev_battery_heating_state": {
+        "name": "Chauffage de la batterie EV"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Dégivrage"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Volant chauffant"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Dégivrage de la lunette arrière"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Rétroviseurs chauffants"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Porte avant gauche"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Porte avant droite"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Porte arrière gauche"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Porte arrière droite"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Coffre"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Capot"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Vitre avant gauche"
+      },
+      "front_right_door_is_locked": {
+        "name": "Verrou porte avant droite"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Vitre avant droite"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Vitre arrière gauche"
+      },
+      "back_right_door_is_locked": {
+        "name": "Verrou porte arrière droite"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Vitre arrière droite"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "Charge de la batterie EV"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "Branchement de la batterie EV"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "Préconditionnement de la batterie EV"
+      },
+      "ev_battery_winter_mode": {
+        "name": "Mode hiver de la batterie EV"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Niveau de carburant bas"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Alerte pile de la clé intelligente"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Alerte liquide lave-glace"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Dégivrage du premier départ"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Climatisation du premier départ"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Dégivrage du second départ"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Climatisation du second départ"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Charge en heures creuses uniquement"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Charge programmée"
+      },
+      "ev_v2l_status": {
+        "name": "État V2L"
+      },
+      "ev_v2x_status": {
+        "name": "État V2X"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Pression des pneus - Tous"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Pression des pneus - Arrière gauche"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Pression des pneus - Avant gauche"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Pression des pneus - Avant droit"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Pression des pneus - Arrière droit"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Climatisation"
+      },
+      "back_left_door_is_locked": {
+        "name": "Verrou porte arrière gauche"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "Trappe de charge EV"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "Départ programmé EV 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "Départ programmé EV 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Verrou porte avant gauche"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Alerte liquide de frein"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Toit ouvrant"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Accessoires"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Démarrage à distance"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "État de la transmission"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Vérification du mode veille"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "État des phares"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Défaut feu avant gauche"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Défaut feu avant droit"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Défaut feu de route gauche"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Défaut feu de route droit"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Défaut projecteur bifonction gauche"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Défaut projecteur bifonction droit"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Défaut feu arrière gauche"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Défaut feu arrière droit"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Clignotant avant gauche"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Clignotant avant droit"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Clignotant arrière gauche"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Clignotant arrière droit"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Verrouillé"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Siège chauffant avant gauche"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Siège chauffant avant droit"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Siège chauffant arrière gauche"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Siège chauffant arrière droit"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Alerte niveau d'huile"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "Défaut batterie 12V"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Verrouillage des portes"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Forcer l'actualisation"
+      },
+      "start_hazard_lights": {
+        "name": "Allumer les feux de détresse"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Allumer les feux de détresse et le klaxon"
+      },
+      "start_valet_mode": {
+        "name": "Activer le mode voiturier"
+      },
+      "stop_valet_mode": {
+        "name": "Désactiver le mode voiturier"
+      },
+      "open_all_windows": {
+        "name": "Ouvrir toutes les vitres"
+      },
+      "close_all_windows": {
+        "name": "Fermer toutes les vitres"
+      },
+      "vent_all_windows": {
+        "name": "Entrouvrir toutes les vitres"
+      },
+      "capture_svm_image": {
+        "name": "Capturer une image SVM"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "Caméra avant SVM"
+      },
+      "svm_rear": {
+        "name": "Caméra arrière SVM"
+      },
+      "svm_left": {
+        "name": "Caméra gauche SVM"
+      },
+      "svm_right": {
+        "name": "Caméra droite SVM"
+      },
+      "svm_top": {
+        "name": "Vue aérienne SVM"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Vitre avant gauche"
+      },
+      "front_right_window": {
+        "name": "Vitre avant droite"
+      },
+      "back_left_window": {
+        "name": "Vitre arrière gauche"
+      },
+      "back_right_window": {
+        "name": "Vitre arrière droite"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "Charge EV"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Climatisation"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Dégivrage du premier départ"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Climatisation du premier départ"
+      },
+      "ev_first_departure_enabled": {
+        "name": "Départ programmé EV 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Dégivrage du second départ"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Climatisation du second départ"
+      },
+      "ev_second_departure_enabled": {
+        "name": "Départ programmé EV 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Charge en heures creuses uniquement"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Charge programmée"
+      },
+      "ev_charge_port_door": {
+        "name": "Trappe de charge"
+      },
+      "valet_mode_control": {
+        "name": "Mode voiturier"
+      },
+      "svm_dewarp": {
+        "name": "Correction de distorsion SVM"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Contrôle de la climatisation"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "Limite de charge AC"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "Limite de charge DC"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "Limite V2L"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Position"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Début de la charge en heures creuses"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Fin de la charge en heures creuses"
       }
     }
   }
