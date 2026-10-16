@@ -29,9 +29,23 @@ _LOGGER = logging.getLogger(__name__)
 class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     """A class that describes custom binary sensor entities."""
 
-    is_on: Callable[[Vehicle], bool] | None = None
+    is_on: Callable[[Vehicle], bool | None] | None = None
+    # Creation gate for descriptions whose key is not a Vehicle attribute;
+    # defaults to the attribute named by `key` being non-None at setup.
+    exists: Callable[[Vehicle], bool] | None = None
     on_icon: str | None = None
     off_icon: str | None = None
+
+
+def _seat_heater_is_on(status: str | None) -> bool | None:
+    """Return True if a seat status string reports heating.
+
+    Statuses come from the library's SEAT_STATUS map ("Off", "On",
+    "Low Heat" ... "High Cool"); ventilation-only levels are not heating.
+    """
+    if status is None:
+        return None
+    return status == "On" or status.endswith("Heat")
 
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] = (
@@ -440,7 +454,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_left_seat_heater_on",
         translation_key="front_left_seat_heater_on",
-        is_on=lambda vehicle: vehicle.front_left_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle.front_left_seat_status),
+        exists=lambda vehicle: vehicle.front_left_seat_status is not None,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -448,7 +463,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="front_right_seat_heater_on",
         translation_key="front_right_seat_heater_on",
-        is_on=lambda vehicle: vehicle.front_right_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle.front_right_seat_status),
+        exists=lambda vehicle: vehicle.front_right_seat_status is not None,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -456,7 +472,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_left_seat_heater_on",
         translation_key="rear_left_seat_heater_on",
-        is_on=lambda vehicle: vehicle.rear_left_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle.rear_left_seat_status),
+        exists=lambda vehicle: vehicle.rear_left_seat_status is not None,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -464,7 +481,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="rear_right_seat_heater_on",
         translation_key="rear_right_seat_heater_on",
-        is_on=lambda vehicle: vehicle.rear_right_seat_status,
+        is_on=lambda vehicle: _seat_heater_is_on(vehicle.rear_right_seat_status),
+        exists=lambda vehicle: vehicle.rear_right_seat_status is not None,
         on_icon="mdi:seat-heater",
         off_icon="mdi:seat-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -569,7 +587,12 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
-            if getattr(vehicle, description.key, None) is not None:
+            create = (
+                description.exists(vehicle)
+                if description.exists is not None
+                else getattr(vehicle, description.key, None) is not None
+            )
+            if create:
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
