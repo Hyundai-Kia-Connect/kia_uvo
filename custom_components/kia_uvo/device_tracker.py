@@ -28,6 +28,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up the device tracker from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -42,11 +43,14 @@ PARALLEL_UPDATES = 0
 
 
 class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
+    """Tracks the vehicle's GPS location."""
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the tracker."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_location"
         self._attr_translation_key = "location"
@@ -54,12 +58,15 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
 
     @property
     def latitude(self) -> float | None:
+        """Return the vehicle's latitude."""
         return cast(float | None, self.vehicle.location_latitude)
 
     @property
     def longitude(self) -> float | None:
+        """Return the vehicle's longitude."""
         return cast(float | None, self.vehicle.location_longitude)
 
     @property
     def source_type(self) -> SourceType:
+        """Return the source type (GPS)."""
         return SourceType.GPS

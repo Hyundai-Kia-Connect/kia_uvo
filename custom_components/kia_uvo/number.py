@@ -63,6 +63,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up number entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -80,12 +81,15 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
+    """Charge limit or V2L limit slider."""
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         description: NumberEntityDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the number entity."""
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._key = description.key
@@ -157,22 +161,22 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_min_value(self) -> float:
-        """Return native_min_value as reported in by the sensor"""
+        """Return the minimum value from the entity description."""
         return cast(float, self.entity_description.native_min_value)
 
     @property
     def native_max_value(self) -> float:
-        """Returnnative_max_value as reported in by the sensor"""
+        """Return the maximum value from the entity description."""
         return cast(float, self.entity_description.native_max_value)
 
     @property
     def native_step(self) -> float | None:
-        """Return step value as reported in by the sensor"""
+        """Return the step value from the entity description."""
         return self.entity_description.native_step
 
     @property
     def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value was reported in by the sensor"""
+        """Return the unit the value was reported in by the vehicle."""
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
             return cast(str | None, getattr(self.vehicle, self._key + "_unit"))
         else:
