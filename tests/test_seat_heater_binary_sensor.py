@@ -37,12 +37,12 @@ async def test_seat_heater_sensor_created_from_seat_status() -> None:
         ("On", True),
         ("Low Heat", True),
         ("High Heat", True),
-        ("Medium Cool", False),
+        ("Medium Cool", True),
         (None, None),
     ],
 )
 async def test_seat_heater_state(status: str | None, expected: bool | None) -> None:
-    """Heating levels are on; off and ventilation-only levels are not."""
+    """Any heating or cooling level is on; only "Off" is off."""
     vehicle = Vehicle(id="v1", name="test", model="test")
     vehicle.rear_right_seat_status = "Off"
     entity = (await _setup(vehicle))["rear_right_seat_heater_on"]

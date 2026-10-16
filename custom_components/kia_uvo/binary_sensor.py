@@ -38,14 +38,14 @@ class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
 
 
 def _seat_heater_is_on(status: str | None) -> bool | None:
-    """Return True if a seat status string reports heating.
+    """Return True if a seat status string reports seat climate active.
 
     Statuses come from the library's SEAT_STATUS map ("Off", "On",
-    "Low Heat" ... "High Cool"); ventilation-only levels are not heating.
+    "Low Heat" ... "High Cool"); any heating or cooling level is on.
     """
     if status is None:
         return None
-    return status == "On" or status.endswith("Heat")
+    return status != "Off"
 
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] = (
