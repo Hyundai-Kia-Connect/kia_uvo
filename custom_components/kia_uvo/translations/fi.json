@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Tunnistetiedot",
+        "description": "Anna tilisi tunnistetiedot.",
+        "data": {
+          "username": "Käyttäjätunnus",
+          "password": "Salasana",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Tunnistetiedot",
+        "description": "Anna tilisi tunnistetiedot. Euroopassa token vaatii erityiskäsittelyä — katso README.",
+        "data": {
+          "username": "Käyttäjätunnus",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Todennus",
         "description": "Määritä Hyundai (Bluelink) / Kia (Uvo) Connect integroidaksesi sen Home Assistantiin.",
         "data": {
-          "username": "Käyttäjätunnus",
-          "password": "Salasana",
           "region": "Alue",
-          "brand": "Merkki",
-          "pin": "Pin"
+          "brand": "Merkki"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Uudelleentodennus",
         "description": "Tiliäsi ei voitu todentaa.  Napsauta lähetä yrittääksesi uudelleen."
+      },
+      "select_otp_method": {
+        "title": "Valitse OTP-menetelmä",
+        "description": "Tilisi vaatii vahvistuksen. Valitse, miten haluat vastaanottaa kertakäyttöisen salasanan.",
+        "data": {
+          "method": "OTP:n toimitustapa"
+        }
+      },
+      "enter_otp": {
+        "title": "Syötä kertakäyttöinen salasana",
+        "description": "Syötä valitulla menetelmällä lähetetty vahvistuskoodi.",
+        "data": {
+          "otp": "Kertakäyttöinen salasana"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Uudelleenmääritys",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "Laite on jo määritetty",
+      "reauth_successful": "Uudelleentunnistautuminen onnistui",
       "reconfigure_successful": "Uudelleenmääritys onnistui"
     },
     "error": {
       "invalid_auth": "Kirjautuminen Hyundai (Bluelink) / Kia (Uvo) Connect -palvelimille epäonnistui. Kirjaudu virallisella sovelluksella ulos ja sisään ja yritä uudelleen!",
+      "invalid_credentials": "Virheellinen käyttäjätunnus tai salasana",
       "unknown": "Odottamaton virhe"
     }
   },
@@ -103,6 +134,10 @@
         "heating": {
           "name": "Lämmitys",
           "description": "Esimerkiksi ratin ja takaikkunan lämmitys"
+        },
+        "steering_wheel": {
+          "name": "Ohjauspyörän lämmitys",
+          "description": "Ohjauspyörän lämmitystaso. Vain Eurooppa, muilla alueilla käytetään lämmitysasetusta."
         },
         "flseat": {
           "name": "Vasen etuistuin",
@@ -223,353 +258,684 @@
           "description": "Latausvirran kapasiteetti prosentteina"
         }
       }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Ajasta lataus ja ilmastointi",
+      "description": "Käytä varoen - Ajastaa latauksen ja ilmastoinnin. Kaikki vaihtoehdot eivät ole saatavilla kaikissa autoissa tai kaikilla alueilla. Käytä autosi mobiilisovellusta oppaana ja valitse autossasi saatavilla olevat vaihtoehdot.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        },
+        "charging_enabled": {
+          "name": "Ajastettu lataus",
+          "description": "Ota ajastettu lataus käyttöön"
+        },
+        "first_departure_enabled": {
+          "name": "1. lähtö",
+          "description": "Ota ensimmäinen lähtö käyttöön"
+        },
+        "first_departure_days": {
+          "name": "1. lähdön päivät",
+          "description": "Päivät, joita ensimmäinen lähtö koskee. Ei voi olla tyhjä."
+        },
+        "first_departure_time": {
+          "name": "1. lähdön aika",
+          "description": "Ensimmäisen lähdön aika. Käytä minuuteille arvoja 00, 10, 20, 30, 40 tai 50 ja sekunneille 00"
+        },
+        "second_departure_enabled": {
+          "name": "2. lähtö",
+          "description": "Ota toinen lähtö käyttöön"
+        },
+        "second_departure_days": {
+          "name": "2. lähdön päivät",
+          "description": "Päivät, joita toinen lähtö koskee. Ei voi olla tyhjä."
+        },
+        "second_departure_time": {
+          "name": "2. lähdön aika",
+          "description": "Toisen lähdön aika. Käytä minuuteille arvoja 00, 10, 20, 30, 40 tai 50 ja sekunneille 00"
+        },
+        "off_peak_start_time": {
+          "name": "Edullisen jakson alkuaika",
+          "description": "Edullisen sähköjakson alkuaika. Käytä minuuteille arvoja 00, 10, 20, 30, 40 tai 50 ja sekunneille 00"
+        },
+        "off_peak_end_time": {
+          "name": "Edullisen jakson loppuaika",
+          "description": "Edullisen sähköjakson loppuaika. Käytä minuuteille arvoja 00, 10, 20, 30, 40 tai 50 ja sekunneille 00"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Vain edullinen tariffi",
+          "description": "Jos tosi, lataa vain määritetyn edullisen jakson aikana, muuten lataus voi alkaa ennen edullista jaksoa"
+        },
+        "climate_enabled": {
+          "name": "Ilmastointi",
+          "description": "Ota ilmastointijärjestelmä käyttöön ennen lähtöä"
+        },
+        "temperature": {
+          "name": "Lämpötila",
+          "description": "Aseta ilmastoinnin lämpötila. Yksikkö riippuu alueesta."
+        },
+        "temperature_unit": {
+          "name": "Lämpötilan yksikkö",
+          "description": "Aseta ilmastoinnin lämpötilayksikkö. Yksikkö riippuu alueesta."
+        },
+        "defrost": {
+          "name": "Huurteenpoisto",
+          "description": "Tuulilasin huurteenpoisto ennen lähtöä"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Kytke hätävilkut päälle",
+      "description": "Kytkee hätävilkut päälle 30 sekunniksi.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Kytke hätävilkut ja äänitorvi päälle",
+      "description": "Kytkee hätävilkut ja äänitorven päälle 30 sekunniksi.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Käynnistä valet-tila",
+      "description": "Aktivoi valet-tila. Jos valet-tila aktivoidaan etänä ajon aikana, ajoneuvon näyttö kytketään pois päältä.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Lopeta valet-tila",
+      "description": "Poistaa valet-tilan käytöstä.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Ohjaa ikkunoita",
+      "description": "Ohjaa ajoneuvon ikkunoita. Avaa tai sulje ikkunat tarpeen mukaan.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        },
+        "flwindow": {
+          "name": "Vasen etuikkuna",
+          "description": "Toiminto vasemmalle etuikkunalle"
+        },
+        "frwindow": {
+          "name": "Oikea etuikkuna",
+          "description": "Toiminto oikealle etuikkunalle"
+        },
+        "rlwindow": {
+          "name": "Vasen takaikkuna",
+          "description": "Toiminto vasemmalle takaikkunalle"
+        },
+        "rrwindow": {
+          "name": "Oikea takaikkuna",
+          "description": "Toiminto oikealle takaikkunalle"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "Ota SVM-kuva",
+      "description": "Käynnistää uuden Surround View Monitor -kuvauksen. Ajoneuvo herää ja ottaa 360°-kuvan.",
+      "fields": {
+        "device_id": {
+          "name": "Ajoneuvo",
+          "description": "Kohdeajoneuvo"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Kokonaistoimintamatka"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Matkamittari"
+      },
+      "outside_temperature": {
+        "name": "Ulkolämpötila"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Edellinen huolto"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Seuraava huolto"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Auton akun varaus"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Päivitetty viimeksi"
       },
       "last_scanned_at": {
         "name": "Viimeisin tarkistus"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "Ajoakun varaus"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "Ajoakun kunto (SoH)"
+      },
+      "ev_battery_temperature_max": {
+        "name": "Ajoakun maksimilämpötila"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Ajoakun minimilämpötila"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Ajoakun jäähdytysnesteen lämpötila"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "Ajoakun jäljellä oleva energia"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "Ajoakun kapasiteetti"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "Ajoakun jännite"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "Sähköinen toimintamatka"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Toimintamatka polttoaineella"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Polttoaineen määrä"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Asetettu lämpötila"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Arvioitu latausaika"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Arvioitu pikalatausaika"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Arvioitu latausaika kannettavalla laturilla"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Arvioitu latausaika latausasemalla"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "AC-latauksen tavoitetoimintamatka"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "DC-latauksen tavoitetoimintamatka"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "Energiankulutus 90 päivää"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Talteen otettu energia yhteensä"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Keskimääräinen energiankulutus"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Vasen etuistuin"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Oikea etuistuin"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Vasen takaistuin"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Oikea takaistuin"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Geokoodattu sijainti"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "Vikakoodien (DTC) määrä"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Ensimmäisen lähdön aika"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Toisen lähdön aika"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "Edullisen jakson alkuaika"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "Edullisen jakson loppuaika"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "Latausvirran raja"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "Latausteho"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Valmistenumero (VIN)"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Ensimmäisen lähdön ilmastoinnin lämpötila"
+      },
+      "ev_first_departure_days": {
+        "name": "Ensimmäisen lähdön päivät"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Toisen lähdön ilmastoinnin lämpötila"
+      },
+      "ev_second_departure_days": {
+        "name": "Toisen lähdön päivät"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Energiankulutus - ilmastointi"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Energiankulutus - akun jäähdytys"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Energiankulutus - akun lämmitys"
+      },
+      "location_last_updated_at": {
+        "name": "Sijainti päivitetty viimeksi"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L maksimiteho"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L tavoite-SoC"
       },
       "data": {
-        "name": "Data"
+        "name": "Tiedot"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Päivittäiset ajotilastot"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Tämän päivän ajotilastot"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Rengaspaine - Vasen etu"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Rengaspaine - Oikea etu"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Rengaspaine - Vasen taka"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Rengaspaine - Oikea taka"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Ajotila"
+      },
+      "svm_status": {
+        "name": "SVM-tila"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Moottori"
+      },
+      "ev_battery_heating_state": {
+        "name": "Ajoakun lämmitys"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Huurteenpoisto"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Ohjauspyörän lämmitys"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Takalasin lämmitys"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Sivupeilien lämmitys"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Vasen etuovi"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Oikea etuovi"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Vasen takaovi"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Oikea takaovi"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Tavaratila"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Konepelti"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Vasen etuikkuna"
+      },
+      "front_right_door_is_locked": {
+        "name": "Oikean etuoven lukko"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Oikea etuikkuna"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Vasen takaikkuna"
+      },
+      "back_right_door_is_locked": {
+        "name": "Oikean takaoven lukko"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Oikea takaikkuna"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "Ajoakun lataus"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "Latauskaapeli kytketty"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "Ajoakun esilämmitys"
+      },
+      "ev_battery_winter_mode": {
+        "name": "Ajoakun talvitila"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Polttoaine vähissä"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Älyavaimen paristovaroitus"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Lasinpesunestevaroitus"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Ensimmäisen lähdön huurteenpoisto"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Ensimmäisen lähdön ilmastointi"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Toisen lähdön huurteenpoisto"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Toisen lähdön ilmastointi"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Lataus vain edullisella jaksolla"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Ajastettu lataus"
+      },
+      "ev_v2l_status": {
+        "name": "V2L-tila"
+      },
+      "ev_v2x_status": {
+        "name": "V2X-tila"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Rengaspaine - Kaikki"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Rengaspaine - Vasen taka"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Rengaspaine - Vasen etu"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Rengaspaine - Oikea etu"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Rengaspaine - Oikea taka"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Ilmastointi"
+      },
+      "back_left_door_is_locked": {
+        "name": "Vasemman takaoven lukko"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "Latausluukku"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "Ajastettu lähtö 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "Ajastettu lähtö 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Vasemman etuoven lukko"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Jarrunestevaroitus"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Kattoluukku"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Lisävarusteet"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Etäkäynnistys"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "Vaihteiston kunto"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Lepotilan tarkistus"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "Ajovalojen tila"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Vasemman etuvalon vika"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Oikean etuvalon vika"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Vasemman kaukovalon vika"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Oikean kaukovalon vika"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Vasemman kaksitoimisen ajovalon vika"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Oikean kaksitoimisen ajovalon vika"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Vasemman takavalon vika"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Oikean takavalon vika"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Vasen etuvilkku"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Oikea etuvilkku"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Vasen takavilkku"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Oikea takavilkku"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Lukittu"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Vasemman etuistuimen lämmitys"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Oikean etuistuimen lämmitys"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Vasemman takaistuimen lämmitys"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Oikean takaistuimen lämmitys"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Öljyn tason varoitus"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "12V-akun vika"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Ovien lukitus"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Pakota päivitys"
+      },
+      "start_hazard_lights": {
+        "name": "Kytke hätävilkut päälle"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Kytke hätävilkut ja äänitorvi päälle"
+      },
+      "start_valet_mode": {
+        "name": "Käynnistä valet-tila"
+      },
+      "stop_valet_mode": {
+        "name": "Lopeta valet-tila"
+      },
+      "open_all_windows": {
+        "name": "Avaa kaikki ikkunat"
+      },
+      "close_all_windows": {
+        "name": "Sulje kaikki ikkunat"
+      },
+      "vent_all_windows": {
+        "name": "Tuuleta kaikki ikkunat"
+      },
+      "capture_svm_image": {
+        "name": "Ota SVM-kuva"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM-etukamera"
+      },
+      "svm_rear": {
+        "name": "SVM-takakamera"
+      },
+      "svm_left": {
+        "name": "SVM-vasen kamera"
+      },
+      "svm_right": {
+        "name": "SVM-oikea kamera"
+      },
+      "svm_top": {
+        "name": "SVM-lintuperspektiivi"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Vasen etuikkuna"
+      },
+      "front_right_window": {
+        "name": "Oikea etuikkuna"
+      },
+      "back_left_window": {
+        "name": "Vasen takaikkuna"
+      },
+      "back_right_window": {
+        "name": "Oikea takaikkuna"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "Lataus"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Ilmastointi"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Ensimmäisen lähdön huurteenpoisto"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Ensimmäisen lähdön ilmastointi"
+      },
+      "ev_first_departure_enabled": {
+        "name": "Ajastettu lähtö 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Toisen lähdön huurteenpoisto"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Toisen lähdön ilmastointi"
+      },
+      "ev_second_departure_enabled": {
+        "name": "Ajastettu lähtö 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Lataus vain edullisella jaksolla"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Ajastettu lataus"
+      },
+      "ev_charge_port_door": {
+        "name": "Latausluukku"
+      },
+      "valet_mode_control": {
+        "name": "Valet-tila"
+      },
+      "svm_dewarp": {
+        "name": "SVM-vääristymänkorjaus"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Ilmastoinnin ohjaus"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "AC-latausraja"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "DC-latausraja"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L-raja"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Sijainti"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Edullisen latauksen alkuaika"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Edullisen latauksen loppuaika"
       }
     }
   }
