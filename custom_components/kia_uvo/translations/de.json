@@ -8,16 +8,16 @@
         "data": {
           "username": "Benutzername",
           "password": "Passwort",
-          "pin": "Pin"
+          "pin": "PIN"
         }
       },
       "credentials_token": {
         "title": "Hyundai / Kia Connect - Logininformationen",
         "description": "Gib deine Logininformationen ein. Europa benötigt einen speziellen Token — siehe README.",
         "data": {
-          "username": "Username",
+          "username": "Benutzername",
           "password": "Token",
-          "pin": "Pin"
+          "pin": "PIN"
         }
       },
       "user": {
@@ -33,17 +33,17 @@
         "description": "Dein Konto kann nicht authentifiziert werden. Klicke auf Senden, um die Neukonfiguration durchzuführen."
       },
       "select_otp_method": {
-        "title": "Select OTP Method",
-        "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
+        "title": "OTP-Methode auswählen",
+        "description": "Dein Konto erfordert eine Verifizierung. Wähle aus, wie du dein Einmalpasswort erhalten möchtest.",
         "data": {
-          "method": "OTP delivery method"
+          "method": "OTP-Zustellmethode"
         }
       },
       "enter_otp": {
-        "title": "Enter One‑Time Password",
-        "description": "Enter the verification code sent to your selected method.",
+        "title": "Einmalpasswort eingeben",
+        "description": "Gib den Bestätigungscode ein, der über die gewählte Methode gesendet wurde.",
         "data": {
-          "otp": "One‑time password"
+          "otp": "Einmalpasswort"
         }
       },
       "reconfigure": {
@@ -62,12 +62,12 @@
     },
     "abort": {
       "already_configured": "Dein Fahrzeug ist bereits konfiguriert",
-      "reauth_successful": "Successfully reauthenticated",
+      "reauth_successful": "Erneute Authentifizierung erfolgreich",
       "reconfigure_successful": "Neukonfiguration erfolgreich"
     },
     "error": {
       "invalid_auth": "Anmeldung bei Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde dich von deiner Hyundai/Kia-App ab, melde dich erneut an und versuche es erneut!",
-      "invalid_credentials": "Invalid username or password",
+      "invalid_credentials": "Ungültiger Benutzername oder ungültiges Passwort",
       "unknown": "Unbekannter Fehler"
     }
   },
@@ -525,7 +525,7 @@
         "name": "Rücksitz rechts"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Heutige Fahrstatistik"
       },
       "total_driving_range": {
         "name": "Gesamtreichweite"
@@ -564,10 +564,10 @@
         "name": "Letzte Aktualisierung des Ortes"
       },
       "ev_v2l_max_power": {
-        "name": "V2L max power"
+        "name": "V2L maximale Leistung"
       },
       "ev_v2l_target_soc": {
-        "name": "V2L target SoC"
+        "name": "V2L Ziel-SoC"
       },
       "tire_pressure_front_left": {
         "name": "Reifendruck - vorne links"
@@ -585,7 +585,7 @@
         "name": "Fahrmodus"
       },
       "svm_status": {
-        "name": "SVM Status"
+        "name": "SVM-Status"
       }
     },
     "binary_sensor": {
@@ -719,7 +719,7 @@
         "name": "Spiegelheizung"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Schlafmodus-Prüfung"
       },
       "smart_key_battery_warning_is_on": {
         "name": "Smart Key Batteriewarnung"
@@ -810,7 +810,7 @@
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Aktualisierung erzwingen"
       },
       "start_hazard_lights": {
         "name": "Warnblinklichter aktivieren"
@@ -834,7 +834,7 @@
         "name": "Alle Fenster lüften"
       },
       "capture_svm_image": {
-        "name": "Capture SVM Image"
+        "name": "SVM-Bild aufnehmen"
       }
     },
     "image": {
@@ -906,7 +906,7 @@
         "name": "Valet-Modus"
       },
       "svm_dewarp": {
-        "name": "SVM Dewarp"
+        "name": "SVM-Entzerrung"
       }
     },
     "climate": {
@@ -922,7 +922,7 @@
         "name": "DC Ladelimit"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L-Grenze"
       }
     },
     "device_tracker": {
