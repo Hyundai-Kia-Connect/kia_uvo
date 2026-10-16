@@ -95,6 +95,7 @@ class SVMImageEntity(ImageEntity, HyundaiKiaConnectEntity):
         view: SVMView,
         order: int,
     ) -> None:
+        """Initialize the SVM image entity."""
         # ImageEntity.__init__ sets up the image-proxy client + access_tokens
         # (it does not call super().__init__, so call it explicitly).
         ImageEntity.__init__(self, coordinator.hass)

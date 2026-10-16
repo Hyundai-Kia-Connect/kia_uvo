@@ -1,3 +1,5 @@
+"""Services for Hyundai / Kia Connect integration."""
+
 import logging
 from datetime import datetime
 from typing import Any, cast
@@ -69,7 +71,7 @@ _LOGGER = logging.getLogger(__name__)
 
 @callback
 def async_setup_services(hass: HomeAssistant) -> bool:
-    """Set up services for Hyundai Kia Connect"""
+    """Set up services for Hyundai / Kia Connect."""
 
     async def async_handle_force_update(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
@@ -373,6 +375,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
 @callback
 def async_unload_services(hass: HomeAssistant) -> None:
+    """Remove the integration's services."""
     for service in SUPPORTED_SERVICES:
         hass.services.async_remove(DOMAIN, service)
 

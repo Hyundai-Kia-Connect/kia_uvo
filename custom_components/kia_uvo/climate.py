@@ -65,6 +65,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     }
 
     def get_internal_heat_int_for_climate_request(self) -> int:
+        """Map the current rear window / steering wheel heater state to the API heating code."""
         if (
             self.vehicle.steering_wheel_heater_is_on
             and self.vehicle.back_window_heater_is_on
@@ -156,7 +157,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def hvac_mode(self) -> HVACMode | None:
         """Get the configured climate control operation mode."""
-
         if not self.vehicle.air_control_is_on:
             return HVACMode.OFF
 
@@ -203,7 +203,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the operation mode of the in-car climate control."""
-
         if hvac_mode == HVACMode.OFF:
             await self.coordinator.async_stop_climate(self.vehicle.id)
         else:
