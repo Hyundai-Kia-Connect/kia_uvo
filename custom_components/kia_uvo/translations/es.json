@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Credenciales",
+        "description": "Introduce las credenciales de tu cuenta.",
+        "data": {
+          "username": "Nombre de Usuario",
+          "password": "Contraseña",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Credenciales",
+        "description": "Introduce las credenciales de tu cuenta. Europa requiere un procedimiento especial para el token — consulta el README.",
+        "data": {
+          "username": "Nombre de Usuario",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Autenticación",
         "description": "Configura tu Hyundai (Bluelink) / Kia (Uvo) Connect para integrarlo con el Asistente de Casa.",
         "data": {
-          "username": "Nombre de Usuario",
-          "password": "Contraseña",
           "region": "Región",
-          "brand": "Marca",
-          "pin": "Pin"
+          "brand": "Marca"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Reautenticación",
         "description": "Tu cuenta no puede autenticarse. Haz clic en Enviar para volver a configurar."
+      },
+      "select_otp_method": {
+        "title": "Seleccionar método OTP",
+        "description": "Tu cuenta requiere verificación. Elige cómo quieres recibir tu contraseña de un solo uso.",
+        "data": {
+          "method": "Método de envío del OTP"
+        }
+      },
+      "enter_otp": {
+        "title": "Introducir contraseña de un solo uso",
+        "description": "Introduce el código de verificación enviado mediante el método seleccionado.",
+        "data": {
+          "otp": "Contraseña de un solo uso"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Reconfigurar",
@@ -38,6 +67,7 @@
     },
     "error": {
       "invalid_auth": "Falló el inicio de sesión en los servidores Hyundai (Bluelink) / Kia (Uvo) Connect. ¡Por favor, usa la aplicación oficial para cerrar sesión y volver a iniciarla e intenta de nuevo!",
+      "invalid_credentials": "Nombre de usuario o contraseña no válidos",
       "unknown": "Error inesperado"
     }
   },
@@ -104,6 +134,10 @@
         "heating": {
           "name": "Calefactables",
           "description": "Funciones calefactables como el volante y la ventana trasera"
+        },
+        "steering_wheel": {
+          "name": "Volante Calefactable",
+          "description": "Nivel de calefacción del volante. Solo Europa, otras regiones usan el ajuste de calefacción."
         },
         "flseat": {
           "name": "Asiento Delantero Izquierdo",
@@ -224,353 +258,684 @@
           "description": "Capacidad de corriente de carga en porcentaje"
         }
       }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Programar carga y climatización",
+      "description": "Por favor, use con precaución - Programa la carga y la climatización. No todas las opciones están disponibles en todos los coches o regiones. Use la aplicación móvil de su coche como guía y combine las opciones disponibles en su coche.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        },
+        "charging_enabled": {
+          "name": "Carga programada",
+          "description": "Habilitar la carga programada"
+        },
+        "first_departure_enabled": {
+          "name": "1.ª salida",
+          "description": "Habilitar la primera salida"
+        },
+        "first_departure_days": {
+          "name": "Días de la 1.ª salida",
+          "description": "Días a los que se aplica la primera salida. No puede estar vacío."
+        },
+        "first_departure_time": {
+          "name": "Hora de la 1.ª salida",
+          "description": "Hora de la primera salida. Use 00, 10, 20, 30, 40 o 50 para los minutos y 00 para los segundos"
+        },
+        "second_departure_enabled": {
+          "name": "2.ª salida",
+          "description": "Habilitar la segunda salida"
+        },
+        "second_departure_days": {
+          "name": "Días de la 2.ª salida",
+          "description": "Días a los que se aplica la segunda salida. No puede estar vacío."
+        },
+        "second_departure_time": {
+          "name": "Hora de la 2.ª salida",
+          "description": "Hora de la segunda salida. Use 00, 10, 20, 30, 40 o 50 para los minutos y 00 para los segundos"
+        },
+        "off_peak_start_time": {
+          "name": "Inicio de horario valle",
+          "description": "Hora de inicio del horario valle. Use 00, 10, 20, 30, 40 o 50 para los minutos y 00 para los segundos"
+        },
+        "off_peak_end_time": {
+          "name": "Fin de horario valle",
+          "description": "Hora de fin del horario valle. Use 00, 10, 20, 30, 40 o 50 para los minutos y 00 para los segundos"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Solo tarifas valle",
+          "description": "Si es verdadero, carga solo durante el horario valle definido; de lo contrario, la carga puede comenzar antes del horario valle"
+        },
+        "climate_enabled": {
+          "name": "Clima",
+          "description": "Habilitar el sistema HVAC (climatizador) antes de la salida"
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Establecer la temperatura del control del climatizador. La unidad es específica para la región."
+        },
+        "temperature_unit": {
+          "name": "Unidad de Temperatura",
+          "description": "Establecer la unidad de temperatura del control del climatizador. La unidad es específica para la región."
+        },
+        "defrost": {
+          "name": "Descongelar",
+          "description": "Descongelar el parabrisas delantero antes de la salida"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Encender las luces de emergencia",
+      "description": "Enciende las luces de emergencia durante 30 segundos.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Encender las luces de emergencia y la bocina",
+      "description": "Enciende las luces de emergencia y la bocina durante 30 segundos.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Iniciar modo aparcacoches",
+      "description": "Activa el modo aparcacoches. Si el modo aparcacoches remoto se activa durante la conducción, la pantalla del vehículo se desactiva.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Detener modo aparcacoches",
+      "description": "Desactiva el modo aparcacoches.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Controlar Ventanillas",
+      "description": "Controla las ventanillas del vehículo. Abre o cierra las ventanillas según sea necesario.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        },
+        "flwindow": {
+          "name": "Ventanilla Delantera Izquierda",
+          "description": "Acción para la ventanilla delantera izquierda"
+        },
+        "frwindow": {
+          "name": "Ventanilla Delantera Derecha",
+          "description": "Acción para la ventanilla delantera derecha"
+        },
+        "rlwindow": {
+          "name": "Ventanilla Trasera Izquierda",
+          "description": "Acción para la ventanilla trasera izquierda"
+        },
+        "rrwindow": {
+          "name": "Ventanilla Trasera Derecha",
+          "description": "Acción para la ventanilla trasera derecha"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "Capturar Imagen SVM",
+      "description": "Solicita una nueva captura del monitor de visión envolvente (SVM). El vehículo se activa y captura una imagen de 360°.",
+      "fields": {
+        "device_id": {
+          "name": "Vehículo",
+          "description": "Vehículo objetivo"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Autonomía Total"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Cuentakilómetros"
+      },
+      "outside_temperature": {
+        "name": "Temperatura exterior"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Último Mantenimiento"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Próximo Mantenimiento"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Nivel de Batería del Coche"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Última Actualización"
       },
       "last_scanned_at": {
         "name": "Última exploración"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "Nivel de Batería EV"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "Estado de Salud de la Batería EV"
+      },
+      "ev_battery_temperature_max": {
+        "name": "Temperatura Máxima de la Batería EV"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Temperatura Mínima de la Batería EV"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Temperatura del Refrigerante de la Batería EV"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "Energía Restante de la Batería EV"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "Capacidad de la Batería EV"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "Tensión del Paquete de Batería EV"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "Autonomía EV"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Autonomía con Combustible"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Nivel de Combustible"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Temperatura Establecida"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Duración Estimada de la Carga"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Duración Estimada de la Carga Rápida"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Duración Estimada de la Carga Portátil"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Duración Estimada de la Carga en Estación"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "Autonomía Objetivo de Carga AC"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "Autonomía Objetivo de Carga DC"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "Consumo de Energía en 90 Días"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Energía Regenerada Total"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Consumo Medio de Energía"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Asiento Delantero Izquierdo"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Asiento Delantero Derecho"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Asiento Trasero Izquierdo"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Asiento Trasero Derecho"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Ubicación Geocodificada"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "Número de DTC"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Hora de la primera salida"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Hora de la segunda salida"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "Inicio de Horario Valle EV"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "Fin de Horario Valle EV"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "Límite de Corriente de Carga EV"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "Potencia de Carga EV"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Número de Identificación del Vehículo"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Temperatura de climatización de la primera salida"
+      },
+      "ev_first_departure_days": {
+        "name": "Días de la primera salida"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Temperatura de climatización de la segunda salida"
+      },
+      "ev_second_departure_days": {
+        "name": "Días de la segunda salida"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Consumo EV del Aire Acondicionado"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Consumo EV de la Refrigeración de la Batería"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Consumo EV del Calefactor de la Batería"
+      },
+      "location_last_updated_at": {
+        "name": "Última Actualización de la Ubicación"
+      },
+      "ev_v2l_max_power": {
+        "name": "Potencia máxima V2L"
+      },
+      "ev_v2l_target_soc": {
+        "name": "SoC objetivo V2L"
       },
       "data": {
-        "name": "Data"
+        "name": "Datos"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Estadísticas de Conducción Diarias"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Estadísticas de Conducción de Hoy"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Presión de Neumáticos - Delantero Izquierdo"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Presión de Neumáticos - Delantero Derecho"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Presión de Neumáticos - Trasero Izquierdo"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Presión de Neumáticos - Trasero Derecho"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Modo de Conducción"
+      },
+      "svm_status": {
+        "name": "Estado SVM"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Motor"
+      },
+      "ev_battery_heating_state": {
+        "name": "Calefacción de la batería EV"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Descongelar"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Volante Calefactable"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Luneta Térmica Trasera"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Calefacción de Retrovisores"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Puerta Delantera Izquierda"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Puerta Delantera Derecha"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Puerta Trasera Izquierda"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Puerta Trasera Derecha"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Maletero"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Capó"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Ventanilla Delantera Izquierda"
+      },
+      "front_right_door_is_locked": {
+        "name": "Cierre Puerta Delantera Derecha"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Ventanilla Delantera Derecha"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Ventanilla Trasera Izquierda"
+      },
+      "back_right_door_is_locked": {
+        "name": "Cierre Puerta Trasera Derecha"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Ventanilla Trasera Derecha"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "Carga de la Batería EV"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "Conexión de la Batería EV"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "Preacondicionamiento de la batería EV"
+      },
+      "ev_battery_winter_mode": {
+        "name": "Modo Invierno de la Batería EV"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Nivel de Combustible Bajo"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Aviso de Batería de la Llave Inteligente"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Aviso de Líquido Limpiaparabrisas"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Descongelación de la primera salida"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Climatización de la primera salida"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Descongelación de la segunda salida"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Climatización de la segunda salida"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Carga solo en horario valle"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Carga programada"
+      },
+      "ev_v2l_status": {
+        "name": "Estado V2L"
+      },
+      "ev_v2x_status": {
+        "name": "Estado V2X"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Presión de Neumáticos - Todos"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Presión de Neumáticos - Trasero Izquierdo"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Presión de Neumáticos - Delantero Izquierdo"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Presión de Neumáticos - Delantero Derecho"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Presión de Neumáticos - Trasero Derecho"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Aire Acondicionado"
+      },
+      "back_left_door_is_locked": {
+        "name": "Cierre Puerta Trasera Izquierda"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "Puerto de Carga EV"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "Salida Programada EV 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "Salida Programada EV 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Cierre Puerta Delantera Izquierda"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Aviso de Líquido de Frenos"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Techo Solar"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Accesorios"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Encendido Remoto"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "Estado de la Transmisión"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Comprobación del Modo Reposo"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "Estado de los Faros"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Fallo Faro Delantero Izquierdo"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Fallo Faro Delantero Derecho"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Fallo Luz de Carretera Izquierda"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Fallo Luz de Carretera Derecha"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Fallo Faro Bifuncional Izquierdo"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Fallo Faro Bifuncional Derecho"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Fallo Piloto Trasero Izquierdo"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Fallo Piloto Trasero Derecho"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Intermitente Delantero Izquierdo"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Intermitente Delantero Derecho"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Intermitente Trasero Izquierdo"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Intermitente Trasero Derecho"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Bloqueado"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Calefacción Asiento Delantero Izquierdo"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Calefacción Asiento Delantero Derecho"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Calefacción Asiento Trasero Izquierdo"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Calefacción Asiento Trasero Derecho"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Aviso de Nivel de Aceite"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "Fallo de la Batería de 12V"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Cierre de Puertas"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Forzar Actualización"
+      },
+      "start_hazard_lights": {
+        "name": "Encender Luces de Emergencia"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Encender Luces de Emergencia y Bocina"
+      },
+      "start_valet_mode": {
+        "name": "Iniciar Modo Aparcacoches"
+      },
+      "stop_valet_mode": {
+        "name": "Detener Modo Aparcacoches"
+      },
+      "open_all_windows": {
+        "name": "Abrir Todas las Ventanillas"
+      },
+      "close_all_windows": {
+        "name": "Cerrar Todas las Ventanillas"
+      },
+      "vent_all_windows": {
+        "name": "Ventilar Todas las Ventanillas"
+      },
+      "capture_svm_image": {
+        "name": "Capturar Imagen SVM"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "Cámara Delantera SVM"
+      },
+      "svm_rear": {
+        "name": "Cámara Trasera SVM"
+      },
+      "svm_left": {
+        "name": "Cámara Izquierda SVM"
+      },
+      "svm_right": {
+        "name": "Cámara Derecha SVM"
+      },
+      "svm_top": {
+        "name": "Vista Aérea SVM"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Ventanilla Delantera Izquierda"
+      },
+      "front_right_window": {
+        "name": "Ventanilla Delantera Derecha"
+      },
+      "back_left_window": {
+        "name": "Ventanilla Trasera Izquierda"
+      },
+      "back_right_window": {
+        "name": "Ventanilla Trasera Derecha"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "Carga EV"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Climatización"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Descongelación de la primera salida"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Climatización de la primera salida"
+      },
+      "ev_first_departure_enabled": {
+        "name": "Salida Programada EV 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Descongelación de la segunda salida"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Climatización de la segunda salida"
+      },
+      "ev_second_departure_enabled": {
+        "name": "Salida Programada EV 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Carga solo en horario valle"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Carga programada"
+      },
+      "ev_charge_port_door": {
+        "name": "Puerto de Carga"
+      },
+      "valet_mode_control": {
+        "name": "Modo Aparcacoches"
+      },
+      "svm_dewarp": {
+        "name": "Corrección de Distorsión SVM"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Control de Climatización"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "Límite de Carga AC"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "Límite de Carga DC"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "Límite V2L"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Ubicación"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Inicio de carga en horario valle"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Fin de carga en horario valle"
       }
     }
   }
