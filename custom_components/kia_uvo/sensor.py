@@ -49,6 +49,26 @@ def _is_electrified(vehicle: Vehicle) -> bool:
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
 
+# Percentage sensors whose vehicle value must lie in 0-100. Out-of-range
+# values (e.g. the 255 SOH reported after a BMS OTA, kia_uvo #1935) are
+# published as unknown instead of a bogus percentage.
+_PERCENTAGE_KEYS: Final[frozenset[str]] = frozenset(
+    {"ev_battery_percentage", "ev_battery_soh_percentage", "car_battery_percentage"}
+)
+
+
+def _sanitize_percentage(key: str, value: Any) -> Any:
+    """Return None for percentage values outside 0-100, else the value unchanged."""
+    if key not in _PERCENTAGE_KEYS or value is None:
+        return value
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return value
+    if 0 <= value <= 100:
+        return value
+    _LOGGER.debug("Ignoring out-of-range %s value: %s", key, value)
+    return None
+
+
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
     HyundaiKiaSensorEntityDescription(
         key="_total_driving_range",
@@ -640,7 +660,7 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
             if isinstance(value, list):
                 return ", ".join(str(d) for d in value)
             return cast(StateType | datetime, value)
-        return cast(StateType | datetime, value)
+        return cast(StateType | datetime, _sanitize_percentage(self._key, value))
 
     async def async_added_to_hass(self) -> None:
         """Restore the last known dynamic unit after a restart."""
