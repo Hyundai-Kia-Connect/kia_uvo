@@ -9,7 +9,10 @@ import pytest
 from custom_components.kia_uvo.sensor import _sanitize_percentage
 
 
-@pytest.mark.parametrize("key", ["ev_battery_soh_percentage", "ev_battery_percentage", "car_battery_percentage"])
+@pytest.mark.parametrize(
+    "key",
+    ["ev_battery_soh_percentage", "ev_battery_percentage", "car_battery_percentage"],
+)
 @pytest.mark.parametrize("value", [0, 1, 99.5, 100])
 def test_in_range_values_pass_through(key, value):
     assert _sanitize_percentage(key, value) == value
