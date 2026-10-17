@@ -24,6 +24,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaSwitchDescription(SwitchEntityDescription):
+    """Describes a Hyundai / Kia Connect switch entity."""
+
     value_fn: Callable[[Vehicle], bool | None]
     exists_fn: Callable[[Vehicle], bool]
     on_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
@@ -191,6 +193,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up switch entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities: list[SwitchEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -210,6 +213,8 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
+    """Switch backed by a vehicle on/off command pair."""
+
     entity_description: HyundaiKiaSwitchDescription
 
     def __init__(
@@ -218,6 +223,7 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
         description: HyundaiKiaSwitchDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the switch."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self.entity_description = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
@@ -225,12 +231,15 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
 
     @property
     def is_on(self) -> bool | None:
+        """Return True if the switch is on."""
         return self.entity_description.value_fn(self.vehicle)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the switch on."""
         await self.entity_description.on_fn(self.coordinator, self.vehicle.id)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the switch off."""
         await self.entity_description.off_fn(self.coordinator, self.vehicle.id)
 
 

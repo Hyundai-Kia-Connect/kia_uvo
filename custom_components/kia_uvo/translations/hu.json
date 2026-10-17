@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Hitelesítő adatok",
+        "description": "Add meg a fiókod hitelesítő adatait.",
+        "data": {
+          "username": "Felhasználónév",
+          "password": "Jelszó",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Hitelesítő adatok",
+        "description": "Add meg a fiókod hitelesítő adatait. Európában a token külön kezelést igényel — lásd a README-t.",
+        "data": {
+          "username": "Felhasználónév",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Hitelesítés",
         "description": "Állítsd be a Hyundai (Bluelink) / Kia (Uvo) Connect Home Assistant integrációt.",
         "data": {
-          "username": "Felhasználónév",
-          "password": "Jelszó",
           "region": "Régió",
-          "brand": "Márka",
-          "pin": "Pin (csak Kanadában)"
+          "brand": "Márka"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Újra hitelesítés",
         "description": "Fiókja nem hitelesíthető. Az újra beállításhoz kattintson a Küldés gombra."
+      },
+      "select_otp_method": {
+        "title": "OTP módszer kiválasztása",
+        "description": "A fiókod ellenőrzést igényel. Válaszd ki, hogyan szeretnéd megkapni az egyszer használatos jelszót.",
+        "data": {
+          "method": "OTP kézbesítési módja"
+        }
+      },
+      "enter_otp": {
+        "title": "Egyszer használatos jelszó megadása",
+        "description": "Add meg a kiválasztott módon elküldött ellenőrző kódot.",
+        "data": {
+          "otp": "Egyszer használatos jelszó"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Újrakonfigurálás",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "Az eszköz már konfigurálva van",
+      "reauth_successful": "Az újrahitelesítés sikeres",
       "reconfigure_successful": "Újrakonfigurálás sikeres"
     },
     "error": {
       "invalid_auth": "Nem sikerült bejelentkezni a Hyundai (Bluelink) / Kia (Uvo) Connect szerverekre. Kérjük, használja a hivatalos alkalmazást a kijelentkezéshez és a bejelentkezéshez, majd próbálja újra!",
+      "invalid_credentials": "Érvénytelen felhasználónév vagy jelszó",
       "unknown": "Váratlan hiba"
     }
   },
@@ -73,6 +104,16 @@
         "device_id": {
           "name": "Jármű",
           "description": "Válassza ki melyik jármű adatait szeretné frissíteni"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "Légkondicionálás bekapcsolása",
+      "description": "Kérjük, óvatosan használja - beindítja a klímát és a motort. Nem minden lehetőség érhető el minden autóban vagy régióban. Használja az autós mobilalkalmazását útmutatóként, és vegye figyelembe az ott elérhető lehetőségeket.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Válassza ki a melyik jármű légkondicionálását szeretné elindítani"
         },
         "duration": {
           "name": "Időtartam",
@@ -94,6 +135,10 @@
           "name": "Melegítás",
           "description": "Melegítési funkciók engedélyezése (pl kormány- vagy hátsóablakfűtés)"
         },
+        "steering_wheel": {
+          "name": "Kormányfűtés",
+          "description": "A kormányfűtés szintje. Csak Európában, más régiókban a melegítés beállítás használható."
+        },
         "flseat": {
           "name": "Első bal ülés",
           "description": "Első bal ülés fűtése/hűtése"
@@ -109,16 +154,6 @@
         "rrseat": {
           "name": "Hátsó jobb ülés",
           "description": "Hátsóő jobb ülés fűtése/hűtése"
-        }
-      }
-    },
-    "start_climate": {
-      "name": "Légkondicionálás bekapcsolása",
-      "description": "Kérjük, óvatosan használja - beindítja a klímát és a motort. Nem minden lehetőség érhető el minden autóban vagy régióban. Használja az autós mobilalkalmazását útmutatóként, és vegye figyelembe az ott elérhető lehetőségeket.",
-      "fields": {
-        "device_id": {
-          "name": "Jármű",
-          "description": "Válassza ki a melyik jármű légkondicionálását szeretné elindítani"
         }
       }
     },
@@ -223,353 +258,684 @@
           "description": "Töltési áram kapacitása százalékban"
         }
       }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Töltés és klíma ütemezése",
+      "description": "Kérjük, óvatosan használja - töltés és klíma ütemezése. Nem minden lehetőség érhető el minden autóban vagy régióban. Használja az autós mobilalkalmazását útmutatóként, és vegye figyelembe az ott elérhető lehetőségeket.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        },
+        "charging_enabled": {
+          "name": "Ütemezett töltés",
+          "description": "Ütemezett töltés engedélyezése"
+        },
+        "first_departure_enabled": {
+          "name": "1. indulás",
+          "description": "Első indulás engedélyezése"
+        },
+        "first_departure_days": {
+          "name": "1. indulás napjai",
+          "description": "Napok, amelyekre az első indulás vonatkozik. Nem lehet üres."
+        },
+        "first_departure_time": {
+          "name": "1. indulás időpontja",
+          "description": "Az első indulás időpontja. Percnek 00, 10, 20, 30, 40 vagy 50, másodpercnek 00 értéket használj"
+        },
+        "second_departure_enabled": {
+          "name": "2. indulás",
+          "description": "Második indulás engedélyezése"
+        },
+        "second_departure_days": {
+          "name": "2. indulás napjai",
+          "description": "Napok, amelyekre a második indulás vonatkozik. Nem lehet üres."
+        },
+        "second_departure_time": {
+          "name": "2. indulás időpontja",
+          "description": "A második indulás időpontja. Percnek 00, 10, 20, 30, 40 vagy 50, másodpercnek 00 értéket használj"
+        },
+        "off_peak_start_time": {
+          "name": "Völgyidőszak kezdete",
+          "description": "A völgyidőszak kezdő időpontja. Percnek 00, 10, 20, 30, 40 vagy 50, másodpercnek 00 értéket használj"
+        },
+        "off_peak_end_time": {
+          "name": "Völgyidőszak vége",
+          "description": "A völgyidőszak záró időpontja. Percnek 00, 10, 20, 30, 40 vagy 50, másodpercnek 00 értéket használj"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Csak völgyidőszaki tarifa",
+          "description": "Ha igaz, csak a megadott völgyidőszakban tölt, egyébként a töltés a völgyidőszak előtt is elindulhat"
+        },
+        "climate_enabled": {
+          "name": "Klíma",
+          "description": "A klímarendszer bekapcsolása indulás előtt"
+        },
+        "temperature": {
+          "name": "Hőmérséklet",
+          "description": "Állítsd be a kívánt hőmérsékletet. A mértékegység régióspecifikus."
+        },
+        "temperature_unit": {
+          "name": "Hőmérséklet mértékegysége",
+          "description": "Állítsd be a klíma hőmérsékletének mértékegységét. A mértékegység régióspecifikus."
+        },
+        "defrost": {
+          "name": "Jégmentesítés",
+          "description": "Szélvédő jégmentesítése indulás előtt"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Vészvillogó bekapcsolása",
+      "description": "A vészvillogó bekapcsolása 30 másodpercre.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Vészvillogó és kürt bekapcsolása",
+      "description": "A vészvillogó és a kürt bekapcsolása 30 másodpercre.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Inas mód bekapcsolása",
+      "description": "Inas mód (valet) aktiválása. Ha a távoli inas módot vezetés közben aktiválják, a jármű kijelzője kikapcsol.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Inas mód kikapcsolása",
+      "description": "Inas mód (valet) kikapcsolása.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Ablakok vezérlése",
+      "description": "A jármű ablakainak vezérlése. Nyisd vagy zárd az ablakokat igény szerint.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        },
+        "flwindow": {
+          "name": "Bal első ablak",
+          "description": "Művelet a bal első ablakhoz"
+        },
+        "frwindow": {
+          "name": "Jobb első ablak",
+          "description": "Művelet a jobb első ablakhoz"
+        },
+        "rlwindow": {
+          "name": "Bal hátsó ablak",
+          "description": "Művelet a bal hátsó ablakhoz"
+        },
+        "rrwindow": {
+          "name": "Jobb hátsó ablak",
+          "description": "Művelet a jobb hátsó ablakhoz"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "SVM kép készítése",
+      "description": "Új Surround View Monitor felvétel indítása. A jármű felébred és 360°-os képet készít.",
+      "fields": {
+        "device_id": {
+          "name": "Jármű",
+          "description": "Célzott jármű"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Teljes hatótáv"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Kilométeróra"
+      },
+      "outside_temperature": {
+        "name": "Külső hőmérséklet"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Utolsó szerviz"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Következő szerviz"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Akkumulátor töltöttsége"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Utolsó frissítés"
       },
       "last_scanned_at": {
         "name": "Utolsó lekérdezés"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "EV akkumulátor töltöttsége"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "EV akkumulátor állapota (SoH)"
+      },
+      "ev_battery_temperature_max": {
+        "name": "EV akkumulátor max. hőmérséklete"
+      },
+      "ev_battery_temperature_min": {
+        "name": "EV akkumulátor min. hőmérséklete"
+      },
+      "ev_battery_water_temperature": {
+        "name": "EV akkumulátor hűtőfolyadék-hőmérséklete"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "EV akkumulátor fennmaradó energiája"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "EV akkumulátor kapacitása"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "EV akkumulátorcsomag feszültsége"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "EV hatótáv"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Hatótáv üzemanyaggal"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Üzemanyagszint"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Beállított hőmérséklet"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Becsült töltési idő"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Becsült gyorstöltési idő"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Becsült töltési idő hordozható töltővel"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Becsült töltési idő töltőállomáson"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "AC töltés cél hatótávja"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "DC töltés cél hatótávja"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "90 napos energiafogyasztás"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Összes visszanyert energia"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Átlagos energiafogyasztás"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Első bal ülés"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Első jobb ülés"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Hátsó bal ülés"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Hátsó jobb ülés"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Geokódolt hely"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "DTC hibakódok száma"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Első indulás időpontja"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Második indulás időpontja"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "EV völgyidőszak kezdete"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "EV völgyidőszak vége"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "EV töltőáram korlátja"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "EV töltési teljesítmény"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Alvázszám (VIN)"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Első indulás klímahőmérséklete"
+      },
+      "ev_first_departure_days": {
+        "name": "Első indulás napjai"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Második indulás klímahőmérséklete"
+      },
+      "ev_second_departure_days": {
+        "name": "Második indulás napjai"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "EV energiafogyasztás - légkondicionáló"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "EV energiafogyasztás - akkumulátorhűtés"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "EV energiafogyasztás - akkumulátorfűtés"
+      },
+      "location_last_updated_at": {
+        "name": "Helyzet utolsó frissítése"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L max. teljesítmény"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L cél SoC"
       },
       "data": {
-        "name": "Data"
+        "name": "Adatok"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Napi vezetési statisztika"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Mai vezetési statisztika"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Guminyomás - Bal első"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Guminyomás - Jobb első"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Guminyomás - Bal hátsó"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Guminyomás - Jobb hátsó"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Vezetési mód"
+      },
+      "svm_status": {
+        "name": "SVM állapot"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Motor"
+      },
+      "ev_battery_heating_state": {
+        "name": "EV akkumulátor fűtése"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Jégmentesítés"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Kormányfűtés"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Hátsó ablak fűtése"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Oldalsó tükör fűtése"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Bal első ajtó"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Jobb első ajtó"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Bal hátsó ajtó"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Jobb hátsó ajtó"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Csomagtartó"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Motorháztető"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Bal első ablak"
+      },
+      "front_right_door_is_locked": {
+        "name": "Jobb első ajtó zárja"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Jobb első ablak"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Bal hátsó ablak"
+      },
+      "back_right_door_is_locked": {
+        "name": "Jobb hátsó ajtó zárja"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Jobb hátsó ablak"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "EV akkumulátor töltése"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "EV töltőkábel csatlakoztatva"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "EV akkumulátor előkondicionálása"
+      },
+      "ev_battery_winter_mode": {
+        "name": "EV akkumulátor téli mód"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Alacsony üzemanyagszint"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Okoskulcs elem figyelmeztetés"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Ablakmosó folyadék figyelmeztetés"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Első indulás jégmentesítése"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Első indulás klímája"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Második indulás jégmentesítése"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Második indulás klímája"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Töltés csak völgyidőszakban"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Ütemezett töltés"
+      },
+      "ev_v2l_status": {
+        "name": "V2L állapot"
+      },
+      "ev_v2x_status": {
+        "name": "V2X állapot"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Guminyomás - Összes"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Guminyomás - Bal hátsó"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Guminyomás - Bal első"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Guminyomás - Jobb első"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Guminyomás - Jobb hátsó"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Légkondicionáló"
+      },
+      "back_left_door_is_locked": {
+        "name": "Bal hátsó ajtó zárja"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "EV töltőnyílás"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "EV ütemezett indulás 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "EV ütemezett indulás 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Bal első ajtó zárja"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Fékfolyadék figyelmeztetés"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Napfénytető"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Tartozék"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Távoli indítás"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "Sebességváltó állapota"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Alvó mód ellenőrzése"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "Fényszórók állapota"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Bal első lámpa hiba"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Jobb első lámpa hiba"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Bal távolsági fényszóró hiba"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Jobb távolsági fényszóró hiba"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Bal bifunkciós fényszóró hiba"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Jobb bifunkciós fényszóró hiba"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Bal hátsó lámpa hiba"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Jobb hátsó lámpa hiba"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Bal első irányjelző"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Jobb első irányjelző"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Bal hátsó irányjelző"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Jobb hátsó irányjelző"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Zárva"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Bal első ülésfűtés"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Jobb első ülésfűtés"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Bal hátsó ülésfűtés"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Jobb hátsó ülésfűtés"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Olajszint figyelmeztetés"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "12V akkumulátor hiba"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Ajtózár"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Kényszerített frissítés"
+      },
+      "start_hazard_lights": {
+        "name": "Vészvillogó bekapcsolása"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Vészvillogó és kürt bekapcsolása"
+      },
+      "start_valet_mode": {
+        "name": "Inas mód bekapcsolása"
+      },
+      "stop_valet_mode": {
+        "name": "Inas mód kikapcsolása"
+      },
+      "open_all_windows": {
+        "name": "Összes ablak nyitása"
+      },
+      "close_all_windows": {
+        "name": "Összes ablak zárása"
+      },
+      "vent_all_windows": {
+        "name": "Összes ablak résnyire nyitása"
+      },
+      "capture_svm_image": {
+        "name": "SVM kép készítése"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM első kamera"
+      },
+      "svm_rear": {
+        "name": "SVM hátsó kamera"
+      },
+      "svm_left": {
+        "name": "SVM bal kamera"
+      },
+      "svm_right": {
+        "name": "SVM jobb kamera"
+      },
+      "svm_top": {
+        "name": "SVM madártávlat"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Bal első ablak"
+      },
+      "front_right_window": {
+        "name": "Jobb első ablak"
+      },
+      "back_left_window": {
+        "name": "Bal hátsó ablak"
+      },
+      "back_right_window": {
+        "name": "Jobb hátsó ablak"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "EV töltés"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Klíma"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Első indulás jégmentesítése"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Első indulás klímája"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV ütemezett indulás 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Második indulás jégmentesítése"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Második indulás klímája"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV ütemezett indulás 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Töltés csak völgyidőszakban"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Ütemezett töltés"
+      },
+      "ev_charge_port_door": {
+        "name": "Töltőnyílás"
+      },
+      "valet_mode_control": {
+        "name": "Inas mód"
+      },
+      "svm_dewarp": {
+        "name": "SVM torzításkorrekció"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Klímavezérlés"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "AC töltési korlát"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "DC töltési korlát"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L korlát"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Helyzet"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Völgyidőszaki töltés kezdete"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Völgyidőszaki töltés vége"
       }
     }
   }

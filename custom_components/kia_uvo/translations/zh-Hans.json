@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - 账号凭据",
+        "description": "请输入您的账号凭据。",
+        "data": {
+          "username": "账号",
+          "password": "密码",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - 账号凭据",
+        "description": "请输入您的账号凭据。欧洲地区需要特殊的令牌处理 — 请参阅 README。",
+        "data": {
+          "username": "账号",
+          "password": "令牌",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - 登录账号",
         "description": "添加您的现代汽车（Bluelink）/起亚汽车（Kia Connect）账号到Home Assistant",
         "data": {
-          "username": "账号",
-          "password": "密码",
           "region": "国家/地区",
-          "brand": "品牌",
-          "pin": "Pin服务口令 (CA必选)"
+          "brand": "品牌"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - 重新登录账号",
         "description": "您的账户验证失败。点击提交重新登录授权。"
+      },
+      "select_otp_method": {
+        "title": "选择 OTP 方式",
+        "description": "您的账号需要验证。请选择接收一次性密码的方式。",
+        "data": {
+          "method": "OTP 发送方式"
+        }
+      },
+      "enter_otp": {
+        "title": "输入一次性密码",
+        "description": "请输入通过所选方式发送的验证码。",
+        "data": {
+          "otp": "一次性密码"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - 重新配置",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "设备已配置",
+      "reauth_successful": "重新验证成功",
       "reconfigure_successful": "重新配置成功"
     },
     "error": {
       "invalid_auth": "连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",
+      "invalid_credentials": "用户名或密码无效",
       "unknown": "未知错误"
     }
   },
@@ -55,351 +86,856 @@
       }
     }
   },
+  "services": {
+    "force_update": {
+      "name": "强制更新",
+      "description": "强制车辆更新其数据。与所选车辆同一账号下的所有车辆都将被更新。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "update": {
+      "name": "更新",
+      "description": "从服务缓存更新车辆数据",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "启动空调",
+      "description": "请谨慎使用 - 启动空调和发动机。并非所有车型或地区都支持所有选项。请参考您车辆的手机应用，选择车辆支持的选项。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        },
+        "duration": {
+          "name": "持续时间",
+          "description": "空调系统运行时长。最长时长可能受车型/年款/地区限制。"
+        },
+        "climate": {
+          "name": "空调",
+          "description": "启用空调系统"
+        },
+        "temperature": {
+          "name": "温度",
+          "description": "设置空调温度。单位取决于地区。"
+        },
+        "defrost": {
+          "name": "除霜",
+          "description": "前挡风玻璃除霜"
+        },
+        "heating": {
+          "name": "加热",
+          "description": "前/后窗和后视镜等加热功能。欧洲地区使用单独的方向盘设置。"
+        },
+        "steering_wheel": {
+          "name": "方向盘加热",
+          "description": "方向盘加热档位。仅限欧洲，其他地区使用加热设置。"
+        },
+        "flseat": {
+          "name": "左前座椅",
+          "description": "左前座椅加热/通风设置"
+        },
+        "frseat": {
+          "name": "右前座椅",
+          "description": "右前座椅加热/通风设置"
+        },
+        "rlseat": {
+          "name": "左后座椅",
+          "description": "左后座椅加热/通风设置"
+        },
+        "rrseat": {
+          "name": "右后座椅",
+          "description": "右后座椅加热/通风设置"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "停止空调",
+      "description": "请谨慎使用 - 停止车辆和空调",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "停止充电",
+      "description": "停止充电",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "开始充电",
+      "description": "开始充电",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "lock": {
+      "name": "锁车",
+      "description": "锁定车辆",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "unlock": {
+      "name": "解锁",
+      "description": "解锁车辆",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "关闭充电口",
+      "description": "关闭充电口盖",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "打开充电口",
+      "description": "打开充电口盖",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "设置充电上限",
+      "description": "设置交流和直流充电容量上限",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        },
+        "dc_limit": {
+          "name": "直流充电上限",
+          "description": "使用直流充电桩时的最大充电容量"
+        },
+        "ac_limit": {
+          "name": "交流充电上限",
+          "description": "使用交流充电桩时的最大充电容量"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "设置交流充电电流",
+      "description": "设置交流充电电流容量",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        },
+        "level": {
+          "name": "充电电流",
+          "description": "充电电流容量百分比"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "预约充电和空调",
+      "description": "请谨慎使用 - 预约充电和空调。并非所有车型或地区都支持所有选项。请参考您车辆的手机应用，选择车辆支持的选项。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        },
+        "charging_enabled": {
+          "name": "预约充电",
+          "description": "启用预约充电"
+        },
+        "first_departure_enabled": {
+          "name": "第一次出发",
+          "description": "启用第一次出发"
+        },
+        "first_departure_days": {
+          "name": "第一次出发日期",
+          "description": "第一次出发适用的日期。不能为空。"
+        },
+        "first_departure_time": {
+          "name": "第一次出发时间",
+          "description": "第一次出发时间。分钟请使用 00、10、20、30、40 或 50，秒请使用 00"
+        },
+        "second_departure_enabled": {
+          "name": "第二次出发",
+          "description": "启用第二次出发"
+        },
+        "second_departure_days": {
+          "name": "第二次出发日期",
+          "description": "第二次出发适用的日期。不能为空。"
+        },
+        "second_departure_time": {
+          "name": "第二次出发时间",
+          "description": "第二次出发时间。分钟请使用 00、10、20、30、40 或 50，秒请使用 00"
+        },
+        "off_peak_start_time": {
+          "name": "谷电开始时间",
+          "description": "谷电时段开始时间。分钟请使用 00、10、20、30、40 或 50，秒请使用 00"
+        },
+        "off_peak_end_time": {
+          "name": "谷电结束时间",
+          "description": "谷电时段结束时间。分钟请使用 00、10、20、30、40 或 50，秒请使用 00"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "仅谷电时段",
+          "description": "若为真，仅在设定的谷电时段内充电，否则可能在谷电时段之前开始充电"
+        },
+        "climate_enabled": {
+          "name": "空调",
+          "description": "出发前启用空调系统"
+        },
+        "temperature": {
+          "name": "温度",
+          "description": "设置空调温度。单位取决于地区。"
+        },
+        "temperature_unit": {
+          "name": "温度单位",
+          "description": "设置空调温度单位。单位取决于地区。"
+        },
+        "defrost": {
+          "name": "除霜",
+          "description": "出发前前挡风玻璃除霜"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "打开危险警示灯",
+      "description": "打开危险警示灯 30 秒。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "打开危险警示灯和喇叭",
+      "description": "打开危险警示灯和喇叭 30 秒。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "开启代客模式",
+      "description": "启用代客模式。如果在行驶中远程启用代客模式，车辆显示屏将被关闭。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "关闭代客模式",
+      "description": "停用代客模式。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "车窗控制",
+      "description": "控制车辆的车窗。根据需要打开或关闭车窗。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        },
+        "flwindow": {
+          "name": "左前车窗",
+          "description": "左前车窗的操作"
+        },
+        "frwindow": {
+          "name": "右前车窗",
+          "description": "右前车窗的操作"
+        },
+        "rlwindow": {
+          "name": "左后车窗",
+          "description": "左后车窗的操作"
+        },
+        "rrwindow": {
+          "name": "右后车窗",
+          "description": "右后车窗的操作"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "拍摄 SVM 图像",
+      "description": "触发全景影像监视器（SVM）重新拍摄。车辆将被唤醒并拍摄 360° 图像。",
+      "fields": {
+        "device_id": {
+          "name": "车辆",
+          "description": "目标车辆"
+        }
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "总续航里程"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "总里程"
+      },
+      "outside_temperature": {
+        "name": "车外温度"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "上次保养"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "下次保养"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "蓄电池电量"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "上次更新时间"
       },
       "last_scanned_at": {
         "name": "上次扫描"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "动力电池电量"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "动力电池健康度（SoH）"
+      },
+      "ev_battery_temperature_max": {
+        "name": "动力电池最高温度"
+      },
+      "ev_battery_temperature_min": {
+        "name": "动力电池最低温度"
+      },
+      "ev_battery_water_temperature": {
+        "name": "动力电池冷却液温度"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "动力电池剩余能量"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "动力电池容量"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "动力电池组电压"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "纯电续航里程"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "燃油续航里程"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "燃油油量"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "设定温度"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "预计充电时长"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "预计快充时长"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "预计便携式充电时长"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "预计充电桩充电时长"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "交流充电目标续航"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "直流充电目标续航"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "90 天能耗"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "能量回收总量"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "平均能耗"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "左前座椅"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "右前座椅"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "左后座椅"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "右后座椅"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "地理编码位置"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "故障码（DTC）数量"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "第一次出发时间"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "第二次出发时间"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "谷电开始时间"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "谷电结束时间"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "充电电流上限"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "充电功率"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "车辆识别代号（VIN）"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "第一次出发空调温度"
+      },
+      "ev_first_departure_days": {
+        "name": "第一次出发日期"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "第二次出发空调温度"
+      },
+      "ev_second_departure_days": {
+        "name": "第二次出发日期"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "空调能耗"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "电池冷却能耗"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "电池加热能耗"
+      },
+      "location_last_updated_at": {
+        "name": "位置上次更新时间"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L 最大功率"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L 目标 SoC"
       },
       "data": {
-        "name": "Data"
+        "name": "数据"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "每日驾驶统计"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "今日驾驶统计"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "胎压 - 左前"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "胎压 - 右前"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "胎压 - 左后"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "胎压 - 右后"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "驾驶模式"
+      },
+      "svm_status": {
+        "name": "SVM 状态"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "发动机"
+      },
+      "ev_battery_heating_state": {
+        "name": "动力电池加热"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "除霜"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "方向盘加热"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "后窗加热"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "后视镜加热"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "左前门"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "右前门"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "左后门"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "右后门"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "后备箱"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "引擎盖"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "左前车窗"
+      },
+      "front_right_door_is_locked": {
+        "name": "右前门锁"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "右前车窗"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "左后车窗"
+      },
+      "back_right_door_is_locked": {
+        "name": "右后门锁"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "右后车窗"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "动力电池充电"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "充电枪连接"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "动力电池预调节"
+      },
+      "ev_battery_winter_mode": {
+        "name": "动力电池冬季模式"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "燃油不足"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "智能钥匙电池警告"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "玻璃水警告"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "第一次出发除霜"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "第一次出发空调"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "第二次出发除霜"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "第二次出发空调"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "仅谷电充电"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "预约充电"
+      },
+      "ev_v2l_status": {
+        "name": "V2L 状态"
+      },
+      "ev_v2x_status": {
+        "name": "V2X 状态"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "胎压 - 全部"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "胎压 - 左后"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "胎压 - 左前"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "胎压 - 右前"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "胎压 - 右后"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "空调"
+      },
+      "back_left_door_is_locked": {
+        "name": "左后门锁"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "充电口盖"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "预约出发 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "预约出发 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "左前门锁"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "制动液警告"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "天窗"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "附件电源"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "远程启动"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "变速箱状态"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "休眠模式检查"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "大灯状态"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "左前灯故障"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "右前灯故障"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "左远光灯故障"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "右远光灯故障"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "左双功能大灯故障"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "右双功能大灯故障"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "左尾灯故障"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "右尾灯故障"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "左前转向灯"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "右前转向灯"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "左后转向灯"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "右后转向灯"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "已锁定"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "左前座椅加热"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "右前座椅加热"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "左后座椅加热"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "右后座椅加热"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "机油油位警告"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "12V 蓄电池故障"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "门锁"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "强制刷新"
+      },
+      "start_hazard_lights": {
+        "name": "打开危险警示灯"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "打开危险警示灯和喇叭"
+      },
+      "start_valet_mode": {
+        "name": "开启代客模式"
+      },
+      "stop_valet_mode": {
+        "name": "关闭代客模式"
+      },
+      "open_all_windows": {
+        "name": "打开所有车窗"
+      },
+      "close_all_windows": {
+        "name": "关闭所有车窗"
+      },
+      "vent_all_windows": {
+        "name": "所有车窗通风"
+      },
+      "capture_svm_image": {
+        "name": "拍摄 SVM 图像"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM 前摄像头"
+      },
+      "svm_rear": {
+        "name": "SVM 后摄像头"
+      },
+      "svm_left": {
+        "name": "SVM 左摄像头"
+      },
+      "svm_right": {
+        "name": "SVM 右摄像头"
+      },
+      "svm_top": {
+        "name": "SVM 鸟瞰图"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "左前车窗"
+      },
+      "front_right_window": {
+        "name": "右前车窗"
+      },
+      "back_left_window": {
+        "name": "左后车窗"
+      },
+      "back_right_window": {
+        "name": "右后车窗"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "充电"
       },
       "climate": {
-        "name": "Climate"
+        "name": "空调"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "第一次出发除霜"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "第一次出发空调"
+      },
+      "ev_first_departure_enabled": {
+        "name": "预约出发 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "第二次出发除霜"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "第二次出发空调"
+      },
+      "ev_second_departure_enabled": {
+        "name": "预约出发 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "仅谷电充电"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "预约充电"
+      },
+      "ev_charge_port_door": {
+        "name": "充电口盖"
+      },
+      "valet_mode_control": {
+        "name": "代客模式"
+      },
+      "svm_dewarp": {
+        "name": "SVM 畸变校正"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "空调控制"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "交流充电上限"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "直流充电上限"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L 放电上限"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "位置"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "谷电充电开始时间"
+      },
+      "ev_off_peak_end_time": {
+        "name": "谷电充电结束时间"
       }
     }
   }

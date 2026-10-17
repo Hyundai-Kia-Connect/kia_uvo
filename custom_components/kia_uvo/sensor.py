@@ -9,6 +9,7 @@ from datetime import date, datetime
 from typing import Any, Final, cast
 
 from homeassistant.components.sensor import (
+    RestoreSensor,
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
@@ -598,7 +599,7 @@ async def async_setup_entry(
 PARALLEL_UPDATES = 0
 
 
-class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
+class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect sensor class."""
 
     def __init__(
@@ -611,6 +612,7 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._key = description.key
+        self._last_dynamic_unit: str | None = None
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{self._key}"
         self._attr_icon = description.icon
         self._attr_state_class = description.state_class
@@ -640,15 +642,33 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
             return cast(StateType | datetime, value)
         return cast(StateType | datetime, value)
 
+    async def async_added_to_hass(self) -> None:
+        """Restore the last known dynamic unit after a restart."""
+        await super().async_added_to_hass()
+        last_sensor_data = await self.async_get_last_sensor_data()
+        if last_sensor_data is not None and last_sensor_data.native_unit_of_measurement:
+            self._last_dynamic_unit = last_sensor_data.native_unit_of_measurement
+
     @property
     def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value was reported in by the sensor"""
+        """Return the reported unit, falling back to the last known unit.
+
+        A poll whose payload omits the unit block would otherwise publish a
+        unitless state for DYNAMIC_UNIT sensors while the device_class stays,
+        which trips the recorder units_changed repair on every dropout
+        (issue #1894).
+        """
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
-            return cast(str | None, getattr(self.vehicle, self._key + "_unit"))
+            unit = cast(str | None, getattr(self.vehicle, self._key + "_unit", None))
+            if unit is not None:
+                self._last_dynamic_unit = unit
+                return unit
+            return self._last_dynamic_unit
         return self.entity_description.native_unit_of_measurement
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the geocoded address or DTC descriptions, if applicable."""
         if self.entity_description.key == "_geocode_name":
             return {"address": self.vehicle._geocode_address}
         elif self.entity_description.key == "dtc_count":
@@ -657,6 +677,8 @@ class HyundaiKiaConnectSensor(SensorEntity, HyundaiKiaConnectEntity):
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Sensor exposing the raw vehicle data as attributes."""
+
     _attr_translation_key = "data"
 
     def __init__(
@@ -664,18 +686,22 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the vehicle data sensor."""
         super().__init__(coordinator, vehicle)
 
     @property
     def native_value(self) -> StateType:
+        """Return a constant state; the data lives in the attributes."""
         return "on"
 
     @property
     def is_on(self) -> bool:
+        """Return True; this sensor is always on."""
         return True
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the raw vehicle data and name."""
         return {
             "vehicle_data": self.vehicle.data,
             "vehicle_name": self.vehicle.name,
@@ -683,10 +709,13 @@ class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def unique_id(self) -> str:
+        """Return the unique ID."""
         return f"{DOMAIN}-all-data-{self.vehicle.id}"
 
 
 class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Number of days of driving stats, with each day as an attribute."""
+
     _attr_translation_key = "daily_driving_stats"
 
     def __init__(
@@ -694,14 +723,17 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the daily driving stats sensor."""
         super().__init__(coordinator, vehicle)
 
     @property
     def native_value(self) -> StateType:
+        """Return the number of days with driving stats."""
         return len(self.vehicle.daily_stats)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the driving stats for each day, keyed by date."""
         m: dict[str, Any] = {}
         for day in self.vehicle.daily_stats:
             key = day.date.strftime("%Y-%m-%d")
@@ -719,14 +751,18 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def unique_id(self) -> str:
+        """Return the unique ID."""
         return f"{DOMAIN}-daily-driving-stats-{self.vehicle.id}"
 
     @property
     def native_unit_of_measurement(self) -> str:
+        """Return days as the unit."""
         return UnitOfTime.DAYS
 
 
 class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
+    """Today's driving stats, zeroed until the API reports today."""
+
     _attr_translation_key = "todays_daily_driving_stats"
 
     def __init__(
@@ -734,16 +770,19 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize today's driving stats sensor."""
         super().__init__(coordinator, vehicle)
 
     @property
     def native_value(self) -> StateType:
+        """Return today's date."""
         today = date.today()
         todayskey = today.strftime("%Y-%m-%d")
         return todayskey
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return today's driving stats."""
         today = date.today()
         todayskey = today.strftime("%Y-%m-%d")
         m = {
@@ -775,6 +814,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def unique_id(self) -> str:
+        """Return the unique ID."""
         return f"{DOMAIN}-todays-daily-driving-stats-{self.vehicle.id}"
 
 

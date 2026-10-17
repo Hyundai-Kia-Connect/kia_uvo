@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Inloggegevens",
+        "description": "Voer de gegevens van je account in.",
+        "data": {
+          "username": "Gebruikersnaam",
+          "password": "Wachtwoord",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Inloggegevens",
+        "description": "Voer de gegevens van je account in. Europa vereist een speciale tokenprocedure — zie de README.",
+        "data": {
+          "username": "Gebruikersnaam",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Authenticatie",
         "description": "Stel uw Hyundai (Bluelink) / Kia (Uvo) Connect in om te integreren met Home Assistant.",
         "data": {
-          "username": "Gebruikersnaam",
-          "password": "Wachtwoord",
           "region": "Regio",
-          "brand": "Merk",
-          "pin": "Pin (vereist voor CA)"
+          "brand": "Merk"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Opnieuw Authenticeren",
         "description": "Uw account kan zich niet authenticeren. Klik Submit om het opnieuw te proberen."
+      },
+      "select_otp_method": {
+        "title": "OTP-methode kiezen",
+        "description": "Je account vereist verificatie. Kies hoe je je eenmalige wachtwoord wilt ontvangen.",
+        "data": {
+          "method": "Verzendmethode voor OTP"
+        }
+      },
+      "enter_otp": {
+        "title": "Eenmalig wachtwoord invoeren",
+        "description": "Voer de verificatiecode in die via de gekozen methode is verzonden.",
+        "data": {
+          "otp": "Eenmalig wachtwoord"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Opnieuw configureren",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "Het device is al geconfigureerd",
+      "reauth_successful": "Opnieuw authenticeren geslaagd",
       "reconfigure_successful": "Herconfiguratie geslaagd"
     },
     "error": {
       "invalid_auth": "Het authenticeren op de Hyundai (Bluelink) / Kia (Uvo) Connect servers is niet gelukt. Gebruik svp de officiële app om uit te loggen en weer in te loggen, en probeer het dan opnieuw!",
+      "invalid_credentials": "Ongeldige gebruikersnaam of wachtwoord",
       "unknown": "Onverwachte foutsituatie"
     }
   },
@@ -45,7 +76,7 @@
       "init": {
         "title": "Hyundai / Kia Connect - Instellingen",
         "data": {
-          "scan_interval": "Scan Interval (min)",
+          "scan_interval": "Scaninterval (min)",
           "force_refresh": "Forceer Refresh Interval (min)",
           "no_force_refresh_hour_start": "Force Refresh niet toelaten na (begin-uur)",
           "no_force_refresh_hour_finish": "Force Refresh weer toelaten na (eind-uur",
@@ -67,7 +98,7 @@
       }
     },
     "update": {
-      "name": "Update",
+      "name": "Bijwerken",
       "description": "Werk de data van het voertuig bij uit de buffer van de dienst",
       "fields": {
         "device_id": {
@@ -103,6 +134,10 @@
         "heating": {
           "name": "Verwarmen",
           "description": "Verwarmde onderdelen zoals het stuur en het achterraam"
+        },
+        "steering_wheel": {
+          "name": "Stuurverwarming",
+          "description": "Verwarmingsniveau van het stuur. Alleen Europa, andere regio's gebruiken de verwarmingsinstelling."
         },
         "flseat": {
           "name": "Stoel Linksvoor",
@@ -223,353 +258,684 @@
           "description": "Capaciteit van de laadstroom in procenten"
         }
       }
+    },
+    "schedule_charging_and_climate": {
+      "name": "Laden en klimaat plannen",
+      "description": "Gebruik voorzichtig - Plant laden en klimaat. Niet alle opties zijn beschikbaar voor alle auto's of regio's. Gebruik de mobiele app van je auto als leidraad en kies de opties die in je auto beschikbaar zijn.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        },
+        "charging_enabled": {
+          "name": "Gepland laden",
+          "description": "Gepland laden inschakelen"
+        },
+        "first_departure_enabled": {
+          "name": "1e vertrek",
+          "description": "Eerste vertrek inschakelen"
+        },
+        "first_departure_days": {
+          "name": "Dagen 1e vertrek",
+          "description": "Dagen waarop het eerste vertrek van toepassing is. Mag niet leeg zijn."
+        },
+        "first_departure_time": {
+          "name": "Tijd 1e vertrek",
+          "description": "Tijd van het eerste vertrek. Gebruik 00, 10, 20, 30, 40 of 50 voor minuten en 00 voor seconden"
+        },
+        "second_departure_enabled": {
+          "name": "2e vertrek",
+          "description": "Tweede vertrek inschakelen"
+        },
+        "second_departure_days": {
+          "name": "Dagen 2e vertrek",
+          "description": "Dagen waarop het tweede vertrek van toepassing is. Mag niet leeg zijn."
+        },
+        "second_departure_time": {
+          "name": "Tijd 2e vertrek",
+          "description": "Tijd van het tweede vertrek. Gebruik 00, 10, 20, 30, 40 of 50 voor minuten en 00 voor seconden"
+        },
+        "off_peak_start_time": {
+          "name": "Starttijd daltarief",
+          "description": "Starttijd van het daltarief. Gebruik 00, 10, 20, 30, 40 of 50 voor minuten en 00 voor seconden"
+        },
+        "off_peak_end_time": {
+          "name": "Eindtijd daltarief",
+          "description": "Eindtijd van het daltarief. Gebruik 00, 10, 20, 30, 40 of 50 voor minuten en 00 voor seconden"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "Alleen daltarief",
+          "description": "Indien waar, alleen laden tijdens de ingestelde daltariefperiode, anders kan het laden vóór het daltarief beginnen"
+        },
+        "climate_enabled": {
+          "name": "Klimaat",
+          "description": "Schakel het klimaatsysteem in vóór vertrek"
+        },
+        "temperature": {
+          "name": "Temperatuur",
+          "description": "Stel de temperatuur van de klimaatregeling in. De eenheid is regiospecifiek."
+        },
+        "temperature_unit": {
+          "name": "Temperatuureenheid",
+          "description": "Stel de temperatuureenheid van de klimaatregeling in. De eenheid is regiospecifiek."
+        },
+        "defrost": {
+          "name": "Ontdooien",
+          "description": "Voorruit ontdooien vóór vertrek"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "Alarmlichten inschakelen",
+      "description": "Schakel de alarmlichten 30 seconden in.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "Alarmlichten en claxon inschakelen",
+      "description": "Schakel de alarmlichten en de claxon 30 seconden in.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "Valet-modus starten",
+      "description": "Activeer de valet-modus. Als de valet-modus op afstand wordt geactiveerd tijdens het rijden, wordt het display van het voertuig uitgeschakeld.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "Valet-modus stoppen",
+      "description": "Deactiveer de valet-modus.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "Ramen bedienen",
+      "description": "Bedien de ramen van het voertuig. Open of sluit de ramen indien nodig.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        },
+        "flwindow": {
+          "name": "Raam linksvoor",
+          "description": "Actie voor het raam linksvoor"
+        },
+        "frwindow": {
+          "name": "Raam rechtsvoor",
+          "description": "Actie voor het raam rechtsvoor"
+        },
+        "rlwindow": {
+          "name": "Raam linksachter",
+          "description": "Actie voor het raam linksachter"
+        },
+        "rrwindow": {
+          "name": "Raam rechtsachter",
+          "description": "Actie voor het raam rechtsachter"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "SVM-beeld vastleggen",
+      "description": "Start een nieuwe opname van de Surround View Monitor. Het voertuig wordt gewekt en maakt een 360°-beeld.",
+      "fields": {
+        "device_id": {
+          "name": "Voertuig",
+          "description": "Gewenste voertuig"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Totaal bereik"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Kilometerstand"
+      },
+      "outside_temperature": {
+        "name": "Buitentemperatuur"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Laatste onderhoud"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Volgende onderhoud"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Accuniveau auto"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Laatst bijgewerkt"
       },
       "last_scanned_at": {
         "name": "Laatste scan"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "EV-accuniveau"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "Gezondheid EV-accu (SoH)"
+      },
+      "ev_battery_temperature_max": {
+        "name": "Maximale temperatuur EV-accu"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Minimale temperatuur EV-accu"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Koelvloeistoftemperatuur EV-accu"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "Resterende energie EV-accu"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "EV-accucapaciteit"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "EV-accupakketspanning"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "EV-bereik"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Bereik op brandstof"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Brandstofniveau"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Ingestelde temperatuur"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Geschatte laadtijd"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Geschatte snellaadtijd"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Geschatte laadtijd draagbare lader"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Geschatte laadtijd laadstation"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "Doelbereik AC-laden"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "Doelbereik DC-laden"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "Energieverbruik 90 dagen"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Totale energieterugwinning"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Gemiddeld energieverbruik"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Stoel linksvoor"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Stoel rechtsvoor"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Stoel linksachter"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Stoel rechtsachter"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Gegeocodeerde locatie"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "Aantal DTC's"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Tijd eerste vertrek"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Tijd tweede vertrek"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "EV starttijd daltarief"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "EV eindtijd daltarief"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "Laadstroomlimiet EV"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "Laadvermogen EV"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Chassisnummer (VIN)"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Klimaattemperatuur eerste vertrek"
+      },
+      "ev_first_departure_days": {
+        "name": "Dagen eerste vertrek"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Klimaattemperatuur tweede vertrek"
+      },
+      "ev_second_departure_days": {
+        "name": "Dagen tweede vertrek"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "EV-energieverbruik airconditioning"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "EV-energieverbruik accukoeling"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "EV-energieverbruik accuverwarming"
+      },
+      "location_last_updated_at": {
+        "name": "Locatie laatst bijgewerkt"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L maximaal vermogen"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L doel-SoC"
       },
       "data": {
-        "name": "Data"
+        "name": "Gegevens"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Dagelijkse ritstatistieken"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Ritstatistieken van vandaag"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Bandenspanning - Linksvoor"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Bandenspanning - Rechtsvoor"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Bandenspanning - Linksachter"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Bandenspanning - Rechtsachter"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Rijmodus"
+      },
+      "svm_status": {
+        "name": "SVM-status"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Motor"
+      },
+      "ev_battery_heating_state": {
+        "name": "EV-accuverwarming"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Ontdooien"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Stuurverwarming"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Achterruitverwarming"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Spiegelverwarming"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Portier linksvoor"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Portier rechtsvoor"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Portier linksachter"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Portier rechtsachter"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Kofferbak"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Motorkap"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Raam linksvoor"
+      },
+      "front_right_door_is_locked": {
+        "name": "Slot portier rechtsvoor"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Raam rechtsvoor"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Raam linksachter"
+      },
+      "back_right_door_is_locked": {
+        "name": "Slot portier rechtsachter"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Raam rechtsachter"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "EV-accu laden"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "EV-laadkabel aangesloten"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "EV-accu voorconditionering"
+      },
+      "ev_battery_winter_mode": {
+        "name": "EV-accu wintermodus"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Laag brandstofniveau"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Waarschuwing batterij smart key"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Waarschuwing ruitensproeiervloeistof"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Ontdooien eerste vertrek"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klimaat eerste vertrek"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Ontdooien tweede vertrek"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klimaat tweede vertrek"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Alleen laden tijdens daltarief"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Gepland laden"
+      },
+      "ev_v2l_status": {
+        "name": "V2L-status"
+      },
+      "ev_v2x_status": {
+        "name": "V2X-status"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Bandenspanning - Alle"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Bandenspanning - Linksachter"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Bandenspanning - Linksvoor"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Bandenspanning - Rechtsvoor"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Bandenspanning - Rechtsachter"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Airconditioning"
+      },
+      "back_left_door_is_locked": {
+        "name": "Slot portier linksachter"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "EV-laadklep"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "EV gepland vertrek 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "EV gepland vertrek 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Slot portier linksvoor"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Waarschuwing remvloeistof"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Schuifdak"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Accessoires"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Starten op afstand"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "Toestand transmissie"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Controle slaapmodus"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "Status koplampen"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Storing koplamp links"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Storing koplamp rechts"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Storing grootlicht links"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Storing grootlicht rechts"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Storing bifunctionele koplamp links"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Storing bifunctionele koplamp rechts"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Storing achterlicht links"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Storing achterlicht rechts"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Richtingaanwijzer linksvoor"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Richtingaanwijzer rechtsvoor"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Richtingaanwijzer linksachter"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Richtingaanwijzer rechtsachter"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Vergrendeld"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Stoelverwarming linksvoor"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Stoelverwarming rechtsvoor"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Stoelverwarming linksachter"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Stoelverwarming rechtsachter"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Waarschuwing oliepeil"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "Storing 12V-accu"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Deurslot"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Verversen forceren"
+      },
+      "start_hazard_lights": {
+        "name": "Alarmlichten inschakelen"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Alarmlichten en claxon inschakelen"
+      },
+      "start_valet_mode": {
+        "name": "Valet-modus starten"
+      },
+      "stop_valet_mode": {
+        "name": "Valet-modus stoppen"
+      },
+      "open_all_windows": {
+        "name": "Alle ramen openen"
+      },
+      "close_all_windows": {
+        "name": "Alle ramen sluiten"
+      },
+      "vent_all_windows": {
+        "name": "Alle ramen op een kier"
+      },
+      "capture_svm_image": {
+        "name": "SVM-beeld vastleggen"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM-camera voor"
+      },
+      "svm_rear": {
+        "name": "SVM-camera achter"
+      },
+      "svm_left": {
+        "name": "SVM-camera links"
+      },
+      "svm_right": {
+        "name": "SVM-camera rechts"
+      },
+      "svm_top": {
+        "name": "SVM-vogelperspectief"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Raam linksvoor"
+      },
+      "front_right_window": {
+        "name": "Raam rechtsvoor"
+      },
+      "back_left_window": {
+        "name": "Raam linksachter"
+      },
+      "back_right_window": {
+        "name": "Raam rechtsachter"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "EV laden"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Klimaat"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Ontdooien eerste vertrek"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klimaat eerste vertrek"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV gepland vertrek 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Ontdooien tweede vertrek"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klimaat tweede vertrek"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV gepland vertrek 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Alleen laden tijdens daltarief"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Gepland laden"
+      },
+      "ev_charge_port_door": {
+        "name": "Laadklep"
+      },
+      "valet_mode_control": {
+        "name": "Valet-modus"
+      },
+      "svm_dewarp": {
+        "name": "SVM-vervormingscorrectie"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Klimaatregeling"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "AC-laadlimiet"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "DC-laadlimiet"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L-limiet"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Locatie"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Starttijd laden daltarief"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Eindtijd laden daltarief"
       }
     }
   }

@@ -28,6 +28,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaCoverDescription(CoverEntityDescription):
+    """Describes a Hyundai / Kia Connect window cover entity."""
+
     window_position: str
 
 
@@ -64,6 +66,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up window cover entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -83,6 +86,8 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
+    """A vehicle window exposed as a cover."""
+
     _attr_supported_features = (
         CoverEntityFeature.OPEN
         | CoverEntityFeature.CLOSE
@@ -97,12 +102,14 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
         description: HyundaiKiaCoverDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the window cover."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self.entity_description: HyundaiKiaCoverDescription = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
 
     @property
     def is_closed(self) -> bool | None:
+        """Return True if the window is closed."""
         is_open = getattr(self.vehicle, self.entity_description.key, None)
         if is_open is None:
             return None
@@ -110,6 +117,7 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
 
     @property
     def current_cover_position(self) -> int | None:
+        """Return 100 if the window is open, 0 if closed."""
         is_open = getattr(self.vehicle, self.entity_description.key, None)
         if is_open is None:
             return None
@@ -118,24 +126,28 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
         return 0
 
     async def async_open_cover(self, **kwargs: Any) -> None:
+        """Open the window."""
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.OPEN}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_close_cover(self, **kwargs: Any) -> None:
+        """Close the window."""
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_stop_cover(self, **kwargs: Any) -> None:
+        """Stop the window (the API has no stop, so this closes it)."""
         options = WindowRequestOptions(
             **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
         )
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
+        """Set the window to closed (0), vent (1-49) or open (50-100)."""
         position = kwargs[ATTR_POSITION]
         if position == 0:
             state = WINDOW_STATE.CLOSED

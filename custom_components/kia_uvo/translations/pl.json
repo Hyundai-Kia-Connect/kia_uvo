@@ -410,6 +410,9 @@
       "odometer": {
         "name": "Licznik kilometrów"
       },
+      "outside_temperature": {
+        "name": "Temperatura zewnętrzna"
+      },
       "last_service_distance": {
         "name": "Ostatni serwis"
       },
@@ -431,11 +434,23 @@
       "ev_battery_soh_percentage": {
         "name": "Stan zdrowia baterii EV"
       },
+      "ev_battery_temperature_max": {
+        "name": "Maksymalna temperatura baterii EV"
+      },
+      "ev_battery_temperature_min": {
+        "name": "Minimalna temperatura baterii EV"
+      },
+      "ev_battery_water_temperature": {
+        "name": "Temperatura płynu chłodzącego baterii EV"
+      },
       "ev_battery_remain": {
         "name": "Pozostała pojemność baterii EV"
       },
       "ev_battery_capacity": {
         "name": "Pojemność baterii EV"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "Napięcie pakietu baterii EV"
       },
       "ev_driving_range": {
         "name": "Zasięg EV"
@@ -515,6 +530,36 @@
       "vehicle_identification_number": {
         "name": "Numer VIN"
       },
+      "ev_first_departure_climate_temperature": {
+        "name": "Temperatura klimatyzacji - pierwszy wyjazd"
+      },
+      "ev_first_departure_days": {
+        "name": "Dni pierwszego wyjazdu"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Temperatura klimatyzacji - drugi wyjazd"
+      },
+      "ev_second_departure_days": {
+        "name": "Dni drugiego wyjazdu"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "Zużycie energii EV - klimatyzacja"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "Zużycie energii EV - chłodzenie baterii"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "Zużycie energii EV - podgrzewanie baterii"
+      },
+      "location_last_updated_at": {
+        "name": "Ostatnia aktualizacja lokalizacji"
+      },
+      "ev_v2l_max_power": {
+        "name": "Maksymalna moc V2L"
+      },
+      "ev_v2l_target_soc": {
+        "name": "Docelowy SoC V2L"
+      },
       "data": {
         "name": "Dane pojazdu"
       },
@@ -546,6 +591,9 @@
     "binary_sensor": {
       "engine_is_running": {
         "name": "Silnik"
+      },
+      "ev_battery_heating_state": {
+        "name": "Podgrzewanie baterii EV"
       },
       "defrost_is_on": {
         "name": "Odmrażanie"
@@ -580,11 +628,17 @@
       "front_left_window_is_open": {
         "name": "Szyba przednia lewa"
       },
+      "front_right_door_is_locked": {
+        "name": "Zamek drzwi przednich prawych"
+      },
       "front_right_window_is_open": {
         "name": "Szyba przednia prawa"
       },
       "back_left_window_is_open": {
         "name": "Szyba tylna lewa"
+      },
+      "back_right_door_is_locked": {
+        "name": "Zamek drzwi tylnych prawych"
       },
       "back_right_window_is_open": {
         "name": "Szyba tylna prawa"
@@ -595,6 +649,12 @@
       "ev_battery_is_plugged_in": {
         "name": "Wtyczka baterii EV"
       },
+      "ev_battery_precondition_enabled": {
+        "name": "Kondycjonowanie wstępne baterii EV"
+      },
+      "ev_battery_winter_mode": {
+        "name": "Tryb zimowy baterii EV"
+      },
       "fuel_level_is_low": {
         "name": "Niski poziom paliwa"
       },
@@ -603,6 +663,30 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Ostrzeżenie o płynie do spryskiwaczy"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Odmrażanie - pierwszy wyjazd"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klimatyzacja - pierwszy wyjazd"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Odmrażanie - drugi wyjazd"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klimatyzacja - drugi wyjazd"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Ładowanie tylko poza szczytem"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Zaplanowane ładowanie"
+      },
+      "ev_v2l_status": {
+        "name": "Status V2L"
+      },
+      "ev_v2x_status": {
+        "name": "Status V2X"
       },
       "tire_pressure_all_warning_is_on": {
         "name": "Ciśnienie opon - wszystkie"
@@ -622,6 +706,9 @@
       "air_control_is_on": {
         "name": "Klimatyzacja"
       },
+      "back_left_door_is_locked": {
+        "name": "Zamek drzwi tylnych lewych"
+      },
       "ev_charge_port_door_is_open": {
         "name": "Port ładowania EV"
       },
@@ -630,6 +717,9 @@
       },
       "ev_second_departure_enabled": {
         "name": "EV zaplanowany wyjazd 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Zamek drzwi przednich lewych"
       },
       "brake_fluid_warning_is_on": {
         "name": "Ostrzeżenie o płynie hamulcowym"
@@ -660,6 +750,18 @@
       },
       "headlamp_right_low": {
         "name": "Awaria lampy przedniej prawej"
+      },
+      "headlamp_left_high": {
+        "name": "Awaria świateł drogowych lewych"
+      },
+      "headlamp_right_high": {
+        "name": "Awaria świateł drogowych prawych"
+      },
+      "headlamp_left_bifunc": {
+        "name": "Awaria lewego reflektora dwufunkcyjnego"
+      },
+      "headlamp_right_bifunc": {
+        "name": "Awaria prawego reflektora dwufunkcyjnego"
       },
       "stop_lamp_left": {
         "name": "Awaria lampy tylnej lewej"
@@ -752,6 +854,20 @@
         "name": "SVM Widok z lotu ptaka"
       }
     },
+    "cover": {
+      "front_left_window": {
+        "name": "Szyba przednia lewa"
+      },
+      "front_right_window": {
+        "name": "Szyba przednia prawa"
+      },
+      "back_left_window": {
+        "name": "Szyba tylna lewa"
+      },
+      "back_right_window": {
+        "name": "Szyba tylna prawa"
+      }
+    },
     "switch": {
       "ev_charging": {
         "name": "Ładowanie EV"
@@ -759,8 +875,35 @@
       "climate": {
         "name": "Klimatyzacja"
       },
+      "ev_first_departure_climate_defrost": {
+        "name": "Odmrażanie - pierwszy wyjazd"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klimatyzacja - pierwszy wyjazd"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV zaplanowany wyjazd 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Odmrażanie - drugi wyjazd"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klimatyzacja - drugi wyjazd"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV zaplanowany wyjazd 2"
+      },
       "ev_off_peak_charge_only_enabled": {
         "name": "Ładowanie tylko poza szczytem"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Zaplanowane ładowanie"
+      },
+      "ev_charge_port_door": {
+        "name": "Port ładowania"
+      },
+      "valet_mode_control": {
+        "name": "Tryb valet"
       },
       "svm_dewarp": {
         "name": "Korekcja SVM (dewarp)"

@@ -40,9 +40,10 @@ from .redact import redact
 
 
 def _token_meta(token: Any) -> dict[str, Any]:
-    """Secret-free view of the Token: expiries, MQTT metadata, device-id
-    presence. The raw access/refresh/control tokens, PIN, and stamp never
-    leave the dump.
+    """Return a secret-free view of the token.
+
+    Covers expiries, MQTT metadata and device-id presence. The raw
+    access/refresh/control tokens, PIN, and stamp never leave the dump.
     """
     if token is None:
         return {}
@@ -62,8 +63,9 @@ def _token_meta(token: Any) -> dict[str, Any]:
 
 
 def _config_options(entry: ConfigEntry) -> dict[str, Any]:
-    """Show effective values (option or default) so the dump reflects what
-    the integration runs with, not a field of nulls.
+    """Return the effective options (option or default).
+
+    The dump reflects what the integration runs with, not a field of nulls.
     """
     return {
         "scan_interval": entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),

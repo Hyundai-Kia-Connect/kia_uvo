@@ -2,20 +2,49 @@
   "title": "Hyundai / Kia Connect",
   "config": {
     "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - Loginoplysninger",
+        "description": "Indtast dine kontooplysninger.",
+        "data": {
+          "username": "Brugernavn",
+          "password": "Adgangskode",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - Loginoplysninger",
+        "description": "Indtast dine kontooplysninger. Europa kræver særlig håndtering af token — se README.",
+        "data": {
+          "username": "Brugernavn",
+          "password": "Token",
+          "pin": "PIN"
+        }
+      },
       "user": {
         "title": "Hyundai / Kia Connect - Godkendelse",
         "description": "Opsæt din Hyundai (Bluelink) / Kia (Uvo) Connect til integration med Home Assistant.",
         "data": {
-          "username": "Brugernavn",
-          "password": "Adgangskode",
           "region": "Region",
-          "brand": "Mærke",
-          "pin": "PIN"
+          "brand": "Mærke"
         }
       },
       "reauth_confirm": {
         "title": "Hyundai / Kia Connect - Genbekræftelse",
         "description": "Din konto kan ikke godkendes. Klik på Indsend for at opsætte igen."
+      },
+      "select_otp_method": {
+        "title": "Vælg OTP-metode",
+        "description": "Din konto kræver bekræftelse. Vælg, hvordan du vil modtage din engangsadgangskode.",
+        "data": {
+          "method": "Leveringsmetode for OTP"
+        }
+      },
+      "enter_otp": {
+        "title": "Indtast engangsadgangskode",
+        "description": "Indtast bekræftelseskoden, der blev sendt via den valgte metode.",
+        "data": {
+          "otp": "Engangsadgangskode"
+        }
       },
       "reconfigure": {
         "title": "Hyundai / Kia Connect - Genindstil",
@@ -33,10 +62,12 @@
     },
     "abort": {
       "already_configured": "Enheden er allerede konfigureret",
+      "reauth_successful": "Genbekræftelse lykkedes",
       "reconfigure_successful": "Genindstilling lykkedes"
     },
     "error": {
       "invalid_auth": "Login fejlede til Hyundai (Bluelink) / Kia (Uvo) Connect-servere. Brug den officielle app til at logge ud og logge ind igen, og prøv derefter igen!",
+      "invalid_credentials": "Ugyldigt brugernavn eller adgangskode",
       "unknown": "Uventet fejl"
     }
   },
@@ -103,6 +134,10 @@
         "heating": {
           "name": "Opvarmning",
           "description": "Opvarmede funktioner som rat og bagrude"
+        },
+        "steering_wheel": {
+          "name": "Rattvarme",
+          "description": "Varmeniveau for rattet. Kun Europa, andre regioner bruger indstillingen for opvarmning."
         },
         "flseat": {
           "name": "Forsæde venstre",
@@ -329,353 +364,578 @@
           "description": "Målrettet køretøj"
         }
       }
+    },
+    "set_windows": {
+      "name": "Indstil vinduer",
+      "description": "Styr køretøjets vinduer. Åbn eller luk vinduerne efter behov.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        },
+        "flwindow": {
+          "name": "Venstre forrude",
+          "description": "Handling for venstre forreste vindue"
+        },
+        "frwindow": {
+          "name": "Højre forrude",
+          "description": "Handling for højre forreste vindue"
+        },
+        "rlwindow": {
+          "name": "Venstre bagrude",
+          "description": "Handling for venstre bageste vindue"
+        },
+        "rrwindow": {
+          "name": "Højre bagrude",
+          "description": "Handling for højre bageste vindue"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "Tag SVM-billede",
+      "description": "Udløs en ny optagelse fra Surround View Monitor. Køretøjet vågner og tager et 360°-billede.",
+      "fields": {
+        "device_id": {
+          "name": "Køretøj",
+          "description": "Målrettet køretøj"
+        }
+      }
     }
   },
   "entity": {
     "sensor": {
       "total_driving_range": {
-        "name": "Total Driving Range"
+        "name": "Samlet rækkevidde"
       },
       "odometer": {
-        "name": "Odometer"
+        "name": "Kilometertæller"
+      },
+      "outside_temperature": {
+        "name": "Udetemperatur"
       },
       "last_service_distance": {
-        "name": "Last Service"
+        "name": "Sidste service"
       },
       "next_service_distance": {
-        "name": "Next Service"
+        "name": "Næste service"
       },
       "car_battery_percentage": {
-        "name": "Car Battery Level"
+        "name": "Bilbatteriniveau"
       },
       "last_updated_at": {
-        "name": "Last Updated At"
+        "name": "Sidst opdateret"
       },
       "last_scanned_at": {
         "name": "Sidste scanning"
       },
       "ev_battery_percentage": {
-        "name": "EV Battery Level"
+        "name": "EV-batteriniveau"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "EV-batteriets tilstand (SoH)"
+      },
+      "ev_battery_temperature_max": {
+        "name": "EV-batteritemperatur maks."
+      },
+      "ev_battery_temperature_min": {
+        "name": "EV-batteritemperatur min."
+      },
+      "ev_battery_water_temperature": {
+        "name": "EV-batteriets kølevæsketemperatur"
       },
       "ev_battery_remain": {
-        "name": "EV Battery Remaining Energy"
+        "name": "EV-batteriets resterende energi"
       },
       "ev_battery_capacity": {
-        "name": "EV Battery Capacity"
+        "name": "EV-batterikapacitet"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "EV-batteripakkens spænding"
       },
       "ev_driving_range": {
-        "name": "EV Range"
+        "name": "EV-rækkevidde"
       },
       "fuel_driving_range": {
-        "name": "Fuel Driving Range"
+        "name": "Rækkevidde på brændstof"
       },
       "fuel_level": {
-        "name": "Fuel Level"
+        "name": "Brændstofniveau"
       },
       "air_temperature": {
-        "name": "Set Temperature"
+        "name": "Indstillet temperatur"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "Estimated Charge Duration"
+        "name": "Estimeret opladningstid"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "Estimated Fast Charge Duration"
+        "name": "Estimeret lynopladningstid"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "Estimated Portable Charge Duration"
+        "name": "Estimeret opladningstid med bærbar lader"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "Estimated Station Charge Duration"
+        "name": "Estimeret opladningstid ved ladestation"
       },
       "ev_target_range_charge_ac": {
-        "name": "Target Range of Charge AC"
+        "name": "Målrækkevidde for AC-opladning"
       },
       "ev_target_range_charge_dc": {
-        "name": "Target Range of Charge DC"
+        "name": "Målrækkevidde for DC-opladning"
       },
       "total_power_consumed": {
-        "name": "90 Day Energy Consumption"
+        "name": "Energiforbrug 90 dage"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "Samlet energiregenerering"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "Gennemsnitligt energiforbrug"
       },
       "front_left_seat_status": {
-        "name": "Front Left Seat"
+        "name": "Forsæde venstre"
       },
       "front_right_seat_status": {
-        "name": "Front Right Seat"
+        "name": "Forsæde højre"
       },
       "rear_left_seat_status": {
-        "name": "Rear Left Seat"
+        "name": "Bagsæde venstre"
       },
       "rear_right_seat_status": {
-        "name": "Rear Right Seat"
+        "name": "Bagsæde højre"
       },
       "geocode_name": {
-        "name": "Geocoded Location"
+        "name": "Geokodet placering"
       },
       "dtc_count": {
-        "name": "DTC Count"
+        "name": "Antal DTC'er"
       },
       "ev_first_departure_time": {
-        "name": "EV First Scheduled Departure Time"
+        "name": "Første afgangstid"
       },
       "ev_second_departure_time": {
-        "name": "EV Second Scheduled Departure Time"
+        "name": "Anden afgangstid"
       },
       "ev_off_peak_start_time": {
-        "name": "EV Off Peak Start Time"
+        "name": "EV lavpris starttidspunkt"
       },
       "ev_off_peak_end_time": {
-        "name": "EV Off Peak End Time"
+        "name": "EV lavpris sluttidspunkt"
       },
       "ev_charging_current": {
-        "name": "EV Charging Current Limit"
+        "name": "EV-ladestrømsgrænse"
       },
       "ev_charging_power": {
-        "name": "EV Charging Power"
+        "name": "EV-ladeeffekt"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Stelnummer (VIN)"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "Klimatemperatur ved første afgang"
+      },
+      "ev_first_departure_days": {
+        "name": "Dage for første afgang"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "Klimatemperatur ved anden afgang"
+      },
+      "ev_second_departure_days": {
+        "name": "Dage for anden afgang"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "EV-strømforbrug klimaanlæg"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "EV-strømforbrug batterikøling"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "EV-strømforbrug batteriopvarmning"
+      },
+      "location_last_updated_at": {
+        "name": "Placering sidst opdateret"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L maks. effekt"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L mål-SoC"
       },
       "data": {
         "name": "Data"
       },
       "daily_driving_stats": {
-        "name": "Daily Driving Stats"
+        "name": "Daglig kørselsstatistik"
       },
       "todays_daily_driving_stats": {
-        "name": "Today's Daily Driving Stats"
+        "name": "Dagens kørselsstatistik"
       },
       "tire_pressure_front_left": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Dæktryk - Venstre for"
       },
       "tire_pressure_front_right": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Dæktryk - Højre for"
       },
       "tire_pressure_rear_left": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Dæktryk - Venstre bag"
       },
       "tire_pressure_rear_right": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Dæktryk - Højre bag"
       },
       "drive_mode": {
-        "name": "Drive Mode"
+        "name": "Køretilstand"
+      },
+      "svm_status": {
+        "name": "SVM-status"
       }
     },
     "binary_sensor": {
       "engine_is_running": {
-        "name": "Engine"
+        "name": "Motor"
+      },
+      "ev_battery_heating_state": {
+        "name": "EV-batteriopvarmning"
       },
       "defrost_is_on": {
-        "name": "Defrost"
+        "name": "Afisning"
       },
       "steering_wheel_heater_is_on": {
-        "name": "Steering Wheel Heater"
+        "name": "Rattvarme"
       },
       "back_window_heater_is_on": {
-        "name": "Back Window Heater"
+        "name": "Bagrudevarme"
       },
       "side_mirror_heater_is_on": {
-        "name": "Side Mirror Heater"
+        "name": "Sidespejlsvarme"
       },
       "front_left_door_is_open": {
-        "name": "Front Left Door"
+        "name": "Fordør venstre"
       },
       "front_right_door_is_open": {
-        "name": "Front Right Door"
+        "name": "Fordør højre"
       },
       "back_left_door_is_open": {
-        "name": "Back Left Door"
+        "name": "Bagdør venstre"
       },
       "back_right_door_is_open": {
-        "name": "Back Right Door"
+        "name": "Bagdør højre"
       },
       "trunk_is_open": {
-        "name": "Trunk"
+        "name": "Bagagerum"
       },
       "hood_is_open": {
-        "name": "Hood"
+        "name": "Motorhjelm"
       },
       "front_left_window_is_open": {
-        "name": "Front Left Window"
+        "name": "Forrude venstre"
+      },
+      "front_right_door_is_locked": {
+        "name": "Lås fordør højre"
       },
       "front_right_window_is_open": {
-        "name": "Front Right Window"
+        "name": "Forrude højre"
       },
       "back_left_window_is_open": {
-        "name": "Back Left Window"
+        "name": "Bagrude venstre"
+      },
+      "back_right_door_is_locked": {
+        "name": "Lås bagdør højre"
       },
       "back_right_window_is_open": {
-        "name": "Back Right Window"
+        "name": "Bagrude højre"
       },
       "ev_battery_is_charging": {
-        "name": "EV Battery Charge"
+        "name": "EV-batteriopladning"
       },
       "ev_battery_is_plugged_in": {
-        "name": "EV Battery Plug"
+        "name": "EV-batteristik"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "EV-batteriforkonditionering"
+      },
+      "ev_battery_winter_mode": {
+        "name": "EV-batteri vintertilstand"
       },
       "fuel_level_is_low": {
-        "name": "Fuel Low Level"
+        "name": "Lavt brændstofniveau"
       },
       "smart_key_battery_warning_is_on": {
-        "name": "Smart Key Battery Warning"
+        "name": "Advarsel om smartnøglebatteri"
       },
       "washer_fluid_warning_is_on": {
-        "name": "Washer Fluid Warning"
+        "name": "Advarsel om sprinklervæske"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Afisning ved første afgang"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klima ved første afgang"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Afisning ved anden afgang"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klima ved anden afgang"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Kun lavprisopladning"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Planlagt opladning"
+      },
+      "ev_v2l_status": {
+        "name": "V2L-status"
+      },
+      "ev_v2x_status": {
+        "name": "V2X-status"
       },
       "tire_pressure_all_warning_is_on": {
-        "name": "Tire Pressure - All"
+        "name": "Dæktryk - Alle"
       },
       "tire_pressure_rear_left_warning_is_on": {
-        "name": "Tire Pressure - Rear Left"
+        "name": "Dæktryk - Venstre bag"
       },
       "tire_pressure_front_left_warning_is_on": {
-        "name": "Tire Pressure - Front Left"
+        "name": "Dæktryk - Venstre for"
       },
       "tire_pressure_front_right_warning_is_on": {
-        "name": "Tire Pressure - Front Right"
+        "name": "Dæktryk - Højre for"
       },
       "tire_pressure_rear_right_warning_is_on": {
-        "name": "Tire Pressure - Rear Right"
+        "name": "Dæktryk - Højre bag"
       },
       "air_control_is_on": {
-        "name": "Air Conditioner"
+        "name": "Klimaanlæg"
+      },
+      "back_left_door_is_locked": {
+        "name": "Lås bagdør venstre"
       },
       "ev_charge_port_door_is_open": {
-        "name": "EV Charge Port"
+        "name": "EV-ladeport"
       },
       "ev_first_departure_enabled": {
-        "name": "EV Scheduled Departure 1"
+        "name": "EV planlagt afgang 1"
       },
       "ev_second_departure_enabled": {
-        "name": "EV Scheduled Departure 2"
+        "name": "EV planlagt afgang 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "Lås fordør venstre"
       },
       "brake_fluid_warning_is_on": {
-        "name": "Brake Fluid Warning"
+        "name": "Advarsel om bremsevæske"
       },
       "sunroof_is_open": {
-        "name": "Sunroof"
+        "name": "Soltag"
       },
       "accessory_on": {
-        "name": "Accessory"
+        "name": "Tilbehør"
       },
       "ign3": {
         "name": "IGN3"
       },
       "remote_ignition": {
-        "name": "Remote Ignition"
+        "name": "Fjernstart"
       },
       "transmission_condition": {
-        "name": "Transmission Condition"
+        "name": "Transmissionstilstand"
       },
       "sleep_mode_check": {
-        "name": "Sleep Mode Check"
+        "name": "Kontrol af dvaletilstand"
       },
       "headlamp_status": {
-        "name": "Headlamp Status"
+        "name": "Forlygtestatus"
       },
       "headlamp_left_low": {
-        "name": "Front Left Lamp Fault"
+        "name": "Fejl på forlygte venstre"
       },
       "headlamp_right_low": {
-        "name": "Front Right Lamp Fault"
+        "name": "Fejl på forlygte højre"
       },
       "headlamp_left_high": {
-        "name": "Headlamp Left High Fault"
+        "name": "Fejl på fjernlys venstre"
       },
       "headlamp_right_high": {
-        "name": "Headlamp Right High Fault"
+        "name": "Fejl på fjernlys højre"
       },
       "headlamp_left_bifunc": {
-        "name": "Headlamp Left Bifunctional Fault"
+        "name": "Fejl på bifunktionel forlygte venstre"
       },
       "headlamp_right_bifunc": {
-        "name": "Headlamp Right Bifunctional Fault"
+        "name": "Fejl på bifunktionel forlygte højre"
       },
       "stop_lamp_left": {
-        "name": "Rear Left Lamp Fault"
+        "name": "Fejl på baglygte venstre"
       },
       "stop_lamp_right": {
-        "name": "Rear Right Lamp Fault"
+        "name": "Fejl på baglygte højre"
       },
       "turn_signal_left_front": {
-        "name": "Turn Signal Left Front"
+        "name": "Blinklys venstre for"
       },
       "turn_signal_right_front": {
-        "name": "Turn Signal Right Front"
+        "name": "Blinklys højre for"
       },
       "turn_signal_left_rear": {
-        "name": "Turn Signal Left Rear"
+        "name": "Blinklys venstre bag"
       },
       "turn_signal_right_rear": {
-        "name": "Turn Signal Right Rear"
+        "name": "Blinklys højre bag"
       },
       "is_locked": {
-        "name": "Locked"
+        "name": "Låst"
       },
       "front_left_seat_heater_on": {
-        "name": "Front Left Seat Heater"
+        "name": "Sædevarme forsæde venstre"
       },
       "front_right_seat_heater_on": {
-        "name": "Front Right Seat Heater"
+        "name": "Sædevarme forsæde højre"
       },
       "rear_left_seat_heater_on": {
-        "name": "Rear Left Seat Heater"
+        "name": "Sædevarme bagsæde venstre"
       },
       "rear_right_seat_heater_on": {
-        "name": "Rear Right Seat Heater"
+        "name": "Sædevarme bagsæde højre"
       },
       "oil_level_warning_is_on": {
-        "name": "Oil Level Warning"
+        "name": "Advarsel om oliestand"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V Battery Fault"
+        "name": "Fejl på 12V-batteri"
       }
     },
     "lock": {
       "door_lock": {
-        "name": "Door Lock"
+        "name": "Dørlås"
       }
     },
     "button": {
       "force_refresh": {
-        "name": "Force Refresh"
+        "name": "Tving opdatering"
+      },
+      "start_hazard_lights": {
+        "name": "Tænd katastrofelys"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "Tænd katastrofelys og horn"
+      },
+      "start_valet_mode": {
+        "name": "Start betjenttilstand"
+      },
+      "stop_valet_mode": {
+        "name": "Stop betjenttilstand"
+      },
+      "open_all_windows": {
+        "name": "Åbn alle vinduer"
+      },
+      "close_all_windows": {
+        "name": "Luk alle vinduer"
+      },
+      "vent_all_windows": {
+        "name": "Udluft alle vinduer"
+      },
+      "capture_svm_image": {
+        "name": "Tag SVM-billede"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM-kamera for"
+      },
+      "svm_rear": {
+        "name": "SVM-kamera bag"
+      },
+      "svm_left": {
+        "name": "SVM-kamera venstre"
+      },
+      "svm_right": {
+        "name": "SVM-kamera højre"
+      },
+      "svm_top": {
+        "name": "SVM-fugleperspektiv"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "Forrude venstre"
+      },
+      "front_right_window": {
+        "name": "Forrude højre"
+      },
+      "back_left_window": {
+        "name": "Bagrude venstre"
+      },
+      "back_right_window": {
+        "name": "Bagrude højre"
       }
     },
     "switch": {
       "ev_charging": {
-        "name": "EV Charging"
+        "name": "EV-opladning"
       },
       "climate": {
-        "name": "Climate"
+        "name": "Klimaanlæg"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "Afisning ved første afgang"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "Klima ved første afgang"
+      },
+      "ev_first_departure_enabled": {
+        "name": "EV planlagt afgang 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "Afisning ved anden afgang"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "Klima ved anden afgang"
+      },
+      "ev_second_departure_enabled": {
+        "name": "EV planlagt afgang 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "Kun lavprisopladning"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "Planlagt opladning"
+      },
+      "ev_charge_port_door": {
+        "name": "Ladeport"
+      },
+      "valet_mode_control": {
+        "name": "Betjenttilstand"
+      },
+      "svm_dewarp": {
+        "name": "SVM-forvrængningskorrektion"
       }
     },
     "climate": {
       "climate_control": {
-        "name": "Climate Control"
+        "name": "Klimastyring"
       }
     },
     "number": {
       "ev_charge_limits_ac": {
-        "name": "AC Charging Limit"
+        "name": "AC-ladegrænse"
       },
       "ev_charge_limits_dc": {
-        "name": "DC Charging Limit"
+        "name": "DC-ladegrænse"
       },
       "ev_v2l_discharge_limit": {
-        "name": "V2L Limit"
+        "name": "V2L-grænse"
       }
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Placering"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "Lavpris opladning starttidspunkt"
+      },
+      "ev_off_peak_end_time": {
+        "name": "Lavpris opladning sluttidspunkt"
       }
     }
   }
