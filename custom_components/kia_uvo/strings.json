@@ -34,16 +34,16 @@
       },
       "select_otp_method": {
         "title": "Select OTP Method",
-        "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
+        "description": "Your account requires verification. Choose how you want to receive your one\u2011time password.",
         "data": {
           "method": "OTP delivery method"
         }
       },
       "enter_otp": {
-        "title": "Enter One‑Time Password",
+        "title": "Enter One\u2011Time Password",
         "description": "Enter the verification code sent to your selected method.",
         "data": {
-          "otp": "One‑time password"
+          "otp": "One\u2011time password"
         }
       },
       "reconfigure": {
@@ -83,6 +83,9 @@
           "enable_geolocation_entity": "[%key:component::hyundai_kia_connect::options::step::init::data::enable_geolocation_entity%]",
           "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]",
           "enable_mqtt": "Enable MQTT push notifications"
+        },
+        "data_description": {
+          "enable_mqtt": "Receive vehicle status updates over MQTT push as the car reports them, instead of waiting for the next poll. Only the Europe (Beta) region supports push."
         }
       }
     }
