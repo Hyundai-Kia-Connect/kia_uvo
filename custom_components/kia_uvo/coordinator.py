@@ -766,7 +766,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         if not self._mqtt_enabled:
             _LOGGER.debug("%s - Push disabled in options, skipping", DOMAIN)
             return
-        if not self.vehicle_manager.is_push_supported:
+        if not getattr(self.vehicle_manager.api, "supports_mqtt_push", False):
             _LOGGER.debug(
                 "%s - Push not supported on %s, skipping",
                 DOMAIN,

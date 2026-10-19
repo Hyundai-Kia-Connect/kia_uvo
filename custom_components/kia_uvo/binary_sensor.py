@@ -578,7 +578,7 @@ async def async_setup_entry(
 
     # Push connectivity sensor — only where the push contract is implemented
     # (regions without push skip; precedent: geocode-entity region gate).
-    if coordinator.is_mqtt_enabled and coordinator.vehicle_manager.is_push_supported:
+    if coordinator.is_mqtt_enabled and coordinator.vehicle_manager.api.supports_mqtt_push:
         entities.append(HyundaiKiaMqttConnectedSensor(coordinator))
     async_add_entities(entities)
 
