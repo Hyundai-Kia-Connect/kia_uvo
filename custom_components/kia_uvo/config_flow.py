@@ -125,7 +125,6 @@ OPTIONS_SCHEMA = vol.Schema(
             default=DEFAULT_ENABLE_GEOLOCATION_ENTITY,
         ): bool,
         vol.Optional(
-            CONF_ENABLE_MQTT,
             CONF_USE_EMAIL_WITH_GEOCODE_API,
             default=DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
         ): bool,
