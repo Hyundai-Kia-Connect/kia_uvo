@@ -753,7 +753,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     # ------------------------------------------------------------------
-    # MQTT push lifecycle (push-contract glue; regions without push skip)
+    # Push lifecycle (regions without push skip inside)
     # ------------------------------------------------------------------
 
     async def async_start_mqtt(self, vehicle_id: str) -> None:
