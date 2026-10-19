@@ -25,7 +25,10 @@ class TestMqttConnectedSensorGate:
     def _setup(self, mqtt_enabled: bool, push_supported: bool) -> list[Any]:
         coordinator = MagicMock()
         coordinator.is_mqtt_enabled = mqtt_enabled
-        coordinator.vehicle_manager.is_push_supported = push_supported
+        # Flag read directly off the api (the removed is_push_supported
+        # property must not come back); getattr tolerance is the platform
+        # gate's own concern.
+        coordinator.vehicle_manager.api.supports_mqtt_push = push_supported
         # connectivity sensor attaches to the first vehicle for device grouping
         first_vehicle = MagicMock()
         first_vehicle.id = "v1"
@@ -111,7 +114,6 @@ class FakePushApi:
 
     def force_refresh_vehicle_state(self, _token, vehicle):
         self.calls.append("force_refresh")
-        return None
 
 
 def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator:
@@ -166,10 +168,17 @@ class TestStartMqtt:
         _patch_hass(coordinator)
         asyncio.run(coordinator.async_start_mqtt("v1"))
         api = coordinator.vehicle_manager.api
-        assert api.calls[:4] == ["broker", "register_client", "identity", "register_vehicle"]
+        assert api.calls[:4] == [
+            "broker",
+            "register_client",
+            "identity",
+            "register_vehicle",
+        ]
         assert "topics" not in api.calls  # transport not connected → no subscribe
         cb = coordinator.vehicle_manager._push_status_callback
-        assert cb.__func__ is HyundaiKiaConnectDataUpdateCoordinator._mqtt_status_callback
+        assert (
+            cb.__func__ is HyundaiKiaConnectDataUpdateCoordinator._mqtt_status_callback
+        )
         assert coordinator.vehicle_manager._push_client is not None
 
     def test_skips_when_disabled(self):
