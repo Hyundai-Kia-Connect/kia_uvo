@@ -69,7 +69,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
     async_setup_services(hass)
 
-    # Start push (MQTT) for each vehicle — regions without push skip inside.
+    # Start push for each vehicle — regions without push skip inside.
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         hass.async_create_task(coordinator.async_start_mqtt(vehicle_id))
 
