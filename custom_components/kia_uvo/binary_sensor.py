@@ -555,6 +555,14 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         device_class=BinarySensorDeviceClass.PROBLEM,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="hazard_lights_on",
+        translation_key="hazard_lights_on",
+        is_on=lambda vehicle: vehicle.hazard_lights_on,
+        on_icon="mdi:hazard-lights",
+        off_icon="mdi:hazard-lights",
+        device_class=BinarySensorDeviceClass.LIGHT,
+    ),
 )
 
 

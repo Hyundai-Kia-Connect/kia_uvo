@@ -58,6 +58,7 @@ from .const import (
     DOMAIN,
     OffPeakChargingMode,
 )
+from .trip_stats import latest_trip_day, month_signature, region_supports_trip_stats
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,6 +122,15 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.use_email_with_geocode_api = config_entry.options.get(
             CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
         )
+        self.trip_stats_enabled: bool = region_supports_trip_stats(
+            config_entry.data.get(CONF_REGION)
+        )
+        # Vehicles whose trip history has been read at least once; trip
+        # sensors are created only for these.
+        self.trip_stats_vehicle_ids: set[str] = set()
+        # Vehicles whose most recent trip refresh succeeded.
+        self.trip_stats_ok: dict[str, bool] = {}
+        self._trip_signatures: dict[str, tuple[Any, ...] | None] = {}
 
         super().__init__(
             hass,
@@ -212,7 +222,64 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
 
+        if self.trip_stats_enabled:
+            await self.hass.async_add_executor_job(self.update_trip_stats)
+
         return self.data
+
+    @property
+    def trip_timezone(self) -> dt.tzinfo:
+        """Timezone the API reports trip dates and times in."""
+        tz = getattr(self.vehicle_manager.api, "data_timezone", None)
+        return tz if isinstance(tz, dt.tzinfo) else dt_util.get_default_time_zone()
+
+    def update_trip_stats(self) -> None:
+        """Refresh trip history. Runs in the executor; never raises.
+
+        Reads Kia's servers only, so it does not wake the car. The month
+        summary is one request per poll; the latest day's trips are re-read
+        only when the month summary changes, i.e. after a new trip.
+        """
+        now = dt.datetime.now(self.trip_timezone)
+        yyyymm = now.strftime("%Y%m")
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
+            if not vehicle.enabled:
+                continue
+            try:
+                self.vehicle_manager.update_month_trip_info(vehicle_id, yyyymm)
+                signature = month_signature(vehicle)
+                if signature != self._trip_signatures.get(vehicle_id, ()):
+                    day = latest_trip_day(vehicle)
+                    if day is None and vehicle.day_trip_info is None:
+                        day = self._latest_trip_day_last_month(vehicle_id, now)
+                    if day is not None:
+                        self.vehicle_manager.update_day_trip_info(vehicle_id, day)
+                    self._trip_signatures[vehicle_id] = signature
+                self.trip_stats_vehicle_ids.add(vehicle_id)
+                self.trip_stats_ok[vehicle_id] = True
+            except Exception:
+                self.trip_stats_ok[vehicle_id] = False
+                _LOGGER.warning(
+                    "%s - Trip stats update failed for %s",
+                    DOMAIN,
+                    vehicle_id,
+                    exc_info=True,
+                )
+
+    def _latest_trip_day_last_month(
+        self, vehicle_id: str, now: dt.datetime
+    ) -> str | None:
+        """Latest trip day of the previous month, for "last trip" early in a
+        month with no trips yet. Leaves month_trip_info on the current month.
+        """
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        current = vehicle.month_trip_info
+        previous = (now.replace(day=1) - dt.timedelta(days=1)).strftime("%Y%m")
+        try:
+            self.vehicle_manager.update_month_trip_info(vehicle_id, previous)
+            return latest_trip_day(vehicle)
+        finally:
+            vehicle.month_trip_info = current
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""

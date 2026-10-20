@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 # Canonical import path since HA 2026.6 (config_entry alias removed 2027.6);
 # the ignore covers HA's implicit re-export, rejected by mypy --strict.
@@ -70,3 +70,13 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     def source_type(self) -> SourceType:
         """Return the source type (GPS)."""
         return SourceType.GPS
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return speed, heading and altitude at the last fix, where reported."""
+        attributes = {
+            "speed": self.vehicle.location_speed,
+            "heading": self.vehicle.location_heading,
+            "altitude": self.vehicle.location_altitude,
+        }
+        return {key: value for key, value in attributes.items() if value is not None}

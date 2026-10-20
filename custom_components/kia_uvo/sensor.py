@@ -21,7 +21,9 @@ from homeassistant.const import (
     EntityCategory,
     UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfLength,
     UnitOfPower,
+    UnitOfSpeed,
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
@@ -30,6 +32,7 @@ from homeassistant.helpers.typing import StateType
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
+from . import trip_stats
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
@@ -541,6 +544,206 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
 )
 
 
+@dataclass(frozen=True, kw_only=True)
+class HyundaiKiaTripSensorEntityDescription(SensorEntityDescription):
+    """Describes a trip statistics sensor.
+
+    value_fn gets the vehicle, today's date as yyyymmdd and the timezone the
+    API reports trips in.
+    """
+
+    value_fn: Callable[[Vehicle, str, Any], StateType | datetime]
+
+
+def _today(field: str) -> Callable[[Vehicle, str, Any], StateType]:
+    """Today's total for field; 0 when there were no trips today."""
+
+    def value(vehicle: Vehicle, today: str, _tz: Any) -> StateType:
+        summary = trip_stats.today_summary(vehicle, today)
+        return getattr(summary, field) if summary is not None else 0
+
+    return value
+
+
+def _month(
+    field: str, empty: StateType = 0
+) -> Callable[[Vehicle, str, Any], StateType]:
+    """This month's figure for field; empty when no trips this month."""
+
+    def value(vehicle: Vehicle, _today: str, _tz: Any) -> StateType:
+        month = vehicle.month_trip_info
+        if month is None or month.summary is None:
+            return empty
+        return cast(StateType, getattr(month.summary, field))
+
+    return value
+
+
+def _last(field: str) -> Callable[[Vehicle, str, Any], StateType]:
+    """The last trip's figure for field."""
+
+    def value(vehicle: Vehicle, _today: str, _tz: Any) -> StateType:
+        trip = trip_stats.last_trip(vehicle)
+        return cast(StateType, getattr(trip, field)) if trip is not None else None
+
+    return value
+
+
+TRIP_SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaTripSensorEntityDescription, ...]] = (
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_today_distance",
+        translation_key="trip_today_distance",
+        icon="mdi:map-marker-distance",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=_today("distance"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_today_drive_time",
+        translation_key="trip_today_drive_time",
+        icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=_today("drive_time"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_today_count",
+        translation_key="trip_today_count",
+        icon="mdi:counter",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda v, today, _tz: trip_stats.today_trip_count(v, today),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_distance",
+        translation_key="trip_month_distance",
+        icon="mdi:map-marker-distance",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=_month("distance"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_drive_time",
+        translation_key="trip_month_drive_time",
+        icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=_month("drive_time"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_idle_time",
+        translation_key="trip_month_idle_time",
+        icon="mdi:timer-pause-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_month("idle_time"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_count",
+        translation_key="trip_month_count",
+        icon="mdi:counter",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        value_fn=lambda v, _today, _tz: trip_stats.month_trip_count(v),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_avg_speed",
+        translation_key="trip_month_avg_speed",
+        icon="mdi:speedometer-medium",
+        device_class=SensorDeviceClass.SPEED,
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_month("avg_speed", empty=None),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="trip_month_max_speed",
+        translation_key="trip_month_max_speed",
+        icon="mdi:speedometer",
+        device_class=SensorDeviceClass.SPEED,
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_month("max_speed", empty=None),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_start",
+        translation_key="last_trip_start",
+        icon="mdi:car-clock",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda v, _today, tz: trip_stats.last_trip_start(v, tz),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_end",
+        translation_key="last_trip_end",
+        icon="mdi:car-clock",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        value_fn=lambda v, _today, tz: trip_stats.last_trip_end(v, tz),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_distance",
+        translation_key="last_trip_distance",
+        icon="mdi:map-marker-distance",
+        device_class=SensorDeviceClass.DISTANCE,
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        value_fn=_last("distance"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_drive_time",
+        translation_key="last_trip_drive_time",
+        icon="mdi:timer-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        value_fn=_last("drive_time"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_idle_time",
+        translation_key="last_trip_idle_time",
+        icon="mdi:timer-pause-outline",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_last("idle_time"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_avg_speed",
+        translation_key="last_trip_avg_speed",
+        icon="mdi:speedometer-medium",
+        device_class=SensorDeviceClass.SPEED,
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        value_fn=_last("avg_speed"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_max_speed",
+        translation_key="last_trip_max_speed",
+        icon="mdi:speedometer",
+        device_class=SensorDeviceClass.SPEED,
+        native_unit_of_measurement=UnitOfSpeed.KILOMETERS_PER_HOUR,
+        value_fn=_last("max_speed"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_hard_braking",
+        translation_key="last_trip_hard_braking",
+        icon="mdi:car-brake-alert",
+        value_fn=_last("hard_braking_count"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_rapid_acceleration",
+        translation_key="last_trip_rapid_acceleration",
+        icon="mdi:car-speed-limiter",
+        value_fn=_last("rapid_acceleration_count"),
+    ),
+    HyundaiKiaTripSensorEntityDescription(
+        key="last_trip_speeding",
+        translation_key="last_trip_speeding",
+        icon="mdi:speedometer-slow",
+        value_fn=_last("excessive_speed_count"),
+    ),
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -582,6 +785,11 @@ async def async_setup_entry(
                 TodaysDailyDrivingStatsEntity(
                     coordinator, coordinator.vehicle_manager.vehicles[vehicle_id]
                 )
+            )
+        if vehicle_id in coordinator.trip_stats_vehicle_ids:
+            entities.extend(
+                HyundaiKiaTripSensor(coordinator, description, vehicle)
+                for description in TRIP_SENSOR_DESCRIPTIONS
             )
         entities.append(
             VehicleEntity(coordinator, coordinator.vehicle_manager.vehicles[vehicle_id])
@@ -865,3 +1073,35 @@ class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
             "door_open": details.door_open,
             "trunk_open": details.trunk_open,
         }
+
+
+class HyundaiKiaTripSensor(SensorEntity, HyundaiKiaConnectEntity):
+    """Trip statistics sensor (today, this month, last trip)."""
+
+    entity_description: HyundaiKiaTripSensorEntityDescription
+
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        description: HyundaiKiaTripSensorEntityDescription,
+        vehicle: Vehicle,
+    ) -> None:
+        """Initialize the trip sensor."""
+        super().__init__(coordinator, vehicle)
+        self.entity_description = description
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
+
+    @property
+    def available(self) -> bool:
+        """Unavailable when the last trip refresh failed, so a failed read
+        is not shown as zero trips."""
+        return super().available and bool(
+            self.coordinator.trip_stats_ok.get(self.vehicle.id)
+        )
+
+    @property
+    def native_value(self) -> StateType | datetime:
+        """Return the trip statistic."""
+        tz = self.coordinator.trip_timezone
+        today = datetime.now(tz).strftime("%Y%m%d")
+        return self.entity_description.value_fn(self.vehicle, today, tz)

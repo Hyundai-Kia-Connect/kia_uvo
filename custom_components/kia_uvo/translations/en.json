@@ -586,6 +586,63 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "trip_today_distance": {
+        "name": "Distance Today"
+      },
+      "trip_today_drive_time": {
+        "name": "Drive Time Today"
+      },
+      "trip_today_count": {
+        "name": "Trips Today"
+      },
+      "trip_month_distance": {
+        "name": "Distance This Month"
+      },
+      "trip_month_drive_time": {
+        "name": "Drive Time This Month"
+      },
+      "trip_month_idle_time": {
+        "name": "Idle Time This Month"
+      },
+      "trip_month_count": {
+        "name": "Trips This Month"
+      },
+      "trip_month_avg_speed": {
+        "name": "Average Speed This Month"
+      },
+      "trip_month_max_speed": {
+        "name": "Top Speed This Month"
+      },
+      "last_trip_start": {
+        "name": "Last Trip Start"
+      },
+      "last_trip_end": {
+        "name": "Last Trip End"
+      },
+      "last_trip_distance": {
+        "name": "Last Trip Distance"
+      },
+      "last_trip_drive_time": {
+        "name": "Last Trip Drive Time"
+      },
+      "last_trip_idle_time": {
+        "name": "Last Trip Idle Time"
+      },
+      "last_trip_avg_speed": {
+        "name": "Last Trip Average Speed"
+      },
+      "last_trip_max_speed": {
+        "name": "Last Trip Top Speed"
+      },
+      "last_trip_hard_braking": {
+        "name": "Last Trip Hard Braking"
+      },
+      "last_trip_rapid_acceleration": {
+        "name": "Last Trip Rapid Acceleration"
+      },
+      "last_trip_speeding": {
+        "name": "Last Trip Speeding"
       }
     },
     "binary_sensor": {
@@ -801,6 +858,9 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V Battery Fault"
+      },
+      "hazard_lights_on": {
+        "name": "Hazard Lights"
       }
     },
     "lock": {
@@ -927,7 +987,18 @@
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Location",
+        "state_attributes": {
+          "speed": {
+            "name": "Speed"
+          },
+          "heading": {
+            "name": "Heading"
+          },
+          "altitude": {
+            "name": "Altitude"
+          }
+        }
       }
     },
     "time": {
