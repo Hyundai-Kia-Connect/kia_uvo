@@ -26,7 +26,7 @@ from custom_components.kia_uvo.coordinator import (
     HyundaiKiaConnectDataUpdateCoordinator as Coordinator,
 )
 
-IST = ZoneInfo("Asia/Kolkata")
+KOLKATA = ZoneInfo("Asia/Kolkata")
 
 
 def _month(yyyymm: str, days: dict[str, int], distance: float = 100) -> MonthTripInfo:
@@ -94,11 +94,11 @@ def test_today_values_only_for_today():
 def test_last_trip_is_newest_and_times_are_local():
     vehicle = _vehicle(day=_day("20261017"))
     assert trip_stats.last_trip(vehicle).distance == 1
-    assert trip_stats.last_trip_start(vehicle, IST) == dt.datetime(
-        2026, 10, 17, 20, 15, 3, tzinfo=IST
+    assert trip_stats.last_trip_start(vehicle, KOLKATA) == dt.datetime(
+        2026, 10, 17, 20, 15, 3, tzinfo=KOLKATA
     )
-    assert trip_stats.last_trip_end(vehicle, IST) == dt.datetime(
-        2026, 10, 17, 20, 24, 57, tzinfo=IST
+    assert trip_stats.last_trip_end(vehicle, KOLKATA) == dt.datetime(
+        2026, 10, 17, 20, 24, 57, tzinfo=KOLKATA
     )
 
 
@@ -106,8 +106,8 @@ def test_last_trip_end_past_midnight_rolls_to_next_day():
     day = _day("20261017")
     day.trip_list = [TripInfo(hhmmss="235000", end_hhmmss="001500")]
     vehicle = _vehicle(day=day)
-    assert trip_stats.last_trip_end(vehicle, IST) == dt.datetime(
-        2026, 10, 18, 0, 15, tzinfo=IST
+    assert trip_stats.last_trip_end(vehicle, KOLKATA) == dt.datetime(
+        2026, 10, 18, 0, 15, tzinfo=KOLKATA
     )
 
 
@@ -144,7 +144,7 @@ class FakeManager:
 def _fake_coordinator(manager: FakeManager, now: dt.datetime) -> SimpleNamespace:
     fake = SimpleNamespace(
         vehicle_manager=manager,
-        trip_timezone=IST,
+        trip_timezone=KOLKATA,
         trip_stats_vehicle_ids=set(),
         trip_stats_ok={},
         _trip_signatures={},
@@ -158,8 +158,8 @@ def _fake_coordinator(manager: FakeManager, now: dt.datetime) -> SimpleNamespace
 
 @pytest.fixture
 def frozen_now(monkeypatch):
-    """Freeze the coordinator's clock at 2026-10-20 12:00 IST."""
-    now = dt.datetime(2026, 10, 20, 12, 0, tzinfo=IST)
+    """Freeze the coordinator's clock at 2026-10-20 12:00 KOLKATA."""
+    now = dt.datetime(2026, 10, 20, 12, 0, tzinfo=KOLKATA)
 
     class FrozenDatetime(dt.datetime):
         @classmethod
@@ -232,7 +232,7 @@ async def _setup_trip_sensors(vehicle: Vehicle, with_trips: bool, ok: bool = Tru
     coordinator = make_coordinator(vehicle)
     coordinator.trip_stats_vehicle_ids = {vehicle.id} if with_trips else set()
     coordinator.trip_stats_ok = {vehicle.id: ok}
-    coordinator.trip_timezone = IST
+    coordinator.trip_timezone = KOLKATA
     hass, config_entry = make_hass(coordinator)
     created: list = []
     await sensor_platform.async_setup_entry(hass, config_entry, created.extend)
@@ -254,7 +254,7 @@ async def test_trip_sensor_values(monkeypatch):
     class FrozenDatetime(dt.datetime):
         @classmethod
         def now(cls, tz=None):
-            return dt.datetime(2026, 10, 17, 21, 0, tzinfo=IST).astimezone(tz)
+            return dt.datetime(2026, 10, 17, 21, 0, tzinfo=KOLKATA).astimezone(tz)
 
     monkeypatch.setattr(sensor_platform, "datetime", FrozenDatetime)
     vehicle = _vehicle(
@@ -273,14 +273,16 @@ async def test_trip_sensor_values(monkeypatch):
     assert values["last_trip_hard_braking"] == 2
     assert values["last_trip_rapid_acceleration"] == 1
     assert values["last_trip_speeding"] == 0
-    assert values["last_trip_start"] == dt.datetime(2026, 10, 17, 20, 15, 3, tzinfo=IST)
+    assert values["last_trip_start"] == dt.datetime(
+        2026, 10, 17, 20, 15, 3, tzinfo=KOLKATA
+    )
 
 
 async def test_today_sensors_zero_on_a_day_without_trips(monkeypatch):
     class FrozenDatetime(dt.datetime):
         @classmethod
         def now(cls, tz=None):
-            return dt.datetime(2026, 10, 18, 9, 0, tzinfo=IST).astimezone(tz)
+            return dt.datetime(2026, 10, 18, 9, 0, tzinfo=KOLKATA).astimezone(tz)
 
     monkeypatch.setattr(sensor_platform, "datetime", FrozenDatetime)
     vehicle = _vehicle(_month("202610", {"20261017": 3}), _day("20261017"))
