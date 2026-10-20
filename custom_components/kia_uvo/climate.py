@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.util.unit_conversion import TemperatureConverter
 from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle
 
 from .const import DOMAIN
@@ -111,6 +112,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
+        # The library can supply the request unit before any valid cached
+        # temperature. getattr preserves compatibility with older libraries.
+        if unit := getattr(self.vehicle, "climate_temperature_unit", None):
+            return UnitOfTemperature(unit)
         if self.vehicle._air_temperature_unit:
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
         return UnitOfTemperature.CELSIUS
@@ -133,8 +138,21 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def target_temperature_step(self) -> float | None:
         """Get the step size for adjusting the in-car target temperature."""
-        # TODO: get from lib
-        return 0.5
+        step = cast(
+            float | None, getattr(self.vehicle, "climate_temperature_step", None)
+        )
+        if step is None:
+            return 0.5
+        # HA converts temperature values, but publishes the step verbatim.
+        # Convert the native increment as an interval, without an offset.
+        display_unit = (
+            self.hass.config.units.temperature_unit
+            if self.hass is not None
+            else self.temperature_unit
+        )
+        return TemperatureConverter.convert_interval(
+            step, self.temperature_unit, display_unit
+        )
 
     @property
     def min_temp(self) -> float:
