@@ -537,7 +537,21 @@
         "name": "Total Energy Regeneration"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Vehicle Identification Number",
+        "state_attributes": {
+          "model_year": {
+            "name": "Model year"
+          },
+          "trim": {
+            "name": "Trim"
+          },
+          "exterior_color": {
+            "name": "Exterior colour"
+          },
+          "interior_color_code": {
+            "name": "Interior colour code"
+          }
+        }
       },
       "ev_first_departure_climate_temperature": {
         "name": "First departure climate temperature"
@@ -643,6 +657,20 @@
       },
       "last_trip_speeding": {
         "name": "Last Trip Speeding"
+      },
+      "cabin_pm25": {
+        "name": "Cabin PM2.5",
+        "state_attributes": {
+          "level": {
+            "name": "Level"
+          },
+          "colour": {
+            "name": "Colour"
+          },
+          "measured_at": {
+            "name": "Measured at"
+          }
+        }
       }
     },
     "binary_sensor": {

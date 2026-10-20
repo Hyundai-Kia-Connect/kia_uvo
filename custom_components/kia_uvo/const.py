@@ -61,3 +61,22 @@ class OffPeakChargingMode(StrEnum):
     OFF = "off"
     TIME = "time"
     TARGET = "target"
+
+
+# Kia/Hyundai paint codes, as reported in the vehicle list's outColor.
+# Paint codes are shared across markets. Add only codes confirmed by an owner.
+EXTERIOR_COLOR_NAMES: dict[str, str] = {
+    "EWE": "Pewter Olive",
+}
+# Trim (carPackageType) codes per region. Region-specific because codes such
+# as "GL" are trim names of their own in other markets.
+TRIM_NAMES: dict[str, dict[str, str]] = {
+    REGION_INDIA: {"GL": "GT Line"},
+}
+# Cabin fine-dust colour bands (Hyundai/Kia Fine Dust Indicator, PM2.5).
+CABIN_AIR_QUALITY_BANDS: dict[int, str] = {
+    1: "blue",
+    2: "green",
+    3: "orange",
+    4: "red",
+}

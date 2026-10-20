@@ -33,7 +33,15 @@ from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from . import trip_stats
-from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
+from .const import (
+    CABIN_AIR_QUALITY_BANDS,
+    CHARGING_CURRENTS,
+    DOMAIN,
+    DYNAMIC_UNIT,
+    EXTERIOR_COLOR_NAMES,
+    REGIONS,
+    TRIM_NAMES,
+)
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -358,6 +366,15 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         translation_key="vehicle_identification_number",
         icon="mdi:identifier",
         entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="cabin_pm25",
+        translation_key="cabin_pm25",
+        icon="mdi:air-filter",
+        device_class=SensorDeviceClass.PM25,
+        # Literal unit: UnitOfDensity is newer than the minimum supported HA.
+        native_unit_of_measurement="µg/m³",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
     HyundaiKiaSensorEntityDescription(
         key="_outside_temperature",
@@ -881,7 +898,34 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
             return {"address": self.vehicle._geocode_address}
         elif self.entity_description.key == "dtc_count":
             return {"DTC Text": self.vehicle.dtc_descriptions}
+        elif self.entity_description.key == "cabin_pm25":
+            level = self.vehicle.cabin_air_quality_level
+            return {
+                "level": level,
+                "colour": CABIN_AIR_QUALITY_BANDS.get(level),
+                "measured_at": self.vehicle.cabin_air_quality_measured_at,
+            }
+        elif self.entity_description.key == "VIN":
+            return self._vehicle_details()
         return {}
+
+    def _vehicle_details(self) -> dict[str, Any]:
+        """Model year, trim and colours, by name where the code is known."""
+        vehicle = self.vehicle
+        region = REGIONS.get(self.coordinator.vehicle_manager.region)
+        trim_code = getattr(vehicle, "trim_code", None)
+        exterior = getattr(vehicle, "exterior_color_code", None)
+        details = {
+            "model_year": getattr(vehicle, "year", None),
+            "trim": TRIM_NAMES.get(region or "", {}).get(trim_code, trim_code)
+            if trim_code
+            else None,
+            "exterior_color": EXTERIOR_COLOR_NAMES.get(exterior, exterior)
+            if exterior
+            else None,
+            "interior_color_code": getattr(vehicle, "interior_color_code", None),
+        }
+        return {key: value for key, value in details.items() if value is not None}
 
 
 class VehicleEntity(SensorEntity, HyundaiKiaConnectEntity):
