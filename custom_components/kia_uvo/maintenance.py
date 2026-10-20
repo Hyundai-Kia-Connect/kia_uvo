@@ -13,9 +13,13 @@ from __future__ import annotations
 
 import datetime as dt
 import re
+from typing import TYPE_CHECKING
 
 from hyundai_kia_connect_api import Vehicle
-from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
+
+if TYPE_CHECKING:
+    # Not in hyundai_kia_connect_api releases before maintenance support.
+    from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
 
 _REG_FORMATS = ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d")
 

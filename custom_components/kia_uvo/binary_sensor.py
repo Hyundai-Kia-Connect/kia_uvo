@@ -6,7 +6,7 @@ import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -18,12 +18,15 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
-from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
 
 from . import maintenance
 from .const import DOMAIN, MAINTENANCE_ITEM_NAMES
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
+
+if TYPE_CHECKING:
+    # Not in hyundai_kia_connect_api releases before maintenance support.
+    from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -584,7 +587,7 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
-        for item in vehicle.maintenance_alerts or []:
+        for item in getattr(vehicle, "maintenance_alerts", None) or []:
             entities.append(MaintenanceAlertBinarySensor(coordinator, vehicle, item))
     async_add_entities(entities)
 
@@ -655,7 +658,7 @@ class MaintenanceAlertBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
         self._attr_name = MAINTENANCE_ITEM_NAMES.get(item.name, item.name)
 
     def _item(self) -> MaintenanceAlertItem | None:
-        for item in self.vehicle.maintenance_alerts or []:
+        for item in getattr(self.vehicle, "maintenance_alerts", None) or []:
             if item.name == self._item_name:
                 return item
         return None

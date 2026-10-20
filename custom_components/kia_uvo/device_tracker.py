@@ -75,8 +75,8 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return speed, heading and altitude at the last fix, where reported."""
         attributes = {
-            "speed": self.vehicle.location_speed,
-            "heading": self.vehicle.location_heading,
-            "altitude": self.vehicle.location_altitude,
+            "speed": getattr(self.vehicle, "location_speed", None),
+            "heading": getattr(self.vehicle, "location_heading", None),
+            "altitude": getattr(self.vehicle, "location_altitude", None),
         }
         return {key: value for key, value in attributes.items() if value is not None}

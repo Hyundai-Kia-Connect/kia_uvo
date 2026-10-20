@@ -601,7 +601,7 @@ def _last(field: str) -> Callable[[Vehicle, str, Any], StateType]:
 
     def value(vehicle: Vehicle, _today: str, _tz: Any) -> StateType:
         trip = trip_stats.last_trip(vehicle)
-        return cast(StateType, getattr(trip, field)) if trip is not None else None
+        return cast(StateType, getattr(trip, field, None)) if trip is not None else None
 
     return value
 
@@ -899,11 +899,15 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
         elif self.entity_description.key == "dtc_count":
             return {"DTC Text": self.vehicle.dtc_descriptions}
         elif self.entity_description.key == "cabin_pm25":
-            level = self.vehicle.cabin_air_quality_level
+            level = getattr(self.vehicle, "cabin_air_quality_level", None)
             return {
                 "level": level,
-                "colour": CABIN_AIR_QUALITY_BANDS.get(level),
-                "measured_at": self.vehicle.cabin_air_quality_measured_at,
+                "colour": CABIN_AIR_QUALITY_BANDS.get(level)
+                if isinstance(level, int)
+                else None,
+                "measured_at": getattr(
+                    self.vehicle, "cabin_air_quality_measured_at", None
+                ),
             }
         elif self.entity_description.key == "VIN":
             return self._vehicle_details()

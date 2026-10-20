@@ -100,7 +100,7 @@ def last_trip_start(vehicle: Vehicle, tz: dt.tzinfo) -> dt.datetime | None:
 def last_trip_end(vehicle: Vehicle, tz: dt.tzinfo) -> dt.datetime | None:
     """End time of the last trip, in the API's timezone."""
     trip = last_trip(vehicle)
-    end = _trip_time(vehicle, trip.end_hhmmss if trip else None, tz)
+    end = _trip_time(vehicle, getattr(trip, "end_hhmmss", None), tz)
     start = last_trip_start(vehicle, tz)
     if end is not None and start is not None and end < start:
         end += dt.timedelta(days=1)  # trip ran past midnight
