@@ -5,7 +5,8 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Final
+from datetime import datetime
+from typing import Any, Final
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -17,8 +18,10 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
 
-from .const import DOMAIN
+from . import maintenance
+from .const import DOMAIN, MAINTENANCE_ITEM_NAMES
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -573,7 +576,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up binary_sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    entities: list[HyundaiKiaConnectBinarySensor] = []
+    entities: list[BinarySensorEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
@@ -581,6 +584,8 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
+        for item in vehicle.maintenance_alerts or []:
+            entities.append(MaintenanceAlertBinarySensor(coordinator, vehicle, item))
     async_add_entities(entities)
 
 
@@ -622,3 +627,67 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
             if self.is_on
             else self.entity_description.off_icon
         )
+
+
+class MaintenanceAlertBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
+    """Scheduled-maintenance item; on when due by Kia's interval.
+
+    Due is computed from the odometer and the vehicle's age against the
+    interval from new (the API gives no service history), so it mirrors the
+    Kia app's Maintenance Alert rather than tracking actual services.
+    """
+
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:car-wrench"
+
+    def __init__(
+        self,
+        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+        vehicle: Vehicle,
+        item: MaintenanceAlertItem,
+    ) -> None:
+        """Initialize the maintenance alert sensor."""
+        super().__init__(coordinator, vehicle)
+        self._item_name = item.name
+        slug = maintenance.item_slug(item.name)
+        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_maintenance_{slug}"
+        self._attr_name = MAINTENANCE_ITEM_NAMES.get(item.name, item.name)
+
+    def _item(self) -> MaintenanceAlertItem | None:
+        for item in self.vehicle.maintenance_alerts or []:
+            if item.name == self._item_name:
+                return item
+        return None
+
+    @property
+    def available(self) -> bool:
+        """Unavailable if the item is no longer reported."""
+        return super().available and self._item() is not None
+
+    @property
+    def is_on(self) -> bool | None:
+        """True when the item is due."""
+        item = self._item()
+        if item is None:
+            return None
+        return maintenance.is_due(item, self.vehicle, datetime.now())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Interval and how far past or until due."""
+        item = self._item()
+        if item is None:
+            return {}
+        now = datetime.now()
+        attributes: dict[str, Any] = {
+            "interval_km": item.interval_km,
+            "interval_months": item.interval_months,
+        }
+        rem_km = maintenance.remaining_km(item, self.vehicle)
+        if rem_km is not None:
+            attributes["remaining_km"] = round(rem_km)
+        rem_months = maintenance.remaining_months(item, self.vehicle, now)
+        if rem_months is not None:
+            attributes["remaining_months"] = rem_months
+        return attributes
