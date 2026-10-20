@@ -95,12 +95,42 @@ async def _maintenance_sensors(vehicle: Vehicle) -> dict:
     }
 
 
-async def test_one_sensor_per_item_with_app_labels():
+async def test_one_sensor_per_item_with_translated_names():
     sensors = await _maintenance_sensors(_seltos())
     assert set(sensors) == {i.name for i in ITEMS}
-    assert sensors["Tire position change"].name == "Tyre Rotation"
-    assert sensors["Cooling water"].name == "Engine Coolant"
+    tyre = sensors["Tire position change"]
+    assert tyre.translation_key == "maintenance_tire_position_change"
     assert sensors["Engine oil"].unique_id == "kia_uvo_v1_maintenance_engine_oil"
+
+
+def test_every_known_item_has_an_english_name():
+    import json
+    from pathlib import Path
+
+    from custom_components.kia_uvo.const import KNOWN_MAINTENANCE_ITEMS
+
+    base = Path(maintenance.__file__).parent
+    for source in (base / "strings.json", base / "translations" / "en.json"):
+        names = json.loads(source.read_text(encoding="utf-8"))["entity"][
+            "binary_sensor"
+        ]
+        for item in KNOWN_MAINTENANCE_ITEMS:
+            key = f"maintenance_{maintenance.item_slug(item)}"
+            assert names[key]["name"], f"{key} missing from {source.name}"
+    en = json.loads((base / "translations" / "en.json").read_text(encoding="utf-8"))
+    assert en["entity"]["binary_sensor"]["maintenance_tire_position_change"] == {
+        "name": "Tyre Rotation"
+    }
+
+
+async def test_unknown_item_falls_back_to_api_name():
+    vehicle = _seltos()
+    vehicle.maintenance_alerts = [
+        MaintenanceAlertItem(name="Brake pads", interval_km=40000)
+    ]
+    (sensor,) = (await _maintenance_sensors(vehicle)).values()
+    assert sensor.translation_key is None
+    assert sensor.name == "Brake pads"
 
 
 async def test_sensor_state_and_attributes():

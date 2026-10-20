@@ -889,6 +889,33 @@
       },
       "hazard_lights_on": {
         "name": "Hazard Lights"
+      },
+      "maintenance_engine_oil": {
+        "name": "Engine Oil"
+      },
+      "maintenance_oil_filter": {
+        "name": "Oil Filter"
+      },
+      "maintenance_tire_position_change": {
+        "name": "Tyre Rotation"
+      },
+      "maintenance_wheel_alignment": {
+        "name": "Wheel Alignment"
+      },
+      "maintenance_air_cleaner": {
+        "name": "Air Cleaner Filter"
+      },
+      "maintenance_antimicrobial_filter": {
+        "name": "Cabin Air Filter"
+      },
+      "maintenance_cooling_water": {
+        "name": "Engine Coolant"
+      },
+      "maintenance_fuel_filter": {
+        "name": "Fuel Filter"
+      },
+      "maintenance_ignition_plug": {
+        "name": "Spark Plug"
       }
     },
     "lock": {

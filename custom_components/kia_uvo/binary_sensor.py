@@ -20,7 +20,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 
 from . import maintenance
-from .const import DOMAIN, MAINTENANCE_ITEM_NAMES
+from .const import DOMAIN, KNOWN_MAINTENANCE_ITEMS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -655,7 +655,10 @@ class MaintenanceAlertBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
         self._item_name = item.name
         slug = maintenance.item_slug(item.name)
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_maintenance_{slug}"
-        self._attr_name = MAINTENANCE_ITEM_NAMES.get(item.name, item.name)
+        if item.name in KNOWN_MAINTENANCE_ITEMS:
+            self._attr_translation_key = f"maintenance_{slug}"
+        else:
+            self._attr_name = item.name
 
     def _item(self) -> MaintenanceAlertItem | None:
         for item in getattr(self.vehicle, "maintenance_alerts", None) or []:

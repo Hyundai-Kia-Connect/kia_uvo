@@ -81,16 +81,19 @@ CABIN_AIR_QUALITY_BANDS: dict[int, str] = {
     4: "red",
 }
 
-# Maintenance item names from the India alert endpoint (itemId) mapped to the
-# labels Kia's own app shows. Unmapped items fall back to their itemId.
-MAINTENANCE_ITEM_NAMES: dict[str, str] = {
-    "Engine oil": "Engine Oil",
-    "Oil Filter": "Oil Filter",
-    "Tire position change": "Tyre Rotation",
-    "Wheel alignment": "Wheel Alignment",
-    "Air Cleaner": "Air Cleaner Filter",
-    "Antimicrobial filter": "Cabin Air Filter",
-    "Cooling water": "Engine Coolant",
-    "Fuel filter": "Fuel Filter",
-    "Ignition plug": "Spark Plug",
-}
+# Maintenance items (itemId from the India alert endpoint) that have a
+# translated name, keyed maintenance_<slug> in strings.json. Unknown items
+# fall back to their itemId.
+KNOWN_MAINTENANCE_ITEMS: frozenset[str] = frozenset(
+    {
+        "Engine oil",
+        "Oil Filter",
+        "Tire position change",
+        "Wheel alignment",
+        "Air Cleaner",
+        "Antimicrobial filter",
+        "Cooling water",
+        "Fuel filter",
+        "Ignition plug",
+    }
+)
