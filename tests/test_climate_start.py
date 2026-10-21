@@ -22,6 +22,7 @@ from hyundai_kia_connect_api import Vehicle
 
 from custom_components.kia_uvo import climate
 from custom_components.kia_uvo.climate import HyundaiKiaCarClimateControlSwitch
+from custom_components.kia_uvo.const import DOMAIN
 
 
 @pytest.fixture(autouse=True)
@@ -114,3 +115,26 @@ async def test_turn_on_and_off_route_to_the_car() -> None:
 
     await entity.async_turn_off()
     entity.coordinator.async_stop_climate.assert_awaited_once_with("v1")
+
+
+async def test_setup_does_not_refresh_the_coordinator_again() -> None:
+    """Adding the entity must not trigger a second fetch of all vehicle data.
+
+    ``update_before_add`` runs ``CoordinatorEntity.async_update``, which is
+    ``coordinator.async_request_refresh()``: on every start that repeated all
+    the API calls of the first refresh, two seconds after it finished.
+    """
+    vehicle = Vehicle(id="v1", name="test", model="test")
+    vehicle.air_control_is_on = False
+    coordinator = MagicMock()
+    coordinator.vehicle_manager.vehicles = {vehicle.id: vehicle}
+    hass = MagicMock()
+    hass.data = {DOMAIN: {"uid": coordinator}}
+    config_entry = MagicMock(unique_id="uid")
+    add_entities = MagicMock()
+
+    await climate.async_setup_entry(hass, config_entry, add_entities)
+
+    (entities,) = add_entities.call_args.args
+    assert len(entities) == 1
+    assert not add_entities.call_args.kwargs.get("update_before_add")
