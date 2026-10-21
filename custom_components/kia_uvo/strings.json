@@ -200,7 +200,7 @@
         "name": "Outside temperature"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "30 Day Average Energy Consumption"
       },
       "rear_left_seat_status": {
         "name": "Rear Left Seat"
@@ -218,7 +218,7 @@
         "name": "90 Day Energy Consumption"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "90 Day Energy Regeneration"
       },
       "vehicle_identification_number": {
         "name": "Vehicle Identification Number"

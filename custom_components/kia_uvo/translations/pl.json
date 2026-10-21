@@ -486,10 +486,10 @@
         "name": "Zużycie energii - 90 dni"
       },
       "total_power_regenerated": {
-        "name": "Całkowita regeneracja energii"
+        "name": "Regeneracja energii - 90 dni"
       },
       "power_consumption_30d": {
-        "name": "Średnie zużycie energii"
+        "name": "Średnie zużycie energii - 30 dni"
       },
       "front_left_seat_status": {
         "name": "Podgrzewanie fotela przedniego lewego"
