@@ -5,11 +5,10 @@ from __future__ import annotations
 import asyncio
 import datetime as dt
 import logging
-import traceback
 from collections.abc import Callable
 from datetime import timedelta
 from functools import partial
-from typing import Any
+from typing import Any, Literal
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -36,7 +35,9 @@ from hyundai_kia_connect_api import (
 )
 from hyundai_kia_connect_api.const import WINDOW_STATE
 from hyundai_kia_connect_api.exceptions import (
+    APIError,
     AuthenticationError,
+    RateLimitingError,
     UnsupportedControlError,
 )
 from hyundai_kia_connect_api.svm_image import render_views
@@ -65,6 +66,13 @@ _LOGGER = logging.getLogger(__name__)
 # set_svm_dewarp, consumed in image.py.
 SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 
+# How a single vehicle is polled:
+#   check  - let the library decide (force refresh or cached, based on the
+#            force refresh interval) - used in the periodic update
+#   cached - server-side cached state only
+#   force  - explicit fresh read, used by the force update service
+PollMode = Literal["check", "cached", "force"]
+
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
@@ -82,6 +90,12 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._svm_views: dict[
             str, tuple[tuple[dt.datetime | None, bool], dict[str, bytes]]
         ] = {}
+        # Per-vehicle API failure state: vehicle_id -> "ExcType: message".
+        # A vehicle in this map has its entities marked unavailable while the
+        # rest of the account keeps updating.
+        self._vehicle_errors: dict[str, str] = {}
+        # Consecutive failed polls per vehicle (drives the "exclude it" hint).
+        self._vehicle_failures: dict[str, int] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -175,7 +189,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             ) from err
         current_hour = dt_util.now().hour
 
-        if (
+        in_force_window = (
             (self.no_force_refresh_hour_start <= self.no_force_refresh_hour_finish)
             and (
                 current_hour < self.no_force_refresh_hour_start
@@ -187,48 +201,151 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 current_hour < self.no_force_refresh_hour_start
                 and current_hour >= self.no_force_refresh_hour_finish
             )
-        ):
-            try:
-                await self.hass.async_add_executor_job(
-                    self.vehicle_manager.check_and_force_update_vehicles,
-                    self.force_refresh_interval,
-                )
-            except Exception:
-                try:
-                    _LOGGER.exception(
-                        f"Force update failed, falling back to cached: {traceback.format_exc()}"
-                    )
-                    await self.hass.async_add_executor_job(
-                        self.vehicle_manager.update_all_vehicles_with_cached_state
-                    )
-                except Exception:
-                    _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
-                    raise UpdateFailed(
-                        f"Error communicating with API: {traceback.format_exc()}"
-                    )
+        )
 
-        else:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.update_all_vehicles_with_cached_state
-            )
+        # Every vehicle is polled on its own: a vehicle the backend no longer
+        # serves must not take the rest of the account down with it.
+        await self._async_poll_vehicles(mode="check" if in_force_window else "cached")
 
         return self.data
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.update_all_vehicles_with_cached_state
-        )
+        await self._async_poll_vehicles(mode="cached")
         self.async_set_updated_data(self.data)
 
     async def async_force_update_all(self) -> None:
         """Force refresh vehicle data and update it."""
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.force_refresh_all_vehicles_states
-        )
+        await self._async_poll_vehicles(mode="force")
         self.async_set_updated_data(self.data)
+
+    async def _async_poll_vehicles(self, *, mode: PollMode) -> None:
+        """Poll every vehicle on its own, isolating per-vehicle API failures.
+
+        A vehicle that fails does not take the rest of the account down: the
+        failure is recorded for that vehicle only, and its entities go
+        unavailable. Account-level failures (rate limiting, network, unknown
+        exceptions) still abort the whole cycle so Home Assistant can back
+        off.
+        """
+        vehicles = list(self.vehicle_manager.vehicles.items())
+        polled = [vid for vid, _ in vehicles if not self._is_vehicle_excluded(vid)]
+        auth_failures = 0
+
+        for vehicle_id, _vehicle in vehicles:
+            if self._is_vehicle_excluded(vehicle_id):
+                continue
+            try:
+                await self._async_poll_vehicle(vehicle_id, mode=mode)
+            except AuthenticationError as err:
+                # resCode 7501 is a per-vehicle answer, not a dead account.
+                auth_failures += 1
+                self._record_vehicle_error(vehicle_id, err)
+                if auth_failures == len(polled):
+                    raise ConfigEntryAuthFailed(err) from err
+            except RateLimitingError as err:
+                raise UpdateFailed(f"Rate limited by the API: {err}") from err
+            except APIError as err:
+                self._record_vehicle_error(vehicle_id, err)
+            except Exception as err:
+                raise UpdateFailed(f"Error communicating with API: {err}") from err
+            else:
+                self._clear_vehicle_error(vehicle_id)
+
+        self._prune_vehicle_state()
+
+    async def _async_poll_vehicle(self, vehicle_id: str, *, mode: PollMode) -> None:
+        """Update a single vehicle, falling back to the cached state on force."""
+        try:
+            if mode == "check":
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.check_and_force_update_vehicle,
+                    self.force_refresh_interval,
+                    vehicle_id,
+                )
+            elif mode == "force":
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.force_refresh_vehicle_state,
+                    vehicle_id,
+                )
+            else:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.update_vehicle_with_cached_state,
+                    vehicle_id,
+                )
+        except APIError:
+            if mode == "cached":
+                raise
+            # A failed force refresh is not fatal: retry this vehicle with the
+            # server-side cached state, exactly like the old account-wide
+            # fallback did, but scoped to the vehicle that failed.
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.update_vehicle_with_cached_state,
+                vehicle_id,
+            )
+
+    def vehicle_available(self, vehicle_id: str) -> bool:
+        """Whether the given vehicle currently has usable data.
+
+        False when the vehicle's last poll failed (its entities go
+        unavailable) or when the user excluded it from polling.
+        """
+        return vehicle_id not in self._vehicle_errors and not self._is_vehicle_excluded(
+            vehicle_id
+        )
+
+    def vehicle_error(self, vehicle_id: str) -> str | None:
+        """The last error recorded for the given vehicle, if any."""
+        return self._vehicle_errors.get(vehicle_id)
+
+    def vehicle_errors(self) -> dict[str, str]:
+        """All recorded per-vehicle errors, keyed by vehicle id."""
+        return dict(self._vehicle_errors)
+
+    def _is_vehicle_excluded(self, vehicle_id: str) -> bool:
+        """Whether the user excluded this vehicle from polling."""
+        return False
+
+    def _record_vehicle_error(self, vehicle_id: str, err: Exception) -> None:
+        """Remember a per-vehicle failure and mark the vehicle unavailable."""
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        label = (vehicle.name if vehicle else None) or vehicle_id
+        self._vehicle_errors[vehicle_id] = f"{type(err).__name__}: {err}"
+        failures = self._vehicle_failures.get(vehicle_id, 0) + 1
+        self._vehicle_failures[vehicle_id] = failures
+        _LOGGER.warning(
+            "%s - Failed to update vehicle %s (%s): %s",
+            DOMAIN,
+            label,
+            vehicle_id,
+            err,
+        )
+        if failures == 3:
+            _LOGGER.warning(
+                "%s - Vehicle %s (%s) failed %s polls in a row. If the backend no "
+                "longer serves it (e.g. the car was sold), exclude it from "
+                "polling in the integration options (excluded_vehicles) to stop "
+                "these errors.",
+                DOMAIN,
+                label,
+                vehicle_id,
+                failures,
+            )
+
+    def _clear_vehicle_error(self, vehicle_id: str) -> None:
+        """Drop the failure state of a vehicle that answered successfully."""
+        self._vehicle_errors.pop(vehicle_id, None)
+        self._vehicle_failures.pop(vehicle_id, None)
+
+    def _prune_vehicle_state(self) -> None:
+        """Forget state of vehicles that are no longer on the account."""
+        known = set(self.vehicle_manager.vehicles)
+        for vehicle_id in set(self._vehicle_errors) - known:
+            self._vehicle_errors.pop(vehicle_id, None)
+        for vehicle_id in set(self._vehicle_failures) - known:
+            self._vehicle_failures.pop(vehicle_id, None)
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
