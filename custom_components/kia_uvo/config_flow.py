@@ -28,6 +28,7 @@ from .const import (
     BRANDS,
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_EXCLUDED_VEHICLES,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
@@ -147,8 +148,53 @@ async def validate_input(
         raise InvalidAuth from err
 
 
+def _excluded_vehicle_options(
+    hass: HomeAssistant, config_entry: ConfigEntry
+) -> list[dict[str, str]]:
+    """Build the select options for the excluded-vehicles field.
+
+    Values are the vehicle key (VIN when present, otherwise the internal
+    vehicle id) — VIN is stable across Hyundai's internal id changes.
+    Vehicles already saved in the option stay selectable even when the config
+    entry is not loaded (no coordinator to list the account from), so an
+    options save can never silently drop an exclusion.
+    """
+    options: dict[str, str] = {}
+    coordinator = hass.data.get(DOMAIN, {}).get(config_entry.unique_id)
+    if coordinator is not None:
+        for vehicle in coordinator.vehicle_manager.vehicles.values():
+            key = vehicle.VIN or vehicle.id
+            options[key] = f"{vehicle.name} ({key})"
+    for key in config_entry.options.get(CONF_EXCLUDED_VEHICLES, []):
+        options.setdefault(key, key)
+    return [{"value": key, "label": label} for key, label in options.items()]
+
+
 class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlowWithReload):
     """Handle an option flow for Hyundai / Kia Connect."""
+
+    def _build_options_schema(self) -> vol.Schema:
+        """Build the options schema, including the live vehicle list."""
+        return vol.Schema(
+            {
+                **OPTIONS_SCHEMA.schema,
+                vol.Optional(
+                    CONF_EXCLUDED_VEHICLES,
+                    default=[],
+                ): selector(
+                    {
+                        "select": {
+                            "options": _excluded_vehicle_options(
+                                self.hass, self.config_entry
+                            ),
+                            "multiple": True,
+                            "custom_value": False,
+                            "mode": "list",
+                        }
+                    }
+                ),
+            }
+        )
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -162,7 +208,7 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlowWithReload):
         return self.async_show_form(
             step_id="init",
             data_schema=self.add_suggested_values_to_schema(
-                OPTIONS_SCHEMA, self.config_entry.options
+                self._build_options_schema(), self.config_entry.options
             ),
         )
 
