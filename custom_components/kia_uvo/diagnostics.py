@@ -130,6 +130,11 @@ async def async_get_config_entry_diagnostics(
         "config_options": _config_options(entry),
         "auth": _token_meta(vm.token),
         "vehicle_count": len(vm.vehicles),
+        # Excluded vehicles and per-vehicle failures are listed by their
+        # internal vehicle id, never by VIN: the excluded-vehicles option
+        # holds VINs and _config_options() is not redacted.
+        "excluded_vehicle_ids": coordinator.excluded_vehicle_ids(),
+        "vehicle_errors": coordinator.vehicle_errors(),
     }
     # Redact only the uncontrolled Vehicle data (raw asdict: GPS, VIN, geocode
     # address, region-specific field names). Whole-payload redaction collides
