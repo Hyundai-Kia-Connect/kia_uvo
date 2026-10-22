@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 from homeassistant.exceptions import ConfigEntryAuthFailed
@@ -17,6 +18,7 @@ from hyundai_kia_connect_api.exceptions import (
 from custom_components.kia_uvo.coordinator import (
     HyundaiKiaConnectDataUpdateCoordinator,
 )
+from custom_components.kia_uvo.entity import HyundaiKiaConnectEntity
 
 
 class _FakeHass:
@@ -214,3 +216,34 @@ async def test_third_consecutive_failure_logs_actionable_hint(
         "Sold Car" in record.message and "excluded_vehicles" in record.message
         for record in caplog.records
     )
+
+
+class _FakeEntity(HyundaiKiaConnectEntity):
+    """Minimal entity to exercise the availability override."""
+
+
+def _make_entity(vehicle: _FakeVehicle, available: bool) -> _FakeEntity:
+    coordinator = MagicMock()
+    coordinator.last_update_success = True
+    coordinator.vehicle_available.return_value = available
+    entity = _FakeEntity(coordinator, vehicle)
+    return entity
+
+
+def test_entity_unavailable_when_vehicle_failed() -> None:
+    """A vehicle that failed its poll takes only its own entities down."""
+    entity = _make_entity(_FakeVehicle("a"), available=False)
+    assert entity.available is False
+
+
+def test_entity_available_when_vehicle_is_healthy() -> None:
+    """A healthy vehicle stays available even if the account is fine."""
+    entity = _make_entity(_FakeVehicle("b"), available=True)
+    assert entity.available is True
+
+
+def test_entity_unavailable_when_account_update_failed() -> None:
+    """An account-level failure still takes every entity down."""
+    entity = _make_entity(_FakeVehicle("b"), available=True)
+    entity.coordinator.last_update_success = False
+    assert entity.available is False

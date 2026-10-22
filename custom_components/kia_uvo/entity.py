@@ -25,6 +25,16 @@ class HyundaiKiaConnectEntity(
         self.vehicle = vehicle
 
     @property
+    def available(self) -> bool:
+        """Return whether the entity is available.
+
+        On top of the coordinator's account-level state, a vehicle that failed
+        its own API poll goes unavailable on its own — one unreachable vehicle
+        must not hide the entities of the healthy ones.
+        """
+        return super().available and self.coordinator.vehicle_available(self.vehicle.id)
+
+    @property
     def device_info(self) -> DeviceInfo:
         """Return device information to use for this entity."""
         identifiers = {(DOMAIN, self.vehicle.id)}
