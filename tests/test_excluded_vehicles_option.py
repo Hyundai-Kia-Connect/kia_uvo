@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.kia_uvo import config_flow as config_flow_mod
 from custom_components.kia_uvo.const import CONF_EXCLUDED_VEHICLES, DOMAIN
+from custom_components.kia_uvo.coordinator import (
+    HyundaiKiaConnectDataUpdateCoordinator,
+)
 
 
 class _FakeVehicle:
@@ -81,3 +87,95 @@ def test_schema_contains_the_excluded_vehicles_field() -> None:
     schema = handler._build_options_schema()
 
     assert CONF_EXCLUDED_VEHICLES in {str(key) for key in schema.schema}
+
+
+class _FakeHass:
+    """Minimal hass that runs executor jobs inline."""
+
+    async def async_add_executor_job(self, func: Any, *args: Any) -> Any:
+        return func(*args)
+
+
+class _FakeManager:
+    """Library stand-in recording every vehicle interaction."""
+
+    def __init__(self, vehicles: dict[str, _FakeVehicle]) -> None:
+        self.vehicles = vehicles
+        self.calls: list[tuple[str, str]] = []
+        self.disabled: list[str] = []
+        self.enabled: list[str] = []
+
+    def update_vehicle_with_cached_state(self, vehicle_id: str) -> None:
+        self.calls.append(("cached", vehicle_id))
+
+    def check_and_force_update_vehicle(self, interval: int, vehicle_id: str) -> None:
+        self.calls.append(("force", vehicle_id))
+
+    def force_refresh_vehicle_state(self, vehicle_id: str) -> None:
+        self.calls.append(("force-now", vehicle_id))
+
+    def disable_vehicle(self, vehicle_id: str) -> None:
+        self.disabled.append(vehicle_id)
+
+    def enable_vehicle(self, vehicle_id: str) -> None:
+        self.enabled.append(vehicle_id)
+
+
+def _make_polling_coordinator(
+    vehicles: dict[str, _FakeVehicle],
+    excluded: set[str],
+) -> HyundaiKiaConnectDataUpdateCoordinator:
+    """Build a coordinator with the attributes the exclusion code touches."""
+    coordinator = HyundaiKiaConnectDataUpdateCoordinator.__new__(
+        HyundaiKiaConnectDataUpdateCoordinator
+    )
+    coordinator.hass = _FakeHass()  # type: ignore[assignment]
+    coordinator.force_refresh_interval = 1440
+    coordinator._vehicle_errors = {}
+    coordinator._vehicle_failures = {}
+    coordinator._excluded_vehicles = set(excluded)
+    coordinator._action_lock = asyncio.Lock()
+    coordinator.vehicle_manager = _FakeManager(vehicles)  # type: ignore[assignment]
+    return coordinator
+
+
+async def test_excluded_vehicle_is_never_polled() -> None:
+    """An excluded vehicle must not be called at all."""
+    coordinator = _make_polling_coordinator(
+        {
+            "a": _FakeVehicle("a", "Ioniq 5", "VINa"),
+            "b": _FakeVehicle("b", "EV6", "VINb"),
+        },
+        excluded={"VINb"},
+    )
+
+    await coordinator._async_poll_vehicles(mode="cached")
+
+    assert coordinator.vehicle_manager.calls == [("cached", "a")]
+
+
+async def test_exclusions_are_applied_to_the_library_on_every_cycle() -> None:
+    """The library's enabled flag is refreshed every cycle, not only at setup."""
+    coordinator = _make_polling_coordinator(
+        {
+            "a": _FakeVehicle("a", "Ioniq 5", "VINa"),
+            "b": _FakeVehicle("b", "EV6", "VINb"),
+        },
+        excluded={"VINb"},
+    )
+
+    await coordinator._async_poll_vehicles(mode="cached")
+    await coordinator._async_poll_vehicles(mode="cached")
+
+    assert coordinator.vehicle_manager.disabled == ["b", "b"]
+    assert coordinator.vehicle_manager.enabled == ["a", "a"]
+
+
+async def test_action_on_excluded_vehicle_is_refused() -> None:
+    """A command for an excluded vehicle must fail with a clear message."""
+    coordinator = _make_polling_coordinator(
+        {"b": _FakeVehicle("b", "EV6", "VINb")}, excluded={"VINb"}
+    )
+
+    with pytest.raises(HomeAssistantError, match="excluded from polling"):
+        await coordinator.async_lock_vehicle("b")

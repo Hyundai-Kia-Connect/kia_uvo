@@ -48,6 +48,7 @@ def _make_coordinator(
     coordinator.force_refresh_interval = 1440
     coordinator._vehicle_errors = {}
     coordinator._vehicle_failures = {}
+    coordinator._excluded_vehicles = set()
 
     failures = failures or {}
 
@@ -73,6 +74,12 @@ def _make_coordinator(
             self.calls.append(("force-now", vehicle_id))
             if vehicle_id in self.failures:
                 raise self.failures[vehicle_id]
+
+        def disable_vehicle(self, vehicle_id: str) -> None:
+            """Mirror the library's per-vehicle enable flag."""
+
+        def enable_vehicle(self, vehicle_id: str) -> None:
+            """Mirror the library's per-vehicle enable flag."""
 
     coordinator.vehicle_manager = _FakeManager()  # type: ignore[assignment]
     return coordinator

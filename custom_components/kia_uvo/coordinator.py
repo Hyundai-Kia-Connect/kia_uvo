@@ -45,12 +45,14 @@ from hyundai_kia_connect_api.svm_image import render_views
 from .const import (
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_EXCLUDED_VEHICLES,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_TOKEN,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+    DEFAULT_EXCLUDED_VEHICLES,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
@@ -96,6 +98,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._vehicle_errors: dict[str, str] = {}
         # Consecutive failed polls per vehicle (drives the "exclude it" hint).
         self._vehicle_failures: dict[str, int] = {}
+        # Vehicles the user excluded from polling (VIN or internal id).
+        self._excluded_vehicles: set[str] = set(
+            config_entry.options.get(CONF_EXCLUDED_VEHICLES, DEFAULT_EXCLUDED_VEHICLES)
+        )
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data.get(CONF_REGION),
@@ -233,6 +239,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         vehicles = list(self.vehicle_manager.vehicles.items())
         polled = [vid for vid, _ in vehicles if not self._is_vehicle_excluded(vid)]
         auth_failures = 0
+        self._apply_vehicle_exclusions()
 
         for vehicle_id, _vehicle in vehicles:
             if self._is_vehicle_excluded(vehicle_id):
@@ -304,9 +311,43 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """All recorded per-vehicle errors, keyed by vehicle id."""
         return dict(self._vehicle_errors)
 
+    def _vehicle_key(self, vehicle: Vehicle) -> str:
+        """The stable key of a vehicle: VIN when known, else internal id."""
+        vin: str | None = vehicle.VIN
+        vehicle_id: str = vehicle.id
+        return vin or vehicle_id
+
     def _is_vehicle_excluded(self, vehicle_id: str) -> bool:
         """Whether the user excluded this vehicle from polling."""
-        return False
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if vehicle is None:
+            return False
+        return self._vehicle_key(vehicle) in self._excluded_vehicles
+
+    def vehicle_excluded(self, vehicle_id: str) -> bool:
+        """Whether the given vehicle is excluded from polling."""
+        return self._is_vehicle_excluded(vehicle_id)
+
+    def excluded_vehicle_ids(self) -> list[str]:
+        """Internal ids of the vehicles excluded from polling."""
+        return [
+            vehicle_id
+            for vehicle_id in self.vehicle_manager.vehicles
+            if self._is_vehicle_excluded(vehicle_id)
+        ]
+
+    def _apply_vehicle_exclusions(self) -> None:
+        """Mirror the exclusion list onto the library's per-vehicle flag.
+
+        Applied on every cycle: the library can add vehicles to the account
+        (Kia USA refreshes the vehicle list on token refresh), and a freshly
+        added vehicle starts out enabled.
+        """
+        for vehicle_id in self.vehicle_manager.vehicles:
+            if self._is_vehicle_excluded(vehicle_id):
+                self.vehicle_manager.disable_vehicle(vehicle_id)
+            else:
+                self.vehicle_manager.enable_vehicle(vehicle_id)
 
     def _record_vehicle_error(self, vehicle_id: str, err: Exception) -> None:
         """Remember a per-vehicle failure and mark the vehicle unavailable."""
@@ -349,11 +390,20 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
+        self._assert_vehicle_not_excluded(vehicle_id)
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
         )
         self.async_set_updated_data(self.data)
+
+    def _assert_vehicle_not_excluded(self, vehicle_id: str) -> None:
+        """Refuse commands for a vehicle the user excluded from polling."""
+        if self._is_vehicle_excluded(vehicle_id):
+            raise HomeAssistantError(
+                f"Vehicle {vehicle_id} is excluded from polling in the "
+                "integration options (excluded_vehicles)."
+            )
 
     async def async_supports_svm(self, vehicle_id: str) -> bool:
         """Return whether the given vehicle supports SVM.
@@ -494,6 +544,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         already in progress, raises HomeAssistantError immediately so
         the user gets a clear message instead of a mysterious long wait.
         """
+        self._assert_vehicle_not_excluded(vehicle_id)
         if self._action_lock.locked():
             _LOGGER.warning(
                 "Vehicle action '%s' rejected: another action is already in progress",
