@@ -99,10 +99,9 @@ async def test_api_error_marks_only_failing_vehicle() -> None:
 
     assert coordinator.vehicle_available("a") is False
     assert coordinator.vehicle_available("b") is True
-    assert coordinator.vehicle_error("a") == (
-        "ServiceTemporaryUnavailable: Unavailable remote control"
-    )
-    assert coordinator.vehicle_error("b") is None
+    assert coordinator.vehicle_errors() == {
+        "a": "ServiceTemporaryUnavailable: Unavailable remote control"
+    }
     assert coordinator.vehicle_manager.calls == [("cached", "a"), ("cached", "b")]
 
 
@@ -119,7 +118,7 @@ async def test_vehicle_error_clears_after_successful_poll() -> None:
     await coordinator._async_poll_vehicles(mode="cached")
 
     assert coordinator.vehicle_available("a") is True
-    assert coordinator.vehicle_error("a") is None
+    assert coordinator.vehicle_errors() == {}
 
 
 async def test_rate_limiting_error_raises_update_failed() -> None:
@@ -199,7 +198,7 @@ async def test_error_state_pruned_for_removed_vehicle() -> None:
         {"a": _FakeVehicle("a")}, {"a": ServiceTemporaryUnavailable("boom")}
     )
     await coordinator._async_poll_vehicles(mode="cached")
-    assert coordinator.vehicle_error("a") is not None
+    assert coordinator.vehicle_errors() != {}
 
     del coordinator.vehicle_manager.vehicles["a"]
     await coordinator._async_poll_vehicles(mode="cached")

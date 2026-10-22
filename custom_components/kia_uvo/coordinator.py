@@ -68,11 +68,9 @@ _LOGGER = logging.getLogger(__name__)
 # set_svm_dewarp, consumed in image.py.
 SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 
-# How a single vehicle is polled:
-#   check  - let the library decide (force refresh or cached, based on the
-#            force refresh interval) - used in the periodic update
-#   cached - server-side cached state only
-#   force  - explicit fresh read, used by the force update service
+# How a single vehicle is polled: "check" lets the library pick (force or
+# cached), "cached" is the server-side cached state, "force" is an explicit
+# fresh read (the force update service).
 PollMode = Literal["check", "cached", "force"]
 
 
@@ -93,8 +91,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             str, tuple[tuple[dt.datetime | None, bool], dict[str, bytes]]
         ] = {}
         # Per-vehicle API failure state: vehicle_id -> "ExcType: message".
-        # A vehicle in this map has its entities marked unavailable while the
-        # rest of the account keeps updating.
         self._vehicle_errors: dict[str, str] = {}
         # Consecutive failed polls per vehicle (drives the "exclude it" hint).
         self._vehicle_failures: dict[str, int] = {}
@@ -209,10 +205,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             )
         )
 
-        # Every vehicle is polled on its own: a vehicle the backend no longer
-        # serves must not take the rest of the account down with it.
         await self._async_poll_vehicles(mode="check" if in_force_window else "cached")
-
         return self.data
 
     async def async_update_all(self) -> None:
@@ -230,11 +223,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def _async_poll_vehicles(self, *, mode: PollMode) -> None:
         """Poll every vehicle on its own, isolating per-vehicle API failures.
 
-        A vehicle that fails does not take the rest of the account down: the
-        failure is recorded for that vehicle only, and its entities go
-        unavailable. Account-level failures (rate limiting, network, unknown
-        exceptions) still abort the whole cycle so Home Assistant can back
-        off.
+        A per-vehicle failure only marks that vehicle unavailable; an
+        account-level failure (rate limiting, network, unknown exception)
+        aborts the cycle so Home Assistant can back off.
         """
         vehicles = list(self.vehicle_manager.vehicles.items())
         polled = [vid for vid, _ in vehicles if not self._is_vehicle_excluded(vid)]
@@ -289,14 +280,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             if mode == "cached":
                 raise
             # A failed force refresh is not fatal: retry this vehicle with the
-            # server-side cached state, exactly like the old account-wide
-            # fallback did, but scoped to the vehicle that failed.
+            # server-side cached state.
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.update_vehicle_with_cached_state,
                 vehicle_id,
             )
-            # The cached state answered, so the vehicle keeps its data — but
-            # the failed force refresh stays visible in the log.
             vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
             label = (vehicle.name if vehicle else None) or vehicle_id
             _LOGGER.warning(
@@ -309,18 +297,10 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             )
 
     def vehicle_available(self, vehicle_id: str) -> bool:
-        """Whether the given vehicle currently has usable data.
-
-        False when the vehicle's last poll failed (its entities go
-        unavailable) or when the user excluded it from polling.
-        """
+        """Whether the given vehicle currently has usable data."""
         return vehicle_id not in self._vehicle_errors and not self._is_vehicle_excluded(
             vehicle_id
         )
-
-    def vehicle_error(self, vehicle_id: str) -> str | None:
-        """The last error recorded for the given vehicle, if any."""
-        return self._vehicle_errors.get(vehicle_id)
 
     def vehicle_errors(self) -> dict[str, str]:
         """All recorded per-vehicle errors, keyed by vehicle id."""
@@ -339,10 +319,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             return False
         return self._vehicle_key(vehicle) in self._excluded_vehicles
 
-    def vehicle_excluded(self, vehicle_id: str) -> bool:
-        """Whether the given vehicle is excluded from polling."""
-        return self._is_vehicle_excluded(vehicle_id)
-
     def excluded_vehicle_ids(self) -> list[str]:
         """Internal ids of the vehicles excluded from polling."""
         return [
@@ -354,9 +330,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     def _apply_vehicle_exclusions(self) -> None:
         """Mirror the exclusion list onto the library's per-vehicle flag.
 
-        Applied on every cycle: the library can add vehicles to the account
-        (Kia USA refreshes the vehicle list on token refresh), and a freshly
-        added vehicle starts out enabled.
+        Applied on every cycle: the library adds vehicles to the account on
+        token refresh (Kia USA), and a new vehicle starts out enabled.
         """
         for vehicle_id in self.vehicle_manager.vehicles:
             if self._is_vehicle_excluded(vehicle_id):
