@@ -39,6 +39,7 @@ class _FakeVehicle:
 def _make_coordinator(
     vehicles: dict[str, _FakeVehicle],
     failures: dict[str, Exception] | None = None,
+    cached_failures: dict[str, Exception] | None = None,
 ) -> HyundaiKiaConnectDataUpdateCoordinator:
     """Build a coordinator with the attributes the polling code touches."""
     coordinator = HyundaiKiaConnectDataUpdateCoordinator.__new__(
@@ -51,17 +52,19 @@ def _make_coordinator(
     coordinator._excluded_vehicles = set()
 
     failures = failures or {}
+    cached_failures = failures if cached_failures is None else cached_failures
 
     class _FakeManager:
         def __init__(self) -> None:
             self.vehicles = vehicles
             self.failures = failures
+            self.cached_failures = cached_failures
             self.calls: list[tuple[str, str]] = []
 
         def update_vehicle_with_cached_state(self, vehicle_id: str) -> None:
             self.calls.append(("cached", vehicle_id))
-            if vehicle_id in self.failures:
-                raise self.failures[vehicle_id]
+            if vehicle_id in self.cached_failures:
+                raise self.cached_failures[vehicle_id]
 
         def check_and_force_update_vehicle(
             self, interval: int, vehicle_id: str
@@ -254,3 +257,43 @@ def test_entity_unavailable_when_account_update_failed() -> None:
     entity = _make_entity(_FakeVehicle("b"), available=True)
     entity.coordinator.last_update_success = False
     assert entity.available is False
+
+
+async def test_failed_force_refresh_is_logged_when_cached_fallback_works(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A failed force refresh must stay visible even if the cache answers."""
+    coordinator = _make_coordinator(
+        {"a": _FakeVehicle("a", name="Sold Car")},
+        failures={"a": ServiceTemporaryUnavailable("boom")},
+        cached_failures={},
+    )
+
+    with caplog.at_level(
+        logging.WARNING, logger="custom_components.kia_uvo.coordinator"
+    ):
+        await coordinator._async_poll_vehicles(mode="check")
+
+    assert any(
+        "Sold Car" in record.message and "boom" in record.message
+        for record in caplog.records
+    )
+    # the cached fallback answered, so the vehicle still has data
+    assert coordinator.vehicle_available("a") is True
+
+
+async def test_unexpected_error_is_logged_with_traceback(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """An account-level failure must be logged with its traceback."""
+    coordinator = _make_coordinator(
+        {"a": _FakeVehicle("a")}, {"a": TimeoutError("net")}
+    )
+
+    with (
+        caplog.at_level(logging.ERROR, logger="custom_components.kia_uvo.coordinator"),
+        pytest.raises(UpdateFailed),
+    ):
+        await coordinator._async_poll_vehicles(mode="cached")
+
+    assert any(record.exc_info is not None for record in caplog.records)

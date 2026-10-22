@@ -164,7 +164,7 @@ def _excluded_vehicle_options(
     if coordinator is not None:
         for vehicle in coordinator.vehicle_manager.vehicles.values():
             key = vehicle.VIN or vehicle.id
-            options[key] = f"{vehicle.name} ({key})"
+            options[key] = f"{vehicle.name or vehicle.id} ({key})"
     for key in config_entry.options.get(CONF_EXCLUDED_VEHICLES, []):
         options.setdefault(key, key)
     return [{"value": key, "label": label} for key, label in options.items()]

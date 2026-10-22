@@ -257,6 +257,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             except APIError as err:
                 self._record_vehicle_error(vehicle_id, err)
             except Exception as err:
+                # Home Assistant logs UpdateFailed without a traceback, so log
+                # the account-level failure here to keep it diagnosable.
+                _LOGGER.exception("%s - Error communicating with API", DOMAIN)
                 raise UpdateFailed(f"Error communicating with API: {err}") from err
             else:
                 self._clear_vehicle_error(vehicle_id)
@@ -282,7 +285,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                     self.vehicle_manager.update_vehicle_with_cached_state,
                     vehicle_id,
                 )
-        except APIError:
+        except APIError as err:
             if mode == "cached":
                 raise
             # A failed force refresh is not fatal: retry this vehicle with the
@@ -291,6 +294,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             await self.hass.async_add_executor_job(
                 self.vehicle_manager.update_vehicle_with_cached_state,
                 vehicle_id,
+            )
+            # The cached state answered, so the vehicle keeps its data — but
+            # the failed force refresh stays visible in the log.
+            vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+            label = (vehicle.name if vehicle else None) or vehicle_id
+            _LOGGER.warning(
+                "%s - Force refresh failed for vehicle %s (%s), "
+                "using the cached state instead: %s",
+                DOMAIN,
+                label,
+                vehicle_id,
+                err,
             )
 
     def vehicle_available(self, vehicle_id: str) -> bool:
