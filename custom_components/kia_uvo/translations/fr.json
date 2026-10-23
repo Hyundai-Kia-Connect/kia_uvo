@@ -486,10 +486,10 @@
         "name": "Consommation d'énergie sur 90 jours"
       },
       "total_power_regenerated": {
-        "name": "Énergie totale régénérée"
+        "name": "Énergie régénérée sur 90 jours"
       },
       "power_consumption_30d": {
-        "name": "Consommation d'énergie moyenne"
+        "name": "Consommation d'énergie moyenne sur 30 jours"
       },
       "front_left_seat_status": {
         "name": "Siège avant gauche"

@@ -516,7 +516,7 @@
         "name": "Außentemperatur"
       },
       "power_consumption_30d": {
-        "name": "Durchschnittlicher Energieverbrauch"
+        "name": "30-Tage durchschnittlicher Energieverbrauch"
       },
       "rear_left_seat_status": {
         "name": "Rücksitz links"
@@ -534,7 +534,7 @@
         "name": "90-Tage Energieverbrauch"
       },
       "total_power_regenerated": {
-        "name": "Energierückgewinnung gesamt"
+        "name": "90-Tage Energierückgewinnung"
       },
       "vehicle_identification_number": {
         "name": "Fahrzeugidentifikationsnummer (FIN)"

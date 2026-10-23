@@ -486,10 +486,10 @@
         "name": "90 napos energiafogyasztás"
       },
       "total_power_regenerated": {
-        "name": "Összes visszanyert energia"
+        "name": "90 napos visszanyert energia"
       },
       "power_consumption_30d": {
-        "name": "Átlagos energiafogyasztás"
+        "name": "30 napos átlagos energiafogyasztás"
       },
       "front_left_seat_status": {
         "name": "Első bal ülés"

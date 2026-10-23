@@ -486,10 +486,10 @@
         "name": "Consumo de Energía en 90 Días"
       },
       "total_power_regenerated": {
-        "name": "Energía Regenerada Total"
+        "name": "Energía Regenerada en 90 Días"
       },
       "power_consumption_30d": {
-        "name": "Consumo Medio de Energía"
+        "name": "Consumo Medio de Energía en 30 Días"
       },
       "front_left_seat_status": {
         "name": "Asiento Delantero Izquierdo"
