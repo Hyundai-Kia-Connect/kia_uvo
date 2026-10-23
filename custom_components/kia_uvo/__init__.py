@@ -68,11 +68,25 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data[DOMAIN][config_entry.unique_id] = coordinator
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
     async_setup_services(hass)
+
+    # Start push for each vehicle — regions without push skip inside.
+    for vehicle_id in coordinator.vehicle_manager.vehicles:
+        hass.async_create_task(coordinator.async_start_mqtt(vehicle_id))
+
+    # Stop push on HA shutdown to prevent leaked transports.
+    async def _on_ha_stop(event: object) -> None:
+        await coordinator.async_stop_mqtt()
+
+    hass.bus.async_listen_once("homeassistant_stop", _on_ha_stop)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    coordinator = hass.data[DOMAIN].get(config_entry.unique_id)
+    if coordinator:
+        await coordinator.async_stop_mqtt()
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     ):
