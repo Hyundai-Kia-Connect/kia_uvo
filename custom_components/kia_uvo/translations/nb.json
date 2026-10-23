@@ -486,10 +486,10 @@
         "name": "Energiforbruk 90 dager"
       },
       "total_power_regenerated": {
-        "name": "Total energiregenerering"
+        "name": "Energiregenerering 90 dager"
       },
       "power_consumption_30d": {
-        "name": "Gjennomsnittlig energiforbruk"
+        "name": "Gjennomsnittlig energiforbruk 30 dager"
       },
       "front_left_seat_status": {
         "name": "Venstre forsete"
