@@ -11,8 +11,7 @@ before the dump leaves their Home Assistant instance.
 from __future__ import annotations
 
 from dataclasses import asdict
-from importlib.metadata import PackageNotFoundError
-from importlib.metadata import version as pkg_version
+from importlib.metadata import PackageNotFoundError, version as pkg_version
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry

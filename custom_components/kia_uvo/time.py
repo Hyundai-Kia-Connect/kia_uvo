@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import datetime as dt
-import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import datetime as dt
+import logging
 from typing import Final
 
 from homeassistant.components.time import TimeEntity, TimeEntityDescription
