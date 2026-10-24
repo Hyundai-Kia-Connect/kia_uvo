@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import Any
 
 from homeassistant.components.lock import LockEntity
 from homeassistant.config_entries import ConfigEntry
@@ -57,7 +57,7 @@ class HyundaiKiaConnectLock(LockEntity, HyundaiKiaConnectEntity):
     @property
     def is_locked(self) -> bool | None:
         """Return True if the doors are locked."""
-        return cast(bool | None, self.vehicle.is_locked)
+        return self.vehicle.is_locked
 
     async def async_lock(self, **kwargs: Any) -> None:
         """Lock the doors."""
