@@ -60,3 +60,39 @@ jobs:
             "$(jq -r '.requirements[0]' custom_components/kia_uvo/manifest.json)"
       - name: Run pytest
         run: pytest
+
+  # Separate from validate-pytest so coverage shows as its own "Coverage"
+  # check, with the report on the run's summary page.
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.15"
+      - name: Install test dependencies
+        run: |
+          pip install homeassistant==2026.9.2 pytest==9.1.1 pytest-asyncio==1.4.0 \
+            pytest-cov==7.1.0 \
+            "$(jq -r '.requirements[0]' custom_components/kia_uvo/manifest.json)"
+      - name: Run pytest with coverage
+        run: pytest --cov=custom_components/kia_uvo --cov-report=term-missing --cov-report=xml
+      - name: Write coverage summary
+        env:
+          CODECOV_URL: ${{ github.event_name == 'pull_request' && format('https://app.codecov.io/gh/{0}/pull/{1}', github.repository, github.event.pull_request.number) || format('https://app.codecov.io/gh/{0}/commit/{1}', github.repository, github.sha) }}
+        run: |
+          {
+            echo "## Coverage: $(coverage report --format=total)%"
+            echo
+            echo "Full report: [Codecov]($CODECOV_URL)"
+            echo
+            coverage report --format=markdown --skip-covered
+          } >> "$GITHUB_STEP_SUMMARY"
+      # Fork PRs have no secrets; the action then uploads tokenless.
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false

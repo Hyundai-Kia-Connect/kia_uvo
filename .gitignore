@@ -5,3 +5,7 @@
 
 # Local tool caches (prettier via pre-commit)
 node_modules/
+
+# Coverage output
+.coverage
+coverage.xml
