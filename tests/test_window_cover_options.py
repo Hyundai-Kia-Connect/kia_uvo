@@ -2,15 +2,12 @@
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.ApiImpl import WindowRequestOptions
 from hyundai_kia_connect_api.const import WINDOW_STATE
+import pytest
 
-from custom_components.kia_uvo.cover import (
-    COVER_DESCRIPTIONS,
-    HyundaiKiaConnectCover,
-)
+from custom_components.kia_uvo.cover import COVER_DESCRIPTIONS, HyundaiKiaConnectCover
 
 
 @pytest.mark.parametrize("description", COVER_DESCRIPTIONS, ids=lambda d: d.key)
