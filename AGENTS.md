@@ -12,8 +12,8 @@ library. This repo only maps that library onto Home Assistant.
 
 ## Pull request rules
 
-- **Keep PRs small.** Aim for under 100 changed lines, tests and translation
-  files excluded, whenever the change allows. If a change grows past that,
+- **Keep PRs small.** Aim for under 100 changed lines, tests excluded, whenever
+  the change allows. If a change grows past that,
   split it into a sequence of PRs that each stand on their own.
 - **One concern per PR.** Don't mix a fix with a feature, and don't combine
   either with a refactor or formatting changes. Mix them only when the change
@@ -24,6 +24,10 @@ library. This repo only maps that library onto Home Assistant.
 - **Vehicle API logic goes in the library, not here.** If a change needs new
   data or a new command from the car, make it in hyundai_kia_connect_api
   first, then bump the library in a separate PR here.
+- **Keep comments and docstrings short.** Write them only when they help
+  whoever changes the code next: why something non-obvious is done, a vendor
+  quirk, a constraint. Don't restate the code, describe the change history,
+  or explain the PR. Those belong in the commit message or PR description.
 - **PR titles use Conventional Commits.** CI enforces this
   (`lintPR.yaml`), and releases are versioned from it: `fix: ...`,
   `feat(sensor): ...`, `refactor: ...`, `chore: ...`, `test: ...`, `docs: ...`.
@@ -48,8 +52,10 @@ library. This repo only maps that library onto Home Assistant.
   always created on purpose, so read the comments beside the existing
   descriptions before changing a creation check.
 - Services are defined in `services.py` and `services.yaml`. Every
-  user-visible string goes in `strings.json` and `translations/en.json`.
-  Other translations are optional.
+  user-visible string goes in `strings.json`. Any added, renamed or removed
+  string key must be applied to **every** file in `translations/`, keeping
+  the same key structure. Use an English placeholder where no translation is
+  available.
 - Redact personal data (VIN, location, tokens, account details) in
   diagnostics with `redact.py`.
 - `except Exception` in setup and force-refresh paths is intentional
