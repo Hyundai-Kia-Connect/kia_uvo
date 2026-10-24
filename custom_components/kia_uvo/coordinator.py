@@ -85,11 +85,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         ] = {}
 
         self.vehicle_manager = VehicleManager(
-            region=config_entry.data.get(CONF_REGION),
-            brand=config_entry.data.get(CONF_BRAND),
-            username=config_entry.data.get(CONF_USERNAME),
-            password=config_entry.data.get(CONF_PASSWORD),
-            pin=config_entry.data.get(CONF_PIN),
+            region=config_entry.data[CONF_REGION],
+            brand=config_entry.data[CONF_BRAND],
+            username=config_entry.data[CONF_USERNAME],
+            password=config_entry.data[CONF_PASSWORD],
+            pin=config_entry.data[CONF_PIN],
             geocode_api_enable=config_entry.options.get(
                 CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
             ),
@@ -596,7 +596,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             or False,
             climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
             temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
-            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit or 0,
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
@@ -659,10 +658,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Toggle a departure schedule on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
-        if departure_num == 1:
-            options.first_departure.enabled = enabled
-        else:
-            options.second_departure.enabled = enabled
+        departure = (
+            options.first_departure if departure_num == 1 else options.second_departure
+        )
+        if departure is not None:
+            departure.enabled = enabled
         # reservFlag (charging_enabled) must be 1 for departure slots to take
         # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
         # (None), the builder defaults it to False, causing the API to accept
