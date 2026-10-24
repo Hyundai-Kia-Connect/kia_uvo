@@ -11,9 +11,9 @@ import datetime
 import threading
 from unittest.mock import MagicMock
 
-import pytest
 from hyundai_kia_connect_api.Token import Token
 from hyundai_kia_connect_api.Vehicle import Vehicle
+import pytest
 
 from custom_components.kia_uvo import diagnostics as diagnostics_mod
 from custom_components.kia_uvo.const import DOMAIN
