@@ -68,7 +68,7 @@ def test_authentication_diagnostics(message, expected):
         "errors": {},
     }
 
-    exec(code, context)
+    exec(code, context)  # noqa: S102
 
     assert logger.messages == [f"Hyundai/Kia authentication failed: {expected}"]
     assert context["errors"]["base"] == "invalid_auth"
