@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
 
 # Canonical import path since HA 2026.6 (config_entry alias removed 2027.6);
 # the ignore covers HA's implicit re-export, rejected by mypy --strict.
@@ -57,12 +56,14 @@ class HyundaiKiaConnectTracker(TrackerEntity, HyundaiKiaConnectEntity):
     @property
     def latitude(self) -> float | None:
         """Return the vehicle's latitude."""
-        return cast(float | None, self.vehicle.location_latitude)
+        latitude: float | None = self.vehicle.location_latitude
+        return latitude
 
     @property
     def longitude(self) -> float | None:
         """Return the vehicle's longitude."""
-        return cast(float | None, self.vehicle.location_longitude)
+        longitude: float | None = self.vehicle.location_longitude
+        return longitude
 
     @property
     def source_type(self) -> SourceType:
