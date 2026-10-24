@@ -139,7 +139,7 @@ async def validate_input(
     try:
         result = await hass.async_add_executor_job(vehicle_manager.login)
 
-        if result is None:
+        if not result:
             raise InvalidAuth
 
         return result
