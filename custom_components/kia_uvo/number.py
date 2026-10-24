@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Final, cast
+from typing import Final, TypeGuard, cast
 
 from homeassistant.components.number import (
     NumberEntity,
@@ -104,7 +104,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         return cast(float | None, getattr(self.vehicle, self._key))
 
     @staticmethod
-    def _is_valid_charge_limit(val: float | None) -> bool:
+    def _is_valid_charge_limit(val: float | None) -> TypeGuard[float]:
         """Check if a charge limit value is a valid integer 50-100 in steps of 10."""
         return isinstance(val, (int, float)) and int(val) in range(50, 101, 10)
 
@@ -139,21 +139,23 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
                 )
             await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, int(dc))
         elif self.entity_description.key == DC_CHARGING_LIMIT_KEY:
-            ac = self.vehicle.ev_charge_limits_ac
+            ac_limit = self.vehicle.ev_charge_limits_ac
             dc = int(value)
-            if not self._is_valid_charge_limit(ac):
+            if not self._is_valid_charge_limit(ac_limit):
                 _LOGGER.error(
                     "Cannot set charge limit: the AC charging limit is not "
                     "available yet (%r). Try performing a force refresh first, "
                     "or set the AC slider to a valid value (50-100%%).",
-                    ac,
+                    ac_limit,
                 )
                 raise HomeAssistantError(
                     "Cannot set charge limit: the AC charging limit "
                     "is not available yet. Try performing a force refresh "
                     "first, or set the AC slider to a valid value (50-100%)."
                 )
-            await self.coordinator.async_set_charge_limits(self.vehicle.id, int(ac), dc)
+            await self.coordinator.async_set_charge_limits(
+                self.vehicle.id, int(ac_limit), dc
+            )
         elif self.entity_description.key == V2L_LIMIT_KEY:
             await self.coordinator.async_set_v2l_limit(self.vehicle.id, int(value))
 
