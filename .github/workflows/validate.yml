@@ -91,7 +91,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       # Fork PRs have no secrets; the action then uploads tokenless.
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
