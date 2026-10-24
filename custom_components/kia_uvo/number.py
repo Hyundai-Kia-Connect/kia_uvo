@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Final, cast
+from typing import Final, TypeGuard, cast
 
 from homeassistant.components.number import (
     NumberEntity,
@@ -63,6 +63,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up number entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -80,12 +81,15 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
+    """Charge limit or V2L limit slider."""
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         description: NumberEntityDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the number entity."""
         super().__init__(coordinator, vehicle)
         self.entity_description = description
         self._key = description.key
@@ -100,7 +104,7 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
         return cast(float | None, getattr(self.vehicle, self._key))
 
     @staticmethod
-    def _is_valid_charge_limit(val: float | None) -> bool:
+    def _is_valid_charge_limit(val: float | None) -> TypeGuard[float]:
         """Check if a charge limit value is a valid integer 50-100 in steps of 10."""
         return isinstance(val, (int, float)) and int(val) in range(50, 101, 10)
 
@@ -135,21 +139,23 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
                 )
             await self.coordinator.async_set_charge_limits(self.vehicle.id, ac, int(dc))
         elif self.entity_description.key == DC_CHARGING_LIMIT_KEY:
-            ac = self.vehicle.ev_charge_limits_ac
+            ac_limit = self.vehicle.ev_charge_limits_ac
             dc = int(value)
-            if not self._is_valid_charge_limit(ac):
+            if not self._is_valid_charge_limit(ac_limit):
                 _LOGGER.error(
                     "Cannot set charge limit: the AC charging limit is not "
                     "available yet (%r). Try performing a force refresh first, "
                     "or set the AC slider to a valid value (50-100%%).",
-                    ac,
+                    ac_limit,
                 )
                 raise HomeAssistantError(
                     "Cannot set charge limit: the AC charging limit "
                     "is not available yet. Try performing a force refresh "
                     "first, or set the AC slider to a valid value (50-100%)."
                 )
-            await self.coordinator.async_set_charge_limits(self.vehicle.id, int(ac), dc)
+            await self.coordinator.async_set_charge_limits(
+                self.vehicle.id, int(ac_limit), dc
+            )
         elif self.entity_description.key == V2L_LIMIT_KEY:
             await self.coordinator.async_set_v2l_limit(self.vehicle.id, int(value))
 
@@ -157,22 +163,22 @@ class HyundaiKiaConnectNumber(NumberEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_min_value(self) -> float:
-        """Return native_min_value as reported in by the sensor"""
+        """Return the minimum value from the entity description."""
         return cast(float, self.entity_description.native_min_value)
 
     @property
     def native_max_value(self) -> float:
-        """Returnnative_max_value as reported in by the sensor"""
+        """Return the maximum value from the entity description."""
         return cast(float, self.entity_description.native_max_value)
 
     @property
     def native_step(self) -> float | None:
-        """Return step value as reported in by the sensor"""
+        """Return the step value from the entity description."""
         return self.entity_description.native_step
 
     @property
     def native_unit_of_measurement(self) -> str | None:
-        """Return the unit the value was reported in by the sensor"""
+        """Return the unit the value was reported in by the vehicle."""
         if self.entity_description.native_unit_of_measurement == DYNAMIC_UNIT:
             return cast(str | None, getattr(self.vehicle, self._key + "_unit"))
         else:

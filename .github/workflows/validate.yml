@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@06749dd8c0b54f350bc69c8752456cee498808a3 # master
+        uses: home-assistant/actions/hassfest@cd6f3635a740c84d8a14f6121a90068b8ece6bf6 # master
 
   validate-hacs:
     runs-on: ubuntu-latest
@@ -28,14 +28,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install mypy and dependencies
-        # hyundai_kia_connect_api pin follows manifest.json; homeassistant pin
-        # tracks the current stable release.
+        # hyundai_kia_connect_api is read from manifest.json so mypy checks
+        # against the library version the integration ships with;
+        # homeassistant pin tracks the current stable release.
         run: |
-          pip install mypy==2.3.1 homeassistant==2026.9.2 hyundai_kia_connect_api==4.31.0
+          pip install mypy==2.3.1 homeassistant==2026.9.2 \
+            "$(jq -r '.requirements[0]' custom_components/kia_uvo/manifest.json)"
       - name: Run mypy
         # Whole custom_components/kia_uvo/ package is strict-clean; this also
         # covers new files automatically.
@@ -47,9 +49,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Install test dependencies
         # hyundai_kia_connect_api is read from manifest.json so the tests
         # always run against the library version the integration ships with.

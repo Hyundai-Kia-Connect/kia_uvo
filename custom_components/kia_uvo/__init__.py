@@ -1,3 +1,5 @@
+"""The Hyundai / Kia Connect integration."""
+
 import hashlib
 import logging
 
@@ -48,6 +50,7 @@ PLATFORMS: list[str] = [
 
 
 async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Set up the integration (config entries only, no YAML)."""
     return True
 
 
@@ -80,6 +83,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate an old config entry to the current version."""
     if config_entry.version == 1:
         _LOGGER.debug(f"{DOMAIN} - config data- {config_entry}")
         username = config_entry.data.get(CONF_USERNAME)
