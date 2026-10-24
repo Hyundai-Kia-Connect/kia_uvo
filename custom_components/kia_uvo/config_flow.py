@@ -231,7 +231,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 result = await validate_input(
                     self.hass, full_config, self._vehicle_manager
                 )
-           except InvalidAuth as err:
+            except InvalidAuth as err:
                 cause = err.__cause__
                 detail = str(cause) if isinstance(cause, AuthenticationError) else ""
             
