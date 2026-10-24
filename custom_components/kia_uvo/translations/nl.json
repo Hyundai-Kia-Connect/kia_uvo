@@ -486,10 +486,10 @@
         "name": "Energieverbruik 90 dagen"
       },
       "total_power_regenerated": {
-        "name": "Totale energieterugwinning"
+        "name": "Energieterugwinning 90 dagen"
       },
       "power_consumption_30d": {
-        "name": "Gemiddeld energieverbruik"
+        "name": "Gemiddeld energieverbruik 30 dagen"
       },
       "front_left_seat_status": {
         "name": "Stoel linksvoor"

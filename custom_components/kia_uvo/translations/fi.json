@@ -486,10 +486,10 @@
         "name": "Energiankulutus 90 päivää"
       },
       "total_power_regenerated": {
-        "name": "Talteen otettu energia yhteensä"
+        "name": "Talteen otettu energia 90 päivää"
       },
       "power_consumption_30d": {
-        "name": "Keskimääräinen energiankulutus"
+        "name": "Keskimääräinen energiankulutus 30 päivää"
       },
       "front_left_seat_status": {
         "name": "Vasen etuistuin"

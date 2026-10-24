@@ -10,7 +10,6 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
-import pytest
 from conftest import make_coordinator, make_hass
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.Vehicle import (
@@ -19,9 +18,9 @@ from hyundai_kia_connect_api.Vehicle import (
     MonthTripInfo,
     TripInfo,
 )
+import pytest
 
-from custom_components.kia_uvo import sensor as sensor_platform
-from custom_components.kia_uvo import trip_stats
+from custom_components.kia_uvo import sensor as sensor_platform, trip_stats
 from custom_components.kia_uvo.coordinator import (
     HyundaiKiaConnectDataUpdateCoordinator as Coordinator,
 )

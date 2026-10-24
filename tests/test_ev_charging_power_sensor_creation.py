@@ -1,8 +1,8 @@
 """Tests for transient EV charging-power sensor creation."""
 
-import pytest
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
+import pytest
 
 
 @pytest.fixture

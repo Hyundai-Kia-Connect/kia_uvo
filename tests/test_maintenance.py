@@ -11,8 +11,7 @@ from conftest import make_coordinator, make_hass
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.Vehicle import MaintenanceAlertItem
 
-from custom_components.kia_uvo import binary_sensor as binary_platform
-from custom_components.kia_uvo import maintenance
+from custom_components.kia_uvo import binary_sensor as binary_platform, maintenance
 
 NOW = dt.datetime(2026, 10, 20, 12, 0)
 

@@ -10,8 +10,8 @@ entity request.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.config_entries import ConfigEntry

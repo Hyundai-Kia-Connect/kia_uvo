@@ -486,10 +486,10 @@
         "name": "90 天能耗"
       },
       "total_power_regenerated": {
-        "name": "能量回收总量"
+        "name": "90 天能量回收"
       },
       "power_consumption_30d": {
-        "name": "平均能耗"
+        "name": "30 天平均能耗"
       },
       "front_left_seat_status": {
         "name": "左前座椅"

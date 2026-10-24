@@ -486,10 +486,10 @@
         "name": "Consumo di Energia 90 Giorni"
       },
       "total_power_regenerated": {
-        "name": "Energia Rigenerata Totale"
+        "name": "Energia Rigenerata 90 Giorni"
       },
       "power_consumption_30d": {
-        "name": "Consumo Medio di Energia"
+        "name": "Consumo Medio di Energia 30 Giorni"
       },
       "front_left_seat_status": {
         "name": "Sedile Anteriore Sinistro"
