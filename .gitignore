@@ -2,3 +2,6 @@
 **/__pycache__
 **.DS_Store
 **@eaDir
+
+# Local tool caches (prettier via pre-commit)
+node_modules/
