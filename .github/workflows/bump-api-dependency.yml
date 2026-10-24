@@ -2,7 +2,9 @@ name: Bump API dependency
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    # An hour after the library's nightly release (00:30 UTC), so the bump
+    # has auto-merged well before the Sunday release (08:00 UTC).
+    - cron: "30 1 * * *"
   workflow_dispatch:
 
 permissions:
