@@ -384,12 +384,22 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         translation_key="ev_first_departure_days",
         icon="mdi:calendar-clock",
         entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            getattr(vehicle, "ev_first_departure_enabled", None) is not None
+            or getattr(vehicle, "ev_first_departure_time", None) is not None
+            or getattr(vehicle, "ev_first_departure_days", None) is not None
+        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_second_departure_days",
         translation_key="ev_second_departure_days",
         icon="mdi:calendar-clock",
         entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            getattr(vehicle, "ev_second_departure_enabled", None) is not None
+            or getattr(vehicle, "ev_second_departure_time", None) is not None
+            or getattr(vehicle, "ev_second_departure_days", None) is not None
+        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="_ev_first_departure_climate_temperature",
@@ -637,8 +647,10 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
         if self._key == "ev_charging_current":
             return CHARGING_CURRENTS.get(value, None)
         if self._key in ("ev_first_departure_days", "ev_second_departure_days"):
-            if isinstance(value, list):
+            if isinstance(value, list) and value:
                 return ", ".join(str(d) for d in value)
+            if value in (None, [], ""):
+                return "None"
             return cast(StateType | datetime, value)
         return cast(StateType | datetime, value)
 
