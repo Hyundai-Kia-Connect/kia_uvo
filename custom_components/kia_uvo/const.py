@@ -10,6 +10,7 @@ CONF_NO_FORCE_REFRESH_HOUR_START: str = "no_force_refresh_hour_start"
 CONF_NO_FORCE_REFRESH_HOUR_FINISH: str = "no_force_refresh_hour_finish"
 CONF_ENABLE_GEOLOCATION_ENTITY: str = "enable_geolocation_entity"
 CONF_USE_EMAIL_WITH_GEOCODE_API: str = "use_email_with_geocode_api"
+CONF_EXCLUDED_VEHICLES: str = "excluded_vehicles"
 CONF_TOKEN: str = "token"
 
 REGION_EUROPE: str = "Europe"
@@ -46,6 +47,7 @@ DEFAULT_NO_FORCE_REFRESH_HOUR_START: int = 22
 DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH: int = 7
 DEFAULT_ENABLE_GEOLOCATION_ENTITY: bool = False
 DEFAULT_USE_EMAIL_WITH_GEOCODE_API: bool = False
+DEFAULT_EXCLUDED_VEHICLES: list[str] = []
 
 DYNAMIC_UNIT: str = "dynamic_unit"
 

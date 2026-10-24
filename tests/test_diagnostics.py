@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import json
 import threading
 from unittest.mock import MagicMock
 
@@ -16,7 +17,7 @@ from hyundai_kia_connect_api.Token import Token
 from hyundai_kia_connect_api.Vehicle import Vehicle
 
 from custom_components.kia_uvo import diagnostics as diagnostics_mod
-from custom_components.kia_uvo.const import DOMAIN
+from custom_components.kia_uvo.const import CONF_EXCLUDED_VEHICLES, DOMAIN
 from custom_components.kia_uvo.diagnostics import async_get_config_entry_diagnostics
 from custom_components.kia_uvo.redact import REDACTED
 
@@ -220,3 +221,45 @@ async def test_broken_vehicle_does_not_kill_dump() -> None:
     assert vehicles["good"]["data"]["id"] == "good"
     assert "error" in vehicles["bad"]
     assert "data" not in vehicles["bad"]
+
+
+@pytest.mark.asyncio
+async def test_diagnostics_expose_vehicle_errors_without_vin() -> None:
+    """Per-vehicle failures are visible, but no VIN may leak in cleartext."""
+    vehicle = Vehicle()
+    vehicle.id = "vehicle-1"
+    vehicle.VIN = "KMH12345678901234"
+    coordinator = _make_coordinator()
+    coordinator.vehicle_errors.return_value = {
+        "vehicle-1": "ServiceTemporaryUnavailable: Unavailable remote control"
+    }
+    coordinator.excluded_vehicle_ids.return_value = ["vehicle-2"]
+    coordinator.vehicle_manager.vehicles = {"vehicle-1": vehicle}
+    hass = _make_hass(coordinator)
+
+    payload = await async_get_config_entry_diagnostics(hass, _make_entry())
+
+    assert payload["vehicle_errors"] == {
+        "vehicle-1": "ServiceTemporaryUnavailable: Unavailable remote control"
+    }
+    assert payload["excluded_vehicle_ids"] == ["vehicle-2"]
+    assert "KMH12345678901234" not in json.dumps(payload, default=str)
+
+
+@pytest.mark.asyncio
+async def test_diagnostics_do_not_dump_the_excluded_vehicle_list() -> None:
+    """The excluded-vehicles option holds VINs — it must not be dumped raw."""
+    coordinator = _make_coordinator()
+    coordinator.vehicle_errors.return_value = {}
+    coordinator.excluded_vehicle_ids.return_value = ["vehicle-1"]
+    hass = _make_hass(coordinator)
+    entry = _make_entry()
+    entry.options = {
+        **entry.options,
+        CONF_EXCLUDED_VEHICLES: ["KMH12345678901234"],
+    }
+
+    payload = await async_get_config_entry_diagnostics(hass, entry)
+
+    assert "excluded_vehicles" not in payload["config_options"]
+    assert "KMH12345678901234" not in json.dumps(payload, default=str)
