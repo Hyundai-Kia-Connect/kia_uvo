@@ -2,7 +2,10 @@ name: Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * Sun"
+    # After the library's nightly release (08:00 UTC) and this repo's
+    # bump-api-dependency run (09:00 UTC) has auto-merged, so the Sunday
+    # release ships the latest hyundai_kia_connect_api.
+    - cron: "0 11 * * Sun"
 jobs:
   build:
     runs-on: ubuntu-latest
