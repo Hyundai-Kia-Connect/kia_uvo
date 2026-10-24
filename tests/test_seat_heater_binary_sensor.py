@@ -5,6 +5,7 @@ non-empty string is truthy, so passing it through made "Off" read as on.
 """
 
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import SEAT_STATUS
 import pytest
 
 from custom_components.kia_uvo.binary_sensor import (
@@ -26,22 +27,23 @@ def _description(key: str) -> HyundaiKiaBinarySensorEntityDescription:
 
 @pytest.mark.parametrize("key", SEAT_KEYS)
 @pytest.mark.parametrize(
-    ("status", "expected"),
+    ("code", "expected"),
     [
         (None, None),
-        ("Off", False),
-        ("On", True),
-        ("Low Heat", True),
-        ("Medium Heat", True),
-        ("High Heat", True),
-        ("Low Cool", False),
-        ("Medium Cool", False),
-        ("High Cool", False),
+        (0, False),  # Off
+        (1, True),  # On
+        (2, False),  # Off
+        (3, False),  # Low Cool
+        (4, False),  # Medium Cool
+        (5, False),  # High Cool
+        (6, True),  # Low Heat
+        (7, True),  # Medium Heat
+        (8, True),  # High Heat
     ],
 )
-def test_seat_heater_is_on(key: str, status: str | None, expected: bool | None) -> None:
+def test_seat_heater_is_on(key: str, code: int | None, expected: bool | None) -> None:
     vehicle = Vehicle()
-    setattr(vehicle, SEAT_KEYS[key], status)
+    setattr(vehicle, SEAT_KEYS[key], SEAT_STATUS[code])
     is_on = _description(key).is_on
     assert is_on is not None
     assert is_on(vehicle) is expected

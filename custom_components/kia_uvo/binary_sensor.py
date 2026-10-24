@@ -17,6 +17,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
+from hyundai_kia_connect_api.const import SEAT_STATUS
 
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -39,11 +40,15 @@ def _raw_flag(value: int | None) -> bool | None:
     return None if value is None else bool(value)
 
 
+# Library SEAT_STATUS codes meaning the heater is on: 1 "On", 6-8 the heat levels.
+_SEAT_HEATER_ON = frozenset(SEAT_STATUS[code] for code in (1, 6, 7, 8))
+
+
 def _seat_heater_on(status: str | None) -> bool | None:
-    """Map a library seat status ("Off", "On", "Low Heat", "High Cool", ...)."""
+    """Map a library seat status (a SEAT_STATUS value) to heater on/off."""
     if status is None:
         return None
-    return status == "On" or status.endswith("Heat")
+    return status in _SEAT_HEATER_ON
 
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] = (
