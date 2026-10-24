@@ -34,6 +34,11 @@ class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     off_icon: str | None = None
 
 
+def _raw_flag(value: int | None) -> bool | None:
+    """Map a raw 0/1 status from the API to a bool, keeping None as unknown."""
+    return None if value is None else bool(value)
+
+
 def _seat_heater_on(status: str | None) -> bool | None:
     """Map a library seat status ("Off", "On", "Low Heat", "High Cool", ...)."""
     if status is None:
@@ -319,7 +324,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="transmission_condition",
         translation_key="transmission_condition",
-        is_on=lambda vehicle: vehicle.transmission_condition,
+        is_on=lambda vehicle: _raw_flag(vehicle.transmission_condition),
         on_icon="mdi:car-shift-pattern",
         off_icon="mdi:car",
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -335,7 +340,7 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
     HyundaiKiaBinarySensorEntityDescription(
         key="headlamp_status",
         translation_key="headlamp_status",
-        is_on=lambda vehicle: vehicle.headlamp_status,
+        is_on=lambda vehicle: _raw_flag(vehicle.headlamp_status),
         on_icon="mdi:lightbulb-alert-outline",
         off_icon="mdi:lightbulb-outline",
         entity_category=EntityCategory.DIAGNOSTIC,
