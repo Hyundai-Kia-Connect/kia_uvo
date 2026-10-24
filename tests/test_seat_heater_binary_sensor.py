@@ -4,8 +4,8 @@ The library reports seat status as a string ("Off", "Low Heat", ...), and any
 non-empty string is truthy, so passing it through made "Off" read as on.
 """
 
-import pytest
 from hyundai_kia_connect_api import Vehicle
+import pytest
 
 from custom_components.kia_uvo.binary_sensor import (
     SENSOR_DESCRIPTIONS,
