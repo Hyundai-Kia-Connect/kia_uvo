@@ -13,3 +13,9 @@ ignore = [
   "DTZ011",
   "DTZ901",
 ]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["custom_components.kia_uvo"]
+combine-as-imports = true
+split-on-trailing-comma = false
