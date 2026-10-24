@@ -1,7 +1,7 @@
 """Services for Hyundai / Kia Connect integration."""
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry

@@ -6,7 +6,6 @@ import hashlib
 import logging
 from typing import Any
 
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.const import (
@@ -23,6 +22,7 @@ from hyundai_kia_connect_api import Token, VehicleManager
 from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
 from hyundai_kia_connect_api.exceptions import AuthenticationError
+import voluptuous as vol
 
 from .const import (
     BRANDS,

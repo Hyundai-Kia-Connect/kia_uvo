@@ -4,8 +4,8 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from hyundai_kia_connect_api import Vehicle
+import pytest
 
 pytest.register_assert_rewrite("custom_components.kia_uvo")
 

@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 from homeassistant.const import ATTR_DEVICE_ID
 from homeassistant.exceptions import HomeAssistantError
+import pytest
 
 from custom_components.kia_uvo import services
 from custom_components.kia_uvo.const import DOMAIN
