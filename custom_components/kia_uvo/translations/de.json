@@ -592,8 +592,14 @@
       "accessory_on": {
         "name": "Zubehör"
       },
+      "air_cleaning_is_on": {
+        "name": "Luftreinigung"
+      },
       "air_control_is_on": {
         "name": "Klimaanlage"
+      },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Vorwarnung automatische Batterieabschaltung"
       },
       "back_left_door_is_locked": {
         "name": "Tür hinten links verschlossen"
@@ -675,6 +681,9 @@
       },
       "fuel_level_is_low": {
         "name": "Kraftstoffstand niedrig"
+      },
+      "hazard_lights_on": {
+        "name": "Warnblinker"
       },
       "headlamp_left_low": {
         "name": "Fehler am Scheinwerfer Links"
@@ -771,6 +780,9 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Scheibenwaschflüssigkeit Warnung"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Frontscheibenheizung"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Abfahrt 1 Enteisung"
