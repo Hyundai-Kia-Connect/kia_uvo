@@ -13,13 +13,8 @@ The payload fixtures run through the REAL API-library CCS2 parser so these
 tests pin the whole contract, not a re-implementation of it.
 """
 
-from unittest.mock import MagicMock
-
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.KiaUvoApiAU import KiaUvoApiAU
-
-from custom_components.kia_uvo import sensor as sensor_platform
-from custom_components.kia_uvo.const import DOMAIN
 
 
 def _ccs2_state(pressure_unit: int, tire_pressure: int) -> dict:
@@ -60,41 +55,28 @@ def _parsed_vehicle(state: dict | None) -> Vehicle:
     return vehicle
 
 
-async def _created_tire_keys(vehicle: Vehicle) -> list[str]:
+async def _created_tire_keys(setup_sensors, vehicle: Vehicle) -> list[str]:
     """Run the real async_setup_entry and return created tire sensor keys."""
-    coordinator = MagicMock()
-    coordinator.vehicle_manager.vehicles = {"v1": vehicle}
-    hass = MagicMock()
-    config_entry = MagicMock()
-    config_entry.unique_id = "uid"
-    hass.data = {DOMAIN: {"uid": coordinator}}
-    created = []
-    await sensor_platform.async_setup_entry(hass, config_entry, created.extend)
-    return [
-        entity.entity_description.key
-        for entity in created
-        if getattr(entity, "entity_description", None) is not None
-        and entity.entity_description.key.startswith("tire_pressure_")
-    ]
+    return [k for k in await setup_sensors(vehicle) if k.startswith("tire_pressure_")]
 
 
-async def test_direct_tpms_parked_creates_sensors() -> None:
+async def test_direct_tpms_parked_creates_sensors(setup_sensors) -> None:
     """Direct TPMS with the parked 255 sentinel -> all 4 sensors created."""
     vehicle = _parsed_vehicle(_DIRECT_TPMS_PARKED)
     assert vehicle.tire_pressure_unit is not None
     assert vehicle.tire_pressure_front_left is None  # sentinel parsed to None
-    assert len(await _created_tire_keys(vehicle)) == 4
+    assert len(await _created_tire_keys(setup_sensors, vehicle)) == 4
 
 
-async def test_indirect_tpms_kona_creates_no_sensors() -> None:
+async def test_indirect_tpms_kona_creates_no_sensors(setup_sensors) -> None:
     """PressureUnit 3 (indirect TPMS, KONA shape from #1786) -> no sensors."""
     vehicle = _parsed_vehicle(_INDIRECT_TPMS)
     assert vehicle.tire_pressure_unit is None
-    assert await _created_tire_keys(vehicle) == []
+    assert await _created_tire_keys(setup_sensors, vehicle) == []
 
 
-async def test_no_tpms_data_creates_no_sensors() -> None:
+async def test_no_tpms_data_creates_no_sensors(setup_sensors) -> None:
     """Vehicle never parsed through the CCS2 path (old protocol) -> none."""
     vehicle = _parsed_vehicle(None)
     assert vehicle.tire_pressure_unit is None
-    assert await _created_tire_keys(vehicle) == []
+    assert await _created_tire_keys(setup_sensors, vehicle) == []

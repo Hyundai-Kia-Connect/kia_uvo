@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import logging
 from typing import Any, Final
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
@@ -24,6 +24,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaSwitchDescription(SwitchEntityDescription):
+    """Describes a Hyundai / Kia Connect switch entity."""
+
     value_fn: Callable[[Vehicle], bool | None]
     exists_fn: Callable[[Vehicle], bool]
     on_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
@@ -79,7 +81,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_first_departure_climate_enabled",
         translation_key="ev_first_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.ev_first_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_first_departure_climate_enabled is not None
@@ -94,7 +96,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_second_departure_climate_enabled",
         translation_key="ev_second_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.ev_second_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_second_departure_climate_enabled is not None
@@ -178,7 +180,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         icon="mdi:key-variant",
         value_fn=lambda vehicle: vehicle.valet_mode_active,
         exists_fn=lambda vehicle: (
-            vehicle.supports_valet_mode and vehicle.valet_mode_active is not None
+            bool(vehicle.supports_valet_mode) and vehicle.valet_mode_active is not None
         ),
         on_fn=lambda coordinator, vid: coordinator.async_start_valet_mode(vid),
         off_fn=lambda coordinator, vid: coordinator.async_stop_valet_mode(vid),
@@ -191,6 +193,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up switch entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities: list[SwitchEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -210,6 +213,8 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
+    """Switch backed by a vehicle on/off command pair."""
+
     entity_description: HyundaiKiaSwitchDescription
 
     def __init__(
@@ -218,6 +223,7 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
         description: HyundaiKiaSwitchDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the switch."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self.entity_description = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
@@ -225,12 +231,15 @@ class HyundaiKiaConnectSwitch(SwitchEntity, HyundaiKiaConnectEntity):
 
     @property
     def is_on(self) -> bool | None:
+        """Return True if the switch is on."""
         return self.entity_description.value_fn(self.vehicle)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the switch on."""
         await self.entity_description.on_fn(self.coordinator, self.vehicle.id)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the switch off."""
         await self.entity_description.off_fn(self.coordinator, self.vehicle.id)
 
 

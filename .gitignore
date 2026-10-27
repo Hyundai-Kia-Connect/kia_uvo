@@ -2,3 +2,10 @@
 **/__pycache__
 **.DS_Store
 **@eaDir
+
+# Local tool caches (prettier via pre-commit)
+node_modules/
+
+# Coverage output
+.coverage
+coverage.xml

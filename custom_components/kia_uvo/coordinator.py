@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-import datetime as dt
-import logging
-import traceback
 from collections.abc import Callable
+import datetime as dt
 from datetime import timedelta
 from functools import partial
+import logging
+import traceback
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -84,11 +84,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         ] = {}
 
         self.vehicle_manager = VehicleManager(
-            region=config_entry.data.get(CONF_REGION),
-            brand=config_entry.data.get(CONF_BRAND),
-            username=config_entry.data.get(CONF_USERNAME),
-            password=config_entry.data.get(CONF_PASSWORD),
-            pin=config_entry.data.get(CONF_PIN),
+            region=config_entry.data[CONF_REGION],
+            brand=config_entry.data[CONF_BRAND],
+            username=config_entry.data[CONF_USERNAME],
+            password=config_entry.data[CONF_PASSWORD],
+            pin=config_entry.data[CONF_PIN],
             geocode_api_enable=config_entry.options.get(
                 CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
             ),
@@ -317,6 +317,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_await_action_and_refresh(
         self, vehicle_id: str, action_id: str
     ) -> None:
+        """Wait for a vehicle action to complete, then refresh the cached data."""
         try:
             await asyncio.sleep(5)
             await self.hass.async_add_executor_job(
@@ -409,6 +410,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 )
 
     async def async_lock_vehicle(self, vehicle_id: str) -> None:
+        """Lock the vehicle."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.lock(vehicle_id),
@@ -416,6 +418,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_unlock_vehicle(self, vehicle_id: str) -> None:
+        """Unlock the vehicle."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.unlock(vehicle_id),
@@ -423,6 +426,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_open_charge_port(self, vehicle_id: str) -> None:
+        """Open the vehicle's charge port."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.open_charge_port(vehicle_id),
@@ -430,6 +434,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_close_charge_port(self, vehicle_id: str) -> None:
+        """Close the vehicle's charge port."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.close_charge_port(vehicle_id),
@@ -443,6 +448,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ) -> None:
+        """Start climate control with the given options."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_climate(vehicle_id, climate_options),
@@ -450,6 +456,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_climate(self, vehicle_id: str) -> None:
+        """Stop climate control."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_climate(vehicle_id),
@@ -457,6 +464,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_charge(self, vehicle_id: str) -> None:
+        """Start charging."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_charge(vehicle_id),
@@ -464,6 +472,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_charge(self, vehicle_id: str) -> None:
+        """Stop charging."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_charge(vehicle_id),
@@ -471,6 +480,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int) -> None:
+        """Set the AC and DC charge limits (percent)."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charge_limits(vehicle_id, ac, dc),
@@ -478,6 +488,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int) -> None:
+        """Set the AC charging current level."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charging_current(vehicle_id, level),
@@ -487,6 +498,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_schedule_charging_and_climate(
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
     ) -> None:
+        """Set the charging and climate schedule."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.schedule_charging_and_climate(
@@ -517,7 +529,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             or False,
             climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
             temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
-            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit or 0,
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
@@ -580,10 +591,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Toggle a departure schedule on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
-        if departure_num == 1:
-            options.first_departure.enabled = enabled
-        else:
-            options.second_departure.enabled = enabled
+        departure = (
+            options.first_departure if departure_num == 1 else options.second_departure
+        )
+        if departure is not None:
+            departure.enabled = enabled
         # reservFlag (charging_enabled) must be 1 for departure slots to take
         # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
         # (None), the builder defaults it to False, causing the API to accept
@@ -611,6 +623,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_start_hazard_lights(self, vehicle_id: str) -> None:
+        """Flash the hazard lights."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights(vehicle_id),
@@ -618,6 +631,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_hazard_lights_and_horn(self, vehicle_id: str) -> None:
+        """Flash the hazard lights and sound the horn."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights_and_horn(vehicle_id),
@@ -625,6 +639,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_valet_mode(self, vehicle_id: str) -> None:
+        """Turn on valet mode."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_valet_mode(vehicle_id),
@@ -632,6 +647,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_valet_mode(self, vehicle_id: str) -> None:
+        """Turn off valet mode."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_valet_mode(vehicle_id),
@@ -639,6 +655,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_v2l_limit(self, vehicle_id: str, limit: int) -> None:
+        """Set the vehicle-to-load discharge limit (percent)."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_vehicle_to_load_discharge_limit(
@@ -650,6 +667,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_set_windows(
         self, vehicle_id: str, windowOptions: WindowRequestOptions
     ) -> None:
+        """Set the state of one or more windows."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, windowOptions),
@@ -659,6 +677,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_set_navigation(
         self, vehicle_id: str, poi_list: list[POIInfo]
     ) -> None:
+        """Send points of interest to the vehicle's navigation."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
@@ -666,6 +685,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_open_all_windows(self, vehicle_id: str) -> None:
+        """Open all four windows."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.OPEN,
             front_right=WINDOW_STATE.OPEN,
@@ -679,6 +699,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_close_all_windows(self, vehicle_id: str) -> None:
+        """Close all four windows."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.CLOSED,
             front_right=WINDOW_STATE.CLOSED,
@@ -692,6 +713,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_vent_all_windows(self, vehicle_id: str) -> None:
+        """Put all four windows in the ventilation position."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.VENTILATION,
             front_right=WINDOW_STATE.VENTILATION,

@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # master's ruleset requires status checks, so github.token can't
+          # push the version-bump commit. BUMP_TOKEN's identity must be on
+          # the ruleset's bypass list.
+          token: ${{ secrets.BUMP_TOKEN }}
 
       - name: Gets semantic release info
         id: semantic_release_info
@@ -29,7 +34,7 @@ jobs:
         if: ${{steps.semantic_release_info.outputs.version != ''}}
         uses: ad-m/github-push-action@881a6320fdb16eb5318c5054f31c218aec2b324c # v1.3.0
         with:
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.BUMP_TOKEN }}
           tags: true
 
       - name: Create GitHub Release
