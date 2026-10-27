@@ -113,6 +113,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         """Get the Cars Climate Control Temperature Unit."""
         if self.vehicle._air_temperature_unit:
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
+        # The library has no unit until the car reports a setpoint (e.g.
+        # airTemp "OFF" at startup), so fall back to HA's unit system.
+        if self.hass is not None:
+            return self.hass.config.units.temperature_unit
         return UnitOfTemperature.CELSIUS
 
     @property
