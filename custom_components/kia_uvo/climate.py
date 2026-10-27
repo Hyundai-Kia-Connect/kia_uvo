@@ -137,7 +137,9 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def target_temperature_step(self) -> float | None:
         """Get the step size for adjusting the in-car target temperature."""
-        # TODO: get from lib
+        # Fahrenheit setpoints are whole degrees; Celsius ones take halves.
+        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+            return 1
         return 0.5
 
     @property
