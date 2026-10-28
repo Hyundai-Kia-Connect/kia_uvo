@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import logging
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers import frame
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
@@ -15,12 +17,15 @@ from hyundai_kia_connect_api.exceptions import (
 )
 import pytest
 
+from custom_components.kia_uvo import coordinator as coordinator_module
 from custom_components.kia_uvo.coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from custom_components.kia_uvo.entity import HyundaiKiaConnectEntity
 
 
 class _FakeHass:
-    """Minimal hass that runs executor jobs inline."""
+    """Minimal hass that runs executor jobs inline and saves tokens."""
+
+    config_entries = MagicMock()
 
     async def async_add_executor_job(self, func: Any, *args: Any) -> Any:
         return func(*args)
@@ -72,6 +77,12 @@ def _make_coordinator(
             self.calls.append(("force-now", vehicle_id))
             if vehicle_id in self.failures:
                 raise self.failures[vehicle_id]
+
+        def check_and_refresh_token(self) -> bool:
+            self.token_check = True
+            return False
+
+        token = MagicMock()
 
     coordinator.vehicle_manager = _FakeManager()  # type: ignore[assignment]
     return coordinator
@@ -295,3 +306,98 @@ async def test_third_consecutive_failure_logs_actionable_hint(
         "Sold Car" in record.message and "disable its device" in record.message
         for record in caplog.records
     )
+
+
+_NOON = dt.datetime(2026, 10, 28, 12, 0, 0, tzinfo=dt.UTC)
+_LATE = dt.datetime(2026, 10, 28, 23, 0, 0, tzinfo=dt.UTC)
+
+
+def _make_update_coordinator(
+    vehicles: dict[str, _FakeVehicle],
+) -> HyundaiKiaConnectDataUpdateCoordinator:
+    """Build a coordinator with the attributes the update paths touch."""
+    coordinator = _make_coordinator(vehicles)
+    coordinator.data = None  # type: ignore[assignment]
+    coordinator.scan_interval = 1800
+    coordinator.no_force_refresh_hour_start = 22
+    coordinator.no_force_refresh_hour_finish = 7
+    entry = MagicMock()
+    entry.data = {}
+    entry.options = {}
+    coordinator.config_entry = entry  # type: ignore[assignment]
+    return coordinator
+
+
+async def test_first_update_uses_check_mode_outside_no_force_window() -> None:
+    """The periodic poll lets the library pick force or cached, per vehicle."""
+    coordinator = _make_update_coordinator({"a": _FakeVehicle("a")})
+
+    with patch.object(coordinator_module.dt_util, "now", return_value=_NOON):
+        await coordinator._async_update_data()
+
+    assert coordinator.vehicle_manager.calls == [("force", "a")]
+
+
+async def test_first_update_polls_cached_during_no_force_window() -> None:
+    """Inside the no-force hours the periodic poll uses the cached state."""
+    coordinator = _make_update_coordinator({"a": _FakeVehicle("a")})
+
+    with patch.object(coordinator_module.dt_util, "now", return_value=_LATE):
+        await coordinator._async_update_data()
+
+    assert coordinator.vehicle_manager.calls == [("cached", "a")]
+
+
+async def test_update_service_polls_cached() -> None:
+    """The update service runs the per-vehicle cached poll for every vehicle."""
+    coordinator = _make_update_coordinator(
+        {"a": _FakeVehicle("a"), "b": _FakeVehicle("b")}
+    )
+
+    with patch.object(
+        HyundaiKiaConnectDataUpdateCoordinator, "async_set_updated_data"
+    ) as notify:
+        await coordinator.async_update_all()
+
+    assert coordinator.vehicle_manager.calls == [("cached", "a"), ("cached", "b")]
+    assert notify.call_count == 2 or notify.called
+    assert notify.call_count >= 1
+
+
+async def test_force_update_service_forces_each_vehicle() -> None:
+    """The force_update service reads each vehicle fresh, not from the cache."""
+    coordinator = _make_update_coordinator(
+        {"a": _FakeVehicle("a"), "b": _FakeVehicle("b")}
+    )
+
+    with patch.object(
+        HyundaiKiaConnectDataUpdateCoordinator, "async_set_updated_data"
+    ) as notify:
+        await coordinator.async_force_update_all()
+
+    assert coordinator.vehicle_manager.calls == [("force-now", "a"), ("force-now", "b")]
+    assert notify.called
+
+
+def test_init_creates_the_per_vehicle_state(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A fresh coordinator starts with empty per-vehicle failure state."""
+    monkeypatch.setattr(frame, "report_usage", lambda *args, **kwargs: None)
+    hass = MagicMock()
+    hass.config.language = "en"
+    entry = MagicMock()
+    entry.data = {"region": 1, "brand": 2, "username": "u", "password": "p", "pin": ""}
+    entry.options = {
+        "scan_interval": 30,
+        "force_refresh": 1440,
+        "no_force_refresh_hour_start": 22,
+        "no_force_refresh_hour_finish": 7,
+        "enable_geolocation_entity": False,
+        "use_email_with_geocode_api": False,
+    }
+
+    coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, entry)
+
+    assert coordinator._failed_vehicles == set()
+    assert coordinator._vehicle_failures == {}
