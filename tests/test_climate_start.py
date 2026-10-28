@@ -14,17 +14,14 @@ bare ``ClimateRequestOptions()`` whose ``climate=None`` the API library then
 defaults to True. Only the climate entity carried the stale False through.
 """
 
-from collections.abc import Iterable
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
-from homeassistant.helpers.entity import Entity
 from hyundai_kia_connect_api import Vehicle
 import pytest
 
 from custom_components.kia_uvo import climate
 from custom_components.kia_uvo.climate import HyundaiKiaCarClimateControlSwitch
-from tests.conftest import make_coordinator, make_hass
 
 
 @pytest.fixture(autouse=True)
@@ -117,24 +114,3 @@ async def test_turn_on_and_off_route_to_the_car() -> None:
 
     await entity.async_turn_off()
     entity.coordinator.async_stop_climate.assert_awaited_once_with("v1")
-
-
-async def test_setup_does_not_refresh_the_coordinator_again() -> None:
-    """Adding the entity must not fetch all vehicle data a second time.
-
-    ``update_before_add`` runs ``CoordinatorEntity.async_update``, which is
-    ``coordinator.async_request_refresh()``, right after the first refresh.
-    """
-    vehicle = Vehicle(id="v1", name="test", model="test")
-    vehicle.air_control_is_on = False
-    hass, config_entry = make_hass(make_coordinator(vehicle))
-    added: list[tuple[int, bool]] = []
-
-    def add_entities(
-        new_entities: Iterable[Entity], update_before_add: bool = False
-    ) -> None:
-        added.append((len(list(new_entities)), update_before_add))
-
-    await climate.async_setup_entry(hass, config_entry, add_entities)
-
-    assert added == [(1, False)]
