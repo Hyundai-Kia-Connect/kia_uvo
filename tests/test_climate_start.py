@@ -14,15 +14,17 @@ bare ``ClimateRequestOptions()`` whose ``climate=None`` the API library then
 defaults to True. Only the climate entity carried the stale False through.
 """
 
+from collections.abc import Iterable
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
+from homeassistant.helpers.entity import Entity
 from hyundai_kia_connect_api import Vehicle
 import pytest
 
 from custom_components.kia_uvo import climate
 from custom_components.kia_uvo.climate import HyundaiKiaCarClimateControlSwitch
-from custom_components.kia_uvo.const import DOMAIN
+from tests.conftest import make_coordinator, make_hass
 
 
 @pytest.fixture(autouse=True)
@@ -118,23 +120,21 @@ async def test_turn_on_and_off_route_to_the_car() -> None:
 
 
 async def test_setup_does_not_refresh_the_coordinator_again() -> None:
-    """Adding the entity must not trigger a second fetch of all vehicle data.
+    """Adding the entity must not fetch all vehicle data a second time.
 
     ``update_before_add`` runs ``CoordinatorEntity.async_update``, which is
-    ``coordinator.async_request_refresh()``: on every start that repeated all
-    the API calls of the first refresh, two seconds after it finished.
+    ``coordinator.async_request_refresh()``, right after the first refresh.
     """
     vehicle = Vehicle(id="v1", name="test", model="test")
     vehicle.air_control_is_on = False
-    coordinator = MagicMock()
-    coordinator.vehicle_manager.vehicles = {vehicle.id: vehicle}
-    hass = MagicMock()
-    hass.data = {DOMAIN: {"uid": coordinator}}
-    config_entry = MagicMock(unique_id="uid")
-    add_entities = MagicMock()
+    hass, config_entry = make_hass(make_coordinator(vehicle))
+    added: list[tuple[int, bool]] = []
+
+    def add_entities(
+        new_entities: Iterable[Entity], update_before_add: bool = False
+    ) -> None:
+        added.append((len(list(new_entities)), update_before_add))
 
     await climate.async_setup_entry(hass, config_entry, add_entities)
 
-    (entities,) = add_entities.call_args.args
-    assert len(entities) == 1
-    assert not add_entities.call_args.kwargs.get("update_before_add")
+    assert added == [(1, False)]
