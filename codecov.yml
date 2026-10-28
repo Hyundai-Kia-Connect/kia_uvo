@@ -1,0 +1,13 @@
+# Informational for now: statuses report but never fail a PR.
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        target: 80%
+        informational: true
+
+comment:
+  layout: "diff, files"

@@ -486,10 +486,10 @@
         "name": "Energiankulutus 90 päivää"
       },
       "total_power_regenerated": {
-        "name": "Talteen otettu energia yhteensä"
+        "name": "Talteen otettu energia 90 päivää"
       },
       "power_consumption_30d": {
-        "name": "Keskimääräinen energiankulutus"
+        "name": "Keskimääräinen energiankulutus 30 päivää"
       },
       "front_left_seat_status": {
         "name": "Vasen etuistuin"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Polttoaine vähissä"
       },
+      "hazard_lights_on": {
+        "name": "Hätävilkut"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Älyavaimen paristovaroitus"
       },
       "washer_fluid_warning_is_on": {
         "name": "Lasinpesunestevaroitus"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Tuulilasin lämmitys"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Ensimmäisen lähdön huurteenpoisto"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Ilmastointi"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Akun automaattisen katkaisun ennakkovaroitus"
+      },
       "back_left_door_is_locked": {
         "name": "Vasemman takaoven lukko"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Lisävarusteet"
+      },
+      "air_cleaning_is_on": {
+        "name": "Ilmanpuhdistus"
       },
       "ign3": {
         "name": "IGN3"

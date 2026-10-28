@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
+import logging
 from typing import Any, Final
 
 from homeassistant.components.cover import (
@@ -125,25 +125,25 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
             return 100
         return 0
 
+    def _window_options(self, state: WINDOW_STATE) -> WindowRequestOptions:
+        """Options that set only this entity's window to ``state``."""
+        options = WindowRequestOptions()
+        setattr(options, self.entity_description.window_position, state)
+        return options
+
     async def async_open_cover(self, **kwargs: Any) -> None:
         """Open the window."""
-        options = WindowRequestOptions(
-            **{self.entity_description.window_position: WINDOW_STATE.OPEN}
-        )
+        options = self._window_options(WINDOW_STATE.OPEN)
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_close_cover(self, **kwargs: Any) -> None:
         """Close the window."""
-        options = WindowRequestOptions(
-            **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
-        )
+        options = self._window_options(WINDOW_STATE.CLOSED)
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_stop_cover(self, **kwargs: Any) -> None:
         """Stop the window (the API has no stop, so this closes it)."""
-        options = WindowRequestOptions(
-            **{self.entity_description.window_position: WINDOW_STATE.CLOSED}
-        )
+        options = self._window_options(WINDOW_STATE.CLOSED)
         await self.coordinator.async_set_windows(self.vehicle.id, options)
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
@@ -155,7 +155,5 @@ class HyundaiKiaConnectCover(CoverEntity, HyundaiKiaConnectEntity):
             state = WINDOW_STATE.VENTILATION
         else:
             state = WINDOW_STATE.OPEN
-        options = WindowRequestOptions(
-            **{self.entity_description.window_position: state}
-        )
+        options = self._window_options(state)
         await self.coordinator.async_set_windows(self.vehicle.id, options)

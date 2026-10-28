@@ -486,10 +486,10 @@
         "name": "90 napos energiafogyasztás"
       },
       "total_power_regenerated": {
-        "name": "Összes visszanyert energia"
+        "name": "90 napos visszanyert energia"
       },
       "power_consumption_30d": {
-        "name": "Átlagos energiafogyasztás"
+        "name": "30 napos átlagos energiafogyasztás"
       },
       "front_left_seat_status": {
         "name": "Első bal ülés"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Alacsony üzemanyagszint"
       },
+      "hazard_lights_on": {
+        "name": "Vészvillogó"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Okoskulcs elem figyelmeztetés"
       },
       "washer_fluid_warning_is_on": {
         "name": "Ablakmosó folyadék figyelmeztetés"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Szélvédőfűtés"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Első indulás jégmentesítése"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Légkondicionáló"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Akkumulátor automatikus lekapcsolásának előjelzése"
+      },
       "back_left_door_is_locked": {
         "name": "Bal hátsó ajtó zárja"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Tartozék"
+      },
+      "air_cleaning_is_on": {
+        "name": "Légtisztítás"
       },
       "ign3": {
         "name": "IGN3"

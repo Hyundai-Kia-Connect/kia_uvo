@@ -486,10 +486,10 @@
         "name": "Energiforbruk 90 dager"
       },
       "total_power_regenerated": {
-        "name": "Total energiregenerering"
+        "name": "Energiregenerering 90 dager"
       },
       "power_consumption_30d": {
-        "name": "Gjennomsnittlig energiforbruk"
+        "name": "Gjennomsnittlig energiforbruk 30 dager"
       },
       "front_left_seat_status": {
         "name": "Venstre forsete"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Lavt drivstoffnivå"
       },
+      "hazard_lights_on": {
+        "name": "Nødblink"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Advarsel om smartnøkkelbatteri"
       },
       "washer_fluid_warning_is_on": {
         "name": "Advarsel om spylervæske"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Frontrutevarme"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Avising ved første avreise"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Klimaanlegg"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Forvarsel om automatisk batterifrakobling"
+      },
       "back_left_door_is_locked": {
         "name": "Lås venstre bakdør"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Tilbehør"
+      },
+      "air_cleaning_is_on": {
+        "name": "Luftrensing"
       },
       "ign3": {
         "name": "IGN3"

@@ -486,10 +486,10 @@
         "name": "Energiförbrukning 90 dagar"
       },
       "total_power_regenerated": {
-        "name": "Total energiåtervinning"
+        "name": "Energiåtervinning 90 dagar"
       },
       "power_consumption_30d": {
-        "name": "Genomsnittlig energiförbrukning"
+        "name": "Genomsnittlig energiförbrukning 30 dagar"
       },
       "front_left_seat_status": {
         "name": "Vänster framsäte"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Låg bränslenivå"
       },
+      "hazard_lights_on": {
+        "name": "Varningsblinkers"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Varning för smartnyckelns batteri"
       },
       "washer_fluid_warning_is_on": {
         "name": "Varning för spolarvätska"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Vindrutevärme"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Avfrostning vid första avgång"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Luftkonditionering"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Förvarning om automatisk batteribrytning"
+      },
       "back_left_door_is_locked": {
         "name": "Lås vänster bakdörr"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Tillbehör"
+      },
+      "air_cleaning_is_on": {
+        "name": "Luftrening"
       },
       "ign3": {
         "name": "IGN3"

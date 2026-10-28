@@ -486,10 +486,10 @@
         "name": "Energieverbruik 90 dagen"
       },
       "total_power_regenerated": {
-        "name": "Totale energieterugwinning"
+        "name": "Energieterugwinning 90 dagen"
       },
       "power_consumption_30d": {
-        "name": "Gemiddeld energieverbruik"
+        "name": "Gemiddeld energieverbruik 30 dagen"
       },
       "front_left_seat_status": {
         "name": "Stoel linksvoor"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Laag brandstofniveau"
       },
+      "hazard_lights_on": {
+        "name": "Alarmlichten"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Waarschuwing batterij smart key"
       },
       "washer_fluid_warning_is_on": {
         "name": "Waarschuwing ruitensproeiervloeistof"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Voorruitverwarming"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Ontdooien eerste vertrek"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Airconditioning"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Voorwaarschuwing automatische accu-uitschakeling"
+      },
       "back_left_door_is_locked": {
         "name": "Slot portier linksachter"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Accessoires"
+      },
+      "air_cleaning_is_on": {
+        "name": "Luchtreiniging"
       },
       "ign3": {
         "name": "IGN3"

@@ -16,9 +16,9 @@ defaults to True. Only the climate entity carried the stale False through.
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
 from hyundai_kia_connect_api import Vehicle
+import pytest
 
 from custom_components.kia_uvo import climate
 from custom_components.kia_uvo.climate import HyundaiKiaCarClimateControlSwitch

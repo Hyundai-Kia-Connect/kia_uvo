@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime
+import logging
 from typing import Any, Final, cast
 
 from homeassistant.components.sensor import (
@@ -384,12 +384,22 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         translation_key="ev_first_departure_days",
         icon="mdi:calendar-clock",
         entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            getattr(vehicle, "ev_first_departure_enabled", None) is not None
+            or getattr(vehicle, "ev_first_departure_time", None) is not None
+            or getattr(vehicle, "ev_first_departure_days", None) is not None
+        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_second_departure_days",
         translation_key="ev_second_departure_days",
         icon="mdi:calendar-clock",
         entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            getattr(vehicle, "ev_second_departure_enabled", None) is not None
+            or getattr(vehicle, "ev_second_departure_time", None) is not None
+            or getattr(vehicle, "ev_second_departure_days", None) is not None
+        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="_ev_first_departure_climate_temperature",
@@ -637,8 +647,10 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
         if self._key == "ev_charging_current":
             return CHARGING_CURRENTS.get(value, None)
         if self._key in ("ev_first_departure_days", "ev_second_departure_days"):
-            if isinstance(value, list):
+            if isinstance(value, list) and value:
                 return ", ".join(str(d) for d in value)
+            if value in (None, [], ""):
+                return "None"
             return cast(StateType | datetime, value)
         return cast(StateType | datetime, value)
 
@@ -736,6 +748,8 @@ class DailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         """Return the driving stats for each day, keyed by date."""
         m: dict[str, Any] = {}
         for day in self.vehicle.daily_stats:
+            if day.date is None:
+                continue
             key = day.date.strftime("%Y-%m-%d")
             value = {
                 "total_consumed": day.total_consumed,
@@ -785,7 +799,7 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
         """Return today's driving stats."""
         today = date.today()
         todayskey = today.strftime("%Y-%m-%d")
-        m = {
+        m: dict[str, Any] = {
             "today_date": todayskey,
             "total_consumed": 0,
             "engine_consumption": 0,
@@ -796,6 +810,8 @@ class TodaysDailyDrivingStatsEntity(SensorEntity, HyundaiKiaConnectEntity):
             "distance": 0,
         }
         for day in self.vehicle.daily_stats:
+            if day.date is None:
+                continue
             key = day.date.strftime("%Y-%m-%d")
             if key == todayskey:
                 todayvalue = {
@@ -847,7 +863,10 @@ class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
     def native_value(self) -> datetime | None:
         """Return the capture timestamp of the latest SVM image."""
         details = self.coordinator.get_cached_svm_details(self.vehicle.id)
-        return cast(datetime | None, details.captured_at) if details else None
+        if details is None:
+            return None
+        captured_at: datetime | None = details.captured_at
+        return captured_at
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

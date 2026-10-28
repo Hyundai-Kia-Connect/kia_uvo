@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+import logging
 from typing import Final
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
@@ -55,14 +55,14 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         translation_key="start_valet_mode",
         icon="mdi:key-variant",
         press_action="async_start_valet_mode",
-        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+        exists_fn=lambda vehicle: bool(vehicle.supports_valet_mode),
     ),
     HyundaiKiaButtonDescription(
         key="stop_valet_mode",
         translation_key="stop_valet_mode",
         icon="mdi:key-variant",
         press_action="async_stop_valet_mode",
-        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+        exists_fn=lambda vehicle: bool(vehicle.supports_valet_mode),
     ),
     HyundaiKiaButtonDescription(
         key="open_all_windows",
@@ -70,7 +70,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-maximize",
         press_action="async_open_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),
@@ -80,7 +80,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-minimize",
         press_action="async_close_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),
@@ -90,7 +90,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-open-variant",
         press_action="async_vent_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),

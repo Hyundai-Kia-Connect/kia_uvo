@@ -486,10 +486,10 @@
         "name": "90 天能耗"
       },
       "total_power_regenerated": {
-        "name": "能量回收总量"
+        "name": "90 天能量回收"
       },
       "power_consumption_30d": {
-        "name": "平均能耗"
+        "name": "30 天平均能耗"
       },
       "front_left_seat_status": {
         "name": "左前座椅"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "燃油不足"
       },
+      "hazard_lights_on": {
+        "name": "危险警告灯"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "智能钥匙电池警告"
       },
       "washer_fluid_warning_is_on": {
         "name": "玻璃水警告"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "前挡风玻璃加热"
       },
       "ev_first_departure_climate_defrost": {
         "name": "第一次出发除霜"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "空调"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "蓄电池自动断电预警"
+      },
       "back_left_door_is_locked": {
         "name": "左后门锁"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "附件电源"
+      },
+      "air_cleaning_is_on": {
+        "name": "空气净化"
       },
       "ign3": {
         "name": "IGN3"

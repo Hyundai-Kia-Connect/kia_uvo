@@ -6,7 +6,6 @@ import hashlib
 import logging
 from typing import Any
 
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.const import (
@@ -19,10 +18,11 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.selector import selector
-from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api import VehicleManager
 from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
 from hyundai_kia_connect_api.exceptions import AuthenticationError
+import voluptuous as vol
 
 from .const import (
     BRANDS,
@@ -134,12 +134,12 @@ async def validate_input(
     hass: HomeAssistant,
     user_input: dict[str, Any],
     vehicle_manager: VehicleManager,
-) -> Token | OTPRequest:
+) -> bool | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
         result = await hass.async_add_executor_job(vehicle_manager.login)
 
-        if result is None:
+        if not result:
             raise InvalidAuth
 
         return result

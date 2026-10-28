@@ -486,10 +486,10 @@
         "name": "Zużycie energii - 90 dni"
       },
       "total_power_regenerated": {
-        "name": "Całkowita regeneracja energii"
+        "name": "Regeneracja energii - 90 dni"
       },
       "power_consumption_30d": {
-        "name": "Średnie zużycie energii"
+        "name": "Średnie zużycie energii - 30 dni"
       },
       "front_left_seat_status": {
         "name": "Podgrzewanie fotela przedniego lewego"
@@ -658,11 +658,17 @@
       "fuel_level_is_low": {
         "name": "Niski poziom paliwa"
       },
+      "hazard_lights_on": {
+        "name": "Światła awaryjne"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Ostrzeżenie o baterii w kluczyku"
       },
       "washer_fluid_warning_is_on": {
         "name": "Ostrzeżenie o płynie do spryskiwaczy"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Podgrzewanie przedniej szyby"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Odmrażanie - pierwszy wyjazd"
@@ -706,6 +712,9 @@
       "air_control_is_on": {
         "name": "Klimatyzacja"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Ostrzeżenie przed automatycznym odłączeniem baterii"
+      },
       "back_left_door_is_locked": {
         "name": "Zamek drzwi tylnych lewych"
       },
@@ -729,6 +738,9 @@
       },
       "accessory_on": {
         "name": "Akcesoria"
+      },
+      "air_cleaning_is_on": {
+        "name": "Oczyszczanie powietrza"
       },
       "ign3": {
         "name": "IGN3"
