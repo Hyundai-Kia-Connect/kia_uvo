@@ -16,7 +16,11 @@ defaults to True. Only the climate entity carried the stale False through.
 
 from unittest.mock import AsyncMock, MagicMock
 
-from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
+from homeassistant.components.climate.const import (
+    ATTR_HVAC_MODE,
+    ClimateEntityFeature,
+    HVACMode,
+)
 from hyundai_kia_connect_api import Vehicle
 import pytest
 
@@ -114,3 +118,62 @@ async def test_turn_on_and_off_route_to_the_car() -> None:
 
     await entity.async_turn_off()
     entity.coordinator.async_stop_climate.assert_awaited_once_with("v1")
+
+
+async def test_target_temperature_retains_setting_when_air_temp_is_none() -> None:
+    """When vehicle air_temperature is None (HVAC off), target_temperature falls back to config."""
+    vehicle = Vehicle(id="v1", name="test", model="test")
+    vehicle.air_control_is_on = False
+    vehicle.air_temperature = (None, "C")
+    coordinator = MagicMock()
+    coordinator.async_start_climate = AsyncMock()
+    coordinator.async_stop_climate = AsyncMock()
+
+    entity = HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)
+    entity.hass = MagicMock()
+    entity.async_write_ha_state = MagicMock()
+
+    # Initial fallback
+    assert entity.target_temperature == 21.0
+
+    # User adjusts temperature via slider while off
+    await entity.async_set_temperature(temperature=23.5)
+    assert entity.target_temperature == 23.5
+    coordinator.async_start_climate.assert_not_called()
+
+    # Turning on now sends the user-chosen 23.5 target temp
+    await entity.async_turn_on()
+    _vehicle_id, options = entity.coordinator.async_start_climate.call_args.args
+    assert options.climate is True
+    assert options.set_temp == 23.5
+
+
+async def test_set_temperature_with_hvac_mode_starts_climate() -> None:
+    """Calling set_temperature with ATTR_HVAC_MODE starts climate with the given temperature."""
+    entity = _entity(air_control_is_on=False)
+
+    await entity.async_set_temperature(temperature=22.5, hvac_mode=HVACMode.AUTO)
+
+    _vehicle_id, options = entity.coordinator.async_start_climate.call_args.args
+    assert options.climate is True
+    assert options.set_temp == 22.5
+
+
+async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported() -> None:
+    """When vehicle reports air temperature, climate_config is updated."""
+    vehicle = Vehicle(id="v1", name="test", model="test")
+    vehicle.air_control_is_on = True
+    vehicle.air_temperature = (24.0, "C")
+    coordinator = MagicMock()
+    coordinator.data = {}
+
+    entity = HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)
+    entity.hass = MagicMock()
+    entity.async_write_ha_state = MagicMock()
+
+    # Simulate coordinator update with new vehicle air_temperature
+    vehicle.air_temperature = (25.5, "C")
+    entity._handle_coordinator_update()
+    assert entity.climate_config.set_temp == 25.5
+    assert entity.target_temperature == 25.5
+
