@@ -102,14 +102,8 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         # current state meant that whenever climate was off -- i.e. exactly
         # when you want to start it -- we sent a start request carrying
         # airCtrl=0 and the car correctly did nothing.
-        initial_temp = self.vehicle.air_temperature
-        if initial_temp is None:
-            initial_temp = (
-                72.0 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 21.0
-            )
-
         self.climate_config = ClimateRequestOptions(
-            set_temp=initial_temp,
+            set_temp=self.vehicle.air_temperature,
             climate=True,
             heating=self.get_internal_heat_int_for_climate_request(),
             defrost=self.vehicle.defrost_is_on,
@@ -119,13 +113,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     def temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
         if self.vehicle._air_temperature_unit:
-            try:
-                return UnitOfTemperature(self.vehicle._air_temperature_unit)
-            except ValueError:
-                if self.vehicle._air_temperature_unit in ("C", "°C"):
-                    return UnitOfTemperature.CELSIUS
-                if self.vehicle._air_temperature_unit in ("F", "°F"):
-                    return UnitOfTemperature.FAHRENHEIT
+            return UnitOfTemperature(self.vehicle._air_temperature_unit)
         # The library has no unit until the car reports a setpoint (e.g.
         # airTemp "OFF" at startup), so fall back to HA's unit system.
         if self.hass is not None:
@@ -147,11 +135,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         """Get the desired in-car target temperature."""
         if self.vehicle.air_temperature is not None:
             return cast(float | None, self.vehicle.air_temperature)
-        if self.climate_config.set_temp is not None:
-            return cast(float | None, self.climate_config.set_temp)
-        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
-            return 72.0
-        return 21.0
+        return self.climate_config.set_temp
 
     @property
     def target_temperature_step(self) -> float | None:
@@ -224,7 +208,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        if self.vehicle.air_temperature is not None:
+        if (
+            self.vehicle.air_temperature is not None
+            and self.climate_config.set_temp is None
+        ):
             self.climate_config.set_temp = self.vehicle.air_temperature
         super()._handle_coordinator_update()
 

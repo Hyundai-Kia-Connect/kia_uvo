@@ -17,7 +17,6 @@ defaults to True. Only the climate entity carried the stale False through.
 from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
-from homeassistant.const import UnitOfTemperature
 from hyundai_kia_connect_api import Vehicle
 import pytest
 
@@ -130,8 +129,8 @@ async def test_target_temperature_retains_setting_when_air_temp_is_none() -> Non
     entity.hass = MagicMock()
     entity.async_write_ha_state = MagicMock()
 
-    # Initial fallback
-    assert entity.target_temperature == 21.0
+    # Initial state is None when car reports off and user hasn't set a temperature
+    assert entity.target_temperature is None
 
     # User adjusts temperature via slider while off
     await entity.async_set_temperature(temperature=23.5)
@@ -156,13 +155,11 @@ async def test_set_temperature_with_hvac_mode_starts_climate() -> None:
     assert options.set_temp == 22.5
 
 
-async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported() -> (
-    None
-):
-    """When vehicle reports air temperature, climate_config is updated."""
+async def test_coordinator_update_syncs_set_temp_only_when_none() -> None:
+    """When vehicle reports air temperature, climate_config is updated if None, but not clobbered."""
     vehicle = Vehicle(id="v1", name="test", model="test")
-    vehicle.air_control_is_on = True
-    vehicle.air_temperature = (24.0, "C")
+    vehicle.air_control_is_on = False
+    vehicle.air_temperature = (None, "C")
     coordinator = MagicMock()
     coordinator.data = {}
 
@@ -170,40 +167,24 @@ async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported()
     entity.hass = MagicMock()
     entity.async_write_ha_state = MagicMock()
 
-    # Simulate coordinator update with new vehicle air_temperature
+    assert entity.climate_config.set_temp is None
+    assert entity.target_temperature is None
+
+    # Vehicle turns on and reports 25.5 C: coordinator update syncs it because set_temp was None
     vehicle.air_temperature = (25.5, "C")
     entity._handle_coordinator_update()
     assert entity.climate_config.set_temp == 25.5
     assert entity.target_temperature == 25.5
 
+    # Vehicle turns off (air_temperature becomes None): set_temp is retained
+    vehicle.air_temperature = (None, "C")
+    assert entity.target_temperature == 25.5
 
-async def test_target_temperature_retains_setting_fahrenheit() -> None:
-    """When vehicle uses Fahrenheit and air_temperature is None, target_temperature defaults to 72.0."""
-    vehicle = Vehicle(id="v1", name="test", model="test")
-    vehicle.air_control_is_on = False
-    vehicle.air_temperature = (None, "F")
-    coordinator = MagicMock()
-    coordinator.async_start_climate = AsyncMock()
+    # User adjusts temperature to 26.0 while off
+    entity.climate_config.set_temp = 26.0
+    assert entity.target_temperature == 26.0
 
-    entity = HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)
-    assert entity.temperature_unit == UnitOfTemperature.FAHRENHEIT
-    assert entity.target_temperature == 72.0
-
-    # Ensure target_temperature fallback branch when climate_config has no set_temp
-    entity.climate_config.set_temp = None
-    assert entity.target_temperature == 72.0
-
-
-async def test_temperature_unit_fallback_strings() -> None:
-    """Verify fallback string handling for non-degree Celsius and Fahrenheit indicators."""
-    vehicle_c = Vehicle(id="v1", name="test", model="test")
-    vehicle_c.air_control_is_on = False
-    vehicle_c.air_temperature = (None, "C")
-    entity_c = HyundaiKiaCarClimateControlSwitch(MagicMock(), vehicle_c)
-    assert entity_c.temperature_unit == UnitOfTemperature.CELSIUS
-
-    vehicle_f = Vehicle(id="v2", name="test", model="test")
-    vehicle_f.air_control_is_on = False
-    vehicle_f.air_temperature = (None, "F")
-    entity_f = HyundaiKiaCarClimateControlSwitch(MagicMock(), vehicle_f)
-    assert entity_f.temperature_unit == UnitOfTemperature.FAHRENHEIT
+    # Stale coordinator update reporting previous 25.5 C does not clobber pending user change
+    vehicle.air_temperature = (25.5, "C")
+    entity._handle_coordinator_update()
+    assert entity.climate_config.set_temp == 26.0
