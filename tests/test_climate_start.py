@@ -207,4 +207,3 @@ async def test_temperature_unit_fallback_strings() -> None:
     vehicle_f.air_temperature = (None, "F")
     entity_f = HyundaiKiaCarClimateControlSwitch(MagicMock(), vehicle_f)
     assert entity_f.temperature_unit == UnitOfTemperature.FAHRENHEIT
-
