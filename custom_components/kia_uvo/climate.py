@@ -109,7 +109,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         )
 
     @property
-    def temperature_unit(self) -> str:
+    def native_temperature_unit(self) -> str:
         """Get the Cars Climate Control Temperature Unit."""
         if self.vehicle._air_temperature_unit:
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
@@ -120,7 +120,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         return UnitOfTemperature.CELSIUS
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         """Return the current in-car temperature, or None.
 
         The API exposes only the HVAC setpoint (`air_temperature`); the
@@ -130,7 +130,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         return None
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         """Get the desired in-car target temperature."""
         return cast(float | None, self.vehicle.air_temperature)
 
@@ -138,7 +138,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     def target_temperature_step(self) -> float | None:
         """Get the step size for adjusting the in-car target temperature."""
         # Fahrenheit setpoints are whole degrees; Celsius ones take halves.
-        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+        if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT:
             return 1
         return 0.5
 
@@ -148,7 +148,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         # TODO: get the exact per-region range from the lib
         # USA/CA report Fahrenheit; the hardcoded 14-30 °C bounds made the
         # climate slider unusable (14-30 °F) for those vehicles.
-        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+        if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT:
             return 62
         return 14
 
@@ -156,7 +156,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     def max_temp(self) -> float:
         """Get the maximum settable temperature."""
         # TODO: get the exact per-region range from the lib
-        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+        if self.native_temperature_unit == UnitOfTemperature.FAHRENHEIT:
             return 82
         return 30
 
@@ -243,3 +243,9 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
                 self.vehicle.id, self.climate_config
             )
         self.async_write_ha_state()
+
+    # Home Assistant before 2026.11 reads the legacy property names.
+    if not hasattr(ClimateEntity, "native_temperature_unit"):
+        temperature_unit = native_temperature_unit
+        current_temperature = native_current_temperature
+        target_temperature = native_target_temperature
