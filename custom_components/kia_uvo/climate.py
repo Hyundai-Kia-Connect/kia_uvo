@@ -105,9 +105,7 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         initial_temp = self.vehicle.air_temperature
         if initial_temp is None:
             initial_temp = (
-                72.0
-                if self.temperature_unit == UnitOfTemperature.FAHRENHEIT
-                else 21.0
+                72.0 if self.temperature_unit == UnitOfTemperature.FAHRENHEIT else 21.0
             )
 
         self.climate_config = ClimateRequestOptions(

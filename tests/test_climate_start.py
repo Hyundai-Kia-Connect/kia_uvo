@@ -16,11 +16,7 @@ defaults to True. Only the climate entity carried the stale False through.
 
 from unittest.mock import AsyncMock, MagicMock
 
-from homeassistant.components.climate.const import (
-    ATTR_HVAC_MODE,
-    ClimateEntityFeature,
-    HVACMode,
-)
+from homeassistant.components.climate.const import ClimateEntityFeature, HVACMode
 from hyundai_kia_connect_api import Vehicle
 import pytest
 
@@ -159,7 +155,9 @@ async def test_set_temperature_with_hvac_mode_starts_climate() -> None:
     assert options.set_temp == 22.5
 
 
-async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported() -> None:
+async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported() -> (
+    None
+):
     """When vehicle reports air temperature, climate_config is updated."""
     vehicle = Vehicle(id="v1", name="test", model="test")
     vehicle.air_control_is_on = True
@@ -176,4 +174,3 @@ async def test_coordinator_update_syncs_set_temp_when_air_temperature_reported()
     entity._handle_coordinator_update()
     assert entity.climate_config.set_temp == 25.5
     assert entity.target_temperature == 25.5
-
