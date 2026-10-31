@@ -31,7 +31,6 @@ from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
 
 from .const import (
-    BRAND_HYUNDAI,
     CHARGING_CURRENTS,
     DOMAIN,
     DYNAMIC_UNIT,
@@ -40,10 +39,8 @@ from .const import (
     REGION_EUROPE,
     REGION_INDIA,
     REGION_NZ,
-    REGION_USA,
     REGIONS,
 )
-
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
