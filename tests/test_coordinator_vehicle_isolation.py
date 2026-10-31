@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import frame
+from homeassistant.helpers.device_registry import DATA_REGISTRY
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
@@ -22,8 +23,24 @@ from custom_components.kia_uvo.coordinator import HyundaiKiaConnectDataUpdateCoo
 from custom_components.kia_uvo.entity import HyundaiKiaConnectEntity
 
 
+class _StubDeviceRegistry:
+    """Registry stub that reports the given device ids as disabled."""
+
+    def __init__(self, disabled_ids: set[str] | None = None) -> None:
+        self._disabled = disabled_ids or set()
+
+    def async_get_device(self, identifiers) -> Any | None:
+        for _, identifier in identifiers:
+            if identifier in self._disabled:
+                return MagicMock(disabled=True)
+        return None
+
+
 class _FakeHass:
     """Minimal hass that runs executor jobs inline and saves tokens."""
+
+    def __init__(self) -> None:
+        self.data: dict[str, Any] = {DATA_REGISTRY: _StubDeviceRegistry()}
 
     config_entries = MagicMock()
 
@@ -35,6 +52,8 @@ class _FakeVehicle:
     def __init__(self, vehicle_id: str, name: str = "Car") -> None:
         self.id = vehicle_id
         self.name = name
+        self.enabled = True
+        self.VIN = None
 
 
 def _make_coordinator(
@@ -83,6 +102,12 @@ def _make_coordinator(
             return False
 
         token = MagicMock()
+
+        def enable_vehicle(self, vehicle_id: str) -> None:
+            self.vehicles[vehicle_id].enabled = True
+
+        def disable_vehicle(self, vehicle_id: str) -> None:
+            self.vehicles[vehicle_id].enabled = False
 
     coordinator.vehicle_manager = _FakeManager()  # type: ignore[assignment]
     return coordinator
@@ -403,3 +428,15 @@ def test_init_creates_the_per_vehicle_state(
 
     assert coordinator._failed_vehicles == set()
     assert coordinator._vehicle_failures == {}
+
+
+async def test_disabled_device_syncs_to_the_manager() -> None:
+    """The device-enabled sync flips the manager flag the library gates on."""
+    coordinator = _make_coordinator({"a": _FakeVehicle("a")})
+    coordinator.hass.data[DATA_REGISTRY] = _StubDeviceRegistry({"a"})
+    coordinator.config_entry = MagicMock()
+    coordinator.config_entry.data = {}
+
+    await coordinator.async_check_and_refresh_token()
+
+    assert coordinator.vehicle_manager.vehicles["a"].enabled is False
