@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM-tila"
+      },
+      "gear_position": {
+        "name": "Vaihteen sijainti"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Ohjauspyörän lämmitystaso"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Keskimääräinen kulutus (yhteensä)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Keskimääräinen kulutus (ajo)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Keskimääräinen kulutus (tankkauksen jälkeen)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L jäljellä oleva matka"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L jäljellä oleva aika"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L-tila"
       }
     },
     "binary_sensor": {

@@ -586,6 +586,18 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Average Fuel Economy (Accumulated)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Average Fuel Economy (Drive)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Average Fuel Economy (After Refuel)"
+      },
+      "gear_position": {
+        "name": "Gear Position"
       }
     },
     "binary_sensor": {

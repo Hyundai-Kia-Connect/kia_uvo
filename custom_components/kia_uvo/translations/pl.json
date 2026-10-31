@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "Status SVM"
+      },
+      "gear_position": {
+        "name": "Pozycja biegu"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Poziom ogrzewania kierownicy"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Średnie spalanie (łącznie)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Średnie spalanie (przejazd)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Średnie spalanie (po tankowaniu)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "Zasięg rozładowania V2L"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "Pozostały czas rozładowania V2L"
+      },
+      "ev_v2l_mode": {
+        "name": "Tryb V2L"
       }
     },
     "binary_sensor": {

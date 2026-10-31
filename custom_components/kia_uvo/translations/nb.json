@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM-status"
+      },
+      "gear_position": {
+        "name": "Girposisjon"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Nivå for rattvarme"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Gjennomsnittlig forbruk (totalt)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Gjennomsnittlig forbruk (tur)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Gjennomsnittlig forbruk (etter tanking)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L gjenstående rekkevidde"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L gjenstående tid"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L-modus"
       }
     },
     "binary_sensor": {

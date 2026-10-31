@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM állapot"
+      },
+      "gear_position": {
+        "name": "Fokozatállás"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Kormányfűtés szintje"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Átlagos fogyasztás (összes)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Átlagos fogyasztás (út)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Átlagos fogyasztás (tankolás után)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L hátralévő hatótávolság"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L hátralévő idő"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L mód"
       }
     },
     "binary_sensor": {

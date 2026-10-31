@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "Stato SVM"
+      },
+      "gear_position": {
+        "name": "Posizione della marcia"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Livello riscaldamento del volante"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Consumo medio (totale)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Consumo medio (tragitto)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Consumo medio (dopo rifornimento)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "Autonomia scarico V2L"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "Tempo scarico restante V2L"
+      },
+      "ev_v2l_mode": {
+        "name": "Modalità V2L"
       }
     },
     "binary_sensor": {
