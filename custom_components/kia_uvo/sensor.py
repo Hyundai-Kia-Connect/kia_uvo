@@ -128,6 +128,8 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
+        # The lib keeps the 255 sentinel (kia_uvo #1935) unknown.
+        exists=_is_electrified,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_battery_remain",
