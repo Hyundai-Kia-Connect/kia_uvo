@@ -4,14 +4,7 @@ target-version = "py313"
 [tool.ruff.lint]
 ignore = [
   "BLE001",  # except Exception — resilience pattern (ConfigEntryNotReady catch-all, force_refresh catch-all) — permanent
-  # DTZ* — naive datetime; deferred to separate tz-aware migration PR (all-or-nothing)
-  "DTZ001",
-  "DTZ004",
-  "DTZ005",
-  "DTZ006",
-  "DTZ007",
-  "DTZ011",
-  "DTZ901",
+  "DTZ011",  # date.today(); deferred to the tz-aware migration PR
 ]
 
 [tool.ruff.lint.isort]

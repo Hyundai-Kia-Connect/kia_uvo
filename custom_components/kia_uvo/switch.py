@@ -81,7 +81,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_first_departure_climate_enabled",
         translation_key="ev_first_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.ev_first_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_first_departure_climate_enabled is not None
@@ -96,7 +96,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_second_departure_climate_enabled",
         translation_key="ev_second_departure_climate_enabled",
-        icon="mdi:car-climate",
+        icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.ev_second_departure_climate_enabled,
         exists_fn=lambda vehicle: (
             vehicle.ev_second_departure_climate_enabled is not None

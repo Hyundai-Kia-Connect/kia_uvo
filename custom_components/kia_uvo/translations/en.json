@@ -677,8 +677,14 @@
       "accessory_on": {
         "name": "Accessory"
       },
+      "air_cleaning_is_on": {
+        "name": "Air Cleaning"
+      },
       "air_control_is_on": {
         "name": "Air Conditioner"
+      },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Auto-Cut Battery Pre-Warning"
       },
       "back_left_door_is_locked": {
         "name": "Back Left Door Lock"
@@ -760,6 +766,9 @@
       },
       "fuel_level_is_low": {
         "name": "Fuel Low Level"
+      },
+      "hazard_lights_on": {
+        "name": "Hazard Lights"
       },
       "headlamp_left_low": {
         "name": "Front Left Lamp Fault"
@@ -856,6 +865,9 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Washer Fluid Warning"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Windshield Heater"
       },
       "ev_first_departure_climate_defrost": {
         "name": "First departure defrost"

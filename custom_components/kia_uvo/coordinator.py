@@ -19,8 +19,9 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -380,6 +381,21 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.vehicle_manager.check_and_refresh_token
         )
         await self._async_save_token()
+        self._sync_vehicle_enabled_states()
+
+    @callback
+    def _sync_vehicle_enabled_states(self) -> None:
+        """Stop polling vehicles whose device the user disabled in HA."""
+        registry = dr.async_get(self.hass)
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
+            identifiers = {(DOMAIN, vehicle_id)}
+            if vehicle.VIN:
+                identifiers.add((DOMAIN, f"vin:{vehicle.VIN}"))
+            device = registry.async_get_device(identifiers=identifiers)
+            if device is not None and device.disabled:
+                self.vehicle_manager.disable_vehicle(vehicle_id)
+            else:
+                self.vehicle_manager.enable_vehicle(vehicle_id)
 
     async def async_await_action_and_refresh(
         self, vehicle_id: str, action_id: str
