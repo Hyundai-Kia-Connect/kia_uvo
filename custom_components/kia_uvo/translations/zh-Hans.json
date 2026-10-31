@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM 状态"
+      },
+      "gear_position": {
+        "name": "换挡位置"
+      },
+      "steering_wheel_heat_step": {
+        "name": "方向盘加热档位"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "平均油耗（累计）"
+      },
+      "average_fuel_economy_drive": {
+        "name": "平均油耗（行驶）"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "平均油耗（加油后）"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L 放电剩余里程"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L 放电剩余时间"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L 模式"
       }
     },
     "binary_sensor": {

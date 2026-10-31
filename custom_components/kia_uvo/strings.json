@@ -91,6 +91,15 @@
       "air_temperature": {
         "name": "Set Temperature"
       },
+      "average_fuel_economy_accumulated": {
+        "name": "Average Fuel Economy (Accumulated)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Average Fuel Economy (Drive)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Average Fuel Economy (After Refuel)"
+      },
       "car_battery_percentage": {
         "name": "Car Battery Level"
       },
@@ -177,6 +186,9 @@
       },
       "fuel_level": {
         "name": "Fuel Level"
+      },
+      "gear_position": {
+        "name": "Gear Position"
       },
       "geocode_name": {
         "name": "Geocoded Location"
@@ -417,6 +429,9 @@
       "smart_key_battery_warning_is_on": {
         "name": "Smart Key Battery Warning"
       },
+      "steering_wheel_heat_step": {
+        "name": "Steering Wheel Heat Step"
+      },
       "steering_wheel_heater_is_on": {
         "name": "Steering Wheel Heater"
       },
@@ -619,6 +634,15 @@
       },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L Discharge DTE"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L Discharge Remaining Time"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L Mode"
       }
     },
     "device_tracker": {

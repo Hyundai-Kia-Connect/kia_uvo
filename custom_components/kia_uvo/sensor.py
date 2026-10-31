@@ -550,6 +550,75 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         translation_key="drive_mode",
         icon="mdi:car-cog",
     ),
+    HyundaiKiaSensorEntityDescription(
+        key="gear_position",
+        translation_key="gear_position",
+        icon="mdi:car-shift-pattern",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="steering_wheel_heat_step",
+        translation_key="steering_wheel_heat_step",
+        icon="mdi:steering",
+        entity_category=EntityCategory.DIAGNOSTIC,
+    ),
+    # The block is either served or not; a None field inside stays unknown.
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_discharge_remain_time",
+        translation_key="ev_v2l_discharge_remain_time",
+        icon="mdi:battery-charging-low",
+        device_class=SensorDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_discharge_dte",
+        translation_key="ev_v2l_discharge_dte",
+        icon="mdi:road-variant",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_v2l_mode",
+        translation_key="ev_v2l_mode",
+        icon="mdi:speedometer",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            vehicle.ev_v2l_discharge_limit is not None
+            or vehicle.ev_v2l_mode is not None
+            or vehicle.ev_v2l_discharge_dte is not None
+        ),
+    ),
+    # Only the unit field proves the backend serves fuel-economy data.
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_accumulated",
+        translation_key="average_fuel_economy_accumulated",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_drive",
+        translation_key="average_fuel_economy_drive",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="average_fuel_economy_after_refuel",
+        translation_key="average_fuel_economy_after_refuel",
+        icon="mdi:gas-station",
+        state_class=SensorStateClass.MEASUREMENT,
+        exists=lambda vehicle: vehicle.average_fuel_economy_unit is not None,
+    ),
 )
 
 
