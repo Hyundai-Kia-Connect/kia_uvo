@@ -612,7 +612,13 @@
         "name": "Modalità V2L"
       },
       "ev_charge_complete_alarm": {
-        "name": "Avviso ricarica completata"
+        "name": "Avviso ricarica completata",
+        "state": {
+          "before_10min": "10 minuti prima",
+          "before_20min": "20 minuti prima",
+          "before_30min": "30 minuti prima",
+          "off": "Disattivato"
+        }
       }
     },
     "binary_sensor": {

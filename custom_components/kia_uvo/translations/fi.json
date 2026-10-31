@@ -612,7 +612,13 @@
         "name": "V2L-tila"
       },
       "ev_charge_complete_alarm": {
-        "name": "Täyteen latautumisen hälytys"
+        "name": "Täyteen latautumisen hälytys",
+        "state": {
+          "before_10min": "10 minuuttia ennen",
+          "before_20min": "20 minuuttia ennen",
+          "before_30min": "30 minuuttia ennen",
+          "off": "Pois"
+        }
       }
     },
     "binary_sensor": {

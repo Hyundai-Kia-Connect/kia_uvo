@@ -612,7 +612,13 @@
         "name": "V2L-modus"
       },
       "ev_charge_complete_alarm": {
-        "name": "Melding volledig opgeladen"
+        "name": "Melding volledig opgeladen",
+        "state": {
+          "before_10min": "10 minuten van tevoren",
+          "before_20min": "20 minuten van tevoren",
+          "before_30min": "30 minuten van tevoren",
+          "off": "Uit"
+        }
       }
     },
     "binary_sensor": {

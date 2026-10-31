@@ -612,7 +612,13 @@
         "name": "V2L-tilstand"
       },
       "ev_charge_complete_alarm": {
-        "name": "Fuldladningsalarm"
+        "name": "Fuldladningsalarm",
+        "state": {
+          "before_10min": "10 minutter før",
+          "before_20min": "20 minutter før",
+          "before_30min": "30 minutter før",
+          "off": "Fra"
+        }
       }
     },
     "binary_sensor": {

@@ -600,7 +600,13 @@
         "name": "Gear Position"
       },
       "ev_charge_complete_alarm": {
-        "name": "Charge Complete Alarm"
+        "name": "Charge Complete Alarm",
+        "state": {
+          "before_10min": "10 Minutes Before",
+          "before_20min": "20 Minutes Before",
+          "before_30min": "30 Minutes Before",
+          "off": "Off"
+        }
       }
     },
     "binary_sensor": {
