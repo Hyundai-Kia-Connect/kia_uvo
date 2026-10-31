@@ -1,6 +1,6 @@
 {
   "name": "Kia Uvo / Hyundai Bluelink",
   "render_readme": true,
-  "homeassistant": "2025.1",
+  "homeassistant": "2025.12",
   "content_in_root": false
 }
