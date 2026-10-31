@@ -184,6 +184,15 @@
       "ev_target_range_charge_dc": {
         "name": "Target Range of Charge DC"
       },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L Discharge DTE"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L Discharge Remaining Time"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L Mode"
+      },
       "front_left_seat_status": {
         "name": "Front Left Seat"
       },
@@ -228,6 +237,9 @@
       },
       "rear_right_seat_status": {
         "name": "Rear Right Seat"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Steering Wheel Heat Step"
       },
       "todays_daily_driving_stats": {
         "name": "Today's Daily Driving Stats"
@@ -438,9 +450,6 @@
       "smart_key_battery_warning_is_on": {
         "name": "Smart Key Battery Warning"
       },
-      "steering_wheel_heat_step": {
-        "name": "Steering Wheel Heat Step"
-      },
       "steering_wheel_heater_is_on": {
         "name": "Steering Wheel Heater"
       },
@@ -643,15 +652,6 @@
       },
       "ev_v2l_discharge_limit": {
         "name": "V2L Limit"
-      },
-      "ev_v2l_discharge_dte": {
-        "name": "V2L Discharge DTE"
-      },
-      "ev_v2l_discharge_remain_time": {
-        "name": "V2L Discharge Remaining Time"
-      },
-      "ev_v2l_mode": {
-        "name": "V2L Mode"
       }
     },
     "device_tracker": {
