@@ -84,9 +84,6 @@ library. This repo only maps that library onto Home Assistant.
   `name` (+ `state`, `state_attributes`). `description` belongs on config-flow
   steps; hassfest rejects it on entities. Don't run formatters on these JSON
   files.
-- When a third entity key must be created despite a `None` value, replace the
-  `elif` creation cascade with a named frozenset of always-created keys, with
-  one comment per key.
 
 ## Development
 
