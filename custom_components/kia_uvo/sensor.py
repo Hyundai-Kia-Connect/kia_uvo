@@ -562,7 +562,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         icon="mdi:steering",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
-    # The block is either served or not; a None field inside stays unknown.
     HyundaiKiaSensorEntityDescription(
         key="ev_v2l_discharge_remain_time",
         translation_key="ev_v2l_discharge_remain_time",
@@ -597,7 +596,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
             or vehicle.ev_v2l_discharge_dte is not None
         ),
     ),
-    # Only the unit field proves the backend serves fuel-economy data.
     HyundaiKiaSensorEntityDescription(
         key="average_fuel_economy_accumulated",
         translation_key="average_fuel_economy_accumulated",
