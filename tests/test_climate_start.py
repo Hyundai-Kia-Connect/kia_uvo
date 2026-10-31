@@ -114,3 +114,77 @@ async def test_turn_on_and_off_route_to_the_car() -> None:
 
     await entity.async_turn_off()
     entity.coordinator.async_stop_climate.assert_awaited_once_with("v1")
+
+
+async def test_target_temperature_retains_setting_when_air_temp_is_none() -> None:
+    """When vehicle air_temperature is None (HVAC off), target_temperature falls back to config."""
+    vehicle = Vehicle(id="v1", name="test", model="test")
+    vehicle.air_control_is_on = False
+    vehicle.air_temperature = (None, "C")
+    coordinator = MagicMock()
+    coordinator.async_start_climate = AsyncMock()
+    coordinator.async_stop_climate = AsyncMock()
+
+    entity = HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)
+    entity.hass = MagicMock()
+    entity.async_write_ha_state = MagicMock()
+
+    # Initial state is None when car reports off and user hasn't set a temperature
+    assert entity.target_temperature is None
+
+    # User adjusts temperature via slider while off
+    await entity.async_set_temperature(temperature=23.5)
+    assert entity.target_temperature == 23.5
+    coordinator.async_start_climate.assert_not_called()
+
+    # Turning on now sends the user-chosen 23.5 target temp
+    await entity.async_turn_on()
+    _vehicle_id, options = entity.coordinator.async_start_climate.call_args.args
+    assert options.climate is True
+    assert options.set_temp == 23.5
+
+
+async def test_set_temperature_with_hvac_mode_starts_climate() -> None:
+    """Calling set_temperature with ATTR_HVAC_MODE starts climate with the given temperature."""
+    entity = _entity(air_control_is_on=False)
+
+    await entity.async_set_temperature(temperature=22.5, hvac_mode=HVACMode.AUTO)
+
+    _vehicle_id, options = entity.coordinator.async_start_climate.call_args.args
+    assert options.climate is True
+    assert options.set_temp == 22.5
+
+
+async def test_coordinator_update_syncs_set_temp_only_when_none() -> None:
+    """When vehicle reports air temperature, climate_config is updated if None, but not clobbered."""
+    vehicle = Vehicle(id="v1", name="test", model="test")
+    vehicle.air_control_is_on = False
+    vehicle.air_temperature = (None, "C")
+    coordinator = MagicMock()
+    coordinator.data = {}
+
+    entity = HyundaiKiaCarClimateControlSwitch(coordinator, vehicle)
+    entity.hass = MagicMock()
+    entity.async_write_ha_state = MagicMock()
+
+    assert entity.climate_config.set_temp is None
+    assert entity.target_temperature is None
+
+    # Vehicle turns on and reports 25.5 C: coordinator update syncs it because set_temp was None
+    vehicle.air_temperature = (25.5, "C")
+    entity._handle_coordinator_update()
+    assert entity.climate_config.set_temp == 25.5
+    assert entity.target_temperature == 25.5
+
+    # Vehicle turns off (air_temperature becomes None): set_temp is retained
+    vehicle.air_temperature = (None, "C")
+    assert entity.target_temperature == 25.5
+
+    # User adjusts temperature to 26.0 while off
+    entity.climate_config.set_temp = 26.0
+    assert entity.target_temperature == 26.0
+
+    # Stale coordinator update reporting previous 25.5 C does not clobber pending user change
+    vehicle.air_temperature = (25.5, "C")
+    entity._handle_coordinator_update()
+    assert entity.climate_config.set_temp == 26.0

@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM-status"
+      },
+      "gear_position": {
+        "name": "Gearposition"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Niveau for rattvarme"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Gennemsnitsforbrug (total)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Gennemsnitsforbrug (tur)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Gennemsnitsforbrug (efter tankning)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L restvidde (afladning)"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L resterende tid (afladning)"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L-tilstand"
       }
     },
     "binary_sensor": {
@@ -658,11 +682,17 @@
       "fuel_level_is_low": {
         "name": "Lavt brændstofniveau"
       },
+      "hazard_lights_on": {
+        "name": "Havariblink"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Advarsel om smartnøglebatteri"
       },
       "washer_fluid_warning_is_on": {
         "name": "Advarsel om sprinklervæske"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Forrudevarme"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Afisning ved første afgang"
@@ -706,6 +736,9 @@
       "air_control_is_on": {
         "name": "Klimaanlæg"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Forvarsel om automatisk batteriafbrydelse"
+      },
       "back_left_door_is_locked": {
         "name": "Lås bagdør venstre"
       },
@@ -729,6 +762,9 @@
       },
       "accessory_on": {
         "name": "Tilbehør"
+      },
+      "air_cleaning_is_on": {
+        "name": "Luftrensning"
       },
       "ign3": {
         "name": "IGN3"

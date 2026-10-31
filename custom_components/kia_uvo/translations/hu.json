@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM állapot"
+      },
+      "gear_position": {
+        "name": "Fokozatállás"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Kormányfűtés szintje"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Átlagos fogyasztás (összes)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Átlagos fogyasztás (út)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Átlagos fogyasztás (tankolás után)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L hátralévő hatótávolság"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L hátralévő idő"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L mód"
       }
     },
     "binary_sensor": {
@@ -658,11 +682,17 @@
       "fuel_level_is_low": {
         "name": "Alacsony üzemanyagszint"
       },
+      "hazard_lights_on": {
+        "name": "Vészvillogó"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Okoskulcs elem figyelmeztetés"
       },
       "washer_fluid_warning_is_on": {
         "name": "Ablakmosó folyadék figyelmeztetés"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Szélvédőfűtés"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Első indulás jégmentesítése"
@@ -706,6 +736,9 @@
       "air_control_is_on": {
         "name": "Légkondicionáló"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Akkumulátor automatikus lekapcsolásának előjelzése"
+      },
       "back_left_door_is_locked": {
         "name": "Bal hátsó ajtó zárja"
       },
@@ -729,6 +762,9 @@
       },
       "accessory_on": {
         "name": "Tartozék"
+      },
+      "air_cleaning_is_on": {
+        "name": "Légtisztítás"
       },
       "ign3": {
         "name": "IGN3"

@@ -17,7 +17,9 @@ def _vehicle() -> Vehicle:
     # Set the backing list: the library's setter sorts by date.
     vehicle._daily_stats = [
         DailyDrivingStats(date=None, total_consumed=1),
-        DailyDrivingStats(date=datetime.datetime(2026, 1, 2), total_consumed=2),
+        DailyDrivingStats(
+            date=datetime.datetime(2026, 1, 2, tzinfo=datetime.UTC), total_consumed=2
+        ),
     ]
     return vehicle
 

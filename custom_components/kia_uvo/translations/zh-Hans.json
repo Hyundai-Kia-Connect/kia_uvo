@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM 状态"
+      },
+      "gear_position": {
+        "name": "换挡位置"
+      },
+      "steering_wheel_heat_step": {
+        "name": "方向盘加热档位"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "平均油耗（累计）"
+      },
+      "average_fuel_economy_drive": {
+        "name": "平均油耗（行驶）"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "平均油耗（加油后）"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L 放电剩余里程"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L 放电剩余时间"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L 模式"
       }
     },
     "binary_sensor": {
@@ -658,11 +682,17 @@
       "fuel_level_is_low": {
         "name": "燃油不足"
       },
+      "hazard_lights_on": {
+        "name": "危险警告灯"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "智能钥匙电池警告"
       },
       "washer_fluid_warning_is_on": {
         "name": "玻璃水警告"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "前挡风玻璃加热"
       },
       "ev_first_departure_climate_defrost": {
         "name": "第一次出发除霜"
@@ -706,6 +736,9 @@
       "air_control_is_on": {
         "name": "空调"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "蓄电池自动断电预警"
+      },
       "back_left_door_is_locked": {
         "name": "左后门锁"
       },
@@ -729,6 +762,9 @@
       },
       "accessory_on": {
         "name": "附件电源"
+      },
+      "air_cleaning_is_on": {
+        "name": "空气净化"
       },
       "ign3": {
         "name": "IGN3"

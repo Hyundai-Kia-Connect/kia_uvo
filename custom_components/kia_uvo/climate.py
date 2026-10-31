@@ -8,6 +8,7 @@ from typing import Any, ClassVar, cast
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityDescription
 from homeassistant.components.climate.const import (
+    ATTR_HVAC_MODE,
     ClimateEntityFeature,
     HVACAction,
     HVACMode,
@@ -36,7 +37,7 @@ async def async_setup_entry(
     for vehicle in coordinator.vehicle_manager.vehicles.values():
         if vehicle.air_control_is_on is not None:
             entities.append(HyundaiKiaCarClimateControlSwitch(coordinator, vehicle))
-    async_add_entities(entities, True)
+    async_add_entities(entities)
 
 
 PARALLEL_UPDATES = 1
@@ -113,6 +114,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
         """Get the Cars Climate Control Temperature Unit."""
         if self.vehicle._air_temperature_unit:
             return UnitOfTemperature(self.vehicle._air_temperature_unit)
+        # The library has no unit until the car reports a setpoint (e.g.
+        # airTemp "OFF" at startup), so fall back to HA's unit system.
+        if self.hass is not None:
+            return self.hass.config.units.temperature_unit
         return UnitOfTemperature.CELSIUS
 
     @property
@@ -128,12 +133,16 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def target_temperature(self) -> float | None:
         """Get the desired in-car target temperature."""
-        return cast(float | None, self.vehicle.air_temperature)
+        if self.vehicle.air_temperature is not None:
+            return cast(float | None, self.vehicle.air_temperature)
+        return self.climate_config.set_temp
 
     @property
     def target_temperature_step(self) -> float | None:
         """Get the step size for adjusting the in-car target temperature."""
-        # TODO: get from lib
+        # Fahrenheit setpoints are whole degrees; Celsius ones take halves.
+        if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
+            return 1
         return 0.5
 
     @property
@@ -195,7 +204,16 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
     async def async_turn_on(self) -> None:
         """Turn the in-car climate control on."""
-        await self.async_set_hvac_mode(HVACMode.HEAT)
+        await self.async_set_hvac_mode(HVACMode.AUTO)
+
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        if (
+            self.vehicle.air_temperature is not None
+            and self.climate_config.set_temp is None
+        ):
+            self.climate_config.set_temp = self.vehicle.air_temperature
+        super()._handle_coordinator_update()
 
     async def async_turn_off(self) -> None:
         """Turn the in-car climate control off."""
@@ -218,6 +236,12 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the desired in-car temperature. Does not turn on the AC."""
+        if (hvac_mode := kwargs.get(ATTR_HVAC_MODE)) is not None:
+            if kwargs.get(ATTR_TEMPERATURE) is not None:
+                self.climate_config.set_temp = kwargs.get(ATTR_TEMPERATURE)
+            await self.async_set_hvac_mode(hvac_mode)
+            return
+
         old_temp = self.climate_config.set_temp
         self.climate_config.set_temp = kwargs.get(ATTR_TEMPERATURE)
 

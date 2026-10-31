@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "SVM-status"
+      },
+      "gear_position": {
+        "name": "Växelläge"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Nivå för rattvärme"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Genomsnittlig förbrukning (total)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Genomsnittlig förbrukning (resa)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Genomsnittlig förbrukning (efter tankning)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L återstående räckvidd"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L återstående tid"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L-läge"
       }
     },
     "binary_sensor": {
@@ -658,11 +682,17 @@
       "fuel_level_is_low": {
         "name": "Låg bränslenivå"
       },
+      "hazard_lights_on": {
+        "name": "Varningsblinkers"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Varning för smartnyckelns batteri"
       },
       "washer_fluid_warning_is_on": {
         "name": "Varning för spolarvätska"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Vindrutevärme"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Avfrostning vid första avgång"
@@ -706,6 +736,9 @@
       "air_control_is_on": {
         "name": "Luftkonditionering"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Förvarning om automatisk batteribrytning"
+      },
       "back_left_door_is_locked": {
         "name": "Lås vänster bakdörr"
       },
@@ -729,6 +762,9 @@
       },
       "accessory_on": {
         "name": "Tillbehör"
+      },
+      "air_cleaning_is_on": {
+        "name": "Luftrening"
       },
       "ign3": {
         "name": "IGN3"

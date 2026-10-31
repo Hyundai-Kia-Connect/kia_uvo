@@ -586,6 +586,30 @@
       },
       "svm_status": {
         "name": "État SVM"
+      },
+      "gear_position": {
+        "name": "Position de la transmission"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Niveau de chauffage du volant"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Consommation moyenne (totale)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Consommation moyenne (par trajet)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Consommation moyenne (après ravitaillement)"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "Autonomie de décharge V2L"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "Temps de décharge restant V2L"
+      },
+      "ev_v2l_mode": {
+        "name": "Mode V2L"
       }
     },
     "binary_sensor": {
@@ -658,11 +682,17 @@
       "fuel_level_is_low": {
         "name": "Niveau de carburant bas"
       },
+      "hazard_lights_on": {
+        "name": "Feux de détresse"
+      },
       "smart_key_battery_warning_is_on": {
         "name": "Alerte pile de la clé intelligente"
       },
       "washer_fluid_warning_is_on": {
         "name": "Alerte liquide lave-glace"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Pare-brise chauffant"
       },
       "ev_first_departure_climate_defrost": {
         "name": "Dégivrage du premier départ"
@@ -706,6 +736,9 @@
       "air_control_is_on": {
         "name": "Climatisation"
       },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Pré-alerte de coupure automatique de la batterie"
+      },
       "back_left_door_is_locked": {
         "name": "Verrou porte arrière gauche"
       },
@@ -729,6 +762,9 @@
       },
       "accessory_on": {
         "name": "Accessoires"
+      },
+      "air_cleaning_is_on": {
+        "name": "Purification de l'air"
       },
       "ign3": {
         "name": "IGN3"
