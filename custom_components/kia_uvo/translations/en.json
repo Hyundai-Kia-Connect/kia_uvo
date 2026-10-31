@@ -537,7 +537,21 @@
         "name": "90 Day Energy Regeneration"
       },
       "vehicle_identification_number": {
-        "name": "Vehicle Identification Number"
+        "name": "Vehicle Identification Number",
+        "state_attributes": {
+          "model_year": {
+            "name": "Model year"
+          },
+          "trim": {
+            "name": "Trim"
+          },
+          "exterior_color": {
+            "name": "Exterior colour"
+          },
+          "interior_color_code": {
+            "name": "Interior colour code"
+          }
+        }
       },
       "ev_first_departure_climate_temperature": {
         "name": "First departure climate temperature"
@@ -586,6 +600,77 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "trip_today_distance": {
+        "name": "Distance Today"
+      },
+      "trip_today_drive_time": {
+        "name": "Drive Time Today"
+      },
+      "trip_today_count": {
+        "name": "Trips Today"
+      },
+      "trip_month_distance": {
+        "name": "Distance This Month"
+      },
+      "trip_month_drive_time": {
+        "name": "Drive Time This Month"
+      },
+      "trip_month_idle_time": {
+        "name": "Idle Time This Month"
+      },
+      "trip_month_count": {
+        "name": "Trips This Month"
+      },
+      "trip_month_avg_speed": {
+        "name": "Average Speed This Month"
+      },
+      "trip_month_max_speed": {
+        "name": "Top Speed This Month"
+      },
+      "last_trip_start": {
+        "name": "Last Trip Start"
+      },
+      "last_trip_end": {
+        "name": "Last Trip End"
+      },
+      "last_trip_distance": {
+        "name": "Last Trip Distance"
+      },
+      "last_trip_drive_time": {
+        "name": "Last Trip Drive Time"
+      },
+      "last_trip_idle_time": {
+        "name": "Last Trip Idle Time"
+      },
+      "last_trip_avg_speed": {
+        "name": "Last Trip Average Speed"
+      },
+      "last_trip_max_speed": {
+        "name": "Last Trip Top Speed"
+      },
+      "last_trip_hard_braking": {
+        "name": "Last Trip Hard Braking"
+      },
+      "last_trip_rapid_acceleration": {
+        "name": "Last Trip Rapid Acceleration"
+      },
+      "last_trip_speeding": {
+        "name": "Last Trip Speeding"
+      },
+      "cabin_pm25": {
+        "name": "Cabin PM2.5",
+        "state_attributes": {
+          "level": {
+            "name": "Level"
+          },
+          "colour": {
+            "name": "Colour"
+          },
+          "measured_at": {
+            "name": "Measured at"
+          }
+        }
       }
     },
     "binary_sensor": {
@@ -813,6 +898,36 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V Battery Fault"
+      },
+      "hazard_lights_on": {
+        "name": "Hazard Lights"
+      },
+      "maintenance_engine_oil": {
+        "name": "Engine Oil"
+      },
+      "maintenance_oil_filter": {
+        "name": "Oil Filter"
+      },
+      "maintenance_tire_position_change": {
+        "name": "Tyre Rotation"
+      },
+      "maintenance_wheel_alignment": {
+        "name": "Wheel Alignment"
+      },
+      "maintenance_air_cleaner": {
+        "name": "Air Cleaner Filter"
+      },
+      "maintenance_antimicrobial_filter": {
+        "name": "Cabin Air Filter"
+      },
+      "maintenance_cooling_water": {
+        "name": "Engine Coolant"
+      },
+      "maintenance_fuel_filter": {
+        "name": "Fuel Filter"
+      },
+      "maintenance_ignition_plug": {
+        "name": "Spark Plug"
       }
     },
     "lock": {
@@ -939,7 +1054,18 @@
     },
     "device_tracker": {
       "location": {
-        "name": "Location"
+        "name": "Location",
+        "state_attributes": {
+          "speed": {
+            "name": "Speed"
+          },
+          "heading": {
+            "name": "Heading"
+          },
+          "altitude": {
+            "name": "Altitude"
+          }
+        }
       }
     },
     "time": {

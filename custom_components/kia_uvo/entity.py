@@ -4,7 +4,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from hyundai_kia_connect_api import Vehicle
 
-from .const import BRANDS, DOMAIN, REGIONS
+from .const import BRANDS, DOMAIN, REGIONS, TRIM_NAMES
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 
@@ -35,7 +35,21 @@ class HyundaiKiaConnectEntity(
         return DeviceInfo(
             identifiers=identifiers,
             manufacturer=f"{BRANDS[self.coordinator.vehicle_manager.brand]} {REGIONS[self.coordinator.vehicle_manager.region]}",
-            model=self.vehicle.model,
+            model=self._model_name(),
             name=self.vehicle.name,
             serial_number=f"{self.vehicle.VIN}",
         )
+
+    def _model_name(self) -> str | None:
+        """Model, plus the trim name when known and the model year."""
+        model = self.vehicle.model
+        if model is None:
+            return None
+        region = REGIONS.get(self.coordinator.vehicle_manager.region)
+        trim_code = getattr(self.vehicle, "trim_code", None)
+        trim = TRIM_NAMES.get(region or "", {}).get(trim_code) if trim_code else None
+        if trim:
+            model = f"{model} {trim}"
+        if year := getattr(self.vehicle, "year", None):
+            model = f"{model} ({year})"
+        return str(model)
