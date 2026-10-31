@@ -65,9 +65,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=DYNAMIC_UNIT,
         device_class=SensorDeviceClass.DISTANCE,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        # Odometer is a stable vehicle capability, but its value can be absent
-        # during setup. Keep the entity so a later refresh can populate it.
-        exists=lambda _: True,
     ),
     HyundaiKiaSensorEntityDescription(
         key="_last_service_distance",
@@ -92,14 +89,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
-        # The 12V SoC is transient — None while the telematics unit
-        # is asleep, after a 12V reset, or when the status payload
-        # omits it. Don't gate creation on it: a None at setup (e.g.
-        # a version-update reload) means the entity isn't yielded and
-        # HA marks it "no longer provided", with no return until the
-        # next reload. Always create; None -> HA `unknown`, the real
-        # SoC arrives on the next poll. See #1803.
-        exists=lambda _: True,
     ),
     HyundaiKiaSensorEntityDescription(
         key="last_updated_at",
@@ -128,6 +117,12 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         native_unit_of_measurement=PERCENTAGE,
         device_class=SensorDeviceClass.BATTERY,
         state_class=SensorStateClass.MEASUREMENT,
+        # SOH is an EV reading, and it can stay None indefinitely: the
+        # library keeps out-of-range values (the 255 some vehicles
+        # report after a BMS OTA, kia_uvo #1935) as unknown. Create the
+        # sensor for electrified vehicles so it survives until a real
+        # reading arrives.
+        exists=_is_electrified,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_battery_remain",
@@ -295,13 +290,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="_geocode_name",
         translation_key="geocode_name",
         icon="mdi:map",
-        # The geocoded address is transient — it lives in memory and is None
-        # right after a restart/reload until a poll with coordinates
-        # succeeds. Don't gate creation on it: a None at setup means the
-        # entity isn't yielded and HA marks it "no longer provided", with no
-        # return until the next reload, even after location recovers
-        # (kia_uvo #1844). Always create; None -> HA `unknown`.
-        exists=lambda _: True,
     ),
     HyundaiKiaSensorEntityDescription(
         key="dtc_count",
@@ -551,6 +539,28 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
 )
 
 
+# Sensor keys whose entity is created even while the value is None: with
+# the default value gate, a None at setup would leave the entity uncreated
+# and HA would report it "no longer being provided" until the next reload.
+# None stays `unknown`; the next poll fills the value in.
+ALWAYS_CREATE_KEYS: Final[frozenset[str]] = frozenset(
+    {
+        # Odometer is a stable vehicle capability, but its value can be
+        # absent during setup. Keep the entity so a later refresh can
+        # populate it.
+        "_odometer",
+        # The 12V SoC is transient — None while the telematics unit is
+        # asleep, after a 12V reset, or when the status payload omits it.
+        # See #1803.
+        "car_battery_percentage",
+        # The geocoded address is None right after a restart until a poll
+        # with coordinates succeeds. Creation is further gated on the
+        # geocode option in async_setup_entry below. See #1844.
+        "_geocode_name",
+    }
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
@@ -576,7 +586,8 @@ async def async_setup_entry(
             create = (
                 description.exists(vehicle)
                 if description.exists is not None
-                else getattr(vehicle, description.key, None) is not None
+                else description.key in ALWAYS_CREATE_KEYS
+                or getattr(vehicle, description.key, None) is not None
             )
             if create:
                 entities.append(
