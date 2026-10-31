@@ -136,6 +136,9 @@
       "ev_battery_water_temperature": {
         "name": "EV Battery Water Temperature"
       },
+      "ev_charge_complete_alarm": {
+        "name": "Charge Complete Alarm"
+      },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
       },

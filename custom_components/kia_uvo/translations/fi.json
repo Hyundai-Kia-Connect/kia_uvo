@@ -610,6 +610,9 @@
       },
       "ev_v2l_mode": {
         "name": "V2L-tila"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Täyteen latautumisen hälytys"
       }
     },
     "binary_sensor": {

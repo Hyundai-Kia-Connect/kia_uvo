@@ -598,6 +598,9 @@
       },
       "gear_position": {
         "name": "Gear Position"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Charge Complete Alarm"
       }
     },
     "binary_sensor": {

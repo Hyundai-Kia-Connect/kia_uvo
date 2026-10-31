@@ -610,6 +610,9 @@
       },
       "ev_v2l_mode": {
         "name": "V2L-tilstand"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Fuldladningsalarm"
       }
     },
     "binary_sensor": {

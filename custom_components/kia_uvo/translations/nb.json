@@ -610,6 +610,9 @@
       },
       "ev_v2l_mode": {
         "name": "V2L-modus"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Fulladingsalarm"
       }
     },
     "binary_sensor": {
