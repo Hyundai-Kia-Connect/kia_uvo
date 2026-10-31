@@ -21,7 +21,13 @@ from homeassistant.helpers.selector import selector
 from hyundai_kia_connect_api import VehicleManager
 from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
-from hyundai_kia_connect_api.exceptions import AuthenticationError
+from hyundai_kia_connect_api.exceptions import (
+    AuthenticationBlockedError,
+    AuthenticationCciTokenExchangeError,
+    AuthenticationError,
+    AuthenticationRedirectError,
+    AuthenticationSigninError,
+)
 import voluptuous as vol
 
 from .const import (
@@ -233,15 +239,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 )
             except InvalidAuth as err:
                 cause = err.__cause__
-                detail = str(cause) if isinstance(cause, AuthenticationError) else ""
-
-                if "returned to login page" in detail:
+                if isinstance(cause, AuthenticationRedirectError):
                     stage = "redirected_to_login"
-                elif "CCI token exchange failed" in detail:
+                elif isinstance(cause, AuthenticationCciTokenExchangeError):
                     stage = "cci_token_exchange"
-                elif "Signin failed" in detail:
+                elif isinstance(cause, AuthenticationSigninError):
                     stage = "signin"
-                elif "authorize was blocked" in detail:
+                elif isinstance(cause, AuthenticationBlockedError):
                     stage = "authorize_blocked"
                 elif cause is None:
                     stage = "login_returned_false"

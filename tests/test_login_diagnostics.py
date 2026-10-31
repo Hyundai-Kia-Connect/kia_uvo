@@ -3,21 +3,32 @@
 import ast
 from pathlib import Path
 
+from hyundai_kia_connect_api.exceptions import (
+    AuthenticationBlockedError,
+    AuthenticationCciTokenExchangeError,
+    AuthenticationError,
+    AuthenticationInvalidCredentialsError,
+    AuthenticationRedirectError,
+    AuthenticationSigninError,
+    AuthenticationTokenExpiredError,
+)
 import pytest
 
 
 @pytest.mark.parametrize(
-    ("message", "expected"),
+    ("exception_type", "expected"),
     [
-        ("Authentication failed — returned to login page", "redirected_to_login"),
-        ("CCI token exchange failed: HTTP 400", "cci_token_exchange"),
-        ("Signin failed: HTTP 400", "signin"),
-        ("IDPConnect authorize was blocked", "authorize_blocked"),
+        (AuthenticationRedirectError, "redirected_to_login"),
+        (AuthenticationCciTokenExchangeError, "cci_token_exchange"),
+        (AuthenticationSigninError, "signin"),
+        (AuthenticationInvalidCredentialsError, "signin"),
+        (AuthenticationTokenExpiredError, "other_authentication_error"),
+        (AuthenticationBlockedError, "authorize_blocked"),
         (None, "login_returned_false"),
-        ("Unknown error SECRET_TEST", "other_authentication_error"),
+        (AuthenticationError, "other_authentication_error"),
     ],
 )
-def test_authentication_diagnostics(message, expected):
+def test_authentication_diagnostics(exception_type, expected):
     path = (
         Path(__file__).resolve().parents[1] / "custom_components/kia_uvo/config_flow.py"
     )
@@ -46,9 +57,6 @@ def test_authentication_diagnostics(message, expected):
         "exec",
     )
 
-    class AuthenticationError(Exception):
-        pass
-
     class Logger:
         def __init__(self):
             self.messages = []
@@ -57,13 +65,16 @@ def test_authentication_diagnostics(message, expected):
             self.messages.append(fmt % args)
 
     err = Exception("Invalid authentication")
-    if message is not None:
-        err.__cause__ = AuthenticationError(message)
+    if exception_type is not None:
+        err.__cause__ = exception_type("SECRET_TEST")
 
     logger = Logger()
     context = {
         "err": err,
-        "AuthenticationError": AuthenticationError,
+        "AuthenticationRedirectError": AuthenticationRedirectError,
+        "AuthenticationCciTokenExchangeError": AuthenticationCciTokenExchangeError,
+        "AuthenticationSigninError": AuthenticationSigninError,
+        "AuthenticationBlockedError": AuthenticationBlockedError,
         "_LOGGER": logger,
         "errors": {},
     }
