@@ -24,10 +24,11 @@ library. This repo only maps that library onto Home Assistant.
 - **Vehicle API logic goes in the library, not here.** If a change needs new
   data or a new command from the car, make it in hyundai_kia_connect_api
   first, then bump the library in a separate PR here.
-- **Keep comments and docstrings short.** Write them only when they help
-  whoever changes the code next: why something non-obvious is done, a vendor
-  quirk, a constraint. Don't restate the code, describe the change history,
-  or explain the PR. Those belong in the commit message or PR description.
+- **Keep comments and docstrings short.** A code comment is at most one line:
+  the one non-obvious `why` the diff doesn't show, plus an issue link when one
+  exists. If nothing survives that test, leave no comment. Longer docstrings
+  are for contracts. Don't restate the code, describe the change history, or
+  explain the PR. Those belong in the commit message or PR description.
 - **PR titles use Conventional Commits.** CI enforces this
   (`lintPR.yaml`), and releases are versioned from it: `fix: ...`,
   `feat(sensor): ...`, `refactor: ...`, `chore: ...`, `test: ...`, `docs: ...`.
