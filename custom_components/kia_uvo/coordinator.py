@@ -234,7 +234,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 if auth_failures == len(self.vehicle_manager.vehicles):
                     raise ConfigEntryAuthFailed(err) from err
             except RateLimitingError as err:
-                raise UpdateFailed(f"Rate limited by the API: {err}") from err
+                raise UpdateFailed(
+                    f"Rate limited by the API: {err}", retry_after=2 * 60 * 60
+                ) from err
             except APIError as err:
                 failed.add(vehicle_id)
                 self._log_vehicle_failure(vehicle_id, err)

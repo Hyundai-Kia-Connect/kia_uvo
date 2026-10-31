@@ -123,8 +123,10 @@ async def test_rate_limiting_error_raises_update_failed() -> None:
         {"a": _FakeVehicle("a")}, {"a": RateLimitingError("slow down")}
     )
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed) as err:
         await coordinator._async_poll_vehicles(mode="cached")
+
+    assert err.value.retry_after == 2 * 60 * 60
 
 
 async def test_non_api_exception_raises_update_failed() -> None:
