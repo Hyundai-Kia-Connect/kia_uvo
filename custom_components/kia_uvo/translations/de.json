@@ -610,6 +610,15 @@
       },
       "ev_v2l_mode": {
         "name": "V2L-Modus"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Alarm bei Ladeende",
+        "state": {
+          "before_10min": "10 Minuten vorher",
+          "before_20min": "20 Minuten vorher",
+          "before_30min": "30 Minuten vorher",
+          "off": "Aus"
+        }
       }
     },
     "binary_sensor": {

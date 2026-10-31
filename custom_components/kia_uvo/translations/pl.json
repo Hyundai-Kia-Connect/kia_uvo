@@ -610,6 +610,15 @@
       },
       "ev_v2l_mode": {
         "name": "Tryb V2L"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Alarm zupełnego naładowania",
+        "state": {
+          "before_10min": "10 minut przed",
+          "before_20min": "20 minut przed",
+          "before_30min": "30 minut przed",
+          "off": "Wyłączony"
+        }
       }
     },
     "binary_sensor": {

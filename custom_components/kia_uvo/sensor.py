@@ -42,12 +42,27 @@ class HyundaiKiaSensorEntityDescription(SensorEntityDescription):
     """A class that describes custom sensor entities."""
 
     exists: Callable[[Vehicle], bool] | None = None
+    value_fn: Callable[[Vehicle], StateType] | None = None
 
 
 def _is_electrified(vehicle: Vehicle) -> bool:
     """Return True for BEV and PHEV vehicles."""
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
+
+# The app models the alarm as a radio preset: exactly one flag is set.
+_ALARM_FLAG_FIELDS: Final[tuple[str, ...]] = (
+    "ev_charge_complete_alarm_before_10min",
+    "ev_charge_complete_alarm_before_20min",
+    "ev_charge_complete_alarm_before_30min",
+    "ev_charge_complete_alarm_off",
+)
+_ALARM_STATE_BY_FIELD: Final[dict[str, str]] = {
+    "ev_charge_complete_alarm_before_10min": "before_10min",
+    "ev_charge_complete_alarm_before_20min": "before_20min",
+    "ev_charge_complete_alarm_before_30min": "before_30min",
+    "ev_charge_complete_alarm_off": "off",
+}
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
     HyundaiKiaSensorEntityDescription(
@@ -329,6 +344,23 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="ev_off_peak_end_time",
         translation_key="ev_off_peak_end_time",
         icon="mdi:clock-outline",
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_charge_complete_alarm",
+        translation_key="ev_charge_complete_alarm",
+        icon="mdi:bell-ring-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: any(
+            getattr(vehicle, field, None) is not None for field in _ALARM_FLAG_FIELDS
+        ),
+        value_fn=lambda vehicle: next(
+            (
+                state
+                for field, state in _ALARM_STATE_BY_FIELD.items()
+                if getattr(vehicle, field, None)
+            ),
+            None,
+        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_charging_current",
@@ -681,6 +713,8 @@ PARALLEL_UPDATES = 0
 class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEntity):
     """Hyundai / Kia Connect sensor class."""
 
+    entity_description: HyundaiKiaSensorEntityDescription
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
@@ -712,6 +746,8 @@ class HyundaiKiaConnectSensor(RestoreSensor, SensorEntity, HyundaiKiaConnectEnti
     @property
     def native_value(self) -> StateType | datetime:
         """Return the value reported by the sensor."""
+        if self.entity_description.value_fn is not None:
+            return self.entity_description.value_fn(self.vehicle)
         value = getattr(self.vehicle, self._key)
         if self._key == "ev_charging_current":
             return CHARGING_CURRENTS.get(value, None)

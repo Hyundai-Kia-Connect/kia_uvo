@@ -610,6 +610,15 @@
       },
       "ev_v2l_mode": {
         "name": "V2L 模式"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "充电完成提醒",
+        "state": {
+          "before_10min": "提前10分钟",
+          "before_20min": "提前20分钟",
+          "before_30min": "提前30分钟",
+          "off": "关闭"
+        }
       }
     },
     "binary_sensor": {
