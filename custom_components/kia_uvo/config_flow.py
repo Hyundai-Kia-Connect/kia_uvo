@@ -231,8 +231,26 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 result = await validate_input(
                     self.hass, full_config, self._vehicle_manager
                 )
-            except InvalidAuth:
+            except InvalidAuth as err:
+                cause = err.__cause__
+                detail = str(cause) if isinstance(cause, AuthenticationError) else ""
+
+                if "returned to login page" in detail:
+                    stage = "redirected_to_login"
+                elif "CCI token exchange failed" in detail:
+                    stage = "cci_token_exchange"
+                elif "Signin failed" in detail:
+                    stage = "signin"
+                elif "authorize was blocked" in detail:
+                    stage = "authorize_blocked"
+                elif cause is None:
+                    stage = "login_returned_false"
+                else:
+                    stage = "other_authentication_error"
+
+                _LOGGER.warning("Hyundai/Kia authentication failed: %s", stage)
                 errors["base"] = "invalid_auth"
+
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
