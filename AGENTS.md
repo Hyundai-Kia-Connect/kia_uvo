@@ -44,6 +44,9 @@ library. This repo only maps that library onto Home Assistant.
 - **Read the full issue thread before planning a fix.** A closed issue is
   often closed because the reporter confirmed a fix in the comments, and the
   data dump you're about to request may already be there.
+- **Reference another PR or issue only when the reader needs it.** Every
+  `#N` posts a cross-reference on that thread. Don't name another PR just to
+  say this one doesn't conflict with it.
 - **Cross-repo references use the full form**
   `Hyundai-Kia-Connect/hyundai_kia_connect_api#N`. A bare `#N` resolves to the
   current repo only.
