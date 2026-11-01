@@ -226,13 +226,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             try:
                 await self._async_poll_vehicle(vehicle_id, mode=mode)
             except AuthenticationError as err:
-                # resCode 7501 arrives per vehicle; only all of them failing
-                # means the account itself is rejected.
+                # The token is only repaired (refresh or re-login) by the next
+                # cycle's token check, which raises ConfigEntryAuthFailed itself
+                # if the credentials are bad.
                 auth_failures += 1
                 failed.add(vehicle_id)
                 self._log_vehicle_failure(vehicle_id, err)
                 if auth_failures == len(self.vehicle_manager.vehicles):
-                    raise ConfigEntryAuthFailed(err) from err
+                    raise UpdateFailed(
+                        f"Authentication failed for every vehicle: {err}"
+                    ) from err
             except RateLimitingError as err:
                 raise UpdateFailed(
                     f"Rate limited by the API: {err}", retry_after=2 * 60 * 60

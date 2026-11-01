@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 from typing import Any
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import frame
@@ -13,6 +13,8 @@ from homeassistant.helpers.device_registry import DATA_REGISTRY
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
+    AuthenticationInvalidCredentialsError,
+    AuthenticationTokenExpiredError,
     RateLimitingError,
     ServiceTemporaryUnavailable,
 )
@@ -177,15 +179,30 @@ async def test_auth_error_from_one_vehicle_does_not_fail_account() -> None:
     assert coordinator.vehicle_available("b") is True
 
 
-async def test_auth_error_from_all_vehicles_raises_config_entry_auth_failed() -> None:
-    """When every vehicle fails with an auth error, the account is at fault."""
+async def test_auth_error_from_all_vehicles_raises_update_failed() -> None:
+    """A token rejected mid-poll is repaired next cycle, so no re-auth prompt."""
     coordinator = _make_coordinator(
         {"a": _FakeVehicle("a"), "b": _FakeVehicle("b")},
-        {"a": AuthenticationError("7501"), "b": AuthenticationError("7501")},
+        {
+            "a": AuthenticationTokenExpiredError("Access token is deleted"),
+            "b": AuthenticationTokenExpiredError("Access token is deleted"),
+        },
+    )
+
+    with pytest.raises(UpdateFailed):
+        await coordinator._async_poll_vehicles(mode="cached")
+
+
+async def test_auth_error_from_token_check_raises_config_entry_auth_failed() -> None:
+    """Bad credentials still prompt re-auth through the token check."""
+    coordinator = _make_coordinator({"a": _FakeVehicle("a")})
+    coordinator.scan_interval = 1800
+    coordinator.async_check_and_refresh_token = AsyncMock(  # type: ignore[method-assign]
+        side_effect=AuthenticationInvalidCredentialsError("7404")
     )
 
     with pytest.raises(ConfigEntryAuthFailed):
-        await coordinator._async_poll_vehicles(mode="cached")
+        await coordinator._async_update_data()
 
 
 async def test_force_refresh_falls_back_to_cached_for_failing_vehicle() -> None:
