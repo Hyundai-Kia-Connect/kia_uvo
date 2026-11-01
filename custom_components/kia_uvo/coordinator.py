@@ -221,9 +221,21 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         account-scoped and raise UpdateFailed so Home Assistant backs off.
         """
         failed: set[str] = set()
+        auth_failures = 0
         for vehicle_id in list(self.vehicle_manager.vehicles):
             try:
                 await self._async_poll_vehicle(vehicle_id, mode=mode)
+            except AuthenticationError as err:
+                # The token is only repaired (refresh or re-login) by the next
+                # cycle's token check, which raises ConfigEntryAuthFailed itself
+                # if the credentials are bad.
+                auth_failures += 1
+                failed.add(vehicle_id)
+                self._log_vehicle_failure(vehicle_id, err)
+                if auth_failures == len(self.vehicle_manager.vehicles):
+                    raise UpdateFailed(
+                        f"Authentication failed for every vehicle: {err}"
+                    ) from err
             except RateLimitingError as err:
                 raise UpdateFailed(
                     f"Rate limited by the API: {err}", retry_after=2 * 60 * 60

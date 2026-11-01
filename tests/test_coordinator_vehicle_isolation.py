@@ -12,6 +12,7 @@ from homeassistant.helpers import frame
 from homeassistant.helpers.device_registry import DATA_REGISTRY
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from hyundai_kia_connect_api.exceptions import (
+    AuthenticationError,
     AuthenticationInvalidCredentialsError,
     AuthenticationTokenExpiredError,
     RateLimitingError,
@@ -165,11 +166,27 @@ async def test_non_api_exception_raises_update_failed() -> None:
         await coordinator._async_poll_vehicles(mode="cached")
 
 
-async def test_auth_error_from_poll_raises_update_failed() -> None:
+async def test_auth_error_from_one_vehicle_does_not_fail_account() -> None:
+    """resCode 7501 is a per-vehicle answer: only that vehicle goes down."""
+    coordinator = _make_coordinator(
+        {"a": _FakeVehicle("a"), "b": _FakeVehicle("b")},
+        {"a": AuthenticationError("7501")},
+    )
+
+    await coordinator._async_poll_vehicles(mode="cached")
+
+    assert coordinator.vehicle_available("a") is False
+    assert coordinator.vehicle_available("b") is True
+
+
+async def test_auth_error_from_all_vehicles_raises_update_failed() -> None:
     """A token rejected mid-poll is repaired next cycle, so no re-auth prompt."""
     coordinator = _make_coordinator(
         {"a": _FakeVehicle("a"), "b": _FakeVehicle("b")},
-        {"a": AuthenticationTokenExpiredError("Access token is deleted")},
+        {
+            "a": AuthenticationTokenExpiredError("Access token is deleted"),
+            "b": AuthenticationTokenExpiredError("Access token is deleted"),
+        },
     )
 
     with pytest.raises(UpdateFailed):
