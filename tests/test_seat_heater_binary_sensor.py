@@ -42,7 +42,7 @@ def _description(key: str) -> HyundaiKiaBinarySensorEntityDescription:
     ],
 )
 def test_seat_heater_is_on(key: str, code: int | None, expected: bool | None) -> None:
-    vehicle = Vehicle()
+    vehicle = Vehicle(id="v1")
     setattr(vehicle, SEAT_KEYS[key], SEAT_STATUS[code])
     is_on = _description(key).is_on
     assert is_on is not None

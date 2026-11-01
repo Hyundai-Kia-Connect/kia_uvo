@@ -11,7 +11,7 @@ from custom_components.kia_uvo.binary_sensor import SENSOR_DESCRIPTIONS
     ("raw", "expected"), [(None, None), (0, False), (1, True), (True, True)]
 )
 def test_raw_flag_is_on(key: str, raw: int | None, expected: bool | None) -> None:
-    vehicle = Vehicle()
+    vehicle = Vehicle(id="v1")
     setattr(vehicle, key, raw)
     is_on = next(d for d in SENSOR_DESCRIPTIONS if d.key == key).is_on
     assert is_on is not None
