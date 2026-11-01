@@ -78,7 +78,7 @@ def _stub_integration(monkeypatch) -> None:
 
 @pytest.mark.asyncio
 async def test_payload_shape() -> None:
-    token = Token()
+    token = Token(username="test-user", password="test-pass")
     token.valid_until = datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC)
     token.device_id = "dev123"
     coordinator = _make_coordinator(token=token)
@@ -117,7 +117,7 @@ async def test_vehicle_gps_redacted() -> None:
 
 @pytest.mark.asyncio
 async def test_token_meta_has_no_secrets() -> None:
-    token = Token()
+    token = Token(username="test-user", password="test-pass")
     token.access_token = "secret_access"
     token.refresh_token = "secret_refresh"
     token.pin = "1234"
