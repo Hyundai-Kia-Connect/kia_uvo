@@ -98,8 +98,7 @@ async def test_payload_shape() -> None:
 
 @pytest.mark.asyncio
 async def test_vehicle_gps_redacted() -> None:
-    vehicle = Vehicle()
-    vehicle.id = "car1"
+    vehicle = Vehicle(id="car1")
     vehicle._location_latitude = 50.06
     vehicle._location_longitude = 19.92
     coordinator = _make_coordinator()
@@ -208,8 +207,7 @@ async def test_broken_vehicle_does_not_kill_dump() -> None:
     class NotADataclass:
         pass
 
-    good = Vehicle()
-    good.id = "good"
+    good = Vehicle(id="good")
     coordinator = _make_coordinator()
     coordinator.vehicle_manager.vehicles = {"good": good, "bad": NotADataclass()}
     hass = _make_hass(coordinator)
