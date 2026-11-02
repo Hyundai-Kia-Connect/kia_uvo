@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",
       "invalid_credentials": "用户名或密码无效",
-      "unknown": "未知错误"
+      "unknown": "未知错误",
+      "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },
   "options": {

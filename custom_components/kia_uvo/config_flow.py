@@ -41,10 +41,27 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
+    REGION_EUROPE,
+    REGION_EUROPE_CCI,
     REGIONS,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Some EU accounts hold only the first 20 password characters; the app
+# truncates longer passwords when saving them (#1979).
+EU_PASSWORD_TRUNCATION_THRESHOLD = 20
+
+
+def _auth_error_base(config: dict[str, Any]) -> str:
+    """Swap in the password hint for EU regions when the password is >20 chars."""
+    if (
+        REGIONS[config[CONF_REGION]] in (REGION_EUROPE, REGION_EUROPE_CCI)
+        and len(config.get(CONF_PASSWORD) or "") > EU_PASSWORD_TRUNCATION_THRESHOLD
+    ):
+        return "password_truncated_hint"
+    return "invalid_auth"
+
 
 STEP_REGION_DATA_SCHEMA = vol.Schema(
     {
@@ -232,7 +249,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass, full_config, self._vehicle_manager
                 )
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -368,7 +385,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 await validate_input(self.hass, full_config, self._vehicle_manager)
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"

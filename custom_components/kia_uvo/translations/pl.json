@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Logowanie do serwerów Hyundai (Bluelink) / Kia (Uvo) Connect nie powiodło się. Użyj oficjalnej aplikacji, aby się wylogować i zalogować ponownie, a następnie spróbuj jeszcze raz.",
       "invalid_credentials": "Nieprawidłowa nazwa użytkownika lub token/hasło",
-      "unknown": "Nieoczekiwany błąd"
+      "unknown": "Nieoczekiwany błąd",
+      "password_truncated_hint": "Logowanie nie powiodło się. Jeśli hasło ma więcej niż 20 znaków, konto może akceptować tylko pierwsze 20 z nich (zaobserwowane na kontach Hyundai/Kia/Genesis w Europie, gdy hasło ustawiano na telefonie). Spróbuj użyć pierwszych 20 znaków hasła."
     }
   },
   "options": {
