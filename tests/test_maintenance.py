@@ -132,7 +132,13 @@ async def test_unknown_item_falls_back_to_api_name():
     assert sensor.name == "Brake pads"
 
 
-async def test_sensor_state_and_attributes():
+async def test_sensor_state_and_attributes(monkeypatch):
+    class _FrozenDatetime(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return NOW
+
+    monkeypatch.setattr(binary_platform, "datetime", _FrozenDatetime)
     sensors = await _maintenance_sensors(_seltos())
     oil = sensors["Engine oil"]
     assert oil.is_on is True
