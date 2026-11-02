@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",
       "invalid_credentials": "Ogiltigt användarnamn eller lösenord",
-      "unknown": "Oväntat fel"
+      "unknown": "Oväntat fel",
+      "password_truncated_hint": "Autentisering misslyckades. Om ditt lösenord är längre än 20 tecken kan kontot endast acceptera de första 20 (observerat på europeiska Hyundai/Kia/Genesis-konton när lösenordet sattes på en telefon). Testa de första 20 tecknen."
     }
   },
   "options": {

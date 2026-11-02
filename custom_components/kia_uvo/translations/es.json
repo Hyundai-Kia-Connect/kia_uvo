@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Falló el inicio de sesión en los servidores Hyundai (Bluelink) / Kia (Uvo) Connect. ¡Por favor, usa la aplicación oficial para cerrar sesión y volver a iniciarla e intenta de nuevo!",
       "invalid_credentials": "Nombre de usuario o contraseña no válidos",
-      "unknown": "Error inesperado"
+      "unknown": "Error inesperado",
+      "password_truncated_hint": "Error de autentificación. Si tu contraseña tiene más de 20 caracteres, la cuenta puede aceptar solo los primeros 20 (observado en cuentas europeas de Hyundai/Kia/Genesis cuando la contraseña se configuró en un teléfono). Prueba los primeros 20 caracteres."
     }
   },
   "options": {
