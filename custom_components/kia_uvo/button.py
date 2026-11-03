@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
+import logging
 from typing import Final
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
@@ -23,6 +23,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaButtonDescription(ButtonEntityDescription):
+    """Describes a Hyundai / Kia Connect button entity."""
+
     press_action: str
     command: str | None = None
     exists_fn: Callable[[Vehicle], bool] = lambda _: True
@@ -58,7 +60,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         translation_key="start_valet_mode",
         icon="mdi:key-variant",
         press_action="async_start_valet_mode",
-        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+        exists_fn=lambda vehicle: bool(vehicle.supports_valet_mode),
     ),
     HyundaiKiaButtonDescription(
         key="stop_valet_mode",
@@ -66,7 +68,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         translation_key="stop_valet_mode",
         icon="mdi:key-variant",
         press_action="async_stop_valet_mode",
-        exists_fn=lambda vehicle: vehicle.supports_valet_mode,
+        exists_fn=lambda vehicle: bool(vehicle.supports_valet_mode),
     ),
     HyundaiKiaButtonDescription(
         key="open_all_windows",
@@ -75,7 +77,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-maximize",
         press_action="async_open_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),
@@ -86,7 +88,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-minimize",
         press_action="async_close_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),
@@ -97,7 +99,7 @@ BUTTON_DESCRIPTIONS: Final[tuple[HyundaiKiaButtonDescription, ...]] = (
         icon="mdi:window-open-variant",
         press_action="async_vent_all_windows",
         exists_fn=lambda vehicle: (
-            vehicle.supports_window_control
+            bool(vehicle.supports_window_control)
             and vehicle.front_left_window_is_open is not None
         ),
     ),
@@ -117,6 +119,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up button entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
@@ -139,12 +142,15 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
+    """Button that triggers a vehicle command on press."""
+
     def __init__(
         self,
         coordinator: HyundaiKiaConnectDataUpdateCoordinator,
         description: HyundaiKiaButtonDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the button."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self.entity_description: HyundaiKiaButtonDescription = description
         self._key = description.key
@@ -153,6 +159,7 @@ class HyundaiKiaConnectButton(ButtonEntity, HyundaiKiaConnectEntity):
         self._attr_entity_registry_enabled_default = description.enabled_fn(vehicle)
 
     async def async_press(self) -> None:
+        """Run the coordinator action bound to this button."""
         await getattr(self.coordinator, self.entity_description.press_action)(
             self.vehicle.id
         )

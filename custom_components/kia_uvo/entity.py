@@ -25,6 +25,11 @@ class HyundaiKiaConnectEntity(
         self.vehicle = vehicle
 
     @property
+    def available(self) -> bool:
+        """Return False when this vehicle's own poll failed."""
+        return super().available and self.coordinator.vehicle_available(self.vehicle.id)
+
+    @property
     def device_info(self) -> DeviceInfo:
         """Return device information to use for this entity."""
         identifiers = {(DOMAIN, self.vehicle.id)}

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 import json
 import os
+from pathlib import Path
 import re
 import sys
+from typing import Any
 import urllib.error
 import urllib.request
-from collections.abc import Callable
-from pathlib import Path
-from typing import Any
 
 API_OWNER = "Hyundai-Kia-Connect"
 API_REPO = "hyundai_kia_connect_api"

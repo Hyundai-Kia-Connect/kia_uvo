@@ -2,8 +2,8 @@
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from homeassistant.const import CONF_REGION
+import pytest
 
 from custom_components.kia_uvo.config_flow import ConfigFlow
 from custom_components.kia_uvo.const import CONF_BRAND, REGIONS
@@ -44,7 +44,7 @@ async def test_japan_login_builds_manager_and_creates_entry(monkeypatch) -> None
     flow._region_data = {CONF_REGION: 10, CONF_BRAND: 2}
     flow.hass = MagicMock()
     flow.hass.config.language = "ja"
-    flow.hass.async_add_executor_job = AsyncMock(return_value=config_flow.Token())
+    flow.hass.async_add_executor_job = AsyncMock(return_value=True)
     flow.async_set_unique_id = AsyncMock()
     flow._abort_if_unique_id_configured = MagicMock()
     flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})

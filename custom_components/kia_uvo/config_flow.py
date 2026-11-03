@@ -6,7 +6,6 @@ import hashlib
 import logging
 from typing import Any
 
-import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
 from homeassistant.const import (
@@ -19,10 +18,11 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.selector import selector
-from hyundai_kia_connect_api import Token, VehicleManager
+from hyundai_kia_connect_api import VehicleManager
 from hyundai_kia_connect_api.ApiImpl import OTPRequest
 from hyundai_kia_connect_api.const import OTP_NOTIFY_TYPE
 from hyundai_kia_connect_api.exceptions import AuthenticationError
+import voluptuous as vol
 
 from .const import (
     BRAND_HYUNDAI,
@@ -42,11 +42,28 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
+    REGION_EUROPE,
+    REGION_EUROPE_CCI,
     REGION_JAPAN,
     REGIONS,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Some EU accounts hold only the first 20 password characters; the app
+# truncates longer passwords when saving them (#1979).
+EU_PASSWORD_TRUNCATION_THRESHOLD = 20
+
+
+def _auth_error_base(config: dict[str, Any]) -> str:
+    """Swap in the password hint for EU regions when the password is >20 chars."""
+    if (
+        REGIONS[config[CONF_REGION]] in (REGION_EUROPE, REGION_EUROPE_CCI)
+        and len(config.get(CONF_PASSWORD) or "") > EU_PASSWORD_TRUNCATION_THRESHOLD
+    ):
+        return "password_truncated_hint"
+    return "invalid_auth"
+
 
 STEP_REGION_DATA_SCHEMA = vol.Schema(
     {
@@ -144,12 +161,12 @@ async def validate_input(
     hass: HomeAssistant,
     user_input: dict[str, Any],
     vehicle_manager: VehicleManager,
-) -> Token | OTPRequest:
+) -> bool | OTPRequest:
     """Validate the user input allows us to connect."""
     try:
         result = await hass.async_add_executor_job(vehicle_manager.login)
 
-        if result is None:
+        if not result:
             raise InvalidAuth
 
         return result
@@ -164,7 +181,6 @@ class HyundaiKiaConnectOptionFlowHandler(config_entries.OptionsFlowWithReload):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle options init setup."""
-
         if user_input is not None:
             return self.async_create_entry(
                 title=self.config_entry.title, data=user_input
@@ -259,20 +275,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             assert self._region_data is not None
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
+            self._vehicle_manager = VehicleManager(
+                region=full_config[CONF_REGION],
+                brand=full_config[CONF_BRAND],
+                language=self.hass.config.language,
+                username=full_config[CONF_USERNAME],
+                password=full_config[CONF_PASSWORD],
+                pin=full_config[CONF_PIN],
+            )
             try:
-                self._vehicle_manager = VehicleManager(
-                    region=full_config[CONF_REGION],
-                    brand=full_config[CONF_BRAND],
-                    language=self.hass.config.language,
-                    username=full_config[CONF_USERNAME],
-                    password=full_config[CONF_PASSWORD],
-                    pin=full_config[CONF_PIN],
-                )
                 result = await validate_input(
                     self.hass, full_config, self._vehicle_manager
                 )
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -403,18 +419,18 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             assert self._region_data is not None
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
+            self._vehicle_manager = VehicleManager(
+                region=full_config[CONF_REGION],
+                brand=full_config[CONF_BRAND],
+                language=self.hass.config.language,
+                username=full_config[CONF_USERNAME],
+                password=full_config[CONF_PASSWORD],
+                pin=full_config[CONF_PIN],
+            )
             try:
-                self._vehicle_manager = VehicleManager(
-                    region=full_config[CONF_REGION],
-                    brand=full_config[CONF_BRAND],
-                    language=self.hass.config.language,
-                    username=full_config[CONF_USERNAME],
-                    password=full_config[CONF_PASSWORD],
-                    pin=full_config[CONF_PIN],
-                )
                 await validate_input(self.hass, full_config, self._vehicle_manager)
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"

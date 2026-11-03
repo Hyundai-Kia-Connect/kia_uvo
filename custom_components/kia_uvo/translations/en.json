@@ -70,7 +70,8 @@
       "invalid_credentials": "Invalid username or password",
       "unknown": "Unexpected error",
       "unsupported_japan_brand": "Japan currently supports Hyundai Bluelink accounts only.",
-      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands."
+      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands.",
+      "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },
   "options": {
@@ -484,6 +485,15 @@
       "ev_target_range_charge_dc": {
         "name": "Target Range of Charge DC"
       },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L Discharge DTE"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L Discharge Remaining Time"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L Mode"
+      },
       "front_left_seat_status": {
         "name": "Front Left Seat"
       },
@@ -518,13 +528,16 @@
         "name": "Outside temperature"
       },
       "power_consumption_30d": {
-        "name": "Average Energy Consumption"
+        "name": "30 Day Average Energy Consumption"
       },
       "rear_left_seat_status": {
         "name": "Rear Left Seat"
       },
       "rear_right_seat_status": {
         "name": "Rear Right Seat"
+      },
+      "steering_wheel_heat_step": {
+        "name": "Steering Wheel Heat Step"
       },
       "todays_daily_driving_stats": {
         "name": "Today's Daily Driving Stats"
@@ -536,7 +549,7 @@
         "name": "90 Day Energy Consumption"
       },
       "total_power_regenerated": {
-        "name": "Total Energy Regeneration"
+        "name": "90 Day Energy Regeneration"
       },
       "vehicle_identification_number": {
         "name": "Vehicle Identification Number"
@@ -588,14 +601,41 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "Average Fuel Economy (Accumulated)"
+      },
+      "average_fuel_economy_drive": {
+        "name": "Average Fuel Economy (Drive)"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "Average Fuel Economy (After Refuel)"
+      },
+      "gear_position": {
+        "name": "Gear Position"
+      },
+      "ev_charge_complete_alarm": {
+        "name": "Charge Complete Alarm",
+        "state": {
+          "before_10min": "10 Minutes Before",
+          "before_20min": "20 Minutes Before",
+          "before_30min": "30 Minutes Before",
+          "off": "Off"
+        }
       }
     },
     "binary_sensor": {
       "accessory_on": {
         "name": "Accessory"
       },
+      "air_cleaning_is_on": {
+        "name": "Air Cleaning"
+      },
       "air_control_is_on": {
         "name": "Air Conditioner"
+      },
+      "auto_cut_battery_prewarning_on": {
+        "name": "Auto-Cut Battery Pre-Warning"
       },
       "back_left_door_is_locked": {
         "name": "Back Left Door Lock"
@@ -677,6 +717,9 @@
       },
       "fuel_level_is_low": {
         "name": "Fuel Low Level"
+      },
+      "hazard_lights_on": {
+        "name": "Hazard Lights"
       },
       "headlamp_left_low": {
         "name": "Front Left Lamp Fault"
@@ -773,6 +816,9 @@
       },
       "washer_fluid_warning_is_on": {
         "name": "Washer Fluid Warning"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "Windshield Heater"
       },
       "ev_first_departure_climate_defrost": {
         "name": "First departure defrost"

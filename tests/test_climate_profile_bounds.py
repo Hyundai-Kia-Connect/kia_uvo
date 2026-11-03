@@ -2,9 +2,9 @@
 
 from unittest.mock import MagicMock
 
-import pytest
 from homeassistant.const import UnitOfTemperature
 from hyundai_kia_connect_api import Vehicle
+import pytest
 
 from custom_components.kia_uvo.climate import HyundaiKiaCarClimateControlSwitch
 from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinator

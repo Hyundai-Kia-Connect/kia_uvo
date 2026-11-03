@@ -4,8 +4,8 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
-import pytest
 from homeassistant.exceptions import HomeAssistantError
+import pytest
 from test_region_operation_serialization import coordinator
 
 from custom_components.kia_uvo import async_unload_entry

@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-import datetime as dt
-import logging
-import traceback
 from collections.abc import Callable
+import datetime as dt
 from datetime import timedelta
 from functools import partial
-from typing import Any
+import logging
+from typing import Any, Literal
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -19,8 +18,9 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_USERNAME,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -36,7 +36,9 @@ from hyundai_kia_connect_api import (
 )
 from hyundai_kia_connect_api.const import WINDOW_STATE
 from hyundai_kia_connect_api.exceptions import (
+    APIError,
     AuthenticationError,
+    RateLimitingError,
     UnsupportedControlError,
 )
 from hyundai_kia_connect_api.svm_image import render_views
@@ -65,6 +67,10 @@ _LOGGER = logging.getLogger(__name__)
 # set_svm_dewarp, consumed in image.py.
 SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 
+# "check" lets the library pick force or cached, "cached" is the server-side
+# cached state, "force" is an explicit fresh read.
+PollMode = Literal["check", "cached", "force"]
+
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
@@ -82,13 +88,17 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._svm_views: dict[
             str, tuple[tuple[dt.datetime | None, bool], dict[str, bytes]]
         ] = {}
+        # Vehicles whose last poll failed with a vehicle-scoped API error.
+        self._failed_vehicles: set[str] = set()
+        # Consecutive failed polls per vehicle (drives the "skip it" hint).
+        self._vehicle_failures: dict[str, int] = {}
 
         self.vehicle_manager = VehicleManager(
-            region=config_entry.data.get(CONF_REGION),
-            brand=config_entry.data.get(CONF_BRAND),
-            username=config_entry.data.get(CONF_USERNAME),
-            password=config_entry.data.get(CONF_PASSWORD),
-            pin=config_entry.data.get(CONF_PIN),
+            region=config_entry.data[CONF_REGION],
+            brand=config_entry.data[CONF_BRAND],
+            username=config_entry.data[CONF_USERNAME],
+            password=config_entry.data[CONF_PASSWORD],
+            pin=config_entry.data[CONF_PIN],
             geocode_api_enable=config_entry.options.get(
                 CONF_ENABLE_GEOLOCATION_ENTITY, DEFAULT_ENABLE_GEOLOCATION_ENTITY
             ),
@@ -175,7 +185,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             ) from err
         current_hour = dt_util.now().hour
 
-        if (
+        in_force_window = (
             (self.no_force_refresh_hour_start <= self.no_force_refresh_hour_finish)
             and (
                 current_hour < self.no_force_refresh_hour_start
@@ -187,48 +197,119 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 current_hour < self.no_force_refresh_hour_start
                 and current_hour >= self.no_force_refresh_hour_finish
             )
-        ):
-            try:
-                await self.hass.async_add_executor_job(
-                    self.vehicle_manager.check_and_force_update_vehicles,
-                    self.force_refresh_interval,
-                )
-            except Exception:
-                try:
-                    _LOGGER.exception(
-                        f"Force update failed, falling back to cached: {traceback.format_exc()}"
-                    )
-                    await self.hass.async_add_executor_job(
-                        self.vehicle_manager.update_all_vehicles_with_cached_state
-                    )
-                except Exception:
-                    _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
-                    raise UpdateFailed(
-                        f"Error communicating with API: {traceback.format_exc()}"
-                    )
+        )
 
-        else:
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.update_all_vehicles_with_cached_state
-            )
-
+        await self._async_poll_vehicles(mode="check" if in_force_window else "cached")
         return self.data
 
     async def async_update_all(self) -> None:
         """Update vehicle data."""
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.update_all_vehicles_with_cached_state
-        )
+        await self._async_poll_vehicles(mode="cached")
         self.async_set_updated_data(self.data)
 
     async def async_force_update_all(self) -> None:
         """Force refresh vehicle data and update it."""
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.force_refresh_all_vehicles_states
-        )
+        await self._async_poll_vehicles(mode="force")
         self.async_set_updated_data(self.data)
+
+    async def _async_poll_vehicles(self, *, mode: PollMode) -> None:
+        """Poll each vehicle on its own so one failing vehicle can't fail all.
+
+        APIError is vehicle-scoped. Rate limiting and unknown exceptions are
+        account-scoped and raise UpdateFailed so Home Assistant backs off.
+        """
+        failed: set[str] = set()
+        auth_failures = 0
+        for vehicle_id in list(self.vehicle_manager.vehicles):
+            try:
+                await self._async_poll_vehicle(vehicle_id, mode=mode)
+            except AuthenticationError as err:
+                # The token is only repaired (refresh or re-login) by the next
+                # cycle's token check, which raises ConfigEntryAuthFailed itself
+                # if the credentials are bad.
+                auth_failures += 1
+                failed.add(vehicle_id)
+                self._log_vehicle_failure(vehicle_id, err)
+                if auth_failures == len(self.vehicle_manager.vehicles):
+                    raise UpdateFailed(
+                        f"Authentication failed for every vehicle: {err}"
+                    ) from err
+            except RateLimitingError as err:
+                raise UpdateFailed(
+                    f"Rate limited by the API: {err}", retry_after=2 * 60 * 60
+                ) from err
+            except APIError as err:
+                failed.add(vehicle_id)
+                self._log_vehicle_failure(vehicle_id, err)
+            except Exception as err:
+                # UpdateFailed is logged without a traceback.
+                _LOGGER.exception("%s - Error communicating with API", DOMAIN)
+                raise UpdateFailed(f"Error communicating with API: {err}") from err
+            else:
+                self._vehicle_failures.pop(vehicle_id, None)
+        self._failed_vehicles = failed
+
+    async def _async_poll_vehicle(self, vehicle_id: str, *, mode: PollMode) -> None:
+        """Update one vehicle, falling back to the cached state if a force fails."""
+        try:
+            if mode == "check":
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.check_and_force_update_vehicle,
+                    self.force_refresh_interval,
+                    vehicle_id,
+                )
+            elif mode == "force":
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
+                )
+            else:
+                await self.hass.async_add_executor_job(
+                    self.vehicle_manager.update_vehicle_with_cached_state, vehicle_id
+                )
+        except Exception as err:
+            if mode == "cached":
+                raise
+            _LOGGER.warning(
+                "%s - Force refresh failed for %s (%s), using cached state: %s",
+                DOMAIN,
+                self.vehicle_manager.vehicles[vehicle_id].name,
+                vehicle_id,
+                err,
+            )
+            await self.hass.async_add_executor_job(
+                self.vehicle_manager.update_vehicle_with_cached_state, vehicle_id
+            )
+
+    def _log_vehicle_failure(self, vehicle_id: str, err: Exception) -> None:
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        failures = self._vehicle_failures.get(vehicle_id, 0) + 1
+        self._vehicle_failures[vehicle_id] = failures
+        _LOGGER.warning(
+            "%s - Failed to update %s (%s): %s: %s",
+            DOMAIN,
+            vehicle.name,
+            vehicle_id,
+            type(err).__name__,
+            err,
+        )
+        if failures == 3:
+            # A vehicle the backend no longer serves (e.g. a sold car) fails
+            # every poll; stop polling it by disabling the device in HA.
+            _LOGGER.warning(
+                "%s - Vehicle %s (%s) failed %s polls in a row. If the backend "
+                "no longer serves it, disable its device in Home Assistant "
+                "to stop polling it.",
+                DOMAIN,
+                vehicle.name,
+                vehicle_id,
+                failures,
+            )
+
+    def vehicle_available(self, vehicle_id: str) -> bool:
+        """Return False if the vehicle's last poll failed."""
+        return vehicle_id not in self._failed_vehicles
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
@@ -313,10 +394,26 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.vehicle_manager.check_and_refresh_token
         )
         await self._async_save_token()
+        self._sync_vehicle_enabled_states()
+
+    @callback
+    def _sync_vehicle_enabled_states(self) -> None:
+        """Stop polling vehicles whose device the user disabled in HA."""
+        registry = dr.async_get(self.hass)
+        for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
+            identifiers = {(DOMAIN, vehicle_id)}
+            if vehicle.VIN:
+                identifiers.add((DOMAIN, f"vin:{vehicle.VIN}"))
+            device = registry.async_get_device(identifiers=identifiers)
+            if device is not None and device.disabled:
+                self.vehicle_manager.disable_vehicle(vehicle_id)
+            else:
+                self.vehicle_manager.enable_vehicle(vehicle_id)
 
     async def async_await_action_and_refresh(
         self, vehicle_id: str, action_id: str
     ) -> None:
+        """Wait for a vehicle action to complete, then refresh the cached data."""
         try:
             await asyncio.sleep(5)
             await self.hass.async_add_executor_job(
@@ -409,6 +506,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 )
 
     async def async_lock_vehicle(self, vehicle_id: str) -> None:
+        """Lock the vehicle."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.lock(vehicle_id),
@@ -416,6 +514,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_unlock_vehicle(self, vehicle_id: str) -> None:
+        """Unlock the vehicle."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.unlock(vehicle_id),
@@ -423,6 +522,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_open_charge_port(self, vehicle_id: str) -> None:
+        """Open the vehicle's charge port."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.open_charge_port(vehicle_id),
@@ -430,6 +530,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_close_charge_port(self, vehicle_id: str) -> None:
+        """Close the vehicle's charge port."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.close_charge_port(vehicle_id),
@@ -443,6 +544,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions
     ) -> None:
+        """Start climate control with the given options."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_climate(vehicle_id, climate_options),
@@ -450,6 +552,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_climate(self, vehicle_id: str) -> None:
+        """Stop climate control."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_climate(vehicle_id),
@@ -457,6 +560,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_charge(self, vehicle_id: str) -> None:
+        """Start charging."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_charge(vehicle_id),
@@ -464,6 +568,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_charge(self, vehicle_id: str) -> None:
+        """Stop charging."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_charge(vehicle_id),
@@ -471,6 +576,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_charge_limits(self, vehicle_id: str, ac: int, dc: int) -> None:
+        """Set the AC and DC charge limits (percent)."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charge_limits(vehicle_id, ac, dc),
@@ -478,6 +584,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_charging_current(self, vehicle_id: str, level: int) -> None:
+        """Set the AC charging current level."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_charging_current(vehicle_id, level),
@@ -487,6 +594,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_schedule_charging_and_climate(
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
     ) -> None:
+        """Set the charging and climate schedule."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.schedule_charging_and_climate(
@@ -517,7 +625,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             or False,
             climate_enabled=vehicle.ev_first_departure_climate_enabled or False,
             temperature=vehicle.ev_first_departure_climate_temperature or 21.0,
-            temperature_unit=vehicle._ev_first_departure_climate_temperature_unit or 0,
             defrost=vehicle.ev_first_departure_climate_defrost or False,
         )
 
@@ -580,10 +687,11 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Toggle a departure schedule on/off."""
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
-        if departure_num == 1:
-            options.first_departure.enabled = enabled
-        else:
-            options.second_departure.enabled = enabled
+        departure = (
+            options.first_departure if departure_num == 1 else options.second_departure
+        )
+        if departure is not None:
+            departure.enabled = enabled
         # reservFlag (charging_enabled) must be 1 for departure slots to take
         # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
         # (None), the builder defaults it to False, causing the API to accept
@@ -611,6 +719,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_start_hazard_lights(self, vehicle_id: str) -> None:
+        """Flash the hazard lights."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights(vehicle_id),
@@ -618,6 +727,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_hazard_lights_and_horn(self, vehicle_id: str) -> None:
+        """Flash the hazard lights and sound the horn."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_hazard_lights_and_horn(vehicle_id),
@@ -625,6 +735,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_valet_mode(self, vehicle_id: str) -> None:
+        """Turn on valet mode."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.start_valet_mode(vehicle_id),
@@ -632,6 +743,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_stop_valet_mode(self, vehicle_id: str) -> None:
+        """Turn off valet mode."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.stop_valet_mode(vehicle_id),
@@ -639,6 +751,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_set_v2l_limit(self, vehicle_id: str, limit: int) -> None:
+        """Set the vehicle-to-load discharge limit (percent)."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_vehicle_to_load_discharge_limit(
@@ -650,6 +763,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_set_windows(
         self, vehicle_id: str, windowOptions: WindowRequestOptions
     ) -> None:
+        """Set the state of one or more windows."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, windowOptions),
@@ -659,6 +773,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_set_navigation(
         self, vehicle_id: str, poi_list: list[POIInfo]
     ) -> None:
+        """Send points of interest to the vehicle's navigation."""
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_navigation(vehicle_id, poi_list),
@@ -666,6 +781,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_open_all_windows(self, vehicle_id: str) -> None:
+        """Open all four windows."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.OPEN,
             front_right=WINDOW_STATE.OPEN,
@@ -679,6 +795,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_close_all_windows(self, vehicle_id: str) -> None:
+        """Close all four windows."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.CLOSED,
             front_right=WINDOW_STATE.CLOSED,
@@ -692,6 +809,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_vent_all_windows(self, vehicle_id: str) -> None:
+        """Put all four windows in the ventilation position."""
         options = WindowRequestOptions(
             front_left=WINDOW_STATE.VENTILATION,
             front_right=WINDOW_STATE.VENTILATION,

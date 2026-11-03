@@ -4,12 +4,12 @@ import json
 import time
 from unittest.mock import Mock
 
-import pytest
-import requests
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api import Token, Vehicle, VehicleManager
 from hyundai_kia_connect_api.const import ORDER_STATUS
 from hyundai_kia_connect_api.HyundaiBlueLinkApiJP import HyundaiBlueLinkApiJP
+import pytest
+import requests
 from test_region_operation_serialization import coordinator
 
 
@@ -42,6 +42,8 @@ def pipeline(body=None, failure=None):
     manager = VehicleManager.__new__(VehicleManager)
     manager.api = api
     manager.token = Token(
+        username="synthetic",
+        password="synthetic",
         access_token="Bearer synthetic-access",
         device_id="synthetic-device",
         pin="synthetic-pin",

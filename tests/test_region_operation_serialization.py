@@ -4,9 +4,9 @@ import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api.const import ORDER_STATUS
+import pytest
 
 from custom_components.kia_uvo.coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinator

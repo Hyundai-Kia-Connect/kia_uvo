@@ -1,5 +1,7 @@
+"""Services for Hyundai / Kia Connect integration."""
+
+from datetime import time
 import logging
-from datetime import datetime
 from typing import Any, cast
 
 from homeassistant.config_entries import ConfigEntry
@@ -69,7 +71,7 @@ _LOGGER = logging.getLogger(__name__)
 
 @callback
 def async_setup_services(hass: HomeAssistant) -> bool:
-    """Set up services for Hyundai Kia Connect"""
+    """Set up services for Hyundai / Kia Connect."""
 
     async def async_handle_force_update(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
@@ -231,7 +233,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
                 else [int(day) for day in departure_days],
                 time=None
                 if departure_time is None
-                else datetime.strptime(departure_time, "%H:%M:%S").time(),
+                else time.fromisoformat(departure_time),
             )
 
         first_departure = initialize_departure_option(
@@ -243,11 +245,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         if charging_enabled is not None:
             charging_enabled = bool(charging_enabled)
         if off_peak_start_time is not None:
-            off_peak_start_time = datetime.strptime(
-                off_peak_start_time, "%H:%M:%S"
-            ).time()
+            off_peak_start_time = time.fromisoformat(off_peak_start_time)
         if off_peak_end_time is not None:
-            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+            off_peak_end_time = time.fromisoformat(off_peak_end_time)
         if off_peak_charge_only_enabled is not None:
             off_peak_charge_only_enabled = bool(off_peak_charge_only_enabled)
         if climate_enabled is not None:
@@ -282,11 +282,9 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         off_peak_start_time = call.data.get("off_peak_start_time")
         off_peak_end_time = call.data.get("off_peak_end_time")
         if off_peak_start_time is not None:
-            off_peak_start_time = datetime.strptime(
-                off_peak_start_time, "%H:%M:%S"
-            ).time()
+            off_peak_start_time = time.fromisoformat(off_peak_start_time)
         if off_peak_end_time is not None:
-            off_peak_end_time = datetime.strptime(off_peak_end_time, "%H:%M:%S").time()
+            off_peak_end_time = time.fromisoformat(off_peak_end_time)
         await coordinator.async_set_off_peak_charging(
             vehicle_id,
             mode=OffPeakChargingMode(mode) if mode is not None else None,
@@ -373,6 +371,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
 
 @callback
 def async_unload_services(hass: HomeAssistant) -> None:
+    """Remove the integration's services."""
     for service in SUPPORTED_SERVICES:
         hass.services.async_remove(DOMAIN, service)
 
@@ -385,7 +384,7 @@ def _get_vehicle_id_from_device(hass: HomeAssistant, call: ServiceCall) -> str:
         )
         vehicles = coordinator.vehicle_manager.vehicles
         if len(vehicles) == 1:
-            return cast(str, next(iter(vehicles.keys())))
+            return next(iter(vehicles))
 
     device_entry = device_registry.async_get(hass).async_get(call.data[ATTR_DEVICE_ID])
     if device_entry is None:

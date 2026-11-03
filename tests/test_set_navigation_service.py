@@ -12,8 +12,8 @@ services.yaml (required: true), not by the Python handler.
 
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from hyundai_kia_connect_api.ApiImpl import POICoord, POIInfo
+import pytest
 
 # --- Minimal stubs (no HA dependency) ---
 

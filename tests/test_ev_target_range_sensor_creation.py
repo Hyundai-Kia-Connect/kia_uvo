@@ -1,8 +1,8 @@
 """Tests for transient EV target-charge-range sensor creation."""
 
-import pytest
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES
+import pytest
 
 _TARGET_RANGE_KEYS = ("_ev_target_range_charge_AC", "_ev_target_range_charge_DC")
 

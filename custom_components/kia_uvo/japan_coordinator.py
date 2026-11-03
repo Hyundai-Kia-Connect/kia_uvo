@@ -3,18 +3,16 @@
 from __future__ import annotations
 
 import asyncio
-import datetime as dt
-import logging
-import traceback
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+import datetime as dt
 from functools import partial
+import logging
 from typing import Any, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
-from homeassistant.helpers.update_coordinator import UpdateFailed
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util import dt as dt_util
 from hyundai_kia_connect_api import (
     ClimateRequestOptions,
@@ -25,13 +23,11 @@ from hyundai_kia_connect_api import (
 )
 from hyundai_kia_connect_api.const import ORDER_STATUS, WINDOW_STATE
 from hyundai_kia_connect_api.exceptions import (
-    AuthenticationError,
     RequestTimeoutError,
     UnsupportedControlError,
 )
 from hyundai_kia_connect_api.svm_image import render_views
 
-from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -146,95 +142,18 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
             return await self._async_update_data_unlocked()
 
     async def _async_update_data_unlocked(self) -> dict[str, Any]:
-        """Update data via library. Called by update_coordinator periodically.
-
-        Allow to update for the first time without further checking
-        Allow force update, if time diff between latest update and `now` is greater than force refresh delta
-        """
-        _LOGGER.debug(
-            "%s - _async_update_data called, scan_interval=%ds, force_refresh_interval=%ds",
-            DOMAIN,
-            self.scan_interval,
-            self.force_refresh_interval,
-        )
-        try:
-            await self.async_check_and_refresh_token()
-        except AuthenticationError as AuthError:
-            raise ConfigEntryAuthFailed(AuthError) from AuthError
-        except Exception as err:
-            # Transient API errors (e.g. DeviceIDError, ReadTimeoutError) from
-            # Kia's EU backend must be surfaced as UpdateFailed rather than
-            # propagating as unexpected exceptions.  HA's update coordinator
-            # counts unexpected exceptions and cancels the config entry after
-            # enough consecutive failures, which makes all entities permanently
-            # unavailable until the integration is manually reloaded.
-            # Raising UpdateFailed(retry_after=60) keeps entities temporarily
-            # unavailable and schedules an automatic retry after 60 seconds
-            # instead of waiting for the next full poll interval.
-            # See: https://github.com/Hyundai-Kia-Connect/kia_uvo/issues/1538
-            raise UpdateFailed(
-                f"Token refresh failed, will retry in 60s: {err}",
-                retry_after=60,
-            ) from err
-        current_hour = dt_util.now().hour
-
-        if (
-            (self.no_force_refresh_hour_start <= self.no_force_refresh_hour_finish)
-            and (
-                current_hour < self.no_force_refresh_hour_start
-                or current_hour >= self.no_force_refresh_hour_finish
-            )
-        ) or (
-            (self.no_force_refresh_hour_start >= self.no_force_refresh_hour_finish)
-            and (
-                current_hour < self.no_force_refresh_hour_start
-                and current_hour >= self.no_force_refresh_hour_finish
-            )
-        ):
-            try:
-                await self._async_run_executor_job(
-                    self.vehicle_manager.check_and_force_update_vehicles,
-                    self.force_refresh_interval,
-                )
-            except Exception:
-                try:
-                    _LOGGER.exception(
-                        f"Force update failed, falling back to cached: {traceback.format_exc()}"
-                    )
-                    await self._async_run_executor_job(
-                        self.vehicle_manager.update_all_vehicles_with_cached_state
-                    )
-                except Exception:
-                    _LOGGER.exception(f"Cached update failed: {traceback.format_exc()}")
-                    raise UpdateFailed(
-                        f"Error communicating with API: {traceback.format_exc()}"
-                    )
-
-        else:
-            await self._async_run_executor_job(
-                self.vehicle_manager.update_all_vehicles_with_cached_state
-            )
-
-        return self.data
+        return await self._async_complete_operation(super()._async_update_data())
 
     async def async_update_all(self) -> None:
-        """Update vehicle data."""
+        """Update vehicle data while preserving Japan's operation lock."""
         async with self._async_region_operation():
-            await self.async_check_and_refresh_token()
-            await self._async_run_executor_job(
-                self.vehicle_manager.update_all_vehicles_with_cached_state
-            )
-            self.async_set_updated_data(self.data)
+            await self._async_complete_operation(super().async_update_all())
 
     async def async_force_update_all(self) -> None:
-        """Force refresh vehicle data and update it."""
+        """Force refresh vehicle data while preserving Japan's operation lock."""
         self._require_force_refresh()
         async with self._async_region_operation():
-            await self.async_check_and_refresh_token()
-            await self._async_run_executor_job(
-                self.vehicle_manager.force_refresh_all_vehicles_states
-            )
-            self.async_set_updated_data(self.data)
+            await self._async_complete_operation(super().async_force_update_all())
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
@@ -373,6 +292,7 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         """Refresh token if needed via library."""
         await self._async_run_executor_job(self.vehicle_manager.check_and_refresh_token)
         await self._async_save_token()
+        self._sync_vehicle_enabled_states()
 
     def _post_command_watch_clock(self) -> float:
         return asyncio.get_running_loop().time()
@@ -387,6 +307,7 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
             getattr(self, "_closing", False)
             or not callable(reader)
             or vehicle_id not in self.vehicle_manager.vehicles
+            or not self.vehicle_manager.vehicles[vehicle_id].enabled
         ):
             return
         if not hasattr(self, "_post_command_watch_tasks"):
@@ -433,6 +354,9 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
                         vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
                         if vehicle is None:
                             diagnostic["last_result"] = "vehicle_removed"
+                            return
+                        if not vehicle.enabled:
+                            diagnostic["last_result"] = "vehicle_disabled"
                             return
                         reader = getattr(
                             self.vehicle_manager.api, "apply_cached_mqtt_state", None
@@ -499,7 +423,10 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
                 ORDER_STATUS.FAILED: "the service reported failure",
                 ORDER_STATUS.TIMEOUT: "no matching completion reply arrived before timeout",
                 ORDER_STATUS.PENDING: "completion is still pending",
-            }.get(status, "the completion status is unknown")
+            }.get(
+                status if status is not None else ORDER_STATUS.UNKNOWN,
+                "the completion status is unknown",
+            )
             raise _UnconfirmedCommandError(
                 "The vehicle command was sent but successful completion was not confirmed: "
                 + reason
@@ -784,7 +711,12 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         positions = getattr(vehicle, "supported_window_positions", None)
         if positions is None:
             positions = ("front_left", "front_right", "back_left", "back_right")
-        return WindowRequestOptions(**{position: state for position in positions})
+        return WindowRequestOptions(
+            front_left=state if "front_left" in positions else None,
+            front_right=state if "front_right" in positions else None,
+            back_left=state if "back_left" in positions else None,
+            back_right=state if "back_right" in positions else None,
+        )
 
     async def async_open_all_windows(self, vehicle_id: str) -> None:
         options = self._window_options(vehicle_id, WINDOW_STATE.OPEN)

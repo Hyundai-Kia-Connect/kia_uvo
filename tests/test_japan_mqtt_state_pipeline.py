@@ -35,7 +35,11 @@ async def test_delayed_unlock_survives_later_unrelated_packet_and_reaches_activi
     api._update_vehicle_properties_ccs2(vehicle, baseline)
     assert vehicle.is_locked is True
     helper = JapanMqttSession(
-        Token(access_token="Bearer synthetic-access"),
+        Token(
+            username="synthetic",
+            password="synthetic",
+            access_token="Bearer synthetic-access",
+        ),
         vehicle.id,
         "synthetic-uuid",
         dict,

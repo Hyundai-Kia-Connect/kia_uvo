@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import datetime as dt
-import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+import datetime as dt
+import logging
 from typing import Final
 
 from homeassistant.components.time import TimeEntity, TimeEntityDescription
@@ -24,6 +24,8 @@ _LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True, kw_only=True)
 class HyundaiKiaTimeDescription(TimeEntityDescription):
+    """Describes a Hyundai / Kia Connect time entity."""
+
     value_fn: Callable[[Vehicle], dt.time | None]
     exists_fn: Callable[[Vehicle], bool]
     set_fn: Callable[
@@ -60,6 +62,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    """Set up time entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
     if isinstance(coordinator, JapanDataUpdateCoordinator) and not (
         coordinator.supports_command("schedule_charging_and_climate")
@@ -82,6 +85,8 @@ PARALLEL_UPDATES = 1
 
 
 class HyundaiKiaConnectTimeEntity(TimeEntity, HyundaiKiaConnectEntity):
+    """Off-peak charging start or end time."""
+
     entity_description: HyundaiKiaTimeDescription
 
     def __init__(
@@ -90,6 +95,7 @@ class HyundaiKiaConnectTimeEntity(TimeEntity, HyundaiKiaConnectEntity):
         description: HyundaiKiaTimeDescription,
         vehicle: Vehicle,
     ) -> None:
+        """Initialize the time entity."""
         HyundaiKiaConnectEntity.__init__(self, coordinator, vehicle)
         self.entity_description = description
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_{description.key}"
@@ -97,8 +103,10 @@ class HyundaiKiaConnectTimeEntity(TimeEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_value(self) -> dt.time | None:
+        """Return the configured time."""
         return self.entity_description.value_fn(self.vehicle)
 
     async def async_set_value(self, value: dt.time) -> None:
+        """Set a new off-peak time."""
         await self.entity_description.set_fn(self.coordinator, self.vehicle.id, value)
         self.async_write_ha_state()

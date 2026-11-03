@@ -28,14 +28,24 @@ A custom integration for Kia Uvo / Hyundai Bluelink. This project uses our under
 
 After installation, go to **Settings** → **Devices & Services** → **Integrations** and search for **Kia Uvo**. Configure your vehicle using your username and password.
 
-- AU, EU, CA, CH, IN, NZ, BR and US is supported. USA, India, China and Brazil support is limited.
-- Genesis Support hasn't been tested and has just been added for Canada only. Feedback would be appreciated!
+- AU, EU, CA, CH, IN, NZ, BR, US and Japan (Hyundai) are supported. USA, India, China and Brazil support is limited.
+- Genesis Support on the Europe (Beta) region: authentication is live-verified, vehicle reads and remote control follow as they are verified with real vehicles. Genesis Support on Canada is still untested. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - Reconfigure flow is available from the integration options (change credentials or set PIN).
 - Scan Interval - fetches cached information from servers every 30 minutes. **Configurable**
 - Force Refresh Interval - asks your car for the latest data every 4 hours. **Configurable**
 - Force Refresh is disabled between 10PM and 6AM by default. **Configurable**
 - By default, distance unit is based on HA metric/imperial preference, you need to configure each entity if you would like other units.
+
+### Japan (Hyundai)
+
+Select **Japan** and **Hyundai** during setup and enter the PIN used by your Japan Bluelink account. Kia and Genesis Japan accounts are not supported.
+
+Ordinary controls can take several seconds, as in the official app. A successful request means the service accepted it; HA updates lock, climate and other states from the vehicle's later reports. Japan watches incoming telemetry for two minutes after an accepted command without sending another vehicle request. Commands are never automatically repeated after a timeout.
+
+One Japan IONIQ 5 owner has confirmed unlocking with HA state updates, locking, climate start/stop, charge-port opening, AC/DC charge limits, force refresh and SVM capture with available images. Charging start/stop and the other profile-dependent controls are implemented but still need vehicle verification. Support depends on the equipment and service options reported for each car.
+
+After **Capture SVM Image** completes, open **SVM Front Camera**, **SVM Rear Camera**, **SVM Left Camera**, **SVM Right Camera** or **SVM Bird's-eye View** on the vehicle page. These are still images. **SVM Status** shows the capture time, or the local receipt time if the car omits it. Japan stores these images in memory; a new manual capture is needed after an integration reload or HA restart.
 
 ## Supported entities
 
@@ -155,23 +165,23 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 ### Service availability by region
 
-| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
-| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
-| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
-| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
-| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
-| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
-| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
-| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
-| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
-| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        |
-| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        |
+| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil | Japan (Hyundai) |
+| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ | --------------- |
+| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      | ✔               |
+| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      | ✔               |
+| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      | ✔               |
+| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      | ✔               |
+| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | Implemented†    |
+| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | ✔               |
+| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | Implemented†    |
+| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Open ✔; close†  |
+| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
+| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Start†          |
+| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      | Start†          |
+| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
+| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
+| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        | Implemented†    |
+| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        | ✔               |
 
 Japan supports Hyundai Bluelink accounts. Select **Japan → Hyundai** and enter your actual Bluelink PIN; no default Japan PIN is supplied. Japan requires an API library release containing the Japan adapter before the integration dependency can be updated.
 
@@ -180,6 +190,8 @@ The Japan adapter provides cached status, forced refresh, lock/unlock, climate, 
 Japan uses its own coordinator for serialized commands, cancellation handling, session cleanup and local protocol diagnostics. Other regions retain the existing coordinator and command paths. The focused Japan branch has no dependency on the separate shared camera/lifecycle fix branches.
 
 Japan camera captures appear in the five SVM image entities after **Capture SVM Image** completes; the button does not open a picture. If the vehicle omits its capture timestamp, Japan uses receipt time and labels it with `timestamp_source`. Camera bytes remain in memory and require a new capture after restart. Japan diagnostics include command/MQTT progress and image-rendering outcomes without credentials or image content.
+
+† Japan: implemented from the app contracts but not yet confirmed on a vehicle. Controls also depend on the vehicle profile. “Start” indicates the implemented hazard operation; a separate stop action is not verified.
 
 SVM entities and `capture_svm_image` are created only for vehicles that expose the surround-view capability (Hyundai).
 

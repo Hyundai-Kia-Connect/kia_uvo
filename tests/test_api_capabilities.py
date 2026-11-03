@@ -3,10 +3,10 @@
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from conftest import make_coordinator, make_hass
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api import Vehicle
+import pytest
 
 from custom_components.kia_uvo import button, climate, lock, number, switch
 from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinator
