@@ -18,6 +18,7 @@ from hyundai_kia_connect_api import Vehicle
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
+from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,12 +28,14 @@ class HyundaiKiaSwitchDescription(SwitchEntityDescription):
     value_fn: Callable[[Vehicle], bool | None]
     exists_fn: Callable[[Vehicle], bool]
     on_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
+    commands: tuple[str, ...] = ("schedule_charging_and_climate",)
     off_fn: Callable[[HyundaiKiaConnectDataUpdateCoordinator, str], Awaitable[None]]
 
 
 SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_battery_is_charging",
+        commands=("start_charge", "stop_charge"),
         translation_key="ev_charging",
         icon="mdi:ev-station",
         value_fn=lambda vehicle: vehicle.ev_battery_is_charging,
@@ -42,6 +45,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     ),
     HyundaiKiaSwitchDescription(
         key="air_control_is_on",
+        commands=("start_climate", "stop_climate"),
         translation_key="climate",
         icon="mdi:air-conditioner",
         value_fn=lambda vehicle: vehicle.air_control_is_on,
@@ -165,6 +169,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     ),
     HyundaiKiaSwitchDescription(
         key="ev_charge_port_door_is_open",
+        commands=("charge_port_action",),
         translation_key="ev_charge_port_door",
         icon="mdi:ev-plug-charging",
         value_fn=lambda vehicle: vehicle.ev_charge_port_door_is_open,
@@ -174,6 +179,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     ),
     HyundaiKiaSwitchDescription(
         key="valet_mode_control",
+        commands=("valet_mode_action",),
         translation_key="valet_mode_control",
         icon="mdi:key-variant",
         value_fn=lambda vehicle: vehicle.valet_mode_active,
@@ -196,6 +202,11 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SWITCH_DESCRIPTIONS:
+            if isinstance(coordinator, JapanDataUpdateCoordinator) and not all(
+                coordinator.supports_command(command)
+                for command in description.commands
+            ):
+                continue
             if description.exists_fn(vehicle):
                 entities.append(
                     HyundaiKiaConnectSwitch(coordinator, description, vehicle)

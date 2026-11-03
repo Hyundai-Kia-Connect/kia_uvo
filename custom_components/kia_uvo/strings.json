@@ -68,7 +68,9 @@
     "error": {
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
       "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
-      "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]"
+      "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]",
+      "unsupported_japan_brand": "Japan currently supports Hyundai Bluelink accounts only.",
+      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands."
     }
   },
   "options": {

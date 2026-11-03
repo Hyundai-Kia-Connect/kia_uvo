@@ -173,6 +173,14 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 | Set Navigation                |     | ✔                 |     |         |             |             |       |       |        |
 | Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        |
 
+Japan supports Hyundai Bluelink accounts. Select **Japan → Hyundai** and enter your actual Bluelink PIN; no default Japan PIN is supplied. Japan requires an API library release containing the Japan adapter before the integration dependency can be updated.
+
+The Japan adapter provides cached status, forced refresh, lock/unlock, climate, charging and charge targets/current, charge-port control, supported windows/curtains, hazards/horn, V2L limits, charging/climate schedules, valet mode, navigation and surround-camera capture. Availability, temperature limits and window positions follow the vehicle profile. An HTTP acknowledgement alone is not treated as successful vehicle-command completion: Japan waits for its matching MQTT result.
+
+Japan uses its own coordinator for serialized commands, cancellation handling, session cleanup and local protocol diagnostics. Other regions retain the existing coordinator and command paths. The focused Japan branch has no dependency on the separate shared camera/lifecycle fix branches.
+
+Japan camera captures appear in the five SVM image entities after **Capture SVM Image** completes; the button does not open a picture. If the vehicle omits its capture timestamp, Japan uses receipt time and labels it with `timestamp_source`. Camera bytes remain in memory and require a new capture after restart. Japan diagnostics include command/MQTT progress and image-rendering outcomes without credentials or image content.
+
 SVM entities and `capture_svm_image` are created only for vehicles that expose the surround-view capability (Hyundai).
 
 ## Screenshots
@@ -184,6 +192,6 @@ SVM entities and `capture_svm_image` are created only for vehicles that expose t
 
 If you receive an error while trying to login, please go through these steps:
 
-1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada and Brazil. If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
+1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada, Brazil and Japan (Hyundai). If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
 2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**. See [Home Assistant troubleshooting: enabling debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#enabling-debug-logging) for details.
 3. You can download a redacted diagnostics snapshot to attach to a bug report. Go to **Settings → Devices & Services → kia_uvo**, open the integration entry, click the menu (⋮) and select **Download diagnostics**. The dump is auto-redacted (tokens, device id, PIN, GPS coordinates, and reverse-geocoded addresses are removed) — safe to share. It contains the parsed vehicle state, API class, and version info, which helps diagnose field-mapping and region-specific issues.

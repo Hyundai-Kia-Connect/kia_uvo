@@ -18,7 +18,7 @@ jobs:
             const labels = [];
 
             // Extract Region
-            const regionMatch = body.match(/### Region\s*\n\s*(Europe|Canada|United States|Australia|China|India|New Zealand|Brazil)/);
+            const regionMatch = body.match(/### Region\s*\n\s*(Europe|Canada|United States|Australia|China|India|New Zealand|Brazil|Japan)/);
             if (regionMatch) {
               labels.push(regionMatch[1]);
             }

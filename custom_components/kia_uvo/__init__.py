@@ -25,9 +25,11 @@ from .const import (
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_PIN,
     DOMAIN,
+    REGION_JAPAN,
     REGIONS,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
+from .japan_coordinator import JapanDataUpdateCoordinator
 from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,7 +55,12 @@ async def async_setup(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up Hyundai / Kia Connect from a config entry."""
-    coordinator = HyundaiKiaConnectDataUpdateCoordinator(hass, config_entry)
+    coordinator_class = (
+        JapanDataUpdateCoordinator
+        if REGIONS.get(config_entry.data.get(CONF_REGION, 0)) == REGION_JAPAN
+        else HyundaiKiaConnectDataUpdateCoordinator
+    )
+    coordinator = coordinator_class(hass, config_entry)
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed as AuthError:
@@ -73,6 +80,12 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     ):
+        coordinator = hass.data[DOMAIN][config_entry.unique_id]
+        if isinstance(coordinator, JapanDataUpdateCoordinator):
+            try:
+                await coordinator.async_shutdown()
+            except Exception:
+                _LOGGER.warning("Unable to close Japan API session during unload")
         del hass.data[DOMAIN][config_entry.unique_id]
     if not hass.data[DOMAIN]:
         async_unload_services(hass)
