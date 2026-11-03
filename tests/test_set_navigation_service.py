@@ -100,7 +100,8 @@ class StubCoordinator:
         self._vehicle_manager.set_navigation = MagicMock(return_value="action-123")
         self._hass = MagicMock()
         self._hass.async_add_executor_job = AsyncMock(side_effect=self._executor_job)
-        self._hass.async_create_task = MagicMock()
+        # Close the scheduled coroutine so it isn't reported as never awaited.
+        self._hass.async_create_task = MagicMock(side_effect=lambda coro: coro.close())
 
     async def _executor_job(self, fn, *args):
         """Simulate executor job by calling fn directly."""
