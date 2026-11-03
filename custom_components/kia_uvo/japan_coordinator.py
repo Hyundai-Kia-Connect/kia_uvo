@@ -50,12 +50,18 @@ class _UnconfirmedCommandError(HomeAssistantError):
 class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
     """Keep Japan behavior isolated from the established regional coordinators."""
 
+    _POST_COMMAND_WATCH_SECONDS = 120
+    _POST_COMMAND_POLL_INTERVAL_SECONDS = 2
+
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         super().__init__(hass, config_entry)
         self._closing = False
         self._svm_received_at: dict[str, dt.datetime] = {}
         self._svm_render_locks: dict[str, asyncio.Lock] = {}
         self._svm_render_diagnostics: dict[str, dict[str, Any]] = {}
+        self._post_command_watch_tasks: dict[str, asyncio.Task[None]] = {}
+        self._post_command_watch_deadlines: dict[str, float] = {}
+        self._post_command_watch_diagnostics: dict[str, dict[str, Any]] = {}
 
     def supports_command(self, command: str) -> bool:
         """Whether this API implements the named vehicle command."""
@@ -118,8 +124,12 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
     async def async_shutdown(self) -> None:
         """Drain active Japan operations before disposing of their API sessions."""
         self._closing = True
+        await self._async_complete_operation(self._async_shutdown_resources())
+
+    async def _async_shutdown_resources(self) -> None:
         await super().async_shutdown()
-        await self._async_complete_operation(self._async_close_api())
+        await self._async_stop_post_command_state_watchers()
+        await self._async_close_api()
 
     async def _async_close_api(self) -> None:
         async with self._action_lock:
@@ -364,6 +374,124 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         await self._async_run_executor_job(self.vehicle_manager.check_and_refresh_token)
         await self._async_save_token()
 
+    def _post_command_watch_clock(self) -> float:
+        return asyncio.get_running_loop().time()
+
+    async def _async_wait_for_post_command_poll(self, seconds: float) -> None:
+        await asyncio.sleep(seconds)
+
+    def _start_post_command_state_watch(self, vehicle_id: str) -> None:
+        """Watch only already-received MQTT data; never poll or wake the car."""
+        reader = getattr(self.vehicle_manager.api, "apply_cached_mqtt_state", None)
+        if (
+            getattr(self, "_closing", False)
+            or not callable(reader)
+            or vehicle_id not in self.vehicle_manager.vehicles
+        ):
+            return
+        if not hasattr(self, "_post_command_watch_tasks"):
+            self._post_command_watch_tasks = {}
+            self._post_command_watch_deadlines = {}
+            self._post_command_watch_diagnostics = {}
+        self._post_command_watch_deadlines[vehicle_id] = (
+            self._post_command_watch_clock() + self._POST_COMMAND_WATCH_SECONDS
+        )
+        existing = self._post_command_watch_tasks.get(vehicle_id)
+        if existing is not None and not existing.done():
+            return
+        self._post_command_watch_diagnostics[vehicle_id] = {
+            "state": "watching",
+            "poll_count": 0,
+            "updates_applied": 0,
+            "read_errors": 0,
+            "last_result": "awaiting_telemetry",
+        }
+        task = self.hass.async_create_background_task(
+            self._async_watch_post_command_state(vehicle_id),
+            "Japan passive vehicle-state watcher",
+            eager_start=False,
+        )
+        self._post_command_watch_tasks[vehicle_id] = task
+
+    async def _async_watch_post_command_state(self, vehicle_id: str) -> None:
+        diagnostic = self._post_command_watch_diagnostics[vehicle_id]
+        try:
+            while not getattr(self, "_closing", False):
+                remaining = (
+                    self._post_command_watch_deadlines[vehicle_id]
+                    - self._post_command_watch_clock()
+                )
+                if remaining <= 0:
+                    diagnostic["state"] = "finished"
+                    return
+                if self._action_lock.locked():
+                    diagnostic["last_result"] = "operation_busy"
+                else:
+                    async with self._action_lock:
+                        if getattr(self, "_closing", False):
+                            return
+                        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+                        if vehicle is None:
+                            diagnostic["last_result"] = "vehicle_removed"
+                            return
+                        reader = getattr(
+                            self.vehicle_manager.api, "apply_cached_mqtt_state", None
+                        )
+                        if not callable(reader):
+                            diagnostic["last_result"] = "reader_unavailable"
+                            return
+                        diagnostic["poll_count"] += 1
+                        try:
+                            changed = await self._async_run_executor_job(
+                                reader, vehicle
+                            )
+                        except Exception:
+                            diagnostic["read_errors"] += 1
+                            diagnostic["last_result"] = "reader_error"
+                            if diagnostic["read_errors"] == 1:
+                                _LOGGER.warning(
+                                    "Japan passive state update could not be applied"
+                                )
+                        else:
+                            diagnostic["last_result"] = (
+                                "newer_telemetry_applied"
+                                if changed is True
+                                else "no_new_telemetry"
+                            )
+                            if changed is True:
+                                diagnostic["updates_applied"] += 1
+                                self.async_set_updated_data(self.data)
+                remaining = (
+                    self._post_command_watch_deadlines[vehicle_id]
+                    - self._post_command_watch_clock()
+                )
+                if remaining > 0:
+                    await self._async_wait_for_post_command_poll(
+                        min(self._POST_COMMAND_POLL_INTERVAL_SECONDS, remaining)
+                    )
+        finally:
+            if diagnostic["state"] == "watching":
+                diagnostic["state"] = "stopped"
+            if self._post_command_watch_tasks.get(vehicle_id) is asyncio.current_task():
+                self._post_command_watch_tasks.pop(vehicle_id, None)
+                self._post_command_watch_deadlines.pop(vehicle_id, None)
+
+    async def _async_stop_post_command_state_watchers(self) -> None:
+        tasks = list(getattr(self, "_post_command_watch_tasks", {}).values())
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+    def get_post_command_state_diagnostics(self) -> list[dict[str, Any]]:
+        """Expose only bounded counters, not vehicle identifiers or payloads."""
+        return [
+            dict(value)
+            for value in list(
+                getattr(self, "_post_command_watch_diagnostics", {}).values()
+            )[:10]
+        ]
+
     def _check_command_confirmation(self, status: ORDER_STATUS | None) -> None:
         """Accept a service receipt without mislabelling it vehicle confirmation."""
         if status not in (ORDER_STATUS.SUCCESS, ORDER_STATUS.ACCEPTED):
@@ -409,7 +537,11 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
             )
             self._check_command_confirmation(status)
         finally:
-            await self._async_refresh_command_state(status)
+            try:
+                await self._async_refresh_command_state(status)
+            finally:
+                if status == ORDER_STATUS.ACCEPTED:
+                    self._start_post_command_state_watch(vehicle_id)
 
     async def async_await_action_and_force_refresh(
         self, vehicle_id: str, action_id: str

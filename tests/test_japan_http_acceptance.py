@@ -54,6 +54,7 @@ def pipeline(body=None, failure=None):
     manager.update_all_vehicles_with_cached_state = Mock()
     result = coordinator()
     result.vehicle_manager = manager
+    result._start_post_command_state_watch = Mock()
 
     async def executor(fn, *args):
         return fn(*args)
@@ -84,6 +85,7 @@ async def test_service_result_accepted_with_no_mqtt_reply(action, command):
         vehicle.is_locked is True
     )  # HTTP acceptance never fabricates a sensor change.
     manager.update_all_vehicles_with_cached_state.assert_called_once()
+    result._start_post_command_state_watch.assert_called_once_with(vehicle.id)
     result.async_set_updated_data.assert_called_once()
     assert not result._action_lock.locked()
 
@@ -99,6 +101,19 @@ async def test_service_result_does_not_require_mqtt_correlation_id():
     assert api.session.request.call_count == 1
 
 
+async def test_accepted_command_still_watches_when_initial_cached_read_fails():
+    result, api, manager, _helper, vehicle = pipeline()
+    manager.update_all_vehicles_with_cached_state.side_effect = RuntimeError(
+        "synthetic cached read failure"
+    )
+    with pytest.raises(HomeAssistantError, match="service accepted the request"):
+        await result.async_unlock_vehicle(vehicle.id)
+    result._start_post_command_state_watch.assert_called_once_with(vehicle.id)
+    assert api.session.request.call_count == 1
+    assert vehicle.is_locked is True
+    assert not result._action_lock.locked()
+
+
 async def test_http_timeout_is_unknown_and_does_not_resend():
     result, api, _manager, helper, vehicle = pipeline(
         failure=requests.Timeout("synthetic")
@@ -108,6 +123,7 @@ async def test_http_timeout_is_unknown_and_does_not_resend():
     assert api.session.request.call_count == 1
     assert not getattr(api, "_japan_actions", {})
     helper.status.assert_not_called()
+    result._start_post_command_state_watch.assert_not_called()
     assert not result._action_lock.locked()
 
 
@@ -120,4 +136,5 @@ async def test_vendor_error_is_not_accepted_or_retried():
     assert api.session.request.call_count == 1
     assert not getattr(api, "_japan_actions", {})
     helper.status.assert_not_called()
+    result._start_post_command_state_watch.assert_not_called()
     assert not result._action_lock.locked()

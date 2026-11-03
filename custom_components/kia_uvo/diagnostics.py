@@ -144,4 +144,7 @@ async def async_get_config_entry_diagnostics(
         render_summary = coordinator.get_svm_render_diagnostics()
         if isinstance(render_summary, list):
             payload["image_rendering"] = render_summary
+        state_summary = coordinator.get_post_command_state_diagnostics()
+        if isinstance(state_summary, list):
+            payload["post_command_state"] = state_summary
     return payload
