@@ -175,7 +175,7 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 Japan supports Hyundai Bluelink accounts. Select **Japan → Hyundai** and enter your actual Bluelink PIN; no default Japan PIN is supplied. Japan requires an API library release containing the Japan adapter before the integration dependency can be updated.
 
-The Japan adapter provides cached status, forced refresh, lock/unlock, climate, charging and charge targets/current, charge-port control, supported windows/curtains, hazards/horn, V2L limits, charging/climate schedules, valet mode, navigation and surround-camera capture. Availability, temperature limits and window positions follow the vehicle profile. An HTTP acknowledgement alone is not treated as successful vehicle-command completion: Japan waits for its matching MQTT result.
+The Japan adapter provides cached status, forced refresh, lock/unlock, climate, charging and charge targets/current, charge-port control, supported windows/curtains, hazards/horn, V2L limits, charging/climate schedules, valet mode, navigation and surround-camera capture. Availability, temperature limits and window positions follow the vehicle profile. Ordinary Japan controls report service acceptance from the validated HTTP response, matching the app; this does not independently confirm physical execution. Vehicle state is read separately. Fresh-status requests retain their distinct MQTT-result and newer-telemetry checks.
 
 Japan uses its own coordinator for serialized commands, cancellation handling, session cleanup and local protocol diagnostics. Other regions retain the existing coordinator and command paths. The focused Japan branch has no dependency on the separate shared camera/lifecycle fix branches.
 

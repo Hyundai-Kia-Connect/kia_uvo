@@ -26,6 +26,7 @@ from hyundai_kia_connect_api import (
 from hyundai_kia_connect_api.const import ORDER_STATUS, WINDOW_STATE
 from hyundai_kia_connect_api.exceptions import (
     AuthenticationError,
+    RequestTimeoutError,
     UnsupportedControlError,
 )
 from hyundai_kia_connect_api.svm_image import render_views
@@ -39,7 +40,7 @@ _T = TypeVar("_T")
 
 
 class _ConfirmedCommandRefreshError(HomeAssistantError):
-    """The command completed but its subsequent telemetry refresh failed."""
+    """A successful service result could not be followed by updated telemetry."""
 
 
 class _UnconfirmedCommandError(HomeAssistantError):
@@ -364,8 +365,8 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         await self._async_save_token()
 
     def _check_command_confirmation(self, status: ORDER_STATUS | None) -> None:
-        """Require a confirmed result when the adapter declares this contract."""
-        if status != ORDER_STATUS.SUCCESS:
+        """Accept a service receipt without mislabelling it vehicle confirmation."""
+        if status not in (ORDER_STATUS.SUCCESS, ORDER_STATUS.ACCEPTED):
             reason = {
                 ORDER_STATUS.FAILED: "the service reported failure",
                 ORDER_STATUS.TIMEOUT: "no matching completion reply arrived before timeout",
@@ -376,42 +377,44 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
                 + reason
             )
 
-    async def _async_refresh_confirmed_command(self, confirmed: bool) -> None:
-        """Read cached status directly while the operation lock is already held."""
+    async def _async_refresh_command_state(self, status: ORDER_STATUS | None) -> None:
+        """Read cached state separately from service acceptance or execution."""
         try:
             await self._async_run_executor_job(
                 self.vehicle_manager.update_all_vehicles_with_cached_state
             )
             self.async_set_updated_data(self.data)
         except Exception as err:
-            if confirmed:
-                raise _ConfirmedCommandRefreshError(
-                    "The vehicle command completed, but updated telemetry could not be retrieved"
-                ) from err
+            if status in (ORDER_STATUS.SUCCESS, ORDER_STATUS.ACCEPTED):
+                message = (
+                    "The service accepted the request, but updated vehicle state could not be retrieved"
+                    if status == ORDER_STATUS.ACCEPTED
+                    else "The vehicle command completed, but updated telemetry could not be retrieved"
+                )
+                raise _ConfirmedCommandRefreshError(message) from err
             _LOGGER.warning("Cached status refresh after unconfirmed command failed")
 
     async def async_await_action_and_refresh(
         self, vehicle_id: str, action_id: str
     ) -> None:
-        confirmed = False
+        """Read a local service receipt, then update state without another command."""
+        status = None
         try:
-            await asyncio.sleep(5)
             status = await self._async_run_executor_job(
                 self.vehicle_manager.check_action_status,
                 vehicle_id,
                 action_id,
-                True,
-                60,
+                False,
+                0,
             )
-            confirmed = status == ORDER_STATUS.SUCCESS
             self._check_command_confirmation(status)
         finally:
-            await self._async_refresh_confirmed_command(confirmed)
+            await self._async_refresh_command_state(status)
 
     async def async_await_action_and_force_refresh(
         self, vehicle_id: str, action_id: str
     ) -> None:
-        """Confirm Japan commands, then read cache without a second vehicle command."""
+        """Read the Japan receipt and cache without a second vehicle command."""
         await self.async_await_action_and_refresh(vehicle_id, action_id)
 
     async def _async_send_action(
@@ -463,6 +466,11 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         await self.async_check_and_refresh_token()
         try:
             action_id = await self._async_run_executor_job(action_fn)
+        except RequestTimeoutError as err:
+            raise HomeAssistantError(
+                "The service response timed out; vehicle execution is unknown. "
+                "Check the vehicle state before retrying."
+            ) from err
         except UnsupportedControlError as err:
             raise HomeAssistantError(
                 f"Vehicle does not support this action: {err}"

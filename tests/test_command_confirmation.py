@@ -1,4 +1,4 @@
-"""A Japan MQTT ACK without completion must never report HA action success."""
+"""Japan distinguishes service acceptance from physical completion and failures."""
 
 import asyncio
 from types import SimpleNamespace
@@ -116,4 +116,54 @@ async def test_confirmation_error_preserves_specific_outcome(
     result.hass.async_add_executor_job.side_effect = ["SYNTHETIC_ID", status, None]
     with pytest.raises(HomeAssistantError, match=reason):
         await result.async_unlock_vehicle("CAR")
+    assert not result._action_lock.locked()
+
+
+async def test_http_acceptance_completes_without_waiting_for_mqtt(monkeypatch):
+    sleep = AsyncMock()
+    monkeypatch.setattr(
+        "custom_components.kia_uvo.japan_coordinator.asyncio.sleep", sleep
+    )
+    result = coordinator()
+    result.hass.async_add_executor_job.side_effect = [
+        "SYNTHETIC_ID",
+        ORDER_STATUS.ACCEPTED,
+        None,
+    ]
+    await result.async_lock_vehicle("CAR")
+    sleep.assert_not_awaited()
+    assert result.hass.async_add_executor_job.await_args_list[1].args == (
+        result.vehicle_manager.check_action_status,
+        "CAR",
+        "SYNTHETIC_ID",
+        False,
+        0,
+    )
+    result.vehicle_manager.force_refresh_vehicle_state.assert_not_called()
+    result.async_set_updated_data.assert_called_once()
+    assert not result._action_lock.locked()
+
+
+async def test_accepted_request_with_state_read_failure_is_labelled_accepted():
+    result = coordinator()
+    result.hass.async_add_executor_job.side_effect = [
+        "SYNTHETIC_ID",
+        ORDER_STATUS.ACCEPTED,
+        RuntimeError("synthetic failure"),
+    ]
+    with pytest.raises(HomeAssistantError, match="service accepted the request"):
+        await result.async_unlock_vehicle("CAR")
+    assert not result._action_lock.locked()
+
+
+async def test_request_timeout_is_unknown_not_a_reason_to_resend():
+    from hyundai_kia_connect_api.exceptions import RequestTimeoutError
+
+    result = coordinator()
+    result.hass.async_add_executor_job.side_effect = RequestTimeoutError(
+        "synthetic timeout"
+    )
+    with pytest.raises(HomeAssistantError, match="vehicle execution is unknown"):
+        await result.async_unlock_vehicle("CAR")
+    assert result.hass.async_add_executor_job.await_count == 1
     assert not result._action_lock.locked()
