@@ -7,6 +7,7 @@ MagicMock is not one) and a mocked coordinator + hass. No HA runtime.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 import datetime
 import threading
 from unittest.mock import MagicMock
@@ -218,3 +219,46 @@ async def test_broken_vehicle_does_not_kill_dump() -> None:
     assert vehicles["good"]["data"]["id"] == "good"
     assert "error" in vehicles["bad"]
     assert "data" not in vehicles["bad"]
+
+
+@pytest.mark.asyncio
+async def test_push_identities_redacted_while_protocol_counters_survive() -> None:
+    # Model the new library fields without requiring a release pin change.
+    @dataclass
+    class PushVehicle(Vehicle):
+        mqtt_vehicle_id: str | None = None
+        hu_client_id: str | None = None
+
+    vehicle = PushVehicle(
+        id="car1",
+        mqtt_vehicle_id="synthetic-topic-identity",
+        hu_client_id="synthetic-head-unit-identity",
+    )
+    vehicle.data = {
+        "mqtt": {
+            "clientId": "synthetic-client-identity",
+            "mqtt_registration_uuid": "synthetic-registration-identity",
+            "messages_received": 12,
+            "mqtt_vehicle_id_present": True,
+        }
+    }
+    token = Token(username="test-user", password="test-pass")
+    token.mqtt_client_id = "synthetic-auth-client-identity"
+    coordinator = _make_coordinator(token)
+    coordinator.vehicle_manager.vehicles = {vehicle.id: vehicle}
+    payload = await async_get_config_entry_diagnostics(
+        _make_hass(coordinator), _make_entry()
+    )
+    data = payload["vehicles"][0]["data"]
+    assert data["mqtt_vehicle_id"] == REDACTED
+    assert data["hu_client_id"] == REDACTED
+    assert data["data"]["mqtt"] == {
+        "clientId": REDACTED,
+        "mqtt_registration_uuid": REDACTED,
+        "messages_received": 12,
+        "mqtt_vehicle_id_present": True,
+    }
+    assert payload["auth"]["mqtt_client_id"] == REDACTED
+    assert payload["auth"]["mqtt_client_present"] is True
+    assert payload["auth"]["device_present"] is False
+    assert "synthetic-" not in repr(payload)
