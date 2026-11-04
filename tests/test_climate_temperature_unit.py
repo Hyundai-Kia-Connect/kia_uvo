@@ -28,17 +28,17 @@ def _entity(
 )
 def test_unknown_car_unit_uses_ha_unit(ha_unit, min_temp, max_temp) -> None:
     entity = _entity(None, ha_unit)
-    assert entity.temperature_unit == ha_unit
+    assert entity.native_temperature_unit == ha_unit
     assert (entity.min_temp, entity.max_temp) == (min_temp, max_temp)
 
 
 def test_car_unit_wins_over_ha_unit() -> None:
     entity = _entity(UnitOfTemperature.FAHRENHEIT, UnitOfTemperature.CELSIUS)
-    assert entity.temperature_unit == UnitOfTemperature.FAHRENHEIT
+    assert entity.native_temperature_unit == UnitOfTemperature.FAHRENHEIT
 
 
 def test_unknown_car_unit_before_attach_is_celsius() -> None:
-    assert _entity(None, None).temperature_unit == UnitOfTemperature.CELSIUS
+    assert _entity(None, None).native_temperature_unit == UnitOfTemperature.CELSIUS
 
 
 @pytest.mark.parametrize(
