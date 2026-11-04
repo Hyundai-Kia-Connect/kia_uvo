@@ -34,16 +34,16 @@
       },
       "select_otp_method": {
         "title": "Select OTP Method",
-        "description": "Your account requires verification. Choose how you want to receive your one\u2011time password.",
+        "description": "Your account requires verification. Choose how you want to receive your one‑time password.",
         "data": {
           "method": "OTP delivery method"
         }
       },
       "enter_otp": {
-        "title": "Enter One\u2011Time Password",
+        "title": "Enter One‑Time Password",
         "description": "Enter the verification code sent to your selected method.",
         "data": {
-          "otp": "One\u2011time password"
+          "otp": "One‑time password"
         }
       },
       "reconfigure": {
