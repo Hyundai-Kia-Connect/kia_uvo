@@ -11,9 +11,10 @@ body:
     id: region
     attributes:
       label: Region
-      description: Select your region
+      description: Select your region. Choose "Europe (Beta)" only if your kia_uvo region setting is "Europe (Beta)"
       options:
         - Europe
+        - Europe (Beta)
         - Canada
         - United States
         - Australia
