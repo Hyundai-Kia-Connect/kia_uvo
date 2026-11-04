@@ -12,7 +12,7 @@ from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinat
 
 def entity(bounds=None, unit=UnitOfTemperature.CELSIUS, japan=True):
     vehicle = Vehicle(id="synthetic", name="synthetic", model="synthetic")
-    vehicle.climate_temperature_range = bounds
+    vehicle.supports.climate_temperature_range = bounds
     vehicle.air_temperature = (20, unit)
     vehicle.air_control_is_on = False
     coordinator = (

@@ -206,9 +206,9 @@ async def test_library_version_read_off_event_loop(monkeypatch) -> None:
 
 @pytest.mark.asyncio
 async def test_local_protocol_diagnostics_are_passive_and_off_event_loop() -> None:
-    from hyundai_kia_connect_api.HyundaiBlueLinkApiJP import HyundaiBlueLinkApiJP
+    from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
 
-    api = HyundaiBlueLinkApiJP(region=10, brand=2, language="en")
+    api = KiaUvoApiJP(region=10, brand=2, language="en")
     api.session = MagicMock()
     api._japan_svm_cache = {"SYNTHETIC_PRIVATE_VEHICLE": object()}
     helper = SimpleNamespace(

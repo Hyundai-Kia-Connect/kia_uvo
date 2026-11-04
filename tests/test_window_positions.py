@@ -13,7 +13,7 @@ from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinat
 def vehicle(positions):
     result = Vehicle(id="synthetic", name="synthetic", model="synthetic")
     result.supports_window_control = True
-    result.supported_window_positions = positions
+    result.supports.supported_window_positions = positions
     result.front_left_window_is_open = False
     result.front_right_window_is_open = False
     result.back_left_window_is_open = True

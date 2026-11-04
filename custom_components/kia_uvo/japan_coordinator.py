@@ -708,7 +708,7 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
         self, vehicle_id: str, state: WINDOW_STATE
     ) -> WindowRequestOptions:
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        positions = getattr(vehicle, "supported_window_positions", None)
+        positions = vehicle.supports.supported_window_positions
         if positions is None:
             positions = ("front_left", "front_right", "back_left", "back_right")
         return WindowRequestOptions(

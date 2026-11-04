@@ -7,14 +7,14 @@ from unittest.mock import Mock
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api import Token, Vehicle, VehicleManager
 from hyundai_kia_connect_api.const import ORDER_STATUS
-from hyundai_kia_connect_api.HyundaiBlueLinkApiJP import HyundaiBlueLinkApiJP
+from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
 import pytest
 import requests
 from test_region_operation_serialization import coordinator
 
 
 def pipeline(body=None, failure=None):
-    api = HyundaiBlueLinkApiJP(10, 2, "en")
+    api = KiaUvoApiJP(10, 2, "en")
     helper = Mock()
     helper.request_context = {
         "clientId": "synthetic-client",

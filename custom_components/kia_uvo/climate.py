@@ -155,9 +155,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def min_temp(self) -> float:
         """Get the minimum settable temperature."""
-        bounds = cast(
-            tuple[float, float] | None,
-            getattr(self.vehicle, "climate_temperature_range", None),
+        bounds = (
+            self.vehicle.supports.climate_temperature_range
+            if isinstance(self.coordinator, JapanDataUpdateCoordinator)
+            else None
         )
         if (
             isinstance(self.coordinator, JapanDataUpdateCoordinator)
@@ -174,9 +175,10 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def max_temp(self) -> float:
         """Get the maximum settable temperature."""
-        bounds = cast(
-            tuple[float, float] | None,
-            getattr(self.vehicle, "climate_temperature_range", None),
+        bounds = (
+            self.vehicle.supports.climate_temperature_range
+            if isinstance(self.coordinator, JapanDataUpdateCoordinator)
+            else None
         )
         if (
             isinstance(self.coordinator, JapanDataUpdateCoordinator)

@@ -80,7 +80,7 @@ async def async_setup_entry(
         if not vehicle.supports_window_control:
             continue
         positions = (
-            getattr(vehicle, "supported_window_positions", None)
+            vehicle.supports.supported_window_positions
             if isinstance(coordinator, JapanDataUpdateCoordinator)
             else None
         )

@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, Mock
 from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.core import StateMachine
 from hyundai_kia_connect_api import Token, Vehicle
-from hyundai_kia_connect_api.HyundaiBlueLinkApiJP import HyundaiBlueLinkApiJP
+from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
 from hyundai_kia_connect_api.japan_mqtt import JapanMqttSession
 from test_region_operation_serialization import coordinator
 
@@ -16,7 +16,7 @@ from custom_components.kia_uvo.lock import HyundaiKiaConnectLock
 
 
 async def test_delayed_unlock_survives_later_unrelated_packet_and_reaches_activity():
-    api = HyundaiBlueLinkApiJP(10, 2, "en")
+    api = KiaUvoApiJP(10, 2, "en")
     api.session.request = Mock(
         side_effect=AssertionError("passive processing must not use HTTP")
     )
