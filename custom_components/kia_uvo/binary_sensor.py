@@ -196,9 +196,10 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.ev_battery_is_plugged_in,
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
-        exists=lambda vehicle: vehicle.engine_type
-        in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
-        or vehicle.ev_battery_is_plugged_in is not None,
+        exists=lambda vehicle: (
+            vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+            or vehicle.ev_battery_is_plugged_in is not None
+        ),
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="fuel_level_is_low",
