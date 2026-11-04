@@ -18,6 +18,7 @@ def coordinator(strict=True):
     )
     result = coordinator_class.__new__(coordinator_class)
     result.vehicle_manager = MagicMock()
+    result.vehicle_manager.supported_commands = None
     result.vehicle_manager.api = SimpleNamespace(
         supports_remote_commands=True,
         supports_force_refresh=True,
