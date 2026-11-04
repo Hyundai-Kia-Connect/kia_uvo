@@ -196,8 +196,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.ev_battery_is_plugged_in,
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
-        # Created for every BEV/PHEV: plugged-in is unknown while the car
-        # is unplugged, so the value gate would drop the entity (kia_uvo#2069).
         exists=lambda vehicle: vehicle.engine_type
         in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
         or vehicle.ev_battery_is_plugged_in is not None,
