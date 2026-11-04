@@ -60,8 +60,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     try:
         await coordinator.async_config_entry_first_refresh()
     except ConfigEntryAuthFailed:
+        await _async_shutdown_coordinator(coordinator)
         raise
     except Exception as ex:
+        await _async_shutdown_coordinator(coordinator)
         raise ConfigEntryNotReady(f"Config Not Ready: {ex}") from ex
 
     hass.data.setdefault(DOMAIN, {})
@@ -71,11 +73,23 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     return True
 
 
+async def _async_shutdown_coordinator(
+    coordinator: HyundaiKiaConnectDataUpdateCoordinator,
+) -> None:
+    try:
+        await coordinator.async_shutdown()
+    except Exception as err:
+        _LOGGER.warning(
+            "Unable to shut down vehicle connection (%s)", type(err).__name__[:64]
+        )
+
+
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     if unload_ok := await hass.config_entries.async_unload_platforms(
         config_entry, PLATFORMS
     ):
+        await _async_shutdown_coordinator(hass.data[DOMAIN][config_entry.unique_id])
         del hass.data[DOMAIN][config_entry.unique_id]
     if not hass.data[DOMAIN]:
         async_unload_services(hass)
