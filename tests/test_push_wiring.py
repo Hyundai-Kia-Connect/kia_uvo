@@ -43,6 +43,9 @@ class TestMqttConnectedSensorGate:
             await binary_sensor_platform.async_setup_entry(
                 hass, config_entry, created.extend
             )
+            for e in created:
+                if type(e).__name__ == "HyundaiKiaMqttConnectedSensor":
+                    assert e.icon == "mdi:cloud-check"
 
         asyncio.run(run())
         return created
@@ -245,7 +248,58 @@ class TestStartMqtt:
         assert coordinator.vehicle_manager.api.calls == []
 
 
+class TestConnectionRefresh:
+    def test_is_push_connected_mirrors_the_manager(self):
+        """The coordinator property is a pass-through over the manager state."""
+        coordinator = _shim_coordinator(MagicMock())
+        coordinator.vehicle_manager = MagicMock(is_push_connected=True)
+        assert coordinator.is_push_connected is True
+        coordinator.vehicle_manager.is_push_connected = False
+        assert coordinator.is_push_connected is False
+
+    def test_push_enabled_round_trips_the_option(self):
+        """is_push_enabled mirrors the stored option, not just a constant."""
+        coordinator = _shim_coordinator(MagicMock())
+        assert coordinator.is_push_enabled is True
+        coordinator._push_enabled = False
+        assert coordinator.is_push_enabled is False
+
+    def test_schedules_a_coordinator_refresh(self):
+        """The connection-change bridge lands an async_request_refresh task."""
+        coordinator = _shim_coordinator(MagicMock())
+        _patch_hass(coordinator)
+        got: list = []
+        coordinator.hass.async_create_task = lambda c: got.append(c)
+        coordinator._schedule_connection_refresh()
+        assert len(got) == 1
+        coro = got[0]
+        assert coro.cr_frame.f_code.co_name == "async_request_refresh"
+        coro.close()
+
+
 class TestStopMqtt:
+    def test_start_error_is_contained(self):
+        """A start failure surfaces as a warning, not an exception."""
+        coordinator = _shim_coordinator(MagicMock())
+        _patch_hass(coordinator)
+        coordinator.vehicle_manager = MagicMock(
+            start_push=MagicMock(side_effect=RuntimeError("boom"))
+        )
+        asyncio.run(coordinator.async_start_push("v1"))
+        coordinator.vehicle_manager.set_push_status_callback.assert_called_with(
+            coordinator._push_status_callback
+        )
+
+    def test_stop_error_is_contained(self):
+        """A stop failure is contained: callbacks detached, no raise."""
+        coordinator = _shim_coordinator(MagicMock())
+        _patch_hass(coordinator)
+        coordinator.vehicle_manager = MagicMock(
+            stop_push=MagicMock(side_effect=RuntimeError("already down"))
+        )
+        asyncio.run(coordinator.async_stop_push())
+        coordinator.vehicle_manager.set_push_status_callback.assert_called_with(None)
+
     def test_unregisters_and_stops(self):
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
