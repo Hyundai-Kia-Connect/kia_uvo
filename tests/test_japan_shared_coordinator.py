@@ -2,11 +2,10 @@
 
 import asyncio
 import datetime as dt
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, sentinel
 
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api import ClimateRequestOptions, SVMDetails, Vehicle
-from hyundai_kia_connect_api.const import ORDER_STATUS
 from hyundai_kia_connect_api.exceptions import RequestTimeoutError
 import pytest
 
@@ -35,7 +34,7 @@ def shared_coordinator(monkeypatch):
     vehicle.ev_charge_limits_dc = 80
     result.vehicle_manager = MagicMock()
     result.vehicle_manager.vehicles = {vehicle.id: vehicle}
-    result.vehicle_manager.check_action_status.return_value = ORDER_STATUS.ACCEPTED
+    result.vehicle_manager.check_action_status.return_value = sentinel.service_accepted
     result._action_lock = asyncio.Lock()
     result._failed_vehicles = set()
     result._vehicle_failures = {}
