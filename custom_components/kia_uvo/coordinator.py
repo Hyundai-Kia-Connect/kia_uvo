@@ -152,6 +152,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.no_force_refresh_hour_finish,
         )
 
+    async def async_shutdown(self) -> None:
+        """Stop polling and release the manager after active commands finish."""
+        try:
+            await super().async_shutdown()
+        finally:
+            async with self._action_lock:
+                close = getattr(self.vehicle_manager, "close", None)
+                if callable(close):
+                    await self.hass.async_add_executor_job(close)
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library. Called by update_coordinator periodically.
 
