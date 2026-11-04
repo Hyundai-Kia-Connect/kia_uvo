@@ -82,7 +82,11 @@
           "no_force_refresh_hour_start": "Kein Force Refresh zulassen ab",
           "no_force_refresh_hour_finish": "Kein Force Refresh zulassen bis",
           "enable_geolocation_entity": "Geolokations-Entität über OpenStreetMap aktivieren",
-          "use_email_with_geocode_api": "Verwende deine Kia E-Mail-Adresse für die Geocode API - Weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+          "use_email_with_geocode_api": "Verwende deine Kia E-Mail-Adresse für die Geocode API - Weitere Informationen: https://nominatim.org/release-docs/develop/api/Reverse/#other",
+          "enable_mqtt": "MQTT-Push-Benachrichtigungen aktivieren"
+        },
+        "data_description": {
+          "enable_mqtt": "Fahrzeugstatusupdates per MQTT-Push empfangen, sobald das Auto sie meldet, statt auf den nächsten Abruf zu warten. Nur die Region Europa (Beta) unterstützt Push."
         }
       }
     }
@@ -849,6 +853,9 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Fehler an 12V-Batterie"
+      },
+      "mqtt_connected": {
+        "name": "MQTT verbunden"
       }
     },
     "lock": {
