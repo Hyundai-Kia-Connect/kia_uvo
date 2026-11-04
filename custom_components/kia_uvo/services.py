@@ -78,7 +78,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         await coordinator.async_force_update_all()
 
     async def async_handle_update(call: ServiceCall) -> None:
-        _LOGGER.debug(f"Call:{call.data}")
+        _LOGGER.debug("Call:%s", call.data)
         coordinator = _get_coordinator_from_device(hass, call)
         await coordinator.async_update_all()
 
@@ -169,7 +169,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             await coordinator.async_set_charge_limits(vehicle_id, int(ac), int(dc))
         else:
             _LOGGER.error(
-                f"{DOMAIN} - Enable to set charge limits.  Both AC and DC value required, but not provided."
+                "%s - Unable to set charge limits. Both AC and DC value required, but not provided.",
+                DOMAIN,
             )
 
     async def async_handle_set_windows(call: ServiceCall) -> None:
@@ -190,7 +191,7 @@ def async_setup_services(hass: HomeAssistant) -> bool:
         ):
             await coordinator.async_set_windows(vehicle_id, window_options)
         else:
-            _LOGGER.error(f"{DOMAIN} -  All windows value required, but not provided.")
+            _LOGGER.error("%s - All windows value required, but not provided.", DOMAIN)
 
     async def async_handle_set_charging_current(call: ServiceCall) -> None:
         coordinator = _get_coordinator_from_device(hass, call)
@@ -201,7 +202,8 @@ def async_setup_services(hass: HomeAssistant) -> bool:
             await coordinator.async_set_charging_current(vehicle_id, int(current_level))
         else:
             _LOGGER.error(
-                f"{DOMAIN} - Enable to set charging current.  Level required, but not provided."
+                "%s - Unable to set charging current. Level required, but not provided.",
+                DOMAIN,
             )
 
     async def async_handle_schedule_charging_and_climate(call: ServiceCall) -> None:
