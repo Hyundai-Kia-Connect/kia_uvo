@@ -20,7 +20,6 @@ from hyundai_kia_connect_api import Vehicle
 from .const import DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,15 +69,6 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in NUMBER_DESCRIPTIONS:
-            command = (
-                "set_vehicle_to_load_discharge_limit"
-                if description.key == V2L_LIMIT_KEY
-                else "set_charge_limits"
-            )
-            if isinstance(
-                coordinator, JapanDataUpdateCoordinator
-            ) and not coordinator.supports_command(command):
-                continue
             if getattr(vehicle, description.key, None) is not None:
                 entities.append(
                     HyundaiKiaConnectNumber(coordinator, description, vehicle)

@@ -9,9 +9,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 import datetime
-import json
 import threading
-from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from hyundai_kia_connect_api.Token import Token
@@ -27,7 +25,6 @@ from custom_components.kia_uvo.redact import REDACTED
 def _make_coordinator(token: Token | None = None) -> MagicMock:
     vm = MagicMock()
     vm.api = MagicMock()  # type().__name__ -> "MagicMock"
-    vm.get_local_diagnostics.side_effect = lambda: vm.api.get_local_diagnostics()
     vm.vehicles = {}
     vm.token = token
     coordinator = MagicMock()
@@ -97,8 +94,6 @@ async def test_payload_shape() -> None:
     assert payload["library_version"] is not None
     assert payload["vehicle_count"] == 0
     assert payload["vehicles"] == []
-    assert "local_protocol" not in payload
-    assert "image_rendering" not in payload
     assert "scan_interval" in payload["config_options"]
 
 
@@ -204,64 +199,6 @@ async def test_library_version_read_off_event_loop(monkeypatch) -> None:
 
     assert payload["library_version"] is not None
     assert seen["thread_id"] != loop_thread_id
-
-
-@pytest.mark.asyncio
-async def test_local_protocol_diagnostics_are_passive_and_off_event_loop() -> None:
-    from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
-
-    api = KiaUvoApiJP(region=10, brand=2, language="en")
-    api.session = MagicMock()
-    api._japan_svm_cache = {"SYNTHETIC_PRIVATE_VEHICLE": object()}
-    helper = SimpleNamespace(
-        diagnostics={"messages_received": 2, "last_result": "pending"},
-        client_id="SYNTHETIC_PRIVATE_CLIENT",
-    )
-    api._mqtt_sessions = {
-        "SYNTHETIC_PRIVATE_VEHICLE": (("SYNTHETIC_PRIVATE_TOKEN",), helper)
-    }
-    loop_thread_id = threading.get_ident()
-    seen = []
-    getter = api.get_local_diagnostics
-
-    def local_diagnostics():
-        seen.append(threading.get_ident())
-        return getter()
-
-    api.get_local_diagnostics = local_diagnostics
-    coordinator = _make_coordinator()
-    from custom_components.kia_uvo.japan_coordinator import JapanDataUpdateCoordinator
-
-    coordinator.__class__ = JapanDataUpdateCoordinator
-    coordinator.vehicle_manager.api = api
-    payload = await async_get_config_entry_diagnostics(
-        _make_hass(coordinator), _make_entry()
-    )
-
-    assert payload["local_protocol"] == {
-        "mqtt_sessions": [{"messages_received": 2, "last_result": "pending"}],
-        "svm_images_cached": 1,
-        "last_command": {},
-        "last_camera_capture": {"stage": "idle"},
-    }
-    assert len(seen) == 1 and seen[0] != loop_thread_id
-    assert "SYNTHETIC_PRIVATE" not in json.dumps(payload)
-    api.session.request.assert_not_called()
-
-
-@pytest.mark.asyncio
-async def test_older_api_without_local_diagnostics_remains_compatible() -> None:
-    coordinator = _make_coordinator()
-    coordinator.vehicle_manager.api = SimpleNamespace()
-
-    payload = await async_get_config_entry_diagnostics(
-        _make_hass(coordinator), _make_entry()
-    )
-
-    assert "local_protocol" not in payload
-    assert payload["vehicles"] == []
-    assert "local_protocol" not in payload
-    assert "image_rendering" not in payload
 
 
 @pytest.mark.asyncio

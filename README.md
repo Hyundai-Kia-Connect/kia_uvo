@@ -156,28 +156,25 @@ These can be accessed via Developer Tools > Actions, or called from automations.
 
 ### Service availability by region
 
-| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil | Japan (Hyundai) |
-| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ | --------------- |
-| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      | ✔               |
-| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      | ✔               |
-| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      | ✔               |
-| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      | ✔               |
-| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | Implemented†    |
-| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | ✔               |
-| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      | Implemented†    |
-| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Open ✔; close†  |
-| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
-| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Start†          |
-| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      | Start†          |
-| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
-| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      | Implemented†    |
-| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        | Implemented†    |
-| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        | ✔               |
-
-† Japan: implemented from the app contracts but not yet confirmed on a vehicle. Controls also depend on the vehicle profile. “Start” indicates the implemented hazard operation; a separate stop action is not verified.
+| Service                       | EU  | EU(>2023), NZ, AU | CA  | USA Kia | USA Hyundai | USA Genesis | China | India | Brazil |
+| ----------------------------- | --- | ----------------- | --- | ------- | ----------- | ----------- | ----- | ----- | ------ |
+| Update                        | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✔      |
+| Force Update                  | ✔   | not tested        | ✔   | ✔       |             |             | ✔     | ✔     | ✔      |
+| Lock / Unlock                 | ✔   | ✔                 | ✔   | ✔       | ✔           | ✔           | ✔     | ✔     | ✖      |
+| Start / Stop Climate          | ✔   | ✔                 | ✔   | ✔       | ✔           |             | ✔     | ✔     | ✖      |
+| Start / Stop Charge           | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charge Limits             | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Set Charging Current          | ✔   | ✔                 | ✔   | ✔       | ✔           |             |       |       | ✖      |
+| Open / Close Charge Port      | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Windows                   | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard Lights    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Hazard + Horn    | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     | ✔     | ✖      |
+| Schedule Charging and Climate | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Start / Stop Valet Mode       | ✖   | ✔                 | ✖   | ✖       | ✖           | ✖           | ✖     |       | ✖      |
+| Set Navigation                |     | ✔                 |     |         |             |             |       |       |        |
+| Capture SVM Image (Hyundai)   | ✔   |                   |     |         | ✔           |             |       |       |        |
 
 SVM entities and `capture_svm_image` are created only for vehicles that expose the surround-view capability (Hyundai).
-Japan SVM images are stored in memory; capture a new image after an integration reload or HA restart.
 
 ## Screenshots
 
@@ -188,6 +185,6 @@ Japan SVM images are stored in memory; capture a new image after an integration 
 
 If you receive an error while trying to login, please go through these steps:
 
-1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada, Brazil and Japan (Hyundai). If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
+1. This integration supports USA, EU, China, India, Australia, New Zealand, Canada and Brazil. If you are outside these regions, you are welcome to create an issue and become a test user. USA and Brazil coverage is limited.
 2. You can enable logging for this integration specifically and share your logs for investigation. To enable logging, click "Enable debug logging" on the integration. It can be accessed via **Settings → System → Logs**. See [Home Assistant troubleshooting: enabling debug logging](https://www.home-assistant.io/docs/configuration/troubleshooting/#enabling-debug-logging) for details.
 3. You can download a redacted diagnostics snapshot to attach to a bug report. Go to **Settings → Devices & Services → kia_uvo**, open the integration entry, click the menu (⋮) and select **Download diagnostics**. The dump is auto-redacted (tokens, device id, PIN, GPS coordinates, and reverse-geocoded addresses are removed) — safe to share. It contains the parsed vehicle state, API class, and version info, which helps diagnose field-mapping and region-specific issues.

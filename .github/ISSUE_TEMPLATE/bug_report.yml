@@ -21,7 +21,6 @@ body:
         - India
         - New Zealand
         - Brazil
-        - Japan
     validations:
       required: true
   - type: dropdown

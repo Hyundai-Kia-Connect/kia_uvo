@@ -22,7 +22,6 @@ from hyundai_kia_connect_api import ClimateRequestOptions, Vehicle
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,12 +33,6 @@ async def async_setup_entry(
 ) -> None:
     """Set up climate platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    if isinstance(coordinator, JapanDataUpdateCoordinator) and not (
-        coordinator.supports_command("start_climate")
-        and coordinator.supports_command("stop_climate")
-    ):
-        async_add_entities([])
-        return
     entities = []
     for vehicle in coordinator.vehicle_manager.vehicles.values():
         if vehicle.air_control_is_on is not None:
@@ -155,16 +148,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def min_temp(self) -> float:
         """Get the minimum settable temperature."""
-        bounds = (
-            self.vehicle.supports.climate_temperature_range
-            if isinstance(self.coordinator, JapanDataUpdateCoordinator)
-            else None
-        )
-        if (
-            isinstance(self.coordinator, JapanDataUpdateCoordinator)
-            and bounds is not None
-        ):
-            return bounds[0]
         # TODO: get the exact per-region range from the lib
         # USA/CA report Fahrenheit; the hardcoded 14-30 °C bounds made the
         # climate slider unusable (14-30 °F) for those vehicles.
@@ -175,16 +158,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
     @property
     def max_temp(self) -> float:
         """Get the maximum settable temperature."""
-        bounds = (
-            self.vehicle.supports.climate_temperature_range
-            if isinstance(self.coordinator, JapanDataUpdateCoordinator)
-            else None
-        )
-        if (
-            isinstance(self.coordinator, JapanDataUpdateCoordinator)
-            and bounds is not None
-        ):
-            return bounds[1]
         # TODO: get the exact per-region range from the lib
         if self.temperature_unit == UnitOfTemperature.FAHRENHEIT:
             return 82

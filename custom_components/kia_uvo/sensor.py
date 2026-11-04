@@ -33,7 +33,6 @@ from hyundai_kia_connect_api.const import ENGINE_TYPES
 from .const import CHARGING_CURRENTS, DOMAIN, DYNAMIC_UNIT
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -967,9 +966,7 @@ class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
 
     @property
     def native_value(self) -> datetime | None:
-        """Return the vehicle capture time, or local receipt time if absent."""
-        if isinstance(self.coordinator, JapanDataUpdateCoordinator):
-            return self.coordinator.get_svm_image_updated_at(self.vehicle.id)
+        """Return the capture timestamp of the latest SVM image."""
         details = self.coordinator.get_cached_svm_details(self.vehicle.id)
         if details is None:
             return None
@@ -983,16 +980,6 @@ class SVMStatusSensor(SensorEntity, HyundaiKiaConnectEntity):
         if details is None:
             return {}
         return {
-            **(
-                {
-                    "timestamp_source": "vehicle"
-                    if details.captured_at
-                    else "received",
-                    "vehicle_captured_at": details.captured_at,
-                }
-                if isinstance(self.coordinator, JapanDataUpdateCoordinator)
-                else {}
-            ),
             "heading": details.heading,
             "speed": (
                 {"value": details.speed[0], "unit": details.speed[1]}

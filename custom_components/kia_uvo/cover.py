@@ -22,7 +22,6 @@ from hyundai_kia_connect_api.const import WINDOW_STATE
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,24 +68,12 @@ async def async_setup_entry(
 ) -> None:
     """Set up window cover entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    if isinstance(coordinator, JapanDataUpdateCoordinator) and not (
-        coordinator.supports_command("set_windows_state")
-    ):
-        async_add_entities([])
-        return
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         if not vehicle.supports_window_control:
             continue
-        positions = (
-            vehicle.supports.supported_window_positions
-            if isinstance(coordinator, JapanDataUpdateCoordinator)
-            else None
-        )
         for description in COVER_DESCRIPTIONS:
-            if positions is not None and description.window_position not in positions:
-                continue
             if getattr(vehicle, description.key, None) is not None:
                 entities.append(
                     HyundaiKiaConnectCover(coordinator, description, vehicle)

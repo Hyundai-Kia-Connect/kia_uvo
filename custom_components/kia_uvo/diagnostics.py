@@ -35,7 +35,6 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
-from .japan_coordinator import JapanDataUpdateCoordinator
 from .redact import redact
 
 
@@ -140,16 +139,4 @@ async def async_get_config_entry_diagnostics(
     # on constructed key names like the "email" in `use_email_with_geocode_api`.
     vehicles = _vehicles_payload(coordinator)
     payload["vehicles"] = [redact(v) for v in vehicles]
-    if isinstance(coordinator, JapanDataUpdateCoordinator):
-        local_diagnostics = vm.get_local_diagnostics
-        if callable(local_diagnostics):
-            summary = await hass.async_add_executor_job(local_diagnostics)
-            if isinstance(summary, dict):
-                payload["local_protocol"] = summary
-        render_summary = coordinator.get_svm_render_diagnostics()
-        if isinstance(render_summary, list):
-            payload["image_rendering"] = render_summary
-        state_summary = coordinator.get_post_command_state_diagnostics()
-        if isinstance(state_summary, list):
-            payload["post_command_state"] = state_summary
     return payload

@@ -17,7 +17,6 @@ from hyundai_kia_connect_api import Vehicle
 from .const import DOMAIN
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
-from .japan_coordinator import JapanDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,11 +63,6 @@ async def async_setup_entry(
 ) -> None:
     """Set up time entities from a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    if isinstance(coordinator, JapanDataUpdateCoordinator) and not (
-        coordinator.supports_command("schedule_charging_and_climate")
-    ):
-        async_add_entities([])
-        return
     entities = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
