@@ -5,10 +5,10 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 import datetime as dt
-import time
 from datetime import timedelta
 from functools import partial
 import logging
+import time
 from typing import Any, Literal
 
 from homeassistant.config_entries import ConfigEntry
@@ -856,20 +856,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Start the push (MQTT) client for a vehicle.
 
         Registered callbacks must be in place before the transport
-        connects, so initial events are not missed. Regions whose API
-        does not declare push support skip silently.
+        connects, so initial events are not missed. The per-car tri-state
+        gate lives on VehicleManager.start_push; regions whose API
+        implements no push contract skip silently.
         """
         if not self._mqtt_enabled:
             _LOGGER.debug("%s - Push disabled in options, skipping", DOMAIN)
             return
-        if not getattr(self.vehicle_manager.api, "supports_mqtt_push", False):
-            _LOGGER.debug(
-                "%s - Push not supported on %s, skipping",
-                DOMAIN,
-                type(self.vehicle_manager.api).__name__,
-            )
-            return
-
         try:
             self.vehicle_manager.set_push_status_callback(self._mqtt_status_callback)
             self.vehicle_manager.set_push_connection_change_callback(
@@ -881,7 +874,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             if started:
                 _LOGGER.info("%s - Push started for vehicle %s", DOMAIN, vehicle_id)
             else:
-                _LOGGER.warning("%s - Push did not start for %s", DOMAIN, vehicle_id)
+                _LOGGER.debug(
+                    "%s - Push not started for %s (per-car or region gate)",
+                    DOMAIN,
+                    vehicle_id,
+                )
+        except NotImplementedError:
+            _LOGGER.debug(
+                "%s - Push contract absent on %s, skipping",
+                DOMAIN,
+                type(self.vehicle_manager.api).__name__,
+            )
+            return
         except Exception as ex:
             _LOGGER.warning("%s - Push start failed for %s: %s", DOMAIN, vehicle_id, ex)
 
