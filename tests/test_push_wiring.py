@@ -28,7 +28,7 @@ class TestMqttConnectedSensorGate:
     # push contract (region id from the lib), not the per-car tri-state.
     def _setup(self, mqtt_enabled: bool, cci_region: bool) -> list[Any]:
         coordinator = MagicMock()
-        coordinator.is_mqtt_enabled = mqtt_enabled
+        coordinator.is_push_enabled = mqtt_enabled
         coordinator.vehicle_manager.region = 9 if cci_region else 1
         # connectivity sensor attaches to the first vehicle for device grouping
         first_vehicle = MagicMock()
@@ -156,7 +156,7 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     """Coordinator wiring methods without the HA super().__init__.
 
     Only the attributes the wiring touches are set: hass, vehicle_manager,
-    _mqtt_enabled, _last_force_refresh.
+    _push_enabled, _last_force_refresh.
     """
     from hyundai_kia_connect_api import VehicleManager
 
@@ -168,7 +168,7 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     coordinator.vehicle_manager.api = FakePushApi()  # type: ignore[assignment]
     vehicle = Vehicle(id="v1")
     coordinator.vehicle_manager.vehicles = {"v1": vehicle}
-    coordinator._mqtt_enabled = True
+    coordinator._push_enabled = True
     coordinator._last_force_refresh = 0.0
     coordinator.config_entry = MagicMock()
     coordinator.data: dict = {}
@@ -204,7 +204,7 @@ class TestStartMqtt:
         hass = MagicMock()
         coordinator = _shim_coordinator(hass)
         _patch_hass(coordinator)
-        asyncio.run(coordinator.async_start_mqtt("v1"))
+        asyncio.run(coordinator.async_start_push("v1"))
         api = coordinator.vehicle_manager.api
         assert [c for c in api.calls if c != "creds"][:4] == [
             "broker",
@@ -215,15 +215,15 @@ class TestStartMqtt:
         assert "topics" not in api.calls  # transport not connected → no subscribe
         cb = coordinator.vehicle_manager._push_status_callback
         assert (
-            cb.__func__ is HyundaiKiaConnectDataUpdateCoordinator._mqtt_status_callback
+            cb.__func__ is HyundaiKiaConnectDataUpdateCoordinator._push_status_callback
         )
         assert coordinator.vehicle_manager._push_session._client is not None
 
     def test_skips_when_disabled(self):
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
-        coordinator._mqtt_enabled = False
-        asyncio.run(coordinator.async_start_mqtt("v1"))
+        coordinator._push_enabled = False
+        asyncio.run(coordinator.async_start_push("v1"))
         assert coordinator.vehicle_manager.api.calls == []
 
     def test_skips_when_unsupported(self):
@@ -232,7 +232,7 @@ class TestStartMqtt:
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
         coordinator.vehicle_manager.vehicles["v1"].supports.mqtt_push = False
-        asyncio.run(coordinator.async_start_mqtt("v1"))
+        asyncio.run(coordinator.async_start_push("v1"))
         assert coordinator.vehicle_manager.api.calls == []
 
     def test_skips_when_contract_absent(self):
@@ -241,7 +241,7 @@ class TestStartMqtt:
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
         coordinator.vehicle_manager.api = NoPushContractApi()
-        asyncio.run(coordinator.async_start_mqtt("v1"))
+        asyncio.run(coordinator.async_start_push("v1"))
         assert coordinator.vehicle_manager.api.calls == []
 
 
@@ -249,8 +249,8 @@ class TestStopMqtt:
     def test_unregisters_and_stops(self):
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
-        asyncio.run(coordinator.async_start_mqtt("v1"))
-        asyncio.run(coordinator.async_stop_mqtt())
+        asyncio.run(coordinator.async_start_push("v1"))
+        asyncio.run(coordinator.async_stop_push())
         assert coordinator.vehicle_manager._push_status_callback is None
         assert coordinator.vehicle_manager._push_session._client is None
 
@@ -259,26 +259,26 @@ class TestCallbacks:
     def test_status_callback_bridges_to_loop(self):
         coordinator = _shim_coordinator(MagicMock())
         call_soon, _ = _patch_hass(coordinator)
-        coordinator._mqtt_status_callback("v1", "Status")
-        call_soon.assert_called_with(coordinator._schedule_mqtt_refresh, "v1")
+        coordinator._push_status_callback("v1", "Status")
+        call_soon.assert_called_with(coordinator._schedule_push_refresh, "v1")
 
     def test_schedule_refresh_for_known_vehicle_tasks_force_refresh(self):
         coordinator = _shim_coordinator(MagicMock())
         _, created = _patch_hass(coordinator)
-        coordinator._schedule_mqtt_refresh("v1")
+        coordinator._schedule_push_refresh("v1")
         assert len(created) == 1
         assert created[0].cr_code.co_name == "async_force_refresh_vehicle"
 
     def test_schedule_refresh_skips_unknown_vehicle(self):
         coordinator = _shim_coordinator(MagicMock())
         _, created = _patch_hass(coordinator)
-        coordinator._schedule_mqtt_refresh("ghost")
+        coordinator._schedule_push_refresh("ghost")
         assert created == []
 
     def test_connection_callback_bridges_to_loop(self):
         coordinator = _shim_coordinator(MagicMock())
         call_soon, _ = _patch_hass(coordinator)
-        coordinator._mqtt_connection_callback(True)
+        coordinator._push_connection_callback(True)
         call_soon.assert_called_with(coordinator._schedule_connection_refresh)
 
 
@@ -311,5 +311,5 @@ class TestForceRefreshThrottle:
 def test_status_callback_types_bridged(topic_type):
     coordinator = _shim_coordinator(MagicMock())
     call_soon, _ = _patch_hass(coordinator)
-    coordinator._mqtt_status_callback("v1", topic_type)
+    coordinator._push_status_callback("v1", topic_type)
     assert call_soon.call_count == 1

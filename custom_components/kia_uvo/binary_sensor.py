@@ -638,7 +638,7 @@ async def async_setup_entry(
     # tri-state (VehicleManager.start_push owns that).
     first_vehicle = next(iter(coordinator.vehicle_manager.vehicles.values()), None)
     if (
-        coordinator.is_mqtt_enabled
+        coordinator.is_push_enabled
         and first_vehicle is not None
         and REGIONS.get(coordinator.vehicle_manager.region) == REGION_EUROPE_CCI
     ):
@@ -705,7 +705,7 @@ class HyundaiKiaMqttConnectedSensor(BinarySensorEntity, HyundaiKiaConnectEntity)
     @property
     def is_on(self) -> bool | None:
         """True while the push transport is connected."""
-        return bool(self.coordinator.is_mqtt_connected)
+        return bool(self.coordinator.is_push_connected)
 
     @property
     def icon(self) -> str:

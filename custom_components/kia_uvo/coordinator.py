@@ -135,7 +135,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.use_email_with_geocode_api = config_entry.options.get(
             CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
         )
-        self._mqtt_enabled: bool = config_entry.options.get(
+        self._push_enabled: bool = config_entry.options.get(
             CONF_ENABLE_MQTT, DEFAULT_ENABLE_MQTT
         )
         # Monotonic timestamp of the last vehicle force refresh (throttle
@@ -852,21 +852,21 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     # Push lifecycle (regions without push skip inside)
     # ------------------------------------------------------------------
 
-    async def async_start_mqtt(self, vehicle_id: str) -> None:
-        """Start the push (MQTT) client for a vehicle.
+    async def async_start_push(self, vehicle_id: str) -> None:
+        """Start push for a vehicle.
 
         Registered callbacks must be in place before the transport
         connects, so initial events are not missed. The per-car tri-state
         gate lives on VehicleManager.start_push; regions whose API
         implements no push contract skip silently.
         """
-        if not self._mqtt_enabled:
+        if not self._push_enabled:
             _LOGGER.debug("%s - Push disabled in options, skipping", DOMAIN)
             return
         try:
-            self.vehicle_manager.set_push_status_callback(self._mqtt_status_callback)
+            self.vehicle_manager.set_push_status_callback(self._push_status_callback)
             self.vehicle_manager.set_push_connection_change_callback(
-                self._mqtt_connection_callback
+                self._push_connection_callback
             )
             started = await self.hass.async_add_executor_job(
                 self.vehicle_manager.start_push, vehicle_id
@@ -889,8 +889,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         except Exception as ex:
             _LOGGER.warning("%s - Push start failed for %s: %s", DOMAIN, vehicle_id, ex)
 
-    async def async_stop_mqtt(self) -> None:
-        """Stop the push client and detach callbacks."""
+    async def async_stop_push(self) -> None:
+        """Stop push and detach callbacks."""
         self.vehicle_manager.set_push_status_callback(None)
         try:
             await self.hass.async_add_executor_job(self.vehicle_manager.stop_push)
@@ -898,30 +898,30 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             _LOGGER.debug("%s - Push stop error (may be harmless): %s", DOMAIN, ex)
 
     @property
-    def is_mqtt_connected(self) -> bool:
+    def is_push_connected(self) -> bool:
         """Whether the push transport is connected."""
         return bool(self.vehicle_manager.is_push_connected)
 
     @property
-    def is_mqtt_enabled(self) -> bool:
+    def is_push_enabled(self) -> bool:
         """Whether push is enabled in options."""
-        return self._mqtt_enabled
+        return self._push_enabled
 
-    def _mqtt_status_callback(self, vehicle_id: str, topic_type: str) -> None:
+    def _push_status_callback(self, vehicle_id: str, topic_type: str) -> None:
         """Bridged from the transport thread on CarStatus deliveries.
 
-        Schedules a force refresh (throttled — see async_force_refresh_vehicle)
+        Schedules a force refresh (throttled, see async_force_refresh_vehicle)
         so the status entities update without waiting for the next poll.
         """
         _LOGGER.debug(
-            "%s - Push status update for %s, type=%s — scheduling refresh",
+            "%s - Push status update for %s, type=%s, scheduling refresh",
             DOMAIN,
             vehicle_id,
             topic_type,
         )
-        self.hass.loop.call_soon_threadsafe(self._schedule_mqtt_refresh, vehicle_id)
+        self.hass.loop.call_soon_threadsafe(self._schedule_push_refresh, vehicle_id)
 
-    def _schedule_mqtt_refresh(self, vehicle_id: str) -> None:
+    def _schedule_push_refresh(self, vehicle_id: str) -> None:
         """Schedule a force refresh for a vehicle on the HA event loop."""
         if vehicle_id not in self.vehicle_manager.vehicles:
             _LOGGER.debug(
@@ -930,7 +930,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             return
         self.hass.async_create_task(self.async_force_refresh_vehicle(vehicle_id))
 
-    def _mqtt_connection_callback(self, connected: bool) -> None:
+    def _push_connection_callback(self, connected: bool) -> None:
         """Bridged from the transport thread on connection state changes.
 
         Schedules a coordinator refresh so the connectivity sensor updates.
