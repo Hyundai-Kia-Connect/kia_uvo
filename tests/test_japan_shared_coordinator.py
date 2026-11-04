@@ -50,7 +50,7 @@ def shared_coordinator(monkeypatch):
         result.async_set_updated_data(result.data)
 
     result.async_refresh = AsyncMock(side_effect=cached_refresh)
-    monkeypatch.setattr(coordinator_module, "asyncio", MagicMock(sleep=AsyncMock()))
+    monkeypatch.setattr(coordinator_module.asyncio, "sleep", AsyncMock())
     return result
 
 
