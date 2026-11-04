@@ -111,6 +111,10 @@ After installation, go to **Settings** → **Devices & Services** → **Integrat
 
 - Climate Control (temperature, mode, defrost)
 
+### Selects
+
+- Climate Duration — how long a remote climate start holds after you press it; `auto` keeps the API default. Created per vehicle where the car supports the duration setting (EU, AU).
+
 ### Buttons
 
 - Force Refresh

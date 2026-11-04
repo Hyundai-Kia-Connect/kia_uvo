@@ -983,6 +983,11 @@
       "ev_off_peak_end_time": {
         "name": "Fin de carga en horario valle"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Climate duration"
+      }
     }
   }
 }

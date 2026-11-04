@@ -983,6 +983,11 @@
       "ev_off_peak_end_time": {
         "name": "谷电充电结束时间"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Climate duration"
+      }
     }
   }
 }
