@@ -21,7 +21,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES, SEAT_STATUS
 
-from .const import BRANDS, DOMAIN, REGIONS
+from .const import BRANDS, DOMAIN, REGION_EUROPE_CCI, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -635,12 +635,11 @@ async def async_setup_entry(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
 
-    # Push connectivity sensor — only where the push contract is implemented
-    # (regions without push skip; precedent: geocode-entity region gate).
-    # getattr: the installed lib release can lag behind the contract (pin
-    # bump follows the lib release), so the flag is optional.
-    if coordinator.is_mqtt_enabled and getattr(
-        coordinator.vehicle_manager.api, "supports_mqtt_push", False
+    # Push connectivity sensor — manager-level: the transport is shared,
+    # so the gate is the region with the push contract, not the per-car
+    # tri-state (VehicleManager.start_push owns that).
+    if coordinator.is_mqtt_enabled and (
+        REGIONS.get(coordinator.vehicle_manager.region) == REGION_EUROPE_CCI
     ):
         entities.append(HyundaiKiaMqttConnectedSensor(coordinator))
     async_add_entities(entities)

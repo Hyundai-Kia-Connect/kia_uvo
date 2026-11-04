@@ -5,13 +5,15 @@ import datetime as dt
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
+from hyundai_kia_connect_api import (
+    Token,
+    Vehicle,
+    mqtt_push_session as mqtt_push_session_mod,
+)
 import pytest
-from hyundai_kia_connect_api import Token, Vehicle
 
 from custom_components.kia_uvo import binary_sensor as binary_sensor_platform
-from custom_components.kia_uvo.coordinator import (
-    HyundaiKiaConnectDataUpdateCoordinator,
-)
+from custom_components.kia_uvo.coordinator import HyundaiKiaConnectDataUpdateCoordinator
 
 DOMAIN = "kia_uvo"
 
@@ -22,13 +24,12 @@ DOMAIN = "kia_uvo"
 
 
 class TestMqttConnectedSensorGate:
-    def _setup(self, mqtt_enabled: bool, push_supported: bool) -> list[Any]:
+    # The transport is manager-level; the gate is the region implementing the
+    # push contract (region id from the lib), not the per-car tri-state.
+    def _setup(self, mqtt_enabled: bool, cci_region: bool) -> list[Any]:
         coordinator = MagicMock()
         coordinator.is_mqtt_enabled = mqtt_enabled
-        # Flag read directly off the api (the removed is_push_supported
-        # property must not come back); getattr tolerance is the platform
-        # gate's own concern.
-        coordinator.vehicle_manager.api.supports_mqtt_push = push_supported
+        coordinator.vehicle_manager.region = 9 if cci_region else 1
         # connectivity sensor attaches to the first vehicle for device grouping
         first_vehicle = MagicMock()
         first_vehicle.id = "v1"
@@ -74,10 +75,41 @@ class TestMqttConnectedSensorGate:
 # ---------------------------------------------------------------------------
 
 
+class NoPushContractApi:
+    """API double without the push contract (stubbed NotImplementedError, as the lib base does)."""
+
+    def __init__(self):
+        self.calls: list[str] = []
+
+    def get_push_broker_info(self, _token):
+        raise NotImplementedError
+
+
+class FakeTransport:
+    """Session-transport double; nothing connects (the lib covers mechanics)."""
+
+    def __init__(self, on_message=None, on_connect=None, on_disconnect=None):
+        self.on_message = on_message
+        self.connected = False
+
+    @property
+    def is_connected(self):
+        return self.connected
+
+    def configure(self, **kwargs): ...
+    def set_on_connection_change(self, cb): ...
+    def connect(self): ...
+    def subscribe(self, topics): ...
+    def disconnect(self): ...
+
+
+@pytest.fixture(autouse=True)
+def _fake_transport(monkeypatch):
+    monkeypatch.setattr(mqtt_push_session_mod, "MqttTransport", FakeTransport)
+
+
 class FakePushApi:
     """Push-capable API double (contract shape of the reworked lib)."""
-
-    supports_mqtt_push = True
 
     def __init__(self):
         self.broker = {"mqtt_host": "broker.example", "mqtt_port": 8883}
@@ -92,6 +124,10 @@ class FakePushApi:
     def register_push_client(self, _token):
         self.calls.append("register_client")
         return self.reg
+
+    def get_push_credentials(self, _token):
+        self.calls.append("creds")
+        return ("dev-client", "stripped-token")
 
     def register_push_vehicle(self, _token, vehicle):
         self.calls.append("register_vehicle")
@@ -130,8 +166,7 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
         region=1, brand=2, language="en", username="u", password="p", pin="0000"
     )
     coordinator.vehicle_manager.api = FakePushApi()  # type: ignore[assignment]
-    vehicle = Vehicle()
-    vehicle.id = "v1"
+    vehicle = Vehicle(id="v1")
     coordinator.vehicle_manager.vehicles = {"v1": vehicle}
     coordinator._mqtt_enabled = True
     coordinator._last_force_refresh = 0.0
@@ -141,6 +176,9 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     # bookkeeping is out of scope here (the wiring under test is the
     # throttle guard + executor call, not the coordinator update itself).
     coordinator.async_set_updated_data = lambda data: None
+    # device-registry sync is out of scope for the shim: a MagicMock hass
+    # would report every device as disabled and skip the force refresh
+    coordinator._sync_vehicle_enabled_states = lambda: None
     return coordinator
 
 
@@ -168,7 +206,7 @@ class TestStartMqtt:
         _patch_hass(coordinator)
         asyncio.run(coordinator.async_start_mqtt("v1"))
         api = coordinator.vehicle_manager.api
-        assert api.calls[:4] == [
+        assert [c for c in api.calls if c != "creds"][:4] == [
             "broker",
             "register_client",
             "identity",
@@ -179,7 +217,7 @@ class TestStartMqtt:
         assert (
             cb.__func__ is HyundaiKiaConnectDataUpdateCoordinator._mqtt_status_callback
         )
-        assert coordinator.vehicle_manager._push_client is not None
+        assert coordinator.vehicle_manager._push_session._client is not None
 
     def test_skips_when_disabled(self):
         coordinator = _shim_coordinator(MagicMock())
@@ -189,9 +227,20 @@ class TestStartMqtt:
         assert coordinator.vehicle_manager.api.calls == []
 
     def test_skips_when_unsupported(self):
+        # per-car gate: VehicleManager.start_push returns False before any
+        # api call
         coordinator = _shim_coordinator(MagicMock())
         _patch_hass(coordinator)
-        coordinator.vehicle_manager.api.supports_mqtt_push = False
+        coordinator.vehicle_manager.vehicles["v1"].supports.mqtt_push = False
+        asyncio.run(coordinator.async_start_mqtt("v1"))
+        assert coordinator.vehicle_manager.api.calls == []
+
+    def test_skips_when_contract_absent(self):
+        # region API without the push contract raises NotImplementedError;
+        # the wiring skips silently (debug) instead of warning
+        coordinator = _shim_coordinator(MagicMock())
+        _patch_hass(coordinator)
+        coordinator.vehicle_manager.api = NoPushContractApi()
         asyncio.run(coordinator.async_start_mqtt("v1"))
         assert coordinator.vehicle_manager.api.calls == []
 
@@ -203,7 +252,7 @@ class TestStopMqtt:
         asyncio.run(coordinator.async_start_mqtt("v1"))
         asyncio.run(coordinator.async_stop_mqtt())
         assert coordinator.vehicle_manager._push_status_callback is None
-        assert coordinator.vehicle_manager._push_client is None
+        assert coordinator.vehicle_manager._push_session._client is None
 
 
 class TestCallbacks:
@@ -239,7 +288,7 @@ class TestForceRefreshThrottle:
         coordinator = _shim_coordinator(hass)
         _, _ = _patch_hass(coordinator)
         # token always valid → check_and_refresh_token skips the API
-        coordinator.vehicle_manager.token = Token(valid_until=dt.datetime.max)
+        coordinator.vehicle_manager.token = Token("u", "p", valid_until=dt.datetime.max)
 
         # executor runs check_and_refresh_token BEFORE the refresh itself,
         # so count the actual refresh calls on the API fake instead.
