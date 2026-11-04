@@ -8,8 +8,8 @@ from unittest.mock import AsyncMock, Mock
 from homeassistant.const import EVENT_STATE_CHANGED
 from homeassistant.core import StateMachine
 from hyundai_kia_connect_api import Token, Vehicle
-from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
 from hyundai_kia_connect_api.japan_mqtt import JapanMqttSession
+from hyundai_kia_connect_api.KiaUvoApiJP import KiaUvoApiJP
 from test_region_operation_serialization import coordinator
 
 from custom_components.kia_uvo.lock import HyundaiKiaConnectLock
