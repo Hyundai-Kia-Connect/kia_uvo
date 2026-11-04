@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from homeassistant.exceptions import HomeAssistantError
 from hyundai_kia_connect_api.const import ORDER_STATUS
+from hyundai_kia_connect_api.VehicleManager import VehicleManager
 import pytest
 
 from custom_components.kia_uvo.coordinator import HyundaiKiaConnectDataUpdateCoordinator
@@ -23,6 +24,13 @@ def coordinator(strict=True):
         supports_remote_commands=True,
         supports_force_refresh=True,
         supported_commands=None,
+    )
+    result.vehicle_manager.supported_commands = None
+    result.vehicle_manager.apply_cached_mqtt_state.side_effect = lambda vehicle_id: (
+        VehicleManager.apply_cached_mqtt_state(result.vehicle_manager, vehicle_id)
+    )
+    result.vehicle_manager.get_vehicle.side_effect = lambda vehicle_id: (
+        result.vehicle_manager.vehicles[vehicle_id]
     )
     result._action_lock = asyncio.Lock()
     result.data = {}

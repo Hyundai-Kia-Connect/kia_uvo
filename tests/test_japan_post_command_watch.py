@@ -93,7 +93,7 @@ async def test_passive_reader_errors_are_private_and_bounded(caplog):
 async def test_shutdown_drains_active_reader_then_closes_and_rejects_new_watch(
     monkeypatch,
 ):
-    result, reader, _clock = watcher()
+    result, _reader, _clock = watcher()
     entered = asyncio.Event()
     release = asyncio.Event()
     close = result.vehicle_manager.api.close
@@ -103,7 +103,7 @@ async def test_shutdown_drains_active_reader_then_closes_and_rejects_new_watch(
     )
 
     async def executor(fn, *args):
-        if fn is reader:
+        if fn is result.vehicle_manager.apply_cached_mqtt_state:
             entered.set()
             await release.wait()
             return False
@@ -127,11 +127,9 @@ async def test_shutdown_drains_active_reader_then_closes_and_rejects_new_watch(
     result.async_set_updated_data.assert_not_called()
 
 
-def test_no_watcher_for_missing_vehicle_or_passive_reader():
+def test_no_watcher_for_missing_vehicle():
     result, _reader, _clock = watcher()
     result._start_post_command_state_watch("missing")
-    result.vehicle_manager.api = SimpleNamespace()
-    result._start_post_command_state_watch("synthetic")
     result.hass.async_create_background_task.assert_not_called()
     assert JapanDataUpdateCoordinator.get_post_command_state_diagnostics(result) == []
 

@@ -61,7 +61,7 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
 
     def supports_command(self, command: str) -> bool:
         """Whether this API implements the named vehicle command."""
-        commands = getattr(self.vehicle_manager.api, "supported_commands", None)
+        commands = self.vehicle_manager.supported_commands
         return commands is None or command in commands
 
     def _require_command(self, command: str) -> None:
@@ -302,10 +302,8 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
 
     def _start_post_command_state_watch(self, vehicle_id: str) -> None:
         """Watch only already-received MQTT data; never poll or wake the car."""
-        reader = getattr(self.vehicle_manager.api, "apply_cached_mqtt_state", None)
         if (
             getattr(self, "_closing", False)
-            or not callable(reader)
             or vehicle_id not in self.vehicle_manager.vehicles
             or not self.vehicle_manager.vehicles[vehicle_id].enabled
         ):
@@ -358,16 +356,11 @@ class JapanDataUpdateCoordinator(HyundaiKiaConnectDataUpdateCoordinator):
                         if not vehicle.enabled:
                             diagnostic["last_result"] = "vehicle_disabled"
                             return
-                        reader = getattr(
-                            self.vehicle_manager.api, "apply_cached_mqtt_state", None
-                        )
-                        if not callable(reader):
-                            diagnostic["last_result"] = "reader_unavailable"
-                            return
+                        reader = self.vehicle_manager.apply_cached_mqtt_state
                         diagnostic["poll_count"] += 1
                         try:
                             changed = await self._async_run_executor_job(
-                                reader, vehicle
+                                reader, vehicle_id
                             )
                         except Exception:
                             diagnostic["read_errors"] += 1

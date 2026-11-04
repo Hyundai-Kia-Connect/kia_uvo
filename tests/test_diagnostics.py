@@ -27,6 +27,7 @@ from custom_components.kia_uvo.redact import REDACTED
 def _make_coordinator(token: Token | None = None) -> MagicMock:
     vm = MagicMock()
     vm.api = MagicMock()  # type().__name__ -> "MagicMock"
+    vm.get_local_diagnostics.side_effect = lambda: vm.api.get_local_diagnostics()
     vm.vehicles = {}
     vm.token = token
     coordinator = MagicMock()

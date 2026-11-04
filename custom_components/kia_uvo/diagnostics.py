@@ -141,7 +141,7 @@ async def async_get_config_entry_diagnostics(
     vehicles = _vehicles_payload(coordinator)
     payload["vehicles"] = [redact(v) for v in vehicles]
     if isinstance(coordinator, JapanDataUpdateCoordinator):
-        local_diagnostics = getattr(vm.api, "get_local_diagnostics", None)
+        local_diagnostics = vm.get_local_diagnostics
         if callable(local_diagnostics):
             summary = await hass.async_add_executor_job(local_diagnostics)
             if isinstance(summary, dict):

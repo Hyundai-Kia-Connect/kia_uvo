@@ -18,6 +18,9 @@ async def test_japan_rejects_unsupported_service_before_authentication():
     result.vehicle_manager.api = SimpleNamespace(
         supported_commands=frozenset({"lock_action"})
     )
+    result.vehicle_manager.supported_commands = (
+        result.vehicle_manager.api.supported_commands
+    )
     result.async_check_and_refresh_token = AsyncMock()
     result.hass = MagicMock()
     result.hass.async_add_executor_job = AsyncMock()
