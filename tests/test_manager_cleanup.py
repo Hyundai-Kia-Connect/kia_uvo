@@ -5,7 +5,11 @@ import threading
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
-from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
+from homeassistant.exceptions import (
+    ConfigEntryAuthFailed,
+    ConfigEntryNotReady,
+    HomeAssistantError,
+)
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 import pytest
 
@@ -165,4 +169,138 @@ async def test_manager_cleanup_runs_even_when_polling_shutdown_fails(stop_pollin
         await result.async_shutdown()
 
     assert info.value is error
+    close.assert_called_once()
+
+
+@pytest.mark.parametrize("mode", ["cached", "force"])
+async def test_shutdown_drains_active_poll_and_blocks_fallback(mode, stop_polling):
+    started = asyncio.Event()
+    release = asyncio.Event()
+    events = []
+    cached = Mock()
+    force = Mock()
+    close = Mock(side_effect=lambda: events.append("closed"))
+    result = coordinator(
+        SimpleNamespace(
+            close=close,
+            update_vehicle_with_cached_state=cached,
+            force_refresh_vehicle_state=force,
+            vehicles={"synthetic": SimpleNamespace(name="test vehicle")},
+        )
+    )
+    read = cached if mode == "cached" else force
+
+    async def execute(target, *args):
+        if target is read:
+            read(*args)
+            events.append("poll_started")
+            started.set()
+            await release.wait()
+            events.append("poll_finished")
+            if mode == "force":
+                raise RuntimeError("synthetic request failure")
+        else:
+            return target(*args)
+
+    result.hass.async_add_executor_job.side_effect = execute
+    polling = asyncio.create_task(result._async_poll_vehicle("synthetic", mode=mode))
+    await started.wait()
+    shutdown = asyncio.create_task(result.async_shutdown())
+    while not getattr(result, "_shutdown_started", False):
+        await asyncio.sleep(0)
+    assert not close.called
+    release.set()
+    if mode == "force":
+        with pytest.raises(HomeAssistantError, match="shutting down"):
+            await polling
+        cached.assert_not_called()
+    else:
+        await polling
+    await shutdown
+
+    assert events == ["poll_started", "poll_finished", "closed"]
+    read.assert_called_once_with("synthetic")
+
+
+@pytest.mark.parametrize("worker_fails", [False, True])
+async def test_cancelled_api_caller_keeps_worker_owned_until_shutdown(
+    worker_fails, stop_polling
+):
+    started = asyncio.Event()
+    release = asyncio.Event()
+    finished = []
+    close = Mock()
+    result = coordinator(SimpleNamespace(close=close))
+    target = Mock()
+
+    async def execute(job):
+        if job is target:
+            started.set()
+            await release.wait()
+            finished.append(True)
+            if worker_fails:
+                raise RuntimeError("synthetic request failure")
+        else:
+            job()
+
+    result.hass.async_add_executor_job.side_effect = execute
+    caller = asyncio.create_task(result._async_api_job(target))
+    await started.wait()
+    caller.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await caller
+    shutdown = asyncio.create_task(result.async_shutdown())
+    while not getattr(result, "_shutdown_started", False):
+        await asyncio.sleep(0)
+    assert not close.called
+    release.set()
+    await shutdown
+
+    assert finished == [True]
+    close.assert_called_once()
+    assert not result._api_jobs
+
+
+async def test_no_api_jobs_submitted_after_shutdown(stop_polling):
+    close = Mock()
+    result = coordinator(SimpleNamespace(close=close))
+    target = Mock()
+    await result.async_shutdown()
+
+    with pytest.raises(HomeAssistantError, match="shutting down"):
+        await result._async_api_job(target)
+
+    result.hass.async_add_executor_job.assert_awaited_once_with(close)
+    target.assert_not_called()
+
+
+async def test_cancelled_shutdown_still_drains_worker_and_closes(stop_polling):
+    started = asyncio.Event()
+    release = asyncio.Event()
+    close = Mock()
+    result = coordinator(SimpleNamespace(close=close))
+    target = Mock()
+
+    async def execute(job):
+        if job is target:
+            started.set()
+            await release.wait()
+        else:
+            job()
+
+    result.hass.async_add_executor_job.side_effect = execute
+    caller = asyncio.create_task(result._async_api_job(target))
+    await started.wait()
+    shutdown = asyncio.create_task(result.async_shutdown())
+    while not getattr(result, "_shutdown_started", False):
+        await asyncio.sleep(0)
+    shutdown.cancel()
+    await asyncio.sleep(0)
+    assert not shutdown.done()
+    assert not close.called
+    release.set()
+    await caller
+    with pytest.raises(asyncio.CancelledError):
+        await shutdown
+
     close.assert_called_once()
