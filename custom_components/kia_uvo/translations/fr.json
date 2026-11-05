@@ -620,6 +620,17 @@
           "before_30min": "30 minutes avant",
           "off": "Désactivée"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "État de verrouillage du connecteur de charge",
+        "state": {
+          "idle": "Inactif",
+          "unlocked": "Déverrouillé",
+          "locked": "Verrouillé",
+          "releasing": "Libération",
+          "locking": "Verrouillage",
+          "released": "Libéré"
+        }
       }
     },
     "binary_sensor": {

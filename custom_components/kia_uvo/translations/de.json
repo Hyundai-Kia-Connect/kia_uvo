@@ -620,6 +620,17 @@
           "before_30min": "30 Minuten vorher",
           "off": "Aus"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Verriegelungszustand des Ladeanschlusses",
+        "state": {
+          "idle": "Ruhend",
+          "unlocked": "Entriegelt",
+          "locked": "Verriegelt",
+          "releasing": "Wird entriegelt",
+          "locking": "Wird verriegelt",
+          "released": "Freigegeben"
+        }
       }
     },
     "binary_sensor": {

@@ -304,6 +304,17 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "ev_connector_lock_state": {
+        "name": "Charging connector lock state",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       }
     },
     "binary_sensor": {

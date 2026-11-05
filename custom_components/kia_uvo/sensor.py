@@ -50,6 +50,12 @@ def _is_electrified(vehicle: Vehicle) -> bool:
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
 
+def _connector_lock_state_name(vehicle: Vehicle) -> str | None:
+    """Return the lowercase enum name, or None while unknown."""
+    state = vehicle.ev_connector_lock_state
+    return None if state is None else state.name.lower()
+
+
 # The app models the alarm as a radio preset: exactly one flag is set.
 _ALARM_FLAG_FIELDS: Final[tuple[str, ...]] = (
     "ev_charge_complete_alarm_before_10min",
@@ -361,6 +367,13 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
             ),
             None,
         ),
+    ),
+    HyundaiKiaSensorEntityDescription(
+        key="ev_connector_lock_state",
+        translation_key="ev_connector_lock_state",
+        icon="mdi:lock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_connector_lock_state_name,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_charging_current",

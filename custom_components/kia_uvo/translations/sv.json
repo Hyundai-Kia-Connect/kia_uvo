@@ -620,6 +620,17 @@
           "before_30min": "30 minuter innan",
           "off": "Av"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Låstillstånd för laddkontakten",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       }
     },
     "binary_sensor": {

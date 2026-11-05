@@ -620,6 +620,17 @@
           "before_30min": "30 minut przed",
           "off": "Wyłączony"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Stan blokady złącza ładowania",
+        "state": {
+          "idle": "Bezczynny",
+          "unlocked": "Odblokowany",
+          "locked": "Zablokowany",
+          "releasing": "Odblokowywanie",
+          "locking": "Blokowanie",
+          "released": "Zwolniony"
+        }
       }
     },
     "binary_sensor": {
