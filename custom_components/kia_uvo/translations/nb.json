@@ -986,7 +986,7 @@
     },
     "select": {
       "climate_duration": {
-        "name": "Climate duration"
+        "name": "Klimavarighet"
       }
     }
   }
