@@ -633,8 +633,8 @@ async def async_setup_entry(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
 
-    # Push connectivity — described at setup time: is_on reads the shared
-    # transport through the coordinator, not the vehicle.
+    # Push connectivity: described at setup time because is_on reads the
+    # shared transport through the coordinator, not the vehicle.
     first_vehicle = next(iter(coordinator.vehicle_manager.vehicles.values()), None)
     if (
         coordinator.is_push_enabled
