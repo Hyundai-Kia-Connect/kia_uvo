@@ -70,10 +70,8 @@ class TestMqttConnectedSensorGate:
         )
 
 
-# ---------------------------------------------------------------------------
-# Lifecycle (wiring methods on a shim instance — the CI stack has no HA
-# test harness, so DataUpdateCoordinator super().__init__ cannot run)
-# ---------------------------------------------------------------------------
+# Lifecycle: wiring methods on a shim instance, because the CI stack has
+# no HA test harness (DataUpdateCoordinator super().__init__ cannot run).
 
 
 class NoPushContractApi:
@@ -175,9 +173,8 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     coordinator._last_force_refresh = 0.0
     coordinator.config_entry = MagicMock()
     coordinator.data: dict = {}
-    # DataUpdateCoordinator machinery is not set up in the shim — refresh
-    # bookkeeping is out of scope here (the wiring under test is the
-    # throttle guard + executor call, not the coordinator update itself).
+    # DataUpdateCoordinator machinery is out of scope for the shim; the
+    # wiring under test is the throttle guard + executor call.
     coordinator.async_set_updated_data = lambda data: None
     # device-registry sync is out of scope for the shim: a MagicMock hass
     # would report every device as disabled and skip the force refresh
@@ -322,7 +319,7 @@ class TestCallbacks:
 
 
 class TestForceRefreshThrottle:
-    """Throttle counts from the car's last_scanned_at (cdnninja review)."""
+    """Throttle counts from the car's last_scanned_at."""
 
     def _coordinator_with_vehicle(self, last_scanned_at):
         hass = MagicMock()
