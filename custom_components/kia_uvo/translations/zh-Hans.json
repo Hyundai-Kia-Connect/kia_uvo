@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "V2L 模式"
       },
-      "ev_charge_complete_alarm": {
-        "name": "充电完成提醒",
-        "state": {
-          "before_10min": "提前10分钟",
-          "before_20min": "提前20分钟",
-          "before_30min": "提前30分钟",
-          "off": "关闭"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "充电接口锁止状态",
         "state": {
@@ -858,6 +849,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V 蓄电池故障"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "充电完成提醒（提前10分钟）"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "充电完成提醒（提前20分钟）"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "充电完成提醒（提前30分钟）"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "充电完成提醒（关闭）"
       }
     },
     "lock": {

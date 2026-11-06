@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "V2L-tila"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Täyteen latautumisen hälytys",
-        "state": {
-          "before_10min": "10 minuuttia ennen",
-          "before_20min": "20 minuuttia ennen",
-          "before_30min": "30 minuuttia ennen",
-          "off": "Pois"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Latausliittimen lukitustila",
         "state": {
@@ -858,6 +849,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V-akun vika"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Täyteen latautumisen hälytys (10 min ennen)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Täyteen latautumisen hälytys (20 min ennen)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Täyteen latautumisen hälytys (30 min ennen)"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "Täyteen latautumisen hälytys (pois)"
       }
     },
     "lock": {

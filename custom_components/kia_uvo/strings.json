@@ -137,15 +137,6 @@
       "ev_battery_water_temperature": {
         "name": "EV Battery Water Temperature"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Charge Complete Alarm",
-        "state": {
-          "before_10min": "10 Minutes Before",
-          "before_20min": "20 Minutes Before",
-          "before_30min": "30 Minutes Before",
-          "off": "Off"
-        }
-      },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
       },
@@ -542,6 +533,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V Battery Fault"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Charge Complete Alarm (10 min Before)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Charge Complete Alarm (20 min Before)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Charge Complete Alarm (30 min Before)"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "Charge Complete Alarm (Off)"
       }
     },
     "lock": {

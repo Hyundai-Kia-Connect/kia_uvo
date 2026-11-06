@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "V2L-modus"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Melding volledig opgeladen",
-        "state": {
-          "before_10min": "10 minuten van tevoren",
-          "before_20min": "20 minuten van tevoren",
-          "before_30min": "30 minuten van tevoren",
-          "off": "Uit"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Vergrendelstatus laadconnector",
         "state": {
@@ -858,6 +849,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Storing 12V-accu"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Melding volledig opgeladen (10 min van tevoren)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Melding volledig opgeladen (20 min van tevoren)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Melding volledig opgeladen (30 min van tevoren)"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "Melding volledig opgeladen (uit)"
       }
     },
     "lock": {

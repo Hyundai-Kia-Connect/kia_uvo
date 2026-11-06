@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "Tryb V2L"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Alarm zupełnego naładowania",
-        "state": {
-          "before_10min": "10 minut przed",
-          "before_20min": "20 minut przed",
-          "before_30min": "30 minut przed",
-          "off": "Wyłączony"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Stan blokady złącza ładowania",
         "state": {
@@ -858,6 +849,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Awaria baterii 12V"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Alarm ukończenia ładowania (10 min przed)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Alarm ukończenia ładowania (20 min przed)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Alarm ukończenia ładowania (30 min przed)"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "Alarm ukończenia ładowania (wyłączony)"
       }
     },
     "lock": {

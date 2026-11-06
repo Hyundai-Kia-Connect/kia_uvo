@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "Modo V2L"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Aviso de carga completa",
-        "state": {
-          "before_10min": "10 minutos antes",
-          "before_20min": "20 minutos antes",
-          "before_30min": "30 minutos antes",
-          "off": "Desactivado"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Estado de bloqueo del conector de carga",
         "state": {
@@ -858,6 +849,18 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Fallo de la Batería de 12V"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Aviso de carga completa (10 min antes)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Aviso de carga completa (20 min antes)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Aviso de carga completa (30 min antes)"
+      },
+      "ev_charge_complete_alarm_off": {
+        "name": "Aviso de carga completa (desactivado)"
       }
     },
     "lock": {
