@@ -61,37 +61,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         off_icon="mdi:engine-off",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
-    # Charge-complete alarm toggles: multi-select in the app (any
-    # combination of the offsets can be on; a PV5 wallbox run confirmed
-    # 10min and 30min simultaneously, kia_uvo #1909).
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_charge_complete_alarm_before_10min",
-        translation_key="ev_charge_complete_alarm_before_10min",
-        icon="mdi:bell-ring-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        is_on=lambda vehicle: vehicle.ev_charge_complete_alarm_before_10min,
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_charge_complete_alarm_before_20min",
-        translation_key="ev_charge_complete_alarm_before_20min",
-        icon="mdi:bell-ring-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        is_on=lambda vehicle: vehicle.ev_charge_complete_alarm_before_20min,
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_charge_complete_alarm_before_30min",
-        translation_key="ev_charge_complete_alarm_before_30min",
-        icon="mdi:bell-ring-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        is_on=lambda vehicle: vehicle.ev_charge_complete_alarm_before_30min,
-    ),
-    HyundaiKiaBinarySensorEntityDescription(
-        key="ev_charge_complete_alarm_off",
-        translation_key="ev_charge_complete_alarm_off",
-        icon="mdi:bell-off-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        is_on=lambda vehicle: vehicle.ev_charge_complete_alarm_off,
-    ),
     HyundaiKiaBinarySensorEntityDescription(
         key="defrost_is_on",
         translation_key="defrost_is_on",

@@ -849,18 +849,6 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Défaut batterie 12V"
-      },
-      "ev_charge_complete_alarm_before_10min": {
-        "name": "Alerte de fin de charge (10 min avant)"
-      },
-      "ev_charge_complete_alarm_before_20min": {
-        "name": "Alerte de fin de charge (20 min avant)"
-      },
-      "ev_charge_complete_alarm_before_30min": {
-        "name": "Alerte de fin de charge (30 min avant)"
-      },
-      "ev_charge_complete_alarm_off": {
-        "name": "Alerte de fin de charge (désactivée)"
       }
     },
     "lock": {
@@ -955,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Charge en heures creuses uniquement"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Alerte de fin de charge (10 min avant)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Alerte de fin de charge (20 min avant)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Alerte de fin de charge (30 min avant)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Charge programmée"
