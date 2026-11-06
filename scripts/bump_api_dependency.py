@@ -402,7 +402,7 @@ def _classify_single_release(
 
 def _commit_prefix(level: str) -> str:
     if level == "breaking":
-        return "feat!(deps):"
+        return "feat(deps)!:"
     if level == "feat":
         return "feat(deps):"
     if level == "fix":
