@@ -166,6 +166,8 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     coordinator.vehicle_manager = VehicleManager(
         region=1, brand=2, language="en", username="u", password="p", pin="0000"
     )
+    # the lib's start path requires a token (Not logged in otherwise)
+    coordinator.vehicle_manager.token = Token("u", "p", valid_until=dt.datetime.max)
     coordinator.vehicle_manager.api = FakePushApi()  # type: ignore[assignment]
     vehicle = Vehicle(id="v1")
     coordinator.vehicle_manager.vehicles = {"v1": vehicle}
