@@ -93,6 +93,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         # Consecutive failed polls per vehicle (drives the "skip it" hint).
         self._vehicle_failures: dict[str, int] = {}
 
+        token_data = config_entry.data.get(CONF_TOKEN)
         self.vehicle_manager = VehicleManager(
             region=config_entry.data[CONF_REGION],
             brand=config_entry.data[CONF_BRAND],
@@ -106,9 +107,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
             ),
             language=hass.config.language,
-            token=Token.from_dict(config_entry.data.get(CONF_TOKEN, None))
-            if config_entry.data.get(CONF_TOKEN, None)
-            else None,
+            token=Token.from_dict(token_data) if token_data else None,
         )
         self.scan_interval: int = (
             config_entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL) * 60
@@ -410,19 +409,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             else:
                 self.vehicle_manager.enable_vehicle(vehicle_id)
 
+    async def _async_wait_for_action(self, vehicle_id: str, action_id: str) -> None:
+        await asyncio.sleep(5)
+        await self.hass.async_add_executor_job(
+            self.vehicle_manager.check_action_status, vehicle_id, action_id, True, 60
+        )
+
     async def async_await_action_and_refresh(
         self, vehicle_id: str, action_id: str
     ) -> None:
         """Wait for a vehicle action to complete, then refresh the cached data."""
         try:
-            await asyncio.sleep(5)
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.check_action_status,
-                vehicle_id,
-                action_id,
-                True,
-                60,
-            )
+            await self._async_wait_for_action(vehicle_id, action_id)
         finally:
             await self.async_refresh()
 
@@ -441,14 +439,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         notify HA entities to re-read their state.
         """
         try:
-            await asyncio.sleep(5)
-            await self.hass.async_add_executor_job(
-                self.vehicle_manager.check_action_status,
-                vehicle_id,
-                action_id,
-                True,
-                60,
-            )
+            await self._async_wait_for_action(vehicle_id, action_id)
         finally:
             try:
                 await self.hass.async_add_executor_job(
@@ -803,46 +794,34 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             "set navigation",
         )
 
-    async def async_open_all_windows(self, vehicle_id: str) -> None:
-        """Open all four windows."""
+    async def _async_set_all_windows(
+        self, vehicle_id: str, state: WINDOW_STATE, label: str
+    ) -> None:
         options = WindowRequestOptions(
-            front_left=WINDOW_STATE.OPEN,
-            front_right=WINDOW_STATE.OPEN,
-            back_left=WINDOW_STATE.OPEN,
-            back_right=WINDOW_STATE.OPEN,
+            front_left=state, front_right=state, back_left=state, back_right=state
         )
         await self._async_send_action(
             vehicle_id,
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
-            "open all windows",
+            label,
+        )
+
+    async def async_open_all_windows(self, vehicle_id: str) -> None:
+        """Open all four windows."""
+        await self._async_set_all_windows(
+            vehicle_id, WINDOW_STATE.OPEN, "open all windows"
         )
 
     async def async_close_all_windows(self, vehicle_id: str) -> None:
         """Close all four windows."""
-        options = WindowRequestOptions(
-            front_left=WINDOW_STATE.CLOSED,
-            front_right=WINDOW_STATE.CLOSED,
-            back_left=WINDOW_STATE.CLOSED,
-            back_right=WINDOW_STATE.CLOSED,
-        )
-        await self._async_send_action(
-            vehicle_id,
-            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
-            "close all windows",
+        await self._async_set_all_windows(
+            vehicle_id, WINDOW_STATE.CLOSED, "close all windows"
         )
 
     async def async_vent_all_windows(self, vehicle_id: str) -> None:
         """Put all four windows in the ventilation position."""
-        options = WindowRequestOptions(
-            front_left=WINDOW_STATE.VENTILATION,
-            front_right=WINDOW_STATE.VENTILATION,
-            back_left=WINDOW_STATE.VENTILATION,
-            back_right=WINDOW_STATE.VENTILATION,
-        )
-        await self._async_send_action(
-            vehicle_id,
-            lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
-            "vent all windows",
+        await self._async_set_all_windows(
+            vehicle_id, WINDOW_STATE.VENTILATION, "vent all windows"
         )
 
     async def _async_save_token(self) -> None:
