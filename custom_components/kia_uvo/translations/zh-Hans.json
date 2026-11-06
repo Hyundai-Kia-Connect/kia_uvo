@@ -620,6 +620,17 @@
           "before_30min": "提前30分钟",
           "off": "关闭"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "充电接口锁止状态",
+        "state": {
+          "idle": "空闲",
+          "unlocked": "未锁止",
+          "locked": "已锁止",
+          "releasing": "解锁中",
+          "locking": "锁止中",
+          "released": "已释放"
+        }
       }
     },
     "binary_sensor": {

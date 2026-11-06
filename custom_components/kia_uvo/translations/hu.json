@@ -620,6 +620,17 @@
           "before_30min": "30 percc korábban",
           "off": "Ki"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Töltőcsatlakozó zár állapota",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       }
     },
     "binary_sensor": {

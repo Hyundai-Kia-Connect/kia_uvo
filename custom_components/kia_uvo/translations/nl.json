@@ -620,6 +620,17 @@
           "before_30min": "30 minuten van tevoren",
           "off": "Uit"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Vergrendelstatus laadconnector",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       }
     },
     "binary_sensor": {

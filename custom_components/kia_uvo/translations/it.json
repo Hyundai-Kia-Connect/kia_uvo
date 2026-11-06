@@ -620,6 +620,17 @@
           "before_30min": "30 minuti prima",
           "off": "Disattivato"
         }
+      },
+      "ev_connector_lock_state": {
+        "name": "Stato di blocco del connettore di ricarica",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       }
     },
     "binary_sensor": {
