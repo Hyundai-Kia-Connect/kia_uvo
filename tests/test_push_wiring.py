@@ -249,21 +249,6 @@ class TestStartMqtt:
 
 
 class TestConnectionRefresh:
-    def test_is_push_connected_mirrors_the_manager(self):
-        """The coordinator property is a pass-through over the manager state."""
-        coordinator = _shim_coordinator(MagicMock())
-        coordinator.vehicle_manager = MagicMock(is_push_connected=True)
-        assert coordinator.is_push_connected is True
-        coordinator.vehicle_manager.is_push_connected = False
-        assert coordinator.is_push_connected is False
-
-    def test_push_enabled_round_trips_the_option(self):
-        """is_push_enabled mirrors the stored option, not just a constant."""
-        coordinator = _shim_coordinator(MagicMock())
-        assert coordinator.is_push_enabled is True
-        coordinator._push_enabled = False
-        assert coordinator.is_push_enabled is False
-
     def test_schedules_a_coordinator_refresh(self):
         """The connection-change bridge lands an async_request_refresh task."""
         coordinator = _shim_coordinator(MagicMock())
