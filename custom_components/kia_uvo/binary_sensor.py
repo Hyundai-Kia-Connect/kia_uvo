@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES, SEAT_STATUS
 
-from .const import DOMAIN
+from .const import DOMAIN, REGION_EUROPE_CCI, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -619,7 +619,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up binary_sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    entities: list[HyundaiKiaConnectBinarySensor] = []
+    entities: list[BinarySensorEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
@@ -632,6 +632,30 @@ async def async_setup_entry(
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
+
+    # Push connectivity: described at setup time because is_on reads the
+    # shared transport through the coordinator, not the vehicle.
+    first_vehicle = next(iter(coordinator.vehicle_manager.vehicles.values()), None)
+    if (
+        coordinator.is_push_enabled
+        and first_vehicle is not None
+        and REGIONS.get(coordinator.vehicle_manager.region) == REGION_EUROPE_CCI
+    ):
+        entities.append(
+            HyundaiKiaConnectBinarySensor(
+                coordinator,
+                HyundaiKiaBinarySensorEntityDescription(
+                    key="push_connected",
+                    translation_key="push_connected",
+                    device_class=BinarySensorDeviceClass.CONNECTIVITY,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    on_icon="mdi:cloud-check",
+                    off_icon="mdi:cloud-off-outline",
+                    is_on=lambda _vehicle: coordinator.is_push_connected,
+                ),
+                first_vehicle,
+            )
+        )
     async_add_entities(entities)
 
 
