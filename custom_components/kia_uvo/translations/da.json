@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "V2L-tilstand"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Fuldladningsalarm",
-        "state": {
-          "before_10min": "10 minutter før",
-          "before_20min": "20 minutter før",
-          "before_30min": "30 minutter før",
-          "off": "Fra"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Låsetilstand for ladekontakten",
         "state": {
@@ -952,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Kun lavprisopladning"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Fuldladningsalarm (10 min før)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Fuldladningsalarm (20 min før)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Fuldladningsalarm (30 min før)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Planlagt opladning"

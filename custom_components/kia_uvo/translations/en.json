@@ -612,15 +612,6 @@
       "gear_position": {
         "name": "Gear Position"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Charge Complete Alarm",
-        "state": {
-          "before_10min": "10 Minutes Before",
-          "before_20min": "20 Minutes Before",
-          "before_30min": "30 Minutes Before",
-          "off": "Off"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Charging connector lock state",
         "state": {
@@ -952,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Off-peak charge only"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Charge Complete Alarm (10 min Before)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Charge Complete Alarm (20 min Before)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Charge Complete Alarm (30 min Before)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Scheduled charging"

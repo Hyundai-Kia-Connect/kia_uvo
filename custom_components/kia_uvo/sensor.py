@@ -56,20 +56,6 @@ def _connector_lock_state_name(vehicle: Vehicle) -> str | None:
     return None if state is None else state.name.lower()
 
 
-# The app models the alarm as a radio preset: exactly one flag is set.
-_ALARM_FLAG_FIELDS: Final[tuple[str, ...]] = (
-    "ev_charge_complete_alarm_before_10min",
-    "ev_charge_complete_alarm_before_20min",
-    "ev_charge_complete_alarm_before_30min",
-    "ev_charge_complete_alarm_off",
-)
-_ALARM_STATE_BY_FIELD: Final[dict[str, str]] = {
-    "ev_charge_complete_alarm_before_10min": "before_10min",
-    "ev_charge_complete_alarm_before_20min": "before_20min",
-    "ev_charge_complete_alarm_before_30min": "before_30min",
-    "ev_charge_complete_alarm_off": "off",
-}
-
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
     HyundaiKiaSensorEntityDescription(
         key="_total_driving_range",
@@ -350,23 +336,6 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="ev_off_peak_end_time",
         translation_key="ev_off_peak_end_time",
         icon="mdi:clock-outline",
-    ),
-    HyundaiKiaSensorEntityDescription(
-        key="ev_charge_complete_alarm",
-        translation_key="ev_charge_complete_alarm",
-        icon="mdi:bell-ring-outline",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        exists=lambda vehicle: any(
-            getattr(vehicle, field, None) is not None for field in _ALARM_FLAG_FIELDS
-        ),
-        value_fn=lambda vehicle: next(
-            (
-                state
-                for field, state in _ALARM_STATE_BY_FIELD.items()
-                if getattr(vehicle, field, None)
-            ),
-            None,
-        ),
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_connector_lock_state",

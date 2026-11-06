@@ -166,6 +166,51 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
         ),
     ),
     HyundaiKiaSwitchDescription(
+        key="ev_charge_complete_alarm_before_10min",
+        translation_key="ev_charge_complete_alarm_before_10min",
+        icon="mdi:bell-ring-outline",
+        value_fn=lambda vehicle: vehicle.ev_charge_complete_alarm_before_10min,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_charge_complete_alarm_before_10min is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 10, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 10, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_charge_complete_alarm_before_20min",
+        translation_key="ev_charge_complete_alarm_before_20min",
+        icon="mdi:bell-ring-outline",
+        value_fn=lambda vehicle: vehicle.ev_charge_complete_alarm_before_20min,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_charge_complete_alarm_before_20min is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 20, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 20, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
+        key="ev_charge_complete_alarm_before_30min",
+        translation_key="ev_charge_complete_alarm_before_30min",
+        icon="mdi:bell-ring-outline",
+        value_fn=lambda vehicle: vehicle.ev_charge_complete_alarm_before_30min,
+        exists_fn=lambda vehicle: (
+            vehicle.ev_charge_complete_alarm_before_30min is not None
+        ),
+        on_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 30, True
+        ),
+        off_fn=lambda coordinator, vid: coordinator.async_set_charge_alarm_before(
+            vid, 30, False
+        ),
+    ),
+    HyundaiKiaSwitchDescription(
         key="ev_charge_port_door_is_open",
         translation_key="ev_charge_port_door",
         icon="mdi:ev-plug-charging",

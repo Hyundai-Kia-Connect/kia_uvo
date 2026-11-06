@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "Tryb V2L"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Alarm zupełnego naładowania",
-        "state": {
-          "before_10min": "10 minut przed",
-          "before_20min": "20 minut przed",
-          "before_30min": "30 minut przed",
-          "off": "Wyłączony"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Stan blokady złącza ładowania",
         "state": {
@@ -952,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Ładowanie tylko poza szczytem"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Alarm ukończenia ładowania (10 min przed)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Alarm ukończenia ładowania (20 min przed)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Alarm ukończenia ładowania (30 min przed)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Zaplanowane ładowanie"

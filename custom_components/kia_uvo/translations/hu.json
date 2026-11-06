@@ -612,15 +612,6 @@
       "ev_v2l_mode": {
         "name": "V2L mód"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Töltés befejezése riasztás",
-        "state": {
-          "before_10min": "10 percc korábban",
-          "before_20min": "20 percc korábban",
-          "before_30min": "30 percc korábban",
-          "off": "Ki"
-        }
-      },
       "ev_connector_lock_state": {
         "name": "Töltőcsatlakozó zár állapota",
         "state": {
@@ -952,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Töltés csak völgyidőszakban"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Töltés befejezése riasztás (10 percc korábban)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Töltés befejezése riasztás (20 percc korábban)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Töltés befejezése riasztás (30 percc korábban)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Ütemezett töltés"

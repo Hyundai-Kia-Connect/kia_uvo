@@ -591,6 +591,29 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             "set charging current",
         )
 
+    async def async_set_charge_alarm_before(
+        self, vehicle_id: str, minutes: int, enabled: bool
+    ) -> None:
+        """Toggle one charge-complete alarm offset, preserving the others.
+
+        The offsets are independent flags, not a radio preset (kia_uvo#1909);
+        an unknown sibling flag (= None) is sent as off.
+        """
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        flags = {
+            10: bool(vehicle.ev_charge_complete_alarm_before_10min),
+            20: bool(vehicle.ev_charge_complete_alarm_before_20min),
+            30: bool(vehicle.ev_charge_complete_alarm_before_30min),
+        }
+        flags[minutes] = enabled
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_charge_alarm(
+                vehicle_id, flags[10], flags[20], flags[30]
+            ),
+            "set charge alarm",
+        )
+
     async def async_schedule_charging_and_climate(
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
     ) -> None:
