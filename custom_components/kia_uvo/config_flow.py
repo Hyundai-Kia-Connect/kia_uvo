@@ -260,6 +260,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     return await self.async_step_select_otp_method()
                 if self._is_reconfigure:
+                    assert self._vehicle_manager.token is not None
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
                         data_updates={
@@ -340,6 +341,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
         pending_login_data = self._pending_login_data
         assert pending_login_data is not None
+        assert vehicle_manager.token is not None
         pending_login_data[CONF_TOKEN] = vehicle_manager.token.to_dict()
         if self._is_reconfigure:
             return self.async_update_reload_and_abort(
