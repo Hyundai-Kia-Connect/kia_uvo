@@ -826,6 +826,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Persist the latest token into the config entry."""
         config_entry = self.config_entry
         assert config_entry is not None
+        assert self.vehicle_manager.token is not None
         new_token = self.vehicle_manager.token.to_dict()
         # Only update if token actually changed
         if new_token and new_token != config_entry.data.get(CONF_TOKEN):
