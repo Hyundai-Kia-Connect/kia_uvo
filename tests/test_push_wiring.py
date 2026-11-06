@@ -19,7 +19,7 @@ DOMAIN = "kia_uvo"
 
 
 # ---------------------------------------------------------------------------
-# Entity gate: HyundaiKiaMqttConnectedSensor (project style: mock coordinator)
+# Entity gate: the push connectivity binary sensor (project style: mock coordinator)
 # ---------------------------------------------------------------------------
 
 
@@ -44,7 +44,7 @@ class TestMqttConnectedSensorGate:
                 hass, config_entry, created.extend
             )
             for e in created:
-                if type(e).__name__ == "HyundaiKiaMqttConnectedSensor":
+                if e.entity_description.key == "push_connected":
                     assert e.icon == "mdi:cloud-check"
 
         asyncio.run(run())
@@ -52,22 +52,20 @@ class TestMqttConnectedSensorGate:
 
     def test_created_when_enabled_and_supported(self):
         created = self._setup(True, True)
-        sensors = [
-            e for e in created if type(e).__name__ == "HyundaiKiaMqttConnectedSensor"
-        ]
+        sensors = [e for e in created if e.entity_description.key == "push_connected"]
         assert len(sensors) == 1
-        assert sensors[0]._attr_translation_key == "mqtt_connected"
-        assert sensors[0]._attr_unique_id == f"{DOMAIN}_v1_mqtt_connected"
+        assert sensors[0].entity_description.translation_key == "push_connected"
+        assert sensors[0]._attr_unique_id == f"{DOMAIN}_v1_push_connected"
 
     def test_not_created_when_push_unsupported(self):
         assert not any(
-            type(e).__name__ == "HyundaiKiaMqttConnectedSensor"
+            e.entity_description.key == "push_connected"
             for e in self._setup(True, False)
         )
 
     def test_not_created_when_disabled(self):
         assert not any(
-            type(e).__name__ == "HyundaiKiaMqttConnectedSensor"
+            e.entity_description.key == "push_connected"
             for e in self._setup(False, True)
         )
 
@@ -337,28 +335,35 @@ class TestCallbacks:
 
 
 class TestForceRefreshThrottle:
-    def test_second_call_within_60s_skips_executor(self):
+    """Throttle counts from the car's last_scanned_at (cdnninja review)."""
+
+    def _coordinator_with_vehicle(self, last_scanned_at):
         hass = MagicMock()
         coordinator = _shim_coordinator(hass)
         _, _ = _patch_hass(coordinator)
-        # token always valid → check_and_refresh_token skips the API
         coordinator.vehicle_manager.token = Token("u", "p", valid_until=dt.datetime.max)
+        coordinator.vehicle_manager.vehicles["v1"].last_scanned_at = last_scanned_at
+        return coordinator
 
-        # executor runs check_and_refresh_token BEFORE the refresh itself,
-        # so count the actual refresh calls on the API fake instead.
+    def test_refresh_runs_from_no_scan_and_sets_last_scanned(self):
+        coordinator = self._coordinator_with_vehicle(None)
         vm = coordinator.vehicle_manager
         asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        first_ts = coordinator._last_force_refresh
         assert vm.api.calls.count("force_refresh") == 1
 
+    def test_refresh_throttled_within_60s_of_last_scan(self):
+        recent = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=30)
+        coordinator = self._coordinator_with_vehicle(recent)
+        vm = coordinator.vehicle_manager
         asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        assert vm.api.calls.count("force_refresh") == 1  # throttled
-        assert coordinator._last_force_refresh == first_ts
+        assert vm.api.calls.count("force_refresh") == 0
 
-        # outside the window the refresh proceeds again
-        coordinator._last_force_refresh -= 61.0
+    def test_refresh_runs_again_after_the_window(self):
+        stale = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=61)
+        coordinator = self._coordinator_with_vehicle(stale)
+        vm = coordinator.vehicle_manager
         asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        assert vm.api.calls.count("force_refresh") == 2
+        assert vm.api.calls.count("force_refresh") == 1
 
 
 @pytest.mark.parametrize("topic_type", ["Status", "Location"])

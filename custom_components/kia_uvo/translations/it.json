@@ -83,10 +83,10 @@
           "no_force_refresh_hour_finish": "Ora di fine senza aggiornamenti forzati",
           "enable_geolocation_entity": "Abilita l'entità di geolocalizzazione usando OpenStreetMap",
           "use_email_with_geocode_api": "Utilizza il tuo indirizzo email Kia per l'API di geocodifica - Maggiori informazioni: https://nominatim.org/release-docs/develop/api/Reverse/#other",
-          "enable_mqtt": "Abilita le notifiche push MQTT"
+          "enable_push": "Abilita le notifiche push"
         },
         "data_description": {
-          "enable_mqtt": "Ricevi gli aggiornamenti dello stato del veicolo via push MQTT man mano che l'auto li segnala, invece di attendere il prossimo polling. Solo la regione Europa (Beta) supporta il push."
+          "enable_push": "Ricevi gli aggiornamenti dello stato del veicolo man mano che l'auto li segnala, invece di attendere il prossimo polling. Solo la regione Europa (Beta) supporta il push."
         }
       }
     }
@@ -854,8 +854,8 @@
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Guasto Batteria 12V"
       },
-      "mqtt_connected": {
-        "name": "MQTT collegato"
+      "push_connected": {
+        "name": "Push collegato"
       }
     },
     "lock": {
