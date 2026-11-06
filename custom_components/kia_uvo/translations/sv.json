@@ -83,10 +83,10 @@
           "no_force_refresh_hour_finish": "Ingen tvångsuppdatering sluttid",
           "enable_geolocation_entity": "Aktivar Geolokation object vid användning av OpenStreetMap",
           "use_email_with_geocode_api": "Använd din Kia e-postadress för Geocode API - Mer information: https://nominatim.org/release-docs/develop/api/Reverse/#other",
-          "enable_mqtt": "Aktivera MQTT-pushnotiser"
+          "enable_push": "Aktivera pushnotiser"
         },
         "data_description": {
-          "enable_mqtt": "Ta emot uppdateringar av fordonsstatus via MQTT-push när bilen rapporterar dem, i stället för att vänta på nästa pollning. Endast regionen Europa (Beta) stödjer push."
+          "enable_push": "Ta emot uppdateringar av fordonsstatus när bilen rapporterar dem, i stället för att vänta på nästa pollning. Endast regionen Europa (Beta) stödjer push."
         }
       }
     }
@@ -854,8 +854,8 @@
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Fel på 12V-batteri"
       },
-      "mqtt_connected": {
-        "name": "MQTT ansluten"
+      "push_connected": {
+        "name": "Push ansluten"
       }
     },
     "lock": {
