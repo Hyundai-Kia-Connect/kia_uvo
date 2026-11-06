@@ -306,10 +306,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="select_otp_method",
                 data_schema=vol.Schema({vol.Required("method"): vol.In(otp_methods)}),
             )
-        if user_input["method"] == "EMAIL":
-            method = OTP_NOTIFY_TYPE.EMAIL
-        if user_input["method"] == "SMS":
-            method = OTP_NOTIFY_TYPE.SMS
+        method = OTP_NOTIFY_TYPE[user_input["method"]]
         vehicle_manager = self._vehicle_manager
         assert vehicle_manager is not None
         await self.hass.async_add_executor_job(vehicle_manager.send_otp, method)
@@ -473,7 +470,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="reauth_confirm",
                 data_schema=vol.Schema({}),
             )
-        self._reauth_config = True
         return await self.async_step_user()
 
 
