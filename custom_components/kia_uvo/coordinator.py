@@ -8,7 +8,6 @@ import datetime as dt
 from datetime import timedelta
 from functools import partial
 import logging
-import time
 from typing import Any, Literal
 
 from homeassistant.config_entries import ConfigEntry
@@ -47,14 +46,14 @@ from hyundai_kia_connect_api.svm_image import render_views
 from .const import (
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
-    CONF_ENABLE_MQTT,
+    CONF_ENABLE_PUSH,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_TOKEN,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
-    DEFAULT_ENABLE_MQTT,
+    DEFAULT_ENABLE_PUSH,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
@@ -136,11 +135,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
         )
         self._push_enabled: bool = config_entry.options.get(
-            CONF_ENABLE_MQTT, DEFAULT_ENABLE_MQTT
+            CONF_ENABLE_PUSH, DEFAULT_ENABLE_PUSH
         )
-        # Monotonic timestamp of the last vehicle force refresh (throttle
-        # for push-callback-driven refreshes; 0 = none yet).
-        self._last_force_refresh: float = 0.0
 
         super().__init__(
             hass,
@@ -324,21 +320,26 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state.
 
-        Throttled to 60s: the push (MQTT) status callback schedules force
-        refreshes on every live status delivery; overlapping these with
-        the poll cycle triggers server-side 400-004 duplicate-request
-        errors. CarStatus pushes arrive in bursts, so a skipped refresh
-        is harmless (the next push or poll converges state).
+        Throttled against the car's own last_scanned_at: the push status
+        callback schedules force refreshes on every live status delivery;
+        overlapping these with the poll cycle triggers server-side
+        400-004 duplicate-request errors. CarStatus pushes arrive in
+        bursts, so a skipped refresh is harmless (the next push or poll
+        converges state).
         """
-        now = time.monotonic()
-        if now - self._last_force_refresh < MQTT_FORCE_REFRESH_THROTTLE_S:
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if (
+            vehicle is not None
+            and vehicle.last_scanned_at is not None
+            and dt.datetime.now(dt.UTC) - vehicle.last_scanned_at
+            < dt.timedelta(seconds=MQTT_FORCE_REFRESH_THROTTLE_S)
+        ):
             _LOGGER.debug(
-                "%s - Force refresh skipped (throttled, %.0fs since last)",
+                "%s - Force refresh skipped (throttled, last scan %ss ago)",
                 DOMAIN,
-                now - self._last_force_refresh,
+                vehicle.last_scanned_at,
             )
             return
-        self._last_force_refresh = now
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
@@ -848,10 +849,6 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             "vent all windows",
         )
 
-    # ------------------------------------------------------------------
-    # Push lifecycle (regions without push skip inside)
-    # ------------------------------------------------------------------
-
     async def async_start_push(self, vehicle_id: str) -> None:
         """Start push for a vehicle.
 
@@ -872,7 +869,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 self.vehicle_manager.start_push, vehicle_id
             )
             if started:
-                _LOGGER.info("%s - Push started for vehicle %s", DOMAIN, vehicle_id)
+                _LOGGER.debug("%s - Push started for vehicle %s", DOMAIN, vehicle_id)
             else:
                 _LOGGER.debug(
                     "%s - Push not started for %s (per-car or region gate)",
@@ -935,7 +932,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
 
         Schedules a coordinator refresh so the connectivity sensor updates.
         """
-        _LOGGER.info(
+        _LOGGER.debug(
             "%s - Push connection state changed: connected=%s", DOMAIN, connected
         )
         self.hass.loop.call_soon_threadsafe(

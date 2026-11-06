@@ -65,5 +65,5 @@ class OffPeakChargingMode(StrEnum):
 
 MQTT_FORCE_REFRESH_THROTTLE_S: int = 60
 
-CONF_ENABLE_MQTT: str = "enable_mqtt"
-DEFAULT_ENABLE_MQTT: bool = True
+CONF_ENABLE_PUSH: str = "enable_push"
+DEFAULT_ENABLE_PUSH: bool = True

@@ -633,16 +633,29 @@ async def async_setup_entry(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
 
-    # Push connectivity sensor — manager-level: the transport is shared,
-    # so the gate is the region with the push contract, not the per-car
-    # tri-state (VehicleManager.start_push owns that).
+    # Push connectivity — described at setup time: is_on reads the shared
+    # transport through the coordinator, not the vehicle.
     first_vehicle = next(iter(coordinator.vehicle_manager.vehicles.values()), None)
     if (
         coordinator.is_push_enabled
         and first_vehicle is not None
         and REGIONS.get(coordinator.vehicle_manager.region) == REGION_EUROPE_CCI
     ):
-        entities.append(HyundaiKiaMqttConnectedSensor(coordinator, first_vehicle))
+        entities.append(
+            HyundaiKiaConnectBinarySensor(
+                coordinator,
+                HyundaiKiaBinarySensorEntityDescription(
+                    key="push_connected",
+                    translation_key="push_connected",
+                    device_class=BinarySensorDeviceClass.CONNECTIVITY,
+                    entity_category=EntityCategory.DIAGNOSTIC,
+                    on_icon="mdi:cloud-check",
+                    off_icon="mdi:cloud-off-outline",
+                    is_on=lambda _vehicle: coordinator.is_push_connected,
+                ),
+                first_vehicle,
+            )
+        )
     async_add_entities(entities)
 
 
@@ -684,30 +697,3 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
             if self.is_on
             else self.entity_description.off_icon
         )
-
-
-class HyundaiKiaMqttConnectedSensor(BinarySensorEntity, HyundaiKiaConnectEntity):
-    """Push connectivity sensor for the shared push transport."""
-
-    _attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_translation_key = "mqtt_connected"
-
-    def __init__(
-        self,
-        coordinator: HyundaiKiaConnectDataUpdateCoordinator,
-        vehicle: Vehicle,
-    ) -> None:
-        """Attach to the first vehicle's device (the transport is shared)."""
-        super().__init__(coordinator, vehicle)
-        self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_mqtt_connected"
-
-    @property
-    def is_on(self) -> bool | None:
-        """True while the push transport is connected."""
-        return bool(self.coordinator.is_push_connected)
-
-    @property
-    def icon(self) -> str:
-        """Icon reflects the connection state."""
-        return "mdi:cloud-check" if self.is_on else "mdi:cloud-off-outline"

@@ -83,10 +83,10 @@
           "no_force_refresh_hour_finish": "Kényszerített frissítés mentes időszak vége (óra)",
           "enable_geolocation_entity": "A földrajzi helymeghatározási entitás engedélyezése az OpenStreetMap segítségével",
           "use_email_with_geocode_api": "Használja a Kia e-mail címét a Geocode API-hoz - Több információ: https://nominatim.org/release-docs/develop/api/Reverse/#other",
-          "enable_mqtt": "MQTT push értesítések engedélyezése"
+          "enable_push": "Push értesítések engedélyezése"
         },
         "data_description": {
-          "enable_mqtt": "Járműállapot-frissítések fogadása MQTT pushen keresztül, ahogy az autó jelenti őket, a következő lekérdezésre várakozás helyett. Csak az Európa (Béta) régió támogatja a pusht."
+          "enable_push": "Járműállapot-frissítések fogadása, ahogy az autó jelenti őket, a következő lekérdezésre várakozás helyett. Csak az Európa (Béta) régió támogatja a pusht."
         }
       }
     }
@@ -852,8 +852,8 @@
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V akkumulátor hiba"
       },
-      "mqtt_connected": {
-        "name": "MQTT kapcsolat"
+      "push_connected": {
+        "name": "Kapcsolat: push"
       }
     },
     "lock": {
