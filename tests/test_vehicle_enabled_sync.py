@@ -18,17 +18,21 @@ def _sync(
     manager = VehicleManager.__new__(VehicleManager)
     manager.vehicles = {v.id: v for v in vehicles}
 
-    def get_device(identifiers: set[tuple[str, str]]) -> MagicMock | None:
-        return next((devices[i] for i in identifiers if i in devices), None)
+    def get_devices(
+        *, identifiers: set[tuple[str, str]], config_entry_id: str
+    ) -> list[MagicMock]:
+        assert config_entry_id == "entry-1"
+        return [devices[i] for i in identifiers if i in devices]
 
     registry = MagicMock()
-    registry.async_get_device.side_effect = get_device
+    registry.async_get_devices.side_effect = get_devices
     monkeypatch.setattr(coordinator_module.dr, "async_get", lambda _: registry)
 
     coordinator = HyundaiKiaConnectDataUpdateCoordinator.__new__(
         HyundaiKiaConnectDataUpdateCoordinator
     )
     coordinator.hass = MagicMock()
+    coordinator.config_entry = MagicMock(entry_id="entry-1")
     coordinator.vehicle_manager = manager
     coordinator._sync_vehicle_enabled_states()
     return manager

@@ -399,13 +399,16 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     @callback
     def _sync_vehicle_enabled_states(self) -> None:
         """Stop polling vehicles whose device the user disabled in HA."""
+        assert self.config_entry is not None
         registry = dr.async_get(self.hass)
         for vehicle_id, vehicle in self.vehicle_manager.vehicles.items():
             identifiers = {(DOMAIN, vehicle_id)}
             if vehicle.VIN:
                 identifiers.add((DOMAIN, f"vin:{vehicle.VIN}"))
-            device = registry.async_get_device(identifiers=identifiers)
-            if device is not None and device.disabled:
+            devices = registry.async_get_devices(
+                identifiers=identifiers, config_entry_id=self.config_entry.entry_id
+            )
+            if any(device.disabled for device in devices):
                 self.vehicle_manager.disable_vehicle(vehicle_id)
             else:
                 self.vehicle_manager.enable_vehicle(vehicle_id)
