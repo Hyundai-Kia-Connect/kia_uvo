@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Kirjautuminen Hyundai (Bluelink) / Kia (Uvo) Connect -palvelimille epäonnistui. Kirjaudu virallisella sovelluksella ulos ja sisään ja yritä uudelleen!",
       "invalid_credentials": "Virheellinen käyttäjätunnus tai salasana",
-      "unknown": "Odottamaton virhe"
+      "unknown": "Odottamaton virhe",
+      "password_truncated_hint": "Kirjautuminen epäonnistui. Jos salasanasi on yli 20 merkkiä pitkä, tili voi hyväksyä vain 20 ensimmäistä merkkiä (havaittu eurooppalaisilla Hyundai/Kia/Genesis-tileillä, kun salasana asetettiin puhelimessa). Kokeile salasanasi 20 ensimmäistä merkkiä."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "V2L-tila"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Täyteen latautumisen hälytys",
+      "ev_connector_lock_state": {
+        "name": "Latausliittimen lukitustila",
         "state": {
-          "before_10min": "10 minuuttia ennen",
-          "before_20min": "20 minuuttia ennen",
-          "before_30min": "30 minuuttia ennen",
-          "off": "Pois"
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Lataus vain edullisella jaksolla"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Täyteen latautumisen hälytys (10 min ennen)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Täyteen latautumisen hälytys (20 min ennen)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Täyteen latautumisen hälytys (30 min ennen)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Ajastettu lataus"

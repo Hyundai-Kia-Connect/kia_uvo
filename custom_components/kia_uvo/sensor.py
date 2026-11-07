@@ -61,19 +61,11 @@ def _is_electrified(vehicle: Vehicle) -> bool:
     return vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
 
 
-# The app models the alarm as a radio preset: exactly one flag is set.
-_ALARM_FLAG_FIELDS: Final[tuple[str, ...]] = (
-    "ev_charge_complete_alarm_before_10min",
-    "ev_charge_complete_alarm_before_20min",
-    "ev_charge_complete_alarm_before_30min",
-    "ev_charge_complete_alarm_off",
-)
-_ALARM_STATE_BY_FIELD: Final[dict[str, str]] = {
-    "ev_charge_complete_alarm_before_10min": "before_10min",
-    "ev_charge_complete_alarm_before_20min": "before_20min",
-    "ev_charge_complete_alarm_before_30min": "before_30min",
-    "ev_charge_complete_alarm_off": "off",
-}
+def _connector_lock_state_name(vehicle: Vehicle) -> str | None:
+    """Return the lowercase enum name, or None while unknown."""
+    state = vehicle.ev_connector_lock_state
+    return None if state is None else state.name.lower()
+
 
 SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
     HyundaiKiaSensorEntityDescription(
@@ -357,21 +349,11 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         icon="mdi:clock-outline",
     ),
     HyundaiKiaSensorEntityDescription(
-        key="ev_charge_complete_alarm",
-        translation_key="ev_charge_complete_alarm",
-        icon="mdi:bell-ring-outline",
+        key="ev_connector_lock_state",
+        translation_key="ev_connector_lock_state",
+        icon="mdi:lock",
         entity_category=EntityCategory.DIAGNOSTIC,
-        exists=lambda vehicle: any(
-            getattr(vehicle, field, None) is not None for field in _ALARM_FLAG_FIELDS
-        ),
-        value_fn=lambda vehicle: next(
-            (
-                state
-                for field, state in _ALARM_STATE_BY_FIELD.items()
-                if getattr(vehicle, field, None)
-            ),
-            None,
-        ),
+        value_fn=_connector_lock_state_name,
     ),
     HyundaiKiaSensorEntityDescription(
         key="ev_charging_current",

@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
       "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
-      "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]"
+      "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]",
+      "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },
   "options": {
@@ -135,15 +136,6 @@
       },
       "ev_battery_water_temperature": {
         "name": "EV Battery Water Temperature"
-      },
-      "ev_charge_complete_alarm": {
-        "name": "Charge Complete Alarm",
-        "state": {
-          "before_10min": "10 Minutes Before",
-          "before_20min": "20 Minutes Before",
-          "before_30min": "30 Minutes Before",
-          "off": "Off"
-        }
       },
       "ev_charging_current": {
         "name": "EV Charging Current Limit"
@@ -317,6 +309,17 @@
       },
       "svm_status": {
         "name": "SVM Status"
+      },
+      "ev_connector_lock_state": {
+        "name": "Charging connector lock state",
+        "state": {
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
+        }
       },
       "trip_today_distance": {
         "name": "Distance Today"
@@ -736,6 +739,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Off-peak charge only"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Charge Complete Alarm (10 min Before)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Charge Complete Alarm (20 min Before)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Charge Complete Alarm (30 min Before)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Scheduled charging"

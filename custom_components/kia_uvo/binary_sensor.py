@@ -18,7 +18,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
-from hyundai_kia_connect_api.const import SEAT_STATUS
+from hyundai_kia_connect_api.const import ENGINE_TYPES, SEAT_STATUS
 
 from . import maintenance
 from .const import DOMAIN, KNOWN_MAINTENANCE_ITEMS
@@ -39,6 +39,7 @@ class HyundaiKiaBinarySensorEntityDescription(BinarySensorEntityDescription):
     is_on: Callable[[Vehicle], bool | None] | None = None
     on_icon: str | None = None
     off_icon: str | None = None
+    exists: Callable[[Vehicle], bool] | None = None
 
 
 def _raw_flag(value: int | None) -> bool | None:
@@ -201,6 +202,10 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         is_on=lambda vehicle: vehicle.ev_battery_is_plugged_in,
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
+        exists=lambda vehicle: (
+            vehicle.engine_type in (ENGINE_TYPES.EV, ENGINE_TYPES.PHEV)
+            or vehicle.ev_battery_is_plugged_in is not None
+        ),
     ),
     HyundaiKiaBinarySensorEntityDescription(
         key="fuel_level_is_low",
@@ -624,7 +629,12 @@ async def async_setup_entry(
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
-            if getattr(vehicle, description.key, None) is not None:
+            create = (
+                description.exists(vehicle)
+                if description.exists is not None
+                else getattr(vehicle, description.key, None) is not None
+            )
+            if create:
                 entities.append(
                     HyundaiKiaConnectBinarySensor(coordinator, description, vehicle)
                 )
@@ -702,7 +712,10 @@ class MaintenanceAlertBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity):
             self._attr_name = item.name
 
     def _item(self) -> MaintenanceAlertItem | None:
-        for item in getattr(self.vehicle, "maintenance_alerts", None) or []:
+        alerts: list[MaintenanceAlertItem] = (
+            getattr(self.vehicle, "maintenance_alerts", None) or []
+        )
+        for item in alerts:
             if item.name == self._item_name:
                 return item
         return None

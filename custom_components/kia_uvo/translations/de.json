@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Anmeldung bei Hyundai (Bluelink) / Kia (Uvo) Connect fehlgeschlagen. Bitte melde dich von deiner Hyundai/Kia-App ab, melde dich erneut an und versuche es erneut!",
       "invalid_credentials": "Ungültiger Benutzername oder ungültiges Passwort",
-      "unknown": "Unbekannter Fehler"
+      "unknown": "Unbekannter Fehler",
+      "password_truncated_hint": "Anmeldung fehlgeschlagen. Ist dein Passwort länger als 20 Zeichen, akzeptiert das Konto möglicherweise nur die ersten 20 davon (bei europäischen Hyundai/Kia/Genesis-Konten beobachtet, wenn das Passwort am Handy gesetzt wurde). Versuche die ersten 20 Zeichen deines Passworts."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "V2L-Modus"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Alarm bei Ladeende",
+      "ev_connector_lock_state": {
+        "name": "Verriegelungszustand des Ladeanschlusses",
         "state": {
-          "before_10min": "10 Minuten vorher",
-          "before_20min": "20 Minuten vorher",
-          "before_30min": "30 Minuten vorher",
-          "off": "Aus"
+          "idle": "Ruhend",
+          "unlocked": "Entriegelt",
+          "locked": "Verriegelt",
+          "releasing": "Wird entriegelt",
+          "locking": "Wird verriegelt",
+          "released": "Freigegeben"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Nur bei Niedertarifbetrieb laden"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Alarm bei Ladeende (10 Min. vorher)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Alarm bei Ladeende (20 Min. vorher)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Alarm bei Ladeende (30 Min. vorher)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Geplantes Laden"

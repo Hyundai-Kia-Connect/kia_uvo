@@ -76,6 +76,8 @@ PollMode = Literal["check", "cached", "force"]
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     """Class to manage fetching data from the API."""
 
+    trip_stats_enabled: bool = False
+
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize."""
         self.platforms: set[str] = set()
@@ -132,7 +134,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.use_email_with_geocode_api = config_entry.options.get(
             CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
         )
-        self.trip_stats_enabled: bool = region_supports_trip_stats(
+        self.trip_stats_enabled = region_supports_trip_stats(
             config_entry.data.get(CONF_REGION)
         )
         # Vehicles whose trip history has been read at least once; trip
@@ -659,6 +661,29 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             "set charging current",
         )
 
+    async def async_set_charge_alarm_before(
+        self, vehicle_id: str, minutes: int, enabled: bool
+    ) -> None:
+        """Toggle one charge-complete alarm offset, preserving the others.
+
+        The offsets are independent flags, not a radio preset (kia_uvo#1909);
+        an unknown sibling flag (= None) is sent as off.
+        """
+        vehicle = self.vehicle_manager.vehicles[vehicle_id]
+        flags = {
+            10: bool(vehicle.ev_charge_complete_alarm_before_10min),
+            20: bool(vehicle.ev_charge_complete_alarm_before_20min),
+            30: bool(vehicle.ev_charge_complete_alarm_before_30min),
+        }
+        flags[minutes] = enabled
+        await self._async_send_action(
+            vehicle_id,
+            lambda: self.vehicle_manager.set_charge_alarm(
+                vehicle_id, flags[10], flags[20], flags[30]
+            ),
+            "set charge alarm",
+        )
+
     async def async_schedule_charging_and_climate(
         self, vehicle_id: str, schedule_options: ScheduleChargingClimateRequestOptions
     ) -> None:
@@ -894,6 +919,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Persist the latest token into the config entry."""
         config_entry = self.config_entry
         assert config_entry is not None
+        assert self.vehicle_manager.token is not None
         new_token = self.vehicle_manager.token.to_dict()
         # Only update if token actually changed
         if new_token and new_token != config_entry.data.get(CONF_TOKEN):

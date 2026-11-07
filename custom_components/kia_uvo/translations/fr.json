@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Authentification échouée aux serveurs Hyundai (Bluelink) / Kia (Uvo) Connect. Déconnectez-vous et reconnectez-vous sur l'application officielle puis ré-essayez!",
       "invalid_credentials": "Nom d'utilisateur ou mot de passe invalide",
-      "unknown": "Erreur non gérée"
+      "unknown": "Erreur non gérée",
+      "password_truncated_hint": "Échec de l'authentification. Si votre mot de passe dépasse 20 caractères, le compte n'accepte peut-être que les 20 premiers (observé sur des comptes européens Hyundai/Kia/Genesis lorsque le mot de passe a été défini sur un téléphone). Essayez les 20 premiers caractères."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "Mode V2L"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Alerte de fin de charge",
+      "ev_connector_lock_state": {
+        "name": "État de verrouillage du connecteur de charge",
         "state": {
-          "before_10min": "10 minutes avant",
-          "before_20min": "20 minutes avant",
-          "before_30min": "30 minutes avant",
-          "off": "Désactivée"
+          "idle": "Inactif",
+          "unlocked": "Déverrouillé",
+          "locked": "Verrouillé",
+          "releasing": "Libération",
+          "locking": "Verrouillage",
+          "released": "Libéré"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Charge en heures creuses uniquement"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Alerte de fin de charge (10 min avant)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Alerte de fin de charge (20 min avant)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Alerte de fin de charge (30 min avant)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Charge programmée"

@@ -7,6 +7,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 from bump_api_dependency import (
+    _commit_prefix,
     _normalize_issue_refs,
     _qualify_short_repo_refs,
     _sanitize_closes_refs,
@@ -436,3 +437,16 @@ def test_classify_release_notes_v4272_real_body(monkeypatch):
     assert "hyundai_kia_connect_api/issues/1823" not in body
     assert "### Bug Fixes" in body
     assert "- 4.27.2:" in body
+
+
+@pytest.mark.parametrize(
+    ("level", "prefix"),
+    [
+        ("breaking", "feat(deps)!:"),
+        ("feat", "feat(deps):"),
+        ("fix", "fix(deps):"),
+        ("other", "chore(deps):"),
+    ],
+)
+def test_commit_prefix(level, prefix):
+    assert _commit_prefix(level) == prefix

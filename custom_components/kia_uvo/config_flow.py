@@ -41,10 +41,27 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
+    REGION_EUROPE,
+    REGION_EUROPE_CCI,
     REGIONS,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Some EU accounts hold only the first 20 password characters; the app
+# truncates longer passwords when saving them (#1979).
+EU_PASSWORD_TRUNCATION_THRESHOLD = 20
+
+
+def _auth_error_base(config: dict[str, Any]) -> str:
+    """Swap in the password hint for EU regions when the password is >20 chars."""
+    if (
+        REGIONS[config[CONF_REGION]] in (REGION_EUROPE, REGION_EUROPE_CCI)
+        and len(config.get(CONF_PASSWORD) or "") > EU_PASSWORD_TRUNCATION_THRESHOLD
+    ):
+        return "password_truncated_hint"
+    return "invalid_auth"
+
 
 STEP_REGION_DATA_SCHEMA = vol.Schema(
     {
@@ -232,7 +249,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass, full_config, self._vehicle_manager
                 )
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -243,6 +260,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     return await self.async_step_select_otp_method()
                 if self._is_reconfigure:
+                    assert self._vehicle_manager.token is not None
                     return self.async_update_reload_and_abort(
                         self._get_reconfigure_entry(),
                         data_updates={
@@ -289,10 +307,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="select_otp_method",
                 data_schema=vol.Schema({vol.Required("method"): vol.In(otp_methods)}),
             )
-        if user_input["method"] == "EMAIL":
-            method = OTP_NOTIFY_TYPE.EMAIL
-        if user_input["method"] == "SMS":
-            method = OTP_NOTIFY_TYPE.SMS
+        method = OTP_NOTIFY_TYPE[user_input["method"]]
         vehicle_manager = self._vehicle_manager
         assert vehicle_manager is not None
         await self.hass.async_add_executor_job(vehicle_manager.send_otp, method)
@@ -326,6 +341,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
         pending_login_data = self._pending_login_data
         assert pending_login_data is not None
+        assert vehicle_manager.token is not None
         pending_login_data[CONF_TOKEN] = vehicle_manager.token.to_dict()
         if self._is_reconfigure:
             return self.async_update_reload_and_abort(
@@ -368,7 +384,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             try:
                 await validate_input(self.hass, full_config, self._vehicle_manager)
             except InvalidAuth:
-                errors["base"] = "invalid_auth"
+                errors["base"] = _auth_error_base(full_config)
             except Exception:  # pylint: disable=broad-except
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
@@ -456,7 +472,6 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="reauth_confirm",
                 data_schema=vol.Schema({}),
             )
-        self._reauth_config = True
         return await self.async_step_user()
 
 

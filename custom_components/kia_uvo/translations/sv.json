@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Innloggningen misslyckades till Hyundai (Bluelink) / Kia (Uvo) Connect-servern. Använd denofficiella appen för att logga ut och logga in igen, och prova igen!",
       "invalid_credentials": "Ogiltigt användarnamn eller lösenord",
-      "unknown": "Oväntat fel"
+      "unknown": "Oväntat fel",
+      "password_truncated_hint": "Autentisering misslyckades. Om ditt lösenord är längre än 20 tecken kan kontot endast acceptera de första 20 (observerat på europeiska Hyundai/Kia/Genesis-konton när lösenordet sattes på en telefon). Testa de första 20 tecknen."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "V2L-läge"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Fulladdationslarm",
+      "ev_connector_lock_state": {
+        "name": "Låstillstånd för laddkontakten",
         "state": {
-          "before_10min": "10 minuter innan",
-          "before_20min": "20 minuter innan",
-          "before_30min": "30 minuter innan",
-          "off": "Av"
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Endast lågprisladdning"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Fulladdationslarm (10 min innan)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Fulladdationslarm (20 min innan)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Fulladdationslarm (30 min innan)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Schemalagd laddning"

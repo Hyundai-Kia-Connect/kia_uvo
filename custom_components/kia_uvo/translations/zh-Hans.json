@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",
       "invalid_credentials": "用户名或密码无效",
-      "unknown": "未知错误"
+      "unknown": "未知错误",
+      "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "V2L 模式"
       },
-      "ev_charge_complete_alarm": {
-        "name": "充电完成提醒",
+      "ev_connector_lock_state": {
+        "name": "充电接口锁止状态",
         "state": {
-          "before_10min": "提前10分钟",
-          "before_20min": "提前20分钟",
-          "before_30min": "提前30分钟",
-          "off": "关闭"
+          "idle": "空闲",
+          "unlocked": "未锁止",
+          "locked": "已锁止",
+          "releasing": "解锁中",
+          "locking": "锁止中",
+          "released": "已释放"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "仅谷电充电"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "充电完成提醒（提前10分钟）"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "充电完成提醒（提前20分钟）"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "充电完成提醒（提前30分钟）"
       },
       "ev_schedule_charge_enabled": {
         "name": "预约充电"

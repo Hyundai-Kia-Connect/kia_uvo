@@ -68,7 +68,8 @@
     "error": {
       "invalid_auth": "Nem sikerült bejelentkezni a Hyundai (Bluelink) / Kia (Uvo) Connect szerverekre. Kérjük, használja a hivatalos alkalmazást a kijelentkezéshez és a bejelentkezéshez, majd próbálja újra!",
       "invalid_credentials": "Érvénytelen felhasználónév vagy jelszó",
-      "unknown": "Váratlan hiba"
+      "unknown": "Váratlan hiba",
+      "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },
   "options": {
@@ -611,13 +612,15 @@
       "ev_v2l_mode": {
         "name": "V2L mód"
       },
-      "ev_charge_complete_alarm": {
-        "name": "Töltés befejezése riasztás",
+      "ev_connector_lock_state": {
+        "name": "Töltőcsatlakozó zár állapota",
         "state": {
-          "before_10min": "10 percc korábban",
-          "before_20min": "20 percc korábban",
-          "before_30min": "30 percc korábban",
-          "off": "Ki"
+          "idle": "Idle",
+          "unlocked": "Unlocked",
+          "locked": "Locked",
+          "releasing": "Releasing",
+          "locking": "Locking",
+          "released": "Released"
         }
       }
     },
@@ -940,6 +943,15 @@
       },
       "ev_off_peak_charge_only_enabled": {
         "name": "Töltés csak völgyidőszakban"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "Töltés befejezése riasztás (10 percc korábban)"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "Töltés befejezése riasztás (20 percc korábban)"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "Töltés befejezése riasztás (30 percc korábban)"
       },
       "ev_schedule_charge_enabled": {
         "name": "Ütemezett töltés"

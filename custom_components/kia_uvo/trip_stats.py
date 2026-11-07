@@ -29,7 +29,7 @@ def latest_trip_day(vehicle: Vehicle) -> str | None:
     month = vehicle.month_trip_info
     if month is None:
         return None
-    days = [d.yyyymmdd for d in month.day_list if d.trip_count]
+    days = [d.yyyymmdd for d in month.day_list if d.trip_count and d.yyyymmdd]
     return max(days) if days else None
 
 

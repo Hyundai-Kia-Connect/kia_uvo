@@ -12,6 +12,7 @@ pytest.register_assert_rewrite("custom_components.kia_uvo")
 from custom_components.kia_uvo import (
     binary_sensor as binary_sensor_platform,
     sensor as sensor_platform,
+    switch as switch_platform,
 )
 from custom_components.kia_uvo.const import DOMAIN
 
@@ -72,6 +73,24 @@ def setup_binary_sensors() -> Callable[..., Awaitable[dict[str, Any]]]:
         await binary_sensor_platform.async_setup_entry(
             hass, config_entry, created.extend
         )
+        return {entity.entity_description.key: entity for entity in created}
+
+    return _setup
+
+
+@pytest.fixture
+def setup_switches() -> Callable[..., Awaitable[dict[str, Any]]]:
+    """Run the real switch ``async_setup_entry`` for the given vehicles.
+
+    Returns the created entities keyed by description key.
+    """
+
+    async def _setup(*vehicles: Vehicle) -> dict[str, Any]:
+        coordinator = make_coordinator(*vehicles)
+        coordinator.async_set_charge_alarm_before = AsyncMock()
+        hass, config_entry = make_hass(coordinator)
+        created: list[Any] = []
+        await switch_platform.async_setup_entry(hass, config_entry, created.extend)
         return {entity.entity_description.key: entity for entity in created}
 
     return _setup
