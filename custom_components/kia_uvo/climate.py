@@ -229,6 +229,9 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             # the same request. Force airCtrl on: the request may have
             # been left with climate=False by a previous stop.
             self.climate_config.climate = True
+            self.climate_config.duration = self.coordinator.climate_duration_value(
+                self.vehicle.id
+            )
             await self.coordinator.async_start_climate(
                 self.vehicle.id, self.climate_config
             )
@@ -257,6 +260,9 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             # stop/start cycle would stop the climate and fail to bring
             # it back.
             self.climate_config.climate = True
+            self.climate_config.duration = self.coordinator.climate_duration_value(
+                self.vehicle.id
+            )
             await self.coordinator.async_start_climate(
                 self.vehicle.id, self.climate_config
             )
