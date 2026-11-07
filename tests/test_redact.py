@@ -99,3 +99,26 @@ def test_scalars_untouched() -> None:
     assert redact("string") == "string"
     assert redact(42) == 42
     assert redact(None) is None
+
+
+def test_redacts_push_identifiers_with_exact_normalized_keys() -> None:
+    for key in (
+        "mqtt_client_id",
+        "mqttVehicleId",
+        "hu-client-id",
+        "clientId",
+        "registration_uuid",
+        "mqtt_registration_uuid",
+    ):
+        assert redact({key: "synthetic-identity"}) == {key: REDACTED}
+
+
+def test_preserves_mqtt_counters_and_identity_presence_flags() -> None:
+    counters = {
+        "mqtt_messages_received": 12,
+        "mqtt_client_id_count": 2,
+        "mqtt_vehicle_id_present": True,
+        "mqtt_registration_uuid_present": True,
+        "hu_client_id_count": 1,
+    }
+    assert redact(counters) == counters

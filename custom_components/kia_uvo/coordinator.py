@@ -8,7 +8,7 @@ import datetime as dt
 from datetime import timedelta
 from functools import partial
 import logging
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -70,6 +70,7 @@ SIGNAL_SVM_RENDER = DOMAIN + "_{}_svm_render"
 # "check" lets the library pick force or cached, "cached" is the server-side
 # cached state, "force" is an explicit fresh read.
 PollMode = Literal["check", "cached", "force"]
+_T = TypeVar("_T")
 
 
 class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -79,6 +80,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Initialize."""
         self.platforms: set[str] = set()
         self._action_lock = asyncio.Lock()
+        self._shutdown_started = False
+        self._api_jobs: set[asyncio.Future[Any]] = set()
         self._svm_details: dict[str, SVMDetails] = {}
         # Per-vehicle SVM fisheye dewarp toggle (local UI state, off by default).
         self._svm_dewarp: dict[str, bool] = {}
@@ -151,6 +154,51 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             self.no_force_refresh_hour_start,
             self.no_force_refresh_hour_finish,
         )
+
+    async def _async_api_job(self, target: Callable[..., _T], *args: Any) -> _T:
+        """Keep executor work owned until completion, even if its caller cancels."""
+        if getattr(self, "_shutdown_started", False):
+            raise HomeAssistantError("The integration is shutting down")
+        if not hasattr(self, "_api_jobs"):
+            self._api_jobs = set()
+        job = asyncio.ensure_future(self.hass.async_add_executor_job(target, *args))
+        self._api_jobs.add(job)
+        job.add_done_callback(self._api_job_finished)
+        return await asyncio.shield(job)
+
+    @callback
+    def _api_job_finished(self, job: asyncio.Future[Any]) -> None:
+        self._api_jobs.discard(job)
+        if not job.cancelled():
+            job.exception()
+
+    async def _async_close_manager(self) -> None:
+        async with self._action_lock:
+            await asyncio.gather(
+                *getattr(self, "_api_jobs", ()), return_exceptions=True
+            )
+            close = getattr(self.vehicle_manager, "close", None)
+            if callable(close):
+                await self.hass.async_add_executor_job(close)
+
+    async def async_shutdown(self) -> None:
+        """Stop polling, drain running API work and release the manager."""
+        self._shutdown_started = True
+        try:
+            await super().async_shutdown()
+        finally:
+            shutdown = asyncio.create_task(self._async_close_manager())
+            cancelled = False
+            while True:
+                try:
+                    await asyncio.shield(shutdown)
+                    break
+                except asyncio.CancelledError:
+                    if shutdown.cancelled():
+                        raise
+                    cancelled = True
+            if cancelled:
+                raise asyncio.CancelledError
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library. Called by update_coordinator periodically.
@@ -255,17 +303,17 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Update one vehicle, falling back to the cached state if a force fails."""
         try:
             if mode == "check":
-                await self.hass.async_add_executor_job(
+                await self._async_api_job(
                     self.vehicle_manager.check_and_force_update_vehicle,
                     self.force_refresh_interval,
                     vehicle_id,
                 )
             elif mode == "force":
-                await self.hass.async_add_executor_job(
+                await self._async_api_job(
                     self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
                 )
             else:
-                await self.hass.async_add_executor_job(
+                await self._async_api_job(
                     self.vehicle_manager.update_vehicle_with_cached_state, vehicle_id
                 )
         except Exception as err:
@@ -278,7 +326,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
                 vehicle_id,
                 err,
             )
-            await self.hass.async_add_executor_job(
+            await self._async_api_job(
                 self.vehicle_manager.update_vehicle_with_cached_state, vehicle_id
             )
 
@@ -314,7 +362,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
         """Force refresh a single vehicle's state."""
         await self.async_check_and_refresh_token()
-        await self.hass.async_add_executor_job(
+        await self._async_api_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
         )
         self.async_set_updated_data(self.data)
@@ -349,7 +397,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
 
     async def async_get_svm_details(self, vehicle_id: str) -> SVMDetails:
         """Fetch the latest cached SVM image and metadata from the API."""
-        details = await self.hass.async_add_executor_job(
+        details = await self._async_api_job(
             self.vehicle_manager.get_svm_details, vehicle_id
         )
         self._svm_details[vehicle_id] = details
@@ -357,7 +405,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
 
     async def async_request_svm_capture(self, vehicle_id: str) -> SVMDetails:
         """Trigger a fresh SVM capture and update the cached details."""
-        details = await self.hass.async_add_executor_job(
+        details = await self._async_api_job(
             self.vehicle_manager.request_svm_capture,
             vehicle_id,
             True,  # acknowledged_warning — capture is always a user-initiated action
@@ -390,9 +438,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
 
     async def async_check_and_refresh_token(self) -> None:
         """Refresh token if needed via library."""
-        await self.hass.async_add_executor_job(
-            self.vehicle_manager.check_and_refresh_token
-        )
+        await self._async_api_job(self.vehicle_manager.check_and_refresh_token)
         await self._async_save_token()
         self._sync_vehicle_enabled_states()
 
@@ -416,7 +462,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """Wait for a vehicle action to complete, then refresh the cached data."""
         try:
             await asyncio.sleep(5)
-            await self.hass.async_add_executor_job(
+            await self._async_api_job(
                 self.vehicle_manager.check_action_status,
                 vehicle_id,
                 action_id,
@@ -442,7 +488,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         """
         try:
             await asyncio.sleep(5)
-            await self.hass.async_add_executor_job(
+            await self._async_api_job(
                 self.vehicle_manager.check_action_status,
                 vehicle_id,
                 action_id,
@@ -451,7 +497,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             )
         finally:
             try:
-                await self.hass.async_add_executor_job(
+                await self._async_api_job(
                     self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
                 )
             except Exception:
@@ -485,7 +531,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         async with self._action_lock:
             await self.async_check_and_refresh_token()
             try:
-                action_id = await self.hass.async_add_executor_job(action_fn)
+                action_id = await self._async_api_job(action_fn)
             except UnsupportedControlError as err:
                 raise HomeAssistantError(
                     f"Vehicle does not support this action: {err}"
