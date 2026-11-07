@@ -31,11 +31,12 @@ class _StubDeviceRegistry:
     def __init__(self, disabled_ids: set[str] | None = None) -> None:
         self._disabled = disabled_ids or set()
 
-    def async_get_device(self, identifiers) -> Any | None:
-        for _, identifier in identifiers:
-            if identifier in self._disabled:
-                return MagicMock(disabled=True)
-        return None
+    def async_get_devices(self, *, identifiers, config_entry_id) -> list[Any]:
+        return [
+            MagicMock(disabled=True)
+            for _, identifier in identifiers
+            if identifier in self._disabled
+        ]
 
 
 class _FakeHass:
