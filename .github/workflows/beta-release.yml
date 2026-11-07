@@ -1,0 +1,84 @@
+name: Beta release
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Bump API dependency"]
+    types: [completed]
+
+concurrency:
+  group: release
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  beta:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for the API bump PR to merge
+        id: wait
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Sunday gets the full release (release.yml) instead.
+          if [ "${{ github.event_name }}" = "workflow_run" ] && [ "$(date -u +%u)" = 7 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Branch name from scripts/bump_api_dependency.py.
+          for _ in $(seq 60); do
+            open=$(gh pr list --head chore/bump-api-dependency --state open --json number --jq length)
+            [ "$open" = 0 ] && exit 0
+            sleep 30
+          done
+          echo "::warning::API bump PR still open after 30 min; releasing master without it"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ steps.wait.outputs.skip != 'true' }}
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Gets semantic release info
+        id: info
+        if: ${{ steps.wait.outputs.skip != 'true' }}
+        uses: jossef/action-semantic-release-info@277fc891fc5ac40ed0e8d6bf59a0e24a25dfdeac # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Tag beta
+        id: beta
+        if: ${{ steps.info.outputs.version != '' }}
+        run: |
+          set -euo pipefail
+          base="${{ steps.info.outputs.version }}"
+          last=$(git tag -l "v${base}-beta.*" --sort=-v:refname | head -1)
+          if [ -n "$last" ] && [ "$(git rev-parse "${last}^")" = "$(git rev-parse HEAD)" ]; then
+            echo "master unchanged since $last"; exit 0
+          fi
+          n=1
+          if [ -n "$last" ]; then n=$(( ${last##*.} + 1 )); fi
+          version="${base}-beta.${n}"
+          sed -i "s/\"version\": \".*\"/\"version\": \"${version}\"/g" custom_components/kia_uvo/manifest.json
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          # Tag a commit off master so semantic-release never sees beta tags.
+          git commit -am "chore: beta ${version}"
+          git tag "v${version}"
+          git push origin "v${version}"
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub prerelease
+        if: ${{ steps.beta.outputs.tag != '' }}
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag: ${{ steps.beta.outputs.tag }}
+          name: ${{ steps.beta.outputs.tag }}
+          body: ${{ steps.info.outputs.notes }}
+          prerelease: true
+          makeLatest: false

@@ -3,6 +3,8 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "0 8 * * Sun"
+concurrency:
+  group: release
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,3 +50,13 @@ jobs:
           body: ${{ steps.semantic_release_info.outputs.notes }}
           draft: false
           prerelease: false
+
+      - name: Delete beta releases
+        if: ${{steps.semantic_release_info.outputs.version != ''}}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release list --limit 100 --json tagName,isPrerelease \
+            --jq '.[] | select(.isPrerelease and (.tagName | test("-beta\\."))) | .tagName' \
+            | xargs -r -n1 gh release delete --cleanup-tag -y
