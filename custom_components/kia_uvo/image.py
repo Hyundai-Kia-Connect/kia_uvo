@@ -49,7 +49,7 @@ SVM_VIEWS: tuple[SVMView, ...] = (
     SVMView("rear", "svm_rear", "mdi:car-arrow-left", 2),
     SVMView("left", "svm_left", "mdi:car-side", 2),
     SVMView("right", "svm_right", "mdi:car-side", 2),
-    SVMView("top", "svm_top", "mdi:car-360", 4),
+    SVMView("top", "svm_top", "mdi:rotate360", 4),
 )
 
 
