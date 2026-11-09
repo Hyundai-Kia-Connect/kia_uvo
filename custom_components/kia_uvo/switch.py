@@ -213,7 +213,7 @@ SWITCH_DESCRIPTIONS: Final[tuple[HyundaiKiaSwitchDescription, ...]] = (
     HyundaiKiaSwitchDescription(
         key="ev_charge_port_door_is_open",
         translation_key="ev_charge_port_door",
-        icon="mdi:ev-plug-charging",
+        icon="mdi:battery-charging-high",
         value_fn=lambda vehicle: vehicle.ev_charge_port_door_is_open,
         exists_fn=lambda vehicle: vehicle.ev_charge_port_door_is_open is not None,
         on_fn=lambda coordinator, vid: coordinator.async_open_charge_port(vid),
