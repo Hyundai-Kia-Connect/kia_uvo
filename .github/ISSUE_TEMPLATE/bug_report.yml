@@ -43,6 +43,14 @@ body:
       placeholder: e.g., 3.11.0
     validations:
       required: true
+  - type: input
+    id: homeassistant_version
+    attributes:
+      label: Version of Home Assistant
+      description: Provide the version of Home Assistant you are running
+      placeholder: e.g., 2026.8.0
+    validations:
+      required: true
   - type: textarea
     id: describe_bug
     attributes:
