@@ -15,12 +15,19 @@ jobs:
           # push the version-bump commit. BUMP_TOKEN's identity must be on
           # the ruleset's bypass list.
           token: ${{ secrets.BUMP_TOKEN }}
+          # release_notes.py reads the bump commits since the last release tag.
+          fetch-depth: 0
 
       - name: Gets semantic release info
         id: semantic_release_info
         uses: jossef/action-semantic-release-info@277fc891fc5ac40ed0e8d6bf59a0e24a25dfdeac # v3.0.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Add API changes to the release notes
+        if: ${{steps.semantic_release_info.outputs.version != ''}}
+        env:
+          NOTES: ${{ steps.semantic_release_info.outputs.notes }}
+        run: printf '%s' "$NOTES" | python3 scripts/release_notes.py > "$RUNNER_TEMP/release_notes.md"
       - name: Update Version and Commit
         if: ${{steps.semantic_release_info.outputs.version != ''}}
         run: |
@@ -47,7 +54,7 @@ jobs:
         with:
           tag: ${{ steps.semantic_release_info.outputs.git_tag }}
           name: ${{ steps.semantic_release_info.outputs.git_tag }}
-          body: ${{ steps.semantic_release_info.outputs.notes }}
+          bodyFile: ${{ runner.temp }}/release_notes.md
           draft: false
           prerelease: false
 
