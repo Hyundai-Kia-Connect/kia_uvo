@@ -10,6 +10,8 @@ A custom integration for Kia Uvo / Hyundai Bluelink. This project uses our under
 
 ## Installation
 
+Requires Home Assistant 2026.8.0 or newer.
+
 ### HACS
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Hyundai-Kia-Connect&repository=kia_uvo&category=integration)
