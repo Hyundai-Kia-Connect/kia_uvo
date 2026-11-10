@@ -49,6 +49,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      - name: Add API changes to the release notes
+        if: ${{ steps.info.outputs.version != '' }}
+        env:
+          NOTES: ${{ steps.info.outputs.notes }}
+        run: printf '%s' "$NOTES" | python3 scripts/release_notes.py > "$RUNNER_TEMP/release_notes.md"
+
       - name: Tag beta
         id: beta
         if: ${{ steps.info.outputs.version != '' }}
@@ -79,6 +85,6 @@ jobs:
         with:
           tag: ${{ steps.beta.outputs.tag }}
           name: ${{ steps.beta.outputs.tag }}
-          body: ${{ steps.info.outputs.notes }}
+          bodyFile: ${{ runner.temp }}/release_notes.md
           prerelease: true
           makeLatest: false
