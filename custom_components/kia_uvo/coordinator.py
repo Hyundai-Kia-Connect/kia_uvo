@@ -658,18 +658,18 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self, vehicle_id: str, enabled: bool
     ) -> None:
         """Toggle scheduled charging on/off."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        options.charging_enabled = enabled
+        # Charge scope only: any climate field set makes the flat path emit
+        # its /hvac request (#2100).
+        options = ScheduleChargingClimateRequestOptions(charging_enabled=enabled)
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_off_peak_charge_only_enabled(
         self, vehicle_id: str, enabled: bool
     ) -> None:
         """Toggle off-peak charge only on/off."""
-        vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        options.off_peak_charge_only_enabled = enabled
+        options = ScheduleChargingClimateRequestOptions(
+            off_peak_charge_only_enabled=enabled
+        )
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_off_peak_charging(
@@ -687,25 +687,45 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         charges only during the off-peak window (time priority), ``TARGET``
         prefers off-peak tariffs but continues past the window to reach the
         target SoC (target priority). ``mode=None`` preserves the current mode
-        and only adjusts the window — used by the time entities. Other
-        schedule fields (departures) are preserved.
+        and only adjusts the window, used by the time entities. Departures
+        and climate are sent as None: the library's "leave unchanged" fill
+        keeps the flat CCS2 path from emitting its /hvac request, which
+        rebuilt from cached defaults turned departure 1 off (#2100).
         """
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
-        options = self._build_schedule_options_from_vehicle(vehicle)
-        if mode is not None:
-            if mode is OffPeakChargingMode.OFF:
-                options.charging_enabled = False
-            elif mode is OffPeakChargingMode.TIME:
-                options.charging_enabled = True
-                options.off_peak_charge_only_enabled = True
-            elif mode is OffPeakChargingMode.TARGET:
-                options.charging_enabled = True
-                options.off_peak_charge_only_enabled = False
-        if start is not None:
-            options.off_peak_start_time = start
-        if end is not None:
-            options.off_peak_end_time = end
+        charging_enabled: bool | None
+        off_peak_charge_only: bool | None
+        if mode is OffPeakChargingMode.OFF:
+            charging_enabled, off_peak_charge_only = False, False
+        elif mode is OffPeakChargingMode.TIME:
+            charging_enabled, off_peak_charge_only = True, True
+        elif mode is OffPeakChargingMode.TARGET:
+            charging_enabled, off_peak_charge_only = True, False
+        else:
+            charging_enabled = vehicle.ev_schedule_charge_enabled
+            off_peak_charge_only = vehicle.ev_off_peak_charge_only_enabled
+        options = ScheduleChargingClimateRequestOptions(
+            first_departure=None,
+            second_departure=None,
+            charging_enabled=charging_enabled,
+            off_peak_start_time=(
+                start if start is not None else vehicle.ev_off_peak_start_time
+            ),
+            off_peak_end_time=(
+                end if end is not None else vehicle.ev_off_peak_end_time
+            ),
+            off_peak_charge_only_enabled=off_peak_charge_only,
+        )
         await self.async_schedule_charging_and_climate(vehicle_id, options)
+
+    def _clear_charge_scope(
+        self, options: ScheduleChargingClimateRequestOptions
+    ) -> None:
+        """Release the charge scope so the flat path skips its endpoint."""
+        options.charging_enabled = None
+        options.off_peak_start_time = None
+        options.off_peak_end_time = None
+        options.off_peak_charge_only_enabled = None
 
     async def async_set_departure_enabled(
         self, vehicle_id: str, departure_num: int, enabled: bool
@@ -719,11 +739,13 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         if departure is not None:
             departure.enabled = enabled
         # reservFlag (charging_enabled) must be 1 for departure slots to take
-        # effect. If the vehicle doesn't expose ev_schedule_charge_enabled
-        # (None), the builder defaults it to False, causing the API to accept
-        # the request but ignore per-slot reservChargeSet.
-        if enabled and not options.charging_enabled:
+        # effect. Force it only when enabling from a car-reported off state;
+        # otherwise leave the charge scope unchanged: its re-send is rejected
+        # as a duplicate before the hvac write lands (#1764).
+        if enabled and not vehicle.ev_schedule_charge_enabled:
             options.charging_enabled = True
+        else:
+            self._clear_charge_scope(options)
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_departure_climate_enabled(
@@ -733,6 +755,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
         options.climate_enabled = enabled
+        # A climate toggle never changes charging state, and the re-sent
+        # charge scope is rejected as a duplicate before the hvac write (#1764).
+        self._clear_charge_scope(options)
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_set_departure_defrost(
@@ -742,6 +767,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         vehicle = self.vehicle_manager.vehicles[vehicle_id]
         options = self._build_schedule_options_from_vehicle(vehicle)
         options.defrost = enabled
+        self._clear_charge_scope(options)
         await self.async_schedule_charging_and_climate(vehicle_id, options)
 
     async def async_start_hazard_lights(self, vehicle_id: str) -> None:
