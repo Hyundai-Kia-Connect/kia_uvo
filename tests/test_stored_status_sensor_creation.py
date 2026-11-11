@@ -52,6 +52,18 @@ async def test_fuel_economy_sensors_created_only_with_unit(
         make_vehicle(average_fuel_economy_unit=2, average_fuel_economy_drive=5.9)
     )
     assert all(key in created for key in FUEL_KEYS)
+    for key in FUEL_KEYS:
+        assert created[key].native_unit_of_measurement == "MPG"
+
+
+async def test_fuel_economy_unit_label_when_only_unit_field_served(
+    setup_sensors, make_vehicle
+) -> None:
+    """The label derives from the raw unit code on the vehicle."""
+    created = await setup_sensors(
+        make_vehicle(average_fuel_economy_unit=1, average_fuel_economy_drive=10.9)
+    )
+    assert created["average_fuel_economy_drive"].native_unit_of_measurement == "L/100km"
 
 
 async def test_gear_and_steering_step_created_only_with_value(
