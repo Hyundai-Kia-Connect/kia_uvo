@@ -1,5 +1,5 @@
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 
 [tool.ruff.lint]
 ignore = [
