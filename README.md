@@ -30,10 +30,11 @@ Requires Home Assistant 2026.8.0 or newer.
 
 After installation, go to **Settings** → **Devices & Services** → **Integrations** and search for **Kia Uvo**. Configure your vehicle using your username and password.
 
-- AU, EU, CA, CH, IN, NZ, BR and US is supported. USA, India, China and Brazil support is limited.
+- AU, EU, CA, CH, IN, NZ, BR, US and Japan (Hyundai) are supported. USA, India, China and Brazil support is limited.
 - Genesis Support on the Europe (Beta) region: authentication is live-verified, vehicle reads and remote control follow as they are verified with real vehicles. Genesis Support on Canada is still untested. Feedback would be appreciated!
 - Multiple cars and accounts are supported. To add additional accounts just go through setup a second time.
 - Reconfigure flow is available from the integration options (change credentials or set PIN).
+- Japan: select **Japan** and **Hyundai** and enter your Bluelink account PIN.
 - Scan Interval - fetches cached information from servers every 30 minutes. **Configurable**
 - Force Refresh Interval - asks your car for the latest data every 4 hours. **Configurable**
 - Force Refresh is disabled between 10PM and 6AM by default. **Configurable**

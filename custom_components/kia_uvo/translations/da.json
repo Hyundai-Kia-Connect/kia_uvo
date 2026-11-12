@@ -66,6 +66,8 @@
       "reconfigure_successful": "Genindstilling lykkedes"
     },
     "error": {
+      "unsupported_japan_brand": "Japan currently supports Hyundai Bluelink accounts only.",
+      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands.",
       "invalid_auth": "Login fejlede til Hyundai (Bluelink) / Kia (Uvo) Connect-servere. Brug den officielle app til at logge ud og logge ind igen, og prøv derefter igen!",
       "invalid_credentials": "Ugyldigt brugernavn eller adgangskode",
       "unknown": "Uventet fejl",
