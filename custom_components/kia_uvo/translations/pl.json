@@ -82,7 +82,11 @@
           "no_force_refresh_hour_start": "Godzina początku przerwy w wymuszonym odświeżaniu",
           "no_force_refresh_hour_finish": "Godzina końca przerwy w wymuszonym odświeżaniu",
           "enable_geolocation_entity": "Włącz encję geolokalizacji przy użyciu OpenStreetMap",
-          "use_email_with_geocode_api": "Użyj adresu e-mail Kia dla API geokodowania. Zwiększa możliwości odpytywania, ale udostępnia adres e-mail do API."
+          "use_email_with_geocode_api": "Użyj adresu e-mail Kia dla API geokodowania. Zwiększa możliwości odpytywania, ale udostępnia adres e-mail do API.",
+          "enable_push": "Włącz powiadomienia push"
+        },
+        "data_description": {
+          "enable_push": "Odbieraj aktualizacje stanu pojazdu, gdy samochód je zgłasza, zamiast czekać na kolejne odpytanie. Tylko region Europa (Beta) obsługuje push."
         }
       }
     }
@@ -849,6 +853,9 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "Awaria baterii 12V"
+      },
+      "push_connected": {
+        "name": "Połączenie push"
       }
     },
     "lock": {
