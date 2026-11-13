@@ -44,6 +44,7 @@ from hyundai_kia_connect_api.exceptions import (
 from hyundai_kia_connect_api.svm_image import render_views
 
 from .const import (
+    CLIMATE_DURATION_AUTO,
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
     CONF_FORCE_REFRESH_INTERVAL,
@@ -92,6 +93,8 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self._failed_vehicles: set[str] = set()
         # Consecutive failed polls per vehicle (drives the "skip it" hint).
         self._vehicle_failures: dict[str, int] = {}
+        # Climate-duration select option per vehicle ("auto" = lib default).
+        self._climate_duration_options: dict[str, str] = {}
 
         self.vehicle_manager = VehicleManager(
             region=config_entry.data[CONF_REGION],
@@ -541,8 +544,25 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
 
     async def async_start_climate_default(self, vehicle_id: str) -> None:
-        """Start climate with default options (API fills sensible defaults)."""
-        await self.async_start_climate(vehicle_id, ClimateRequestOptions())
+        """Start climate with default options, plus the duration selector."""
+        options = ClimateRequestOptions()
+        options.duration = self.climate_duration_value(vehicle_id)
+        await self.async_start_climate(vehicle_id, options)
+
+    def get_climate_duration_option(self, vehicle_id: str) -> str | None:
+        """Selected climate-duration option ("auto" when the user chose none)."""
+        return self._climate_duration_options.get(vehicle_id, CLIMATE_DURATION_AUTO)
+
+    def set_climate_duration_option(self, vehicle_id: str, option: str) -> None:
+        """Store the climate-duration select option (no vehicle round trip)."""
+        self._climate_duration_options[vehicle_id] = option
+
+    def climate_duration_value(self, vehicle_id: str) -> int | None:
+        """Duration in minutes for ClimateRequestOptions; None leaves it to the lib."""
+        option = self.get_climate_duration_option(vehicle_id)
+        if option == CLIMATE_DURATION_AUTO or option is None:
+            return None
+        return int(option)
 
     async def async_start_climate(
         self, vehicle_id: str, climate_options: ClimateRequestOptions

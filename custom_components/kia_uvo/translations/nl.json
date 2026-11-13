@@ -994,6 +994,11 @@
       "ev_off_peak_end_time": {
         "name": "Eindtijd laden daltarief"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Duur van de klimaatregeling"
+      }
     }
   }
 }

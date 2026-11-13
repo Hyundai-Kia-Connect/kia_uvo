@@ -994,6 +994,11 @@
       "ev_off_peak_end_time": {
         "name": "Völgyidőszaki töltés vége"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Klímavezérlés időtartama"
+      }
     }
   }
 }
