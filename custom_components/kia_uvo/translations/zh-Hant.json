@@ -1,0 +1,999 @@
+{
+  "title": "Hyundai / Kia Connect",
+  "config": {
+    "step": {
+      "credentials_password": {
+        "title": "Hyundai / Kia Connect - 帳號憑證",
+        "description": "請輸入您的帳號憑證。",
+        "data": {
+          "username": "帳號",
+          "password": "密碼",
+          "pin": "PIN"
+        }
+      },
+      "credentials_token": {
+        "title": "Hyundai / Kia Connect - 帳號憑證",
+        "description": "請輸入您的帳號憑證。歐洲地區需要特殊的權杖處理 — 請參閱 README。",
+        "data": {
+          "username": "帳號",
+          "password": "權杖",
+          "pin": "PIN"
+        }
+      },
+      "user": {
+        "title": "Hyundai / Kia Connect - 登入帳號",
+        "description": "新增您的現代汽車（Bluelink）/起亞汽車（Kia Connect）帳號 到 Home Assistant",
+        "data": {
+          "region": "國家/地區",
+          "brand": "品牌"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Hyundai / Kia Connect - 重新登入帳號",
+        "description": "您的帳戶驗證失敗。點選「送出」重新登入授權。"
+      },
+      "select_otp_method": {
+        "title": "選擇 OTP 方式",
+        "description": "您的帳號需要驗證。請選擇接收一次性密碼的方式。",
+        "data": {
+          "method": "OTP 傳送方式"
+        }
+      },
+      "enter_otp": {
+        "title": "輸入一次性密碼",
+        "description": "請輸入透過所選方式傳送的驗證碼。",
+        "data": {
+          "otp": "一次性密碼"
+        }
+      },
+      "reconfigure": {
+        "title": "Hyundai / Kia Connect - 重新配置",
+        "data": {
+          "reconfigure_choice": "您想做什麼？"
+        }
+      },
+      "reconfigure_pin": {
+        "title": "Hyundai / Kia Connect - 設定 PIN",
+        "description": "請輸入在 Kia/Hyundai Connect App 中授權遠端命令（鎖車、解鎖、空調）所需的 PIN 碼。",
+        "data": {
+          "pin": "PIN"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "裝置已設定",
+      "reauth_successful": "重新驗證成功",
+      "reconfigure_successful": "重新配置成功"
+    },
+    "error": {
+      "invalid_auth": "連線伺服器失敗。請使用官方 App登出並重新登入，然後重試！",
+      "invalid_credentials": "使用者名稱或密碼無效",
+      "unknown": "未知錯誤",
+      "password_truncated_hint": "驗證失敗。如果您的密碼超過 20 個字元，帳號可能只接受前 20 個字元（曾在歐洲 Hyundai/Kia/Genesis 帳號於手機上設定密碼時發生）。請嘗試使用密碼的前 20 個字元。"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Hyundai / Kia Connect - 配置",
+        "data": {
+          "scan_interval": "更新時間間隔（分鐘）",
+          "force_refresh": "強制更新時間間隔（分鐘）",
+          "no_force_refresh_hour_start": "取消強制更新 - 起始時間",
+          "no_force_refresh_hour_finish": "取消強制更新 - 結束時間",
+          "enable_geolocation_entity": "使用 OpenStreetMap 開啟地理定位實體",
+          "use_email_with_geocode_api": "使用您的 Kia 電子郵件地址取得 Geocode API - 更多資訊：https://nominatim.org/release-docs/develop/api/Reverse/#other"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_update": {
+      "name": "強制更新",
+      "description": "強制車輛更新其資料。與所選車輛同一帳號下的所有車輛都將被更新。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "update": {
+      "name": "更新",
+      "description": "從服務快取更新車輛資料",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "start_climate": {
+      "name": "啟動空調",
+      "description": "請謹慎使用 - 啟動空調和引擎。並非所有車型或地區都支援所有選項。請參考您車輛的手機 App，選擇車輛支援的選項。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        },
+        "duration": {
+          "name": "持續時間",
+          "description": "空調系統執行時長。最長時長可能受車型/年款/地區限制。"
+        },
+        "climate": {
+          "name": "空調",
+          "description": "啟用空調系統"
+        },
+        "temperature": {
+          "name": "溫度",
+          "description": "設定空調溫度。單位取決於地區。"
+        },
+        "defrost": {
+          "name": "除霜",
+          "description": "前擋風玻璃除霜"
+        },
+        "heating": {
+          "name": "加熱",
+          "description": "前/後窗和後視鏡等加熱功能。歐洲地區使用單獨的方向盤設定。"
+        },
+        "steering_wheel": {
+          "name": "方向盤加熱",
+          "description": "方向盤加熱檔位。僅限歐洲，其他地區使用加熱設定。"
+        },
+        "flseat": {
+          "name": "左前座椅",
+          "description": "左前座椅加熱/通風設定"
+        },
+        "frseat": {
+          "name": "右前座椅",
+          "description": "右前座椅加熱/通風設定"
+        },
+        "rlseat": {
+          "name": "左後座椅",
+          "description": "左後座椅加熱/通風設定"
+        },
+        "rrseat": {
+          "name": "右後座椅",
+          "description": "右後座椅加熱/通風設定"
+        }
+      }
+    },
+    "stop_climate": {
+      "name": "停止空調",
+      "description": "請謹慎使用 - 停止車輛和空調",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "stop_charge": {
+      "name": "停止充電",
+      "description": "停止充電",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "start_charge": {
+      "name": "開始充電",
+      "description": "開始充電",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "lock": {
+      "name": "鎖車",
+      "description": "鎖定車輛",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "unlock": {
+      "name": "解鎖",
+      "description": "解鎖車輛",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "close_charge_port": {
+      "name": "關閉充電口",
+      "description": "關閉充電口蓋",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "open_charge_port": {
+      "name": "開啟充電口",
+      "description": "開啟充電口蓋",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "set_charge_limits": {
+      "name": "設定充電上限",
+      "description": "設定交流和直流充電容量上限",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        },
+        "dc_limit": {
+          "name": "直流充電上限",
+          "description": "使用直流充電樁時的最大充電容量"
+        },
+        "ac_limit": {
+          "name": "交流充電上限",
+          "description": "使用交流充電樁時的最大充電容量"
+        }
+      }
+    },
+    "set_charging_current": {
+      "name": "設定交流充電電流",
+      "description": "設定交流充電電流容量",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        },
+        "level": {
+          "name": "充電電流",
+          "description": "充電電流容量百分比"
+        }
+      }
+    },
+    "schedule_charging_and_climate": {
+      "name": "預約充電和空調",
+      "description": "請謹慎使用 - 預約充電和空調。並非所有車型或地區都支援所有選項。請參考您車輛的手機 App，選擇車輛支援的選項。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        },
+        "charging_enabled": {
+          "name": "預約充電",
+          "description": "啟用預約充電"
+        },
+        "first_departure_enabled": {
+          "name": "第一次出發",
+          "description": "啟用第一次出發"
+        },
+        "first_departure_days": {
+          "name": "第一次出發日期",
+          "description": "第一次出發適用的日期。不能為空。"
+        },
+        "first_departure_time": {
+          "name": "第一次出發時間",
+          "description": "第一次出發時間。分鐘請使用 00、10、20、30、40 或 50，秒請使用 00"
+        },
+        "second_departure_enabled": {
+          "name": "第二次出發",
+          "description": "啟用第二次出發"
+        },
+        "second_departure_days": {
+          "name": "第二次出發日期",
+          "description": "第二次出發適用的日期。不能為空。"
+        },
+        "second_departure_time": {
+          "name": "第二次出發時間",
+          "description": "第二次出發時間。分鐘請使用 00、10、20、30、40 或 50，秒請使用 00"
+        },
+        "off_peak_start_time": {
+          "name": "離峰開始時間",
+          "description": "離峰時段開始時間。分鐘請使用 00、10、20、30、40 或 50，秒請使用 00"
+        },
+        "off_peak_end_time": {
+          "name": "離峰結束時間",
+          "description": "離峰時段結束時間。分鐘請使用 00、10、20、30、40 或 50，秒請使用 00"
+        },
+        "off_peak_charge_only_enabled": {
+          "name": "僅離峰時段",
+          "description": "若為真，僅在設定的離峰時段內充電，否則可能在離峰時段之前開始充電"
+        },
+        "climate_enabled": {
+          "name": "空調",
+          "description": "出發前啟用空調系統"
+        },
+        "temperature": {
+          "name": "溫度",
+          "description": "設定空調溫度。單位取決於地區。"
+        },
+        "temperature_unit": {
+          "name": "溫度單位",
+          "description": "設定空調溫度單位。單位取決於地區。"
+        },
+        "defrost": {
+          "name": "除霜",
+          "description": "出發前前擋風玻璃除霜"
+        }
+      }
+    },
+    "start_hazard_lights": {
+      "name": "開啟危險警示燈",
+      "description": "開啟危險警示燈 30 秒。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "start_hazard_lights_and_horn": {
+      "name": "開啟危險警示燈和喇叭",
+      "description": "開啟危險警示燈和喇叭 30 秒。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "start_valet_mode": {
+      "name": "開啟代客模式",
+      "description": "啟用代客模式。如果在行駛中遠端啟用代客模式，車輛螢幕將被關閉。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "stop_valet_mode": {
+      "name": "關閉代客模式",
+      "description": "停用代客模式。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    },
+    "set_windows": {
+      "name": "車窗控制",
+      "description": "控制車輛的車窗。根據需要開啟或關閉車窗。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        },
+        "flwindow": {
+          "name": "左前車窗",
+          "description": "左前車窗的操作"
+        },
+        "frwindow": {
+          "name": "右前車窗",
+          "description": "右前車窗的操作"
+        },
+        "rlwindow": {
+          "name": "左後車窗",
+          "description": "左後車窗的操作"
+        },
+        "rrwindow": {
+          "name": "右後車窗",
+          "description": "右後車窗的操作"
+        }
+      }
+    },
+    "capture_svm_image": {
+      "name": "拍攝 SVM 影像",
+      "description": "觸發全景影像監視器（SVM）重新拍攝。車輛將被喚醒並拍攝 360° 影像。",
+      "fields": {
+        "device_id": {
+          "name": "車輛",
+          "description": "目標車輛"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "total_driving_range": {
+        "name": "總續航里程"
+      },
+      "odometer": {
+        "name": "總里程"
+      },
+      "outside_temperature": {
+        "name": "車外溫度"
+      },
+      "last_service_distance": {
+        "name": "上次保養"
+      },
+      "next_service_distance": {
+        "name": "下次保養"
+      },
+      "car_battery_percentage": {
+        "name": "蓄電池電量"
+      },
+      "last_updated_at": {
+        "name": "上次更新時間"
+      },
+      "last_scanned_at": {
+        "name": "上次掃描"
+      },
+      "ev_battery_percentage": {
+        "name": "動力電池電量"
+      },
+      "ev_battery_soh_percentage": {
+        "name": "動力電池健康度（SoH）"
+      },
+      "ev_battery_temperature_max": {
+        "name": "動力電池最高溫度"
+      },
+      "ev_battery_temperature_min": {
+        "name": "動力電池最低溫度"
+      },
+      "ev_battery_water_temperature": {
+        "name": "動力電池冷卻液溫度"
+      },
+      "ev_battery_remain": {
+        "name": "動力電池剩餘能量"
+      },
+      "ev_battery_capacity": {
+        "name": "動力電池容量"
+      },
+      "ev_battery_pack_voltage": {
+        "name": "動力電池組電壓"
+      },
+      "ev_driving_range": {
+        "name": "純電續航里程"
+      },
+      "fuel_driving_range": {
+        "name": "燃油續航里程"
+      },
+      "fuel_level": {
+        "name": "燃油油量"
+      },
+      "air_temperature": {
+        "name": "設定溫度"
+      },
+      "ev_estimated_current_charge_duration": {
+        "name": "預計充電時長"
+      },
+      "ev_estimated_fast_charge_duration": {
+        "name": "預計快充時長"
+      },
+      "ev_estimated_portable_charge_duration": {
+        "name": "預計可攜式充電時長"
+      },
+      "ev_estimated_station_charge_duration": {
+        "name": "預計充電樁充電時長"
+      },
+      "ev_target_range_charge_ac": {
+        "name": "交流充電目標續航"
+      },
+      "ev_target_range_charge_dc": {
+        "name": "直流充電目標續航"
+      },
+      "total_power_consumed": {
+        "name": "90 天能耗"
+      },
+      "total_power_regenerated": {
+        "name": "90 天能量回收"
+      },
+      "power_consumption_30d": {
+        "name": "30 天平均能耗"
+      },
+      "front_left_seat_status": {
+        "name": "左前座椅"
+      },
+      "front_right_seat_status": {
+        "name": "右前座椅"
+      },
+      "rear_left_seat_status": {
+        "name": "左後座椅"
+      },
+      "rear_right_seat_status": {
+        "name": "右後座椅"
+      },
+      "geocode_name": {
+        "name": "地理編碼位置"
+      },
+      "dtc_count": {
+        "name": "故障碼（DTC）數量"
+      },
+      "ev_first_departure_time": {
+        "name": "第一次出發時間"
+      },
+      "ev_second_departure_time": {
+        "name": "第二次出發時間"
+      },
+      "ev_off_peak_start_time": {
+        "name": "離峰開始時間"
+      },
+      "ev_off_peak_end_time": {
+        "name": "離峰結束時間"
+      },
+      "ev_charging_current": {
+        "name": "充電電流上限"
+      },
+      "ev_charging_power": {
+        "name": "充電功率"
+      },
+      "vehicle_identification_number": {
+        "name": "車輛識別代號（VIN）"
+      },
+      "ev_first_departure_climate_temperature": {
+        "name": "第一次出發空調溫度"
+      },
+      "ev_first_departure_days": {
+        "name": "第一次出發日期"
+      },
+      "ev_second_departure_climate_temperature": {
+        "name": "第二次出發空調溫度"
+      },
+      "ev_second_departure_days": {
+        "name": "第二次出發日期"
+      },
+      "ev_power_consumption_air_conditioning": {
+        "name": "空調能耗"
+      },
+      "ev_power_consumption_battery_cooling": {
+        "name": "電池冷卻能耗"
+      },
+      "ev_power_consumption_battery_heater": {
+        "name": "電池加熱能耗"
+      },
+      "location_last_updated_at": {
+        "name": "位置上次更新時間"
+      },
+      "ev_v2l_max_power": {
+        "name": "V2L 最大功率"
+      },
+      "ev_v2l_target_soc": {
+        "name": "V2L 目標 SoC"
+      },
+      "data": {
+        "name": "資料"
+      },
+      "daily_driving_stats": {
+        "name": "每日駕駛統計"
+      },
+      "todays_daily_driving_stats": {
+        "name": "今日駕駛統計"
+      },
+      "tire_pressure_front_left": {
+        "name": "胎壓 - 左前"
+      },
+      "tire_pressure_front_right": {
+        "name": "胎壓 - 右前"
+      },
+      "tire_pressure_rear_left": {
+        "name": "胎壓 - 左後"
+      },
+      "tire_pressure_rear_right": {
+        "name": "胎壓 - 右後"
+      },
+      "drive_mode": {
+        "name": "駕駛模式"
+      },
+      "svm_status": {
+        "name": "SVM 狀態"
+      },
+      "gear_position": {
+        "name": "排檔位置"
+      },
+      "steering_wheel_heat_step": {
+        "name": "方向盤加熱檔位"
+      },
+      "average_fuel_economy_accumulated": {
+        "name": "平均油耗（累計）"
+      },
+      "average_fuel_economy_drive": {
+        "name": "平均油耗（行駛）"
+      },
+      "average_fuel_economy_after_refuel": {
+        "name": "平均油耗（加油後）"
+      },
+      "ev_v2l_discharge_dte": {
+        "name": "V2L 放電剩餘里程"
+      },
+      "ev_v2l_discharge_remain_time": {
+        "name": "V2L 放電剩餘時間"
+      },
+      "ev_v2l_mode": {
+        "name": "V2L 模式"
+      },
+      "ev_connector_lock_state": {
+        "name": "充電介面鎖定狀態",
+        "state": {
+          "idle": "閒置",
+          "unlocked": "未鎖定",
+          "locked": "已鎖定",
+          "releasing": "解鎖中",
+          "locking": "鎖定中",
+          "released": "已釋放"
+        }
+      }
+    },
+    "binary_sensor": {
+      "engine_is_running": {
+        "name": "引擎"
+      },
+      "ev_battery_heating_state": {
+        "name": "動力電池加熱"
+      },
+      "defrost_is_on": {
+        "name": "除霜"
+      },
+      "steering_wheel_heater_is_on": {
+        "name": "方向盤加熱"
+      },
+      "back_window_heater_is_on": {
+        "name": "後窗加熱"
+      },
+      "side_mirror_heater_is_on": {
+        "name": "後視鏡加熱"
+      },
+      "front_left_door_is_open": {
+        "name": "左前門"
+      },
+      "front_right_door_is_open": {
+        "name": "右前門"
+      },
+      "back_left_door_is_open": {
+        "name": "左後門"
+      },
+      "back_right_door_is_open": {
+        "name": "右後門"
+      },
+      "trunk_is_open": {
+        "name": "後車廂"
+      },
+      "hood_is_open": {
+        "name": "引擎蓋"
+      },
+      "front_left_window_is_open": {
+        "name": "左前車窗"
+      },
+      "front_right_door_is_locked": {
+        "name": "右前門鎖"
+      },
+      "front_right_window_is_open": {
+        "name": "右前車窗"
+      },
+      "back_left_window_is_open": {
+        "name": "左後車窗"
+      },
+      "back_right_door_is_locked": {
+        "name": "右後門鎖"
+      },
+      "back_right_window_is_open": {
+        "name": "右後車窗"
+      },
+      "ev_battery_is_charging": {
+        "name": "動力電池充電"
+      },
+      "ev_battery_is_plugged_in": {
+        "name": "充電槍連線"
+      },
+      "ev_battery_precondition_enabled": {
+        "name": "動力電池預調節"
+      },
+      "ev_battery_winter_mode": {
+        "name": "動力電池冬季模式"
+      },
+      "fuel_level_is_low": {
+        "name": "燃油不足"
+      },
+      "hazard_lights_on": {
+        "name": "危險警告燈"
+      },
+      "smart_key_battery_warning_is_on": {
+        "name": "智慧鑰匙電池警告"
+      },
+      "washer_fluid_warning_is_on": {
+        "name": "玻璃水警告"
+      },
+      "windshield_front_heater_is_on": {
+        "name": "前擋風玻璃加熱"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "第一次出發除霜"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "第一次出發空調"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "第二次出發除霜"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "第二次出發空調"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "僅離峰充電"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "預約充電"
+      },
+      "ev_v2l_status": {
+        "name": "V2L 狀態"
+      },
+      "ev_v2x_status": {
+        "name": "V2X 狀態"
+      },
+      "tire_pressure_all_warning_is_on": {
+        "name": "胎壓 - 全部"
+      },
+      "tire_pressure_rear_left_warning_is_on": {
+        "name": "胎壓 - 左後"
+      },
+      "tire_pressure_front_left_warning_is_on": {
+        "name": "胎壓 - 左前"
+      },
+      "tire_pressure_front_right_warning_is_on": {
+        "name": "胎壓 - 右前"
+      },
+      "tire_pressure_rear_right_warning_is_on": {
+        "name": "胎壓 - 右後"
+      },
+      "air_control_is_on": {
+        "name": "空調"
+      },
+      "auto_cut_battery_prewarning_on": {
+        "name": "蓄電池自動斷電預警"
+      },
+      "back_left_door_is_locked": {
+        "name": "左後門鎖"
+      },
+      "ev_charge_port_door_is_open": {
+        "name": "充電口蓋"
+      },
+      "ev_first_departure_enabled": {
+        "name": "預約出發 1"
+      },
+      "ev_second_departure_enabled": {
+        "name": "預約出發 2"
+      },
+      "front_left_door_is_locked": {
+        "name": "左前門鎖"
+      },
+      "brake_fluid_warning_is_on": {
+        "name": "煞車油警告"
+      },
+      "sunroof_is_open": {
+        "name": "天窗"
+      },
+      "accessory_on": {
+        "name": "附件電源"
+      },
+      "air_cleaning_is_on": {
+        "name": "空氣淨化"
+      },
+      "ign3": {
+        "name": "IGN3"
+      },
+      "remote_ignition": {
+        "name": "遠端啟動"
+      },
+      "transmission_condition": {
+        "name": "變速箱狀態"
+      },
+      "sleep_mode_check": {
+        "name": "休眠模式檢查"
+      },
+      "headlamp_status": {
+        "name": "頭燈狀態"
+      },
+      "headlamp_left_low": {
+        "name": "左前燈故障"
+      },
+      "headlamp_right_low": {
+        "name": "右前燈故障"
+      },
+      "headlamp_left_high": {
+        "name": "左遠光燈故障"
+      },
+      "headlamp_right_high": {
+        "name": "右遠光燈故障"
+      },
+      "headlamp_left_bifunc": {
+        "name": "左雙功能頭燈故障"
+      },
+      "headlamp_right_bifunc": {
+        "name": "右雙功能頭燈故障"
+      },
+      "stop_lamp_left": {
+        "name": "左尾燈故障"
+      },
+      "stop_lamp_right": {
+        "name": "右尾燈故障"
+      },
+      "turn_signal_left_front": {
+        "name": "左前方向燈"
+      },
+      "turn_signal_right_front": {
+        "name": "右前方向燈"
+      },
+      "turn_signal_left_rear": {
+        "name": "左後方向燈"
+      },
+      "turn_signal_right_rear": {
+        "name": "右後方向燈"
+      },
+      "is_locked": {
+        "name": "已鎖定"
+      },
+      "front_left_seat_heater_on": {
+        "name": "左前座椅加熱"
+      },
+      "front_right_seat_heater_on": {
+        "name": "右前座椅加熱"
+      },
+      "rear_left_seat_heater_on": {
+        "name": "左後座椅加熱"
+      },
+      "rear_right_seat_heater_on": {
+        "name": "右後座椅加熱"
+      },
+      "oil_level_warning_is_on": {
+        "name": "機油油位警告"
+      },
+      "battery_auxiliary_fail_warning_is_on": {
+        "name": "12V 蓄電池故障"
+      }
+    },
+    "lock": {
+      "door_lock": {
+        "name": "門鎖"
+      }
+    },
+    "button": {
+      "force_refresh": {
+        "name": "強制重新整理"
+      },
+      "start_hazard_lights": {
+        "name": "開啟危險警示燈"
+      },
+      "start_hazard_lights_and_horn": {
+        "name": "開啟危險警示燈和喇叭"
+      },
+      "start_valet_mode": {
+        "name": "開啟代客模式"
+      },
+      "stop_valet_mode": {
+        "name": "關閉代客模式"
+      },
+      "open_all_windows": {
+        "name": "開啟所有車窗"
+      },
+      "close_all_windows": {
+        "name": "關閉所有車窗"
+      },
+      "vent_all_windows": {
+        "name": "所有車窗通風"
+      },
+      "capture_svm_image": {
+        "name": "拍攝 SVM 影像"
+      }
+    },
+    "image": {
+      "svm_front": {
+        "name": "SVM 前攝影機"
+      },
+      "svm_rear": {
+        "name": "SVM 後攝影機"
+      },
+      "svm_left": {
+        "name": "SVM 左攝影機"
+      },
+      "svm_right": {
+        "name": "SVM 右攝影機"
+      },
+      "svm_top": {
+        "name": "SVM 鳥瞰圖"
+      }
+    },
+    "cover": {
+      "front_left_window": {
+        "name": "左前車窗"
+      },
+      "front_right_window": {
+        "name": "右前車窗"
+      },
+      "back_left_window": {
+        "name": "左後車窗"
+      },
+      "back_right_window": {
+        "name": "右後車窗"
+      }
+    },
+    "switch": {
+      "ev_charging": {
+        "name": "充電"
+      },
+      "climate": {
+        "name": "空調"
+      },
+      "ev_first_departure_climate_defrost": {
+        "name": "第一次出發除霜"
+      },
+      "ev_first_departure_climate_enabled": {
+        "name": "第一次出發空調"
+      },
+      "ev_first_departure_enabled": {
+        "name": "預約出發 1"
+      },
+      "ev_second_departure_climate_defrost": {
+        "name": "第二次出發除霜"
+      },
+      "ev_second_departure_climate_enabled": {
+        "name": "第二次出發空調"
+      },
+      "ev_second_departure_enabled": {
+        "name": "預約出發 2"
+      },
+      "ev_off_peak_charge_only_enabled": {
+        "name": "僅離峰充電"
+      },
+      "ev_charge_complete_alarm_before_10min": {
+        "name": "充電完成提醒（提前 10 分鐘）"
+      },
+      "ev_charge_complete_alarm_before_20min": {
+        "name": "充電完成提醒（提前 20 分鐘）"
+      },
+      "ev_charge_complete_alarm_before_30min": {
+        "name": "充電完成提醒（提前 30 分鐘）"
+      },
+      "ev_schedule_charge_enabled": {
+        "name": "預約充電"
+      },
+      "ev_charge_port_door": {
+        "name": "充電口蓋"
+      },
+      "valet_mode_control": {
+        "name": "代客模式"
+      },
+      "svm_dewarp": {
+        "name": "SVM 畸變校正"
+      }
+    },
+    "climate": {
+      "climate_control": {
+        "name": "空調控制"
+      }
+    },
+    "number": {
+      "ev_charge_limits_ac": {
+        "name": "交流充電上限"
+      },
+      "ev_charge_limits_dc": {
+        "name": "直流充電上限"
+      },
+      "ev_v2l_discharge_limit": {
+        "name": "V2L 放電上限"
+      }
+    },
+    "device_tracker": {
+      "location": {
+        "name": "位置"
+      }
+    },
+    "time": {
+      "ev_off_peak_start_time": {
+        "name": "離峰充電開始時間"
+      },
+      "ev_off_peak_end_time": {
+        "name": "離峰充電結束時間"
+      }
+    }
+  }
+}
