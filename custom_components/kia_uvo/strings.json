@@ -126,7 +126,7 @@
         "name": "EV Battery Remaining Energy"
       },
       "ev_battery_soh_percentage": {
-        "name": "EV State of Health Battery"
+        "name": "EV Battery State of Health"
       },
       "ev_battery_temperature_max": {
         "name": "EV Battery Temperature Max"

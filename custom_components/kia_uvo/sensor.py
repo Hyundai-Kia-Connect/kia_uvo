@@ -133,8 +133,9 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaSensorEntityDescription, ...]] = (
         key="ev_battery_soh_percentage",
         translation_key="ev_battery_soh_percentage",
         native_unit_of_measurement=PERCENTAGE,
-        device_class=SensorDeviceClass.BATTERY,
+        icon="mdi:battery-heart",
         state_class=SensorStateClass.MEASUREMENT,
+        # Not BATTERY (kia_uvo #2085): battery means charge left, not health.
         # The lib keeps the 255 sentinel (kia_uvo #1935) unknown.
         exists=_is_electrified,
     ),
