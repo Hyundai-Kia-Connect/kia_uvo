@@ -22,7 +22,7 @@
       },
       "user": {
         "title": "Hyundai / Kia Connect - 登入帳號",
-        "description": "新增您的現代汽車（Bluelink）/起亞汽車（Kia Connect）帳號 到 Home Assistant",
+        "description": "新增您的現代汽車（Bluelink）/起亞汽車（Uvo）帳號到 Home Assistant",
         "data": {
           "region": "國家/地區",
           "brand": "品牌"
@@ -47,7 +47,7 @@
         }
       },
       "reconfigure": {
-        "title": "Hyundai / Kia Connect - 重新配置",
+        "title": "Hyundai / Kia Connect - 重新設定",
         "data": {
           "reconfigure_choice": "您想做什麼？"
         }
@@ -63,7 +63,7 @@
     "abort": {
       "already_configured": "裝置已設定",
       "reauth_successful": "重新驗證成功",
-      "reconfigure_successful": "重新配置成功"
+      "reconfigure_successful": "重新設定成功"
     },
     "error": {
       "invalid_auth": "連線伺服器失敗。請使用官方 App登出並重新登入，然後重試！",
@@ -75,7 +75,7 @@
   "options": {
     "step": {
       "init": {
-        "title": "Hyundai / Kia Connect - 配置",
+        "title": "Hyundai / Kia Connect - 設定",
         "data": {
           "scan_interval": "更新時間間隔（分鐘）",
           "force_refresh": "強制更新時間間隔（分鐘）",
@@ -118,7 +118,7 @@
         },
         "duration": {
           "name": "持續時間",
-          "description": "空調系統執行時長。最長時長可能受車型/年款/地區限制。"
+          "description": "空調系統執行時間。最長時間可能受車型/年款/地區限制。"
         },
         "climate": {
           "name": "空調",
@@ -421,13 +421,13 @@
         "name": "下次保養"
       },
       "car_battery_percentage": {
-        "name": "蓄電池電量"
+        "name": "電瓶電量"
       },
       "last_updated_at": {
         "name": "上次更新時間"
       },
       "last_scanned_at": {
-        "name": "上次掃描"
+        "name": "上次查詢時間"
       },
       "ev_battery_percentage": {
         "name": "動力電池電量"
@@ -466,16 +466,16 @@
         "name": "設定溫度"
       },
       "ev_estimated_current_charge_duration": {
-        "name": "預計充電時長"
+        "name": "預計充電時間"
       },
       "ev_estimated_fast_charge_duration": {
-        "name": "預計快充時長"
+        "name": "預計快充時間"
       },
       "ev_estimated_portable_charge_duration": {
-        "name": "預計可攜式充電時長"
+        "name": "預計可攜式充電時間"
       },
       "ev_estimated_station_charge_duration": {
-        "name": "預計充電樁充電時長"
+        "name": "預計充電樁充電時間"
       },
       "ev_target_range_charge_ac": {
         "name": "交流充電目標續航"
@@ -749,7 +749,7 @@
         "name": "空調"
       },
       "auto_cut_battery_prewarning_on": {
-        "name": "蓄電池自動斷電預警"
+        "name": "電瓶自動斷電預警"
       },
       "back_left_door_is_locked": {
         "name": "左後門鎖"
@@ -848,7 +848,7 @@
         "name": "機油油位警告"
       },
       "battery_auxiliary_fail_warning_is_on": {
-        "name": "12V 蓄電池故障"
+        "name": "12V 電瓶故障"
       }
     },
     "lock": {
