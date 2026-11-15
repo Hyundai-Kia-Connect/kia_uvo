@@ -90,7 +90,6 @@ class HyundaiKiaCarClimateControlSwitch(HyundaiKiaConnectEntity, ClimateEntity):
             key="climate_control",
             translation_key="climate_control",
             icon="mdi:air-conditioner",
-            unit_of_measurement=vehicle._air_temperature_unit,
         )
         self._attr_unique_id = f"{DOMAIN}_{vehicle.id}_climate_control"
 
