@@ -46,18 +46,21 @@ from hyundai_kia_connect_api.svm_image import render_views
 from .const import (
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
+    CONF_ENABLE_PUSH,
     CONF_FORCE_REFRESH_INTERVAL,
     CONF_NO_FORCE_REFRESH_HOUR_FINISH,
     CONF_NO_FORCE_REFRESH_HOUR_START,
     CONF_TOKEN,
     CONF_USE_EMAIL_WITH_GEOCODE_API,
     DEFAULT_ENABLE_GEOLOCATION_ENTITY,
+    DEFAULT_ENABLE_PUSH,
     DEFAULT_FORCE_REFRESH_INTERVAL,
     DEFAULT_NO_FORCE_REFRESH_HOUR_FINISH,
     DEFAULT_NO_FORCE_REFRESH_HOUR_START,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
+    MQTT_FORCE_REFRESH_THROTTLE_S,
     OffPeakChargingMode,
 )
 
@@ -130,6 +133,9 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         )
         self.use_email_with_geocode_api = config_entry.options.get(
             CONF_USE_EMAIL_WITH_GEOCODE_API, DEFAULT_USE_EMAIL_WITH_GEOCODE_API
+        )
+        self._push_enabled: bool = config_entry.options.get(
+            CONF_ENABLE_PUSH, DEFAULT_ENABLE_PUSH
         )
 
         super().__init__(
@@ -312,7 +318,28 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         return vehicle_id not in self._failed_vehicles
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
-        """Force refresh a single vehicle's state."""
+        """Force refresh a single vehicle's state.
+
+        Throttled against the car's own last_scanned_at: the push status
+        callback schedules force refreshes on every live status delivery;
+        overlapping these with the poll cycle triggers server-side
+        400-004 duplicate-request errors. CarStatus pushes arrive in
+        bursts, so a skipped refresh is harmless (the next push or poll
+        converges state).
+        """
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if (
+            vehicle is not None
+            and vehicle.last_scanned_at is not None
+            and dt.datetime.now(dt.UTC) - vehicle.last_scanned_at
+            < dt.timedelta(seconds=MQTT_FORCE_REFRESH_THROTTLE_S)
+        ):
+            _LOGGER.debug(
+                "%s - Force refresh skipped (throttled, last scan %ss ago)",
+                DOMAIN,
+                vehicle.last_scanned_at,
+            )
+            return
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
@@ -873,6 +900,100 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
             lambda: self.vehicle_manager.set_windows_state(vehicle_id, options),
             "vent all windows",
         )
+
+    async def async_start_push(self, vehicle_id: str) -> None:
+        """Start push for a vehicle.
+
+        Registered callbacks must be in place before the transport
+        connects, so initial events are not missed. The per-car tri-state
+        gate lives on VehicleManager.start_push; regions whose API
+        implements no push contract skip silently.
+        """
+        if not self._push_enabled:
+            _LOGGER.debug("%s - Push disabled in options, skipping", DOMAIN)
+            return
+        try:
+            self.vehicle_manager.set_push_status_callback(self._push_status_callback)
+            self.vehicle_manager.set_push_connection_change_callback(
+                self._push_connection_callback
+            )
+            started = await self.hass.async_add_executor_job(
+                self.vehicle_manager.start_push, vehicle_id
+            )
+            if started:
+                _LOGGER.debug("%s - Push started for vehicle %s", DOMAIN, vehicle_id)
+            else:
+                _LOGGER.debug(
+                    "%s - Push not started for %s (per-car or region gate)",
+                    DOMAIN,
+                    vehicle_id,
+                )
+        except NotImplementedError:
+            _LOGGER.debug(
+                "%s - Push contract absent on %s, skipping",
+                DOMAIN,
+                type(self.vehicle_manager.api).__name__,
+            )
+            return
+        except Exception as ex:
+            _LOGGER.warning("%s - Push start failed for %s: %s", DOMAIN, vehicle_id, ex)
+
+    async def async_stop_push(self) -> None:
+        """Stop push and detach callbacks."""
+        self.vehicle_manager.set_push_status_callback(None)
+        try:
+            await self.hass.async_add_executor_job(self.vehicle_manager.stop_push)
+        except Exception as ex:
+            _LOGGER.debug("%s - Push stop error (may be harmless): %s", DOMAIN, ex)
+
+    @property
+    def is_push_connected(self) -> bool:
+        """Whether the push transport is connected."""
+        return bool(self.vehicle_manager.is_push_connected)
+
+    @property
+    def is_push_enabled(self) -> bool:
+        """Whether push is enabled in options."""
+        return self._push_enabled
+
+    def _push_status_callback(self, vehicle_id: str, topic_type: str) -> None:
+        """Bridged from the transport thread on CarStatus deliveries.
+
+        Schedules a force refresh (throttled, see async_force_refresh_vehicle)
+        so the status entities update without waiting for the next poll.
+        """
+        _LOGGER.debug(
+            "%s - Push status update for %s, type=%s, scheduling refresh",
+            DOMAIN,
+            vehicle_id,
+            topic_type,
+        )
+        self.hass.loop.call_soon_threadsafe(self._schedule_push_refresh, vehicle_id)
+
+    def _schedule_push_refresh(self, vehicle_id: str) -> None:
+        """Schedule a force refresh for a vehicle on the HA event loop."""
+        if vehicle_id not in self.vehicle_manager.vehicles:
+            _LOGGER.debug(
+                "%s - Push refresh skipped — unknown vehicle %s", DOMAIN, vehicle_id
+            )
+            return
+        self.hass.async_create_task(self.async_force_refresh_vehicle(vehicle_id))
+
+    def _push_connection_callback(self, connected: bool) -> None:
+        """Bridged from the transport thread on connection state changes.
+
+        Schedules a coordinator refresh so the connectivity sensor updates.
+        """
+        _LOGGER.debug(
+            "%s - Push connection state changed: connected=%s", DOMAIN, connected
+        )
+        self.hass.loop.call_soon_threadsafe(
+            self._schedule_connection_refresh,
+        )
+
+    def _schedule_connection_refresh(self) -> None:
+        """Schedule a coordinator refresh on the HA event loop."""
+        self.hass.async_create_task(self.async_request_refresh())
 
     async def _async_save_token(self) -> None:
         """Persist the latest token into the config entry."""
