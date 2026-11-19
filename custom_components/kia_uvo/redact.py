@@ -39,6 +39,12 @@ _SENSITIVE_EXACT = frozenset(
         "pin",
         "lat",
         "lon",
+        "clientid",
+        "mqttclientid",
+        "mqttvehicleid",
+        "huclientid",
+        "registrationuuid",
+        "mqttregistrationuuid",
     }
 )
 

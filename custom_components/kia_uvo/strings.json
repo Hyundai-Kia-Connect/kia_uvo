@@ -69,6 +69,8 @@
       "invalid_auth": "[%key:component::hyundai_kia_connect::config::error::invalid_auth%]",
       "invalid_credentials": "[%key:component::hyundai_kia_connect::config::error::invalid_credentials%]",
       "unknown": "[%key:component::hyundai_kia_connect::config::error::unknown%]",
+      "unsupported_japan_brand": "Japan currently supports Hyundai Bluelink accounts only.",
+      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands.",
       "password_truncated_hint": "Authentication failed. If your password is longer than 20 characters, the account may only accept the first 20 of them (observed on European Hyundai/Kia/Genesis accounts when the password was set on a mobile phone). Try the first 20 characters of your password."
     }
   },

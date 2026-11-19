@@ -46,19 +46,23 @@ def _token_meta(token: Any) -> dict[str, Any]:
     """
     if token is None:
         return {}
-    return {
-        "valid_until": token.valid_until.isoformat() if token.valid_until else None,
-        "ccs_valid_until": (
-            token.ccs_token_valid_until.isoformat()
-            if getattr(token, "ccs_token_valid_until", None)
-            else None
-        ),
-        "control_expiry": getattr(token, "control_token_expiry", 0),
-        "mqtt_client_id": getattr(token, "mqtt_client_id", None),
-        "mqtt_broker_host": getattr(token, "mqtt_broker_host", None),
-        "mqtt_broker_port": getattr(token, "mqtt_broker_port", None),
-        "device_present": bool(getattr(token, "device_id", None)),
-    }
+    metadata: dict[str, Any] = redact(
+        {
+            "valid_until": token.valid_until.isoformat() if token.valid_until else None,
+            "ccs_valid_until": (
+                token.ccs_token_valid_until.isoformat()
+                if getattr(token, "ccs_token_valid_until", None)
+                else None
+            ),
+            "control_expiry": getattr(token, "control_token_expiry", 0),
+            "mqtt_client_id": getattr(token, "mqtt_client_id", None),
+            "mqtt_client_present": bool(getattr(token, "mqtt_client_id", None)),
+            "mqtt_broker_host": getattr(token, "mqtt_broker_host", None),
+            "mqtt_broker_port": getattr(token, "mqtt_broker_port", None),
+            "device_present": bool(getattr(token, "device_id", None)),
+        }
+    )
+    return metadata
 
 
 def _config_options(entry: ConfigEntry) -> dict[str, Any]:
