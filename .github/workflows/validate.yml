@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
+        uses: home-assistant/actions/hassfest@07f46fd2e19967768b5fd3000f91f857452b767c # master
 
   validate-hacs:
     runs-on: ubuntu-latest
