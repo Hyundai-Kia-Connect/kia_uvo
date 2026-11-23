@@ -52,3 +52,13 @@ def test_unknown_car_unit_before_attach_is_celsius() -> None:
 )
 def test_step_follows_unit(car_unit, ha_unit, step) -> None:
     assert _entity(car_unit, ha_unit).target_temperature_step == step
+
+
+@pytest.mark.parametrize(
+    "car_unit",
+    [None, UnitOfTemperature.CELSIUS, UnitOfTemperature.FAHRENHEIT],
+)
+def test_entity_description_has_no_unit_of_measurement(car_unit) -> None:
+    """A climate entity has no unit_of_measurement; it would render as "off °C"."""
+    entity = _entity(car_unit, UnitOfTemperature.CELSIUS)
+    assert entity.entity_description.unit_of_measurement is None
