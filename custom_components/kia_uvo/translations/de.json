@@ -436,7 +436,7 @@
         "name": "State of Health EV-Batterie"
       },
       "ev_battery_temperature_max": {
-        "name": "Max Temperatur EV-Batteie"
+        "name": "Max Temperatur EV-Batterie"
       },
       "ev_battery_temperature_min": {
         "name": "Min Temperatur EV-Batterie"
@@ -924,19 +924,19 @@
         "name": "Klima"
       },
       "ev_first_departure_climate_defrost": {
-        "name": "Abfart 1 Enteisung"
+        "name": "Abfahrt 1 Enteisung"
       },
       "ev_first_departure_climate_enabled": {
-        "name": "Abfart 1 Klimatisierung"
+        "name": "Abfahrt 1 Klimatisierung"
       },
       "ev_first_departure_enabled": {
         "name": "Geplante Abfahrt 1 aktiviert"
       },
       "ev_second_departure_climate_defrost": {
-        "name": "Abfart 2 Enteisung"
+        "name": "Abfahrt 2 Enteisung"
       },
       "ev_second_departure_climate_enabled": {
-        "name": "Abfart 2 Klimatisierung"
+        "name": "Abfahrt 2 Klimatisierung"
       },
       "ev_second_departure_enabled": {
         "name": "Geplante Abfahrt 2 aktiviert"
