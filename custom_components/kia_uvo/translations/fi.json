@@ -994,6 +994,11 @@
       "ev_off_peak_end_time": {
         "name": "Edullisen latauksen loppuaika"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Ilmastoinnin kesto"
+      }
     }
   }
 }

@@ -994,6 +994,11 @@
       "ev_off_peak_end_time": {
         "name": "Fin de la charge en heures creuses"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Durée de la climatisation"
+      }
     }
   }
 }

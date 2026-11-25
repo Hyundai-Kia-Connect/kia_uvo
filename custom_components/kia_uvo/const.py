@@ -61,3 +61,16 @@ class OffPeakChargingMode(StrEnum):
     OFF = "off"
     TIME = "time"
     TARGET = "target"
+
+
+CLIMATE_DURATION_AUTO: str = "auto"
+CLIMATE_DURATION_OPTIONS: tuple[str, ...] = (
+    CLIMATE_DURATION_AUTO,
+    "2",
+    "5",
+    "10",
+    "15",
+    "20",
+    "25",
+    "30",
+)

@@ -678,6 +678,11 @@
       "ev_off_peak_end_time": {
         "name": "Off-peak charge end time"
       }
+    },
+    "select": {
+      "climate_duration": {
+        "name": "Climate duration"
+      }
     }
   }
 }
