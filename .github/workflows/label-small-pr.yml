@@ -1,0 +1,51 @@
+name: Label small PRs
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        with:
+          script: |
+            // Matches the "under 100 changed lines, tests excluded" rule in AGENTS.md.
+            // Translations are excluded because one new string key touches every file there.
+            const MAX_CHANGED_LINES = 100;
+            const LABEL = "small";
+            const EXCLUDED = [/^tests\//, /^custom_components\/kia_uvo\/translations\//];
+
+            const pr = context.payload.pull_request;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              ...context.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            const changed = files
+              .filter((f) => !EXCLUDED.some((re) => re.test(f.filename)))
+              .reduce((sum, f) => sum + f.additions + f.deletions, 0);
+            const isSmall = changed < MAX_CHANGED_LINES;
+            const hasLabel = pr.labels.some((l) => l.name === LABEL);
+            core.info(`${changed} changed lines outside tests and translations; small=${isSmall}`);
+
+            if (isSmall && !hasLabel) {
+              await github.rest.issues.addLabels({
+                ...context.repo,
+                issue_number: pr.number,
+                labels: [LABEL],
+              });
+            } else if (!isSmall && hasLabel) {
+              await github.rest.issues.removeLabel({
+                ...context.repo,
+                issue_number: pr.number,
+                name: LABEL,
+              });
+            }
