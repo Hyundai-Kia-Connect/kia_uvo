@@ -82,7 +82,11 @@
           "no_force_refresh_hour_start": "取消強制更新 - 起始時間",
           "no_force_refresh_hour_finish": "取消強制更新 - 結束時間",
           "enable_geolocation_entity": "使用 OpenStreetMap 開啟地理定位實體",
-          "use_email_with_geocode_api": "使用您的 Kia 電子郵件地址取得 Geocode API - 更多資訊：https://nominatim.org/release-docs/develop/api/Reverse/#other"
+          "use_email_with_geocode_api": "使用您的 Kia 電子郵件地址取得 Geocode API - 更多資訊：https://nominatim.org/release-docs/develop/api/Reverse/#other",
+          "enable_push": "啟用推送通知"
+        },
+        "data_description": {
+          "enable_push": "以車輛主動回報的狀態更新，而無需等待下一次輪詢。僅歐洲（Beta）地區支援推送。"
         }
       }
     }
@@ -849,6 +853,9 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V 電瓶故障"
+      },
+      "push_connected": {
+        "name": "推送已連線"
       }
     },
     "lock": {
