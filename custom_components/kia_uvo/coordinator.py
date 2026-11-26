@@ -60,7 +60,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_USE_EMAIL_WITH_GEOCODE_API,
     DOMAIN,
-    MQTT_FORCE_REFRESH_THROTTLE_S,
+    PUSH_REFRESH_THROTTLE_S,
     OffPeakChargingMode,
 )
 
@@ -318,28 +318,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         return vehicle_id not in self._failed_vehicles
 
     async def async_force_refresh_vehicle(self, vehicle_id: str) -> None:
-        """Force refresh a single vehicle's state.
-
-        Throttled against the car's own last_scanned_at: the push status
-        callback schedules force refreshes on every live status delivery;
-        overlapping these with the poll cycle triggers server-side
-        400-004 duplicate-request errors. CarStatus pushes arrive in
-        bursts, so a skipped refresh is harmless (the next push or poll
-        converges state).
-        """
-        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
-        if (
-            vehicle is not None
-            and vehicle.last_scanned_at is not None
-            and dt.datetime.now(dt.UTC) - vehicle.last_scanned_at
-            < dt.timedelta(seconds=MQTT_FORCE_REFRESH_THROTTLE_S)
-        ):
-            _LOGGER.debug(
-                "%s - Force refresh skipped (throttled, last scan %ss ago)",
-                DOMAIN,
-                vehicle.last_scanned_at,
-            )
-            return
+        """Force refresh a single vehicle's state."""
         await self.async_check_and_refresh_token()
         await self.hass.async_add_executor_job(
             self.vehicle_manager.force_refresh_vehicle_state, vehicle_id
@@ -959,7 +938,7 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
     def _push_status_callback(self, vehicle_id: str, topic_type: str) -> None:
         """Bridged from the transport thread on CarStatus deliveries.
 
-        Schedules a force refresh (throttled, see async_force_refresh_vehicle)
+        Schedules a force refresh (throttled, see _schedule_push_refresh)
         so the status entities update without waiting for the next poll.
         """
         _LOGGER.debug(
@@ -971,10 +950,26 @@ class HyundaiKiaConnectDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any
         self.hass.loop.call_soon_threadsafe(self._schedule_push_refresh, vehicle_id)
 
     def _schedule_push_refresh(self, vehicle_id: str) -> None:
-        """Schedule a force refresh for a vehicle on the HA event loop."""
-        if vehicle_id not in self.vehicle_manager.vehicles:
+        """Schedule a force refresh for a vehicle on the HA event loop.
+
+        Throttled against the car's own last_scanned_at: bursty CarStatus
+        pushes overlapping the poll cycle trigger server-side 400-004
+        duplicate-request errors. A skipped refresh is harmless: the
+        next push or poll converges state.
+        """
+        vehicle = self.vehicle_manager.vehicles.get(vehicle_id)
+        if vehicle is None:
             _LOGGER.debug(
-                "%s - Push refresh skipped — unknown vehicle %s", DOMAIN, vehicle_id
+                "%s - Push refresh skipped for unknown vehicle %s", DOMAIN, vehicle_id
+            )
+            return
+        if vehicle.last_scanned_at is not None and dt.datetime.now(
+            dt.UTC
+        ) - vehicle.last_scanned_at < dt.timedelta(seconds=PUSH_REFRESH_THROTTLE_S):
+            _LOGGER.debug(
+                "%s - Push refresh skipped (throttled, last scan %ss ago)",
+                DOMAIN,
+                vehicle.last_scanned_at,
             )
             return
         self.hass.async_create_task(self.async_force_refresh_vehicle(vehicle_id))
