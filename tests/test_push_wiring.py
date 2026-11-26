@@ -225,7 +225,7 @@ def _patch_hass(coordinator) -> tuple[MagicMock, list]:
     return call_soon, created
 
 
-class TestStartMqtt:
+class TestStartPush:
     def test_starts_and_registers_callbacks(self):
         hass = MagicMock()
         coordinator = _shim_coordinator(hass)
@@ -285,7 +285,7 @@ class TestConnectionRefresh:
         coro.close()
 
 
-class TestStopMqtt:
+class TestStopPush:
     def test_start_error_is_contained(self):
         """A start failure surfaces as a warning, not an exception."""
         coordinator = _shim_coordinator(MagicMock())
