@@ -82,7 +82,11 @@
           "no_force_refresh_hour_start": "Ei pakotettuja päivityksiä alkaen",
           "no_force_refresh_hour_finish": "Ei pakotettuja päivityksiä päättyen",
           "enable_geolocation_entity": "Maantieteellisen sijainnin määritys OpenStreetMapilla päälle ",
-          "use_email_with_geocode_api": "Kia/Hyundai sähköpostiosoitteen käyttö Geocode-rajapinnassa - lisätietoja: https://nominatim.org/release-docs/develop/api/Reverse/#other"
+          "use_email_with_geocode_api": "Kia/Hyundai sähköpostiosoitteen käyttö Geocode-rajapinnassa - lisätietoja: https://nominatim.org/release-docs/develop/api/Reverse/#other",
+          "enable_push": "Ota push-ilmoitukset käyttöön"
+        },
+        "data_description": {
+          "enable_push": "Vastaanota ajoneuvon tilapäivitykset auton raportoidessa ne odottamatta seuraavaa kyselyä. Vain Eurooppa (Beta) -alue tukee pushia."
         }
       }
     }
@@ -849,6 +853,9 @@
       },
       "battery_auxiliary_fail_warning_is_on": {
         "name": "12V-akun vika"
+      },
+      "push_connected": {
+        "name": "Push-yhteys"
       }
     },
     "lock": {

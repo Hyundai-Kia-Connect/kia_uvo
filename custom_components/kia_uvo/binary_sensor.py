@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from hyundai_kia_connect_api import Vehicle
 from hyundai_kia_connect_api.const import ENGINE_TYPES, SEAT_STATUS
 
-from .const import DOMAIN
+from .const import DOMAIN, REGION_EUROPE_CCI, REGIONS
 from .coordinator import HyundaiKiaConnectDataUpdateCoordinator
 from .entity import HyundaiKiaConnectEntity
 
@@ -609,6 +609,17 @@ SENSOR_DESCRIPTIONS: Final[tuple[HyundaiKiaBinarySensorEntityDescription, ...]] 
         device_class=BinarySensorDeviceClass.PROBLEM,
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
+    HyundaiKiaBinarySensorEntityDescription(
+        key="push_connected",
+        translation_key="push_connected",
+        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        on_icon="mdi:cloud-check",
+        off_icon="mdi:cloud-off-outline",
+        # False skips outright, None attempts (the lib start_push gate); it
+        # is None at setup (see the gate in async_setup_entry below).
+        exists=lambda vehicle: vehicle.supports.mqtt_push is not False,
+    ),
 )
 
 
@@ -619,10 +630,17 @@ async def async_setup_entry(
 ) -> None:
     """Set up binary_sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.unique_id]
-    entities: list[HyundaiKiaConnectBinarySensor] = []
+    entities: list[BinarySensorEntity] = []
     for vehicle_id in coordinator.vehicle_manager.vehicles:
         vehicle: Vehicle = coordinator.vehicle_manager.vehicles[vehicle_id]
         for description in SENSOR_DESCRIPTIONS:
+            if description.key == "push_connected" and (
+                not coordinator.is_push_enabled
+                or REGIONS.get(coordinator.vehicle_manager.region) != REGION_EUROPE_CCI
+            ):
+                # Option + region gate here, since coordinator state cannot
+                # gate in `exists`: same pattern as `_geocode_name` in sensor.py.
+                continue
             create = (
                 description.exists(vehicle)
                 if description.exists is not None
@@ -659,6 +677,10 @@ class HyundaiKiaConnectBinarySensor(BinarySensorEntity, HyundaiKiaConnectEntity)
         """Return true if the binary sensor is on."""
         if self.entity_description.is_on is not None:
             return self.entity_description.is_on(self.vehicle)
+        if self.entity_description.key == "push_connected":
+            # is_on reads the shared transport through the coordinator,
+            # not the vehicle.
+            return self.coordinator.is_push_connected
         return None
 
     @property

@@ -82,7 +82,11 @@
           "no_force_refresh_hour_start": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_start%]",
           "no_force_refresh_hour_finish": "[%key:component::hyundai_kia_connect::options::step::init::data::no_force_refresh_hour_finish%]",
           "enable_geolocation_entity": "[%key:component::hyundai_kia_connect::options::step::init::data::enable_geolocation_entity%]",
-          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]"
+          "use_email_with_geocode_api": "[%key:component::hyundai_kia_connect::options::step::init::data::use_email_with_geocode_api%]",
+          "enable_push": "Enable push notifications"
+        },
+        "data_description": {
+          "enable_push": "Receive vehicle status updates as the car reports them, instead of waiting for the next poll. Only the Europe (Beta) region supports push."
         }
       }
     }
@@ -350,6 +354,9 @@
       },
       "engine_is_running": {
         "name": "Engine"
+      },
+      "push_connected": {
+        "name": "Push connected"
       },
       "ev_battery_heating_state": {
         "name": "EV battery heating"

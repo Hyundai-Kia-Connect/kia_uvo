@@ -61,3 +61,9 @@ class OffPeakChargingMode(StrEnum):
     OFF = "off"
     TIME = "time"
     TARGET = "target"
+
+
+PUSH_REFRESH_THROTTLE_S: int = 60
+
+CONF_ENABLE_PUSH: str = "enable_push"
+DEFAULT_ENABLE_PUSH: bool = True
