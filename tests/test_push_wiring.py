@@ -23,16 +23,18 @@ DOMAIN = "kia_uvo"
 # ---------------------------------------------------------------------------
 
 
-class TestMqttConnectedSensorGate:
-    # The transport is manager-level; the gate is the region implementing the
-    # push contract (region id from the lib), not the per-car tri-state.
-    def _setup(self, mqtt_enabled: bool, cci_region: bool) -> list[Any]:
+class TestPushConnectedSensorGate:
+    # Option and region gate in the setup loop (coordinator state, like
+    # `_geocode_name`); the per-car tri-state gates via the `exists` callback.
+    def _setup(
+        self, mqtt_enabled: bool, cci_region: bool, mqtt_push: bool | None = None
+    ) -> list[Any]:
         coordinator = MagicMock()
         coordinator.is_push_enabled = mqtt_enabled
         coordinator.vehicle_manager.region = 9 if cci_region else 1
-        # connectivity sensor attaches to the first vehicle for device grouping
         first_vehicle = MagicMock()
         first_vehicle.id = "v1"
+        first_vehicle.supports.mqtt_push = mqtt_push
         coordinator.vehicle_manager.vehicles = {"v1": first_vehicle}
         hass = MagicMock()
         hass.data = {DOMAIN: {"uid": coordinator}}
@@ -50,24 +52,49 @@ class TestMqttConnectedSensorGate:
         asyncio.run(run())
         return created
 
-    def test_created_when_enabled_and_supported(self):
-        created = self._setup(True, True)
-        sensors = [e for e in created if e.entity_description.key == "push_connected"]
+    def _push_sensors(self, created: list[Any]) -> list[Any]:
+        return [e for e in created if e.entity_description.key == "push_connected"]
+
+    def test_created_when_enabled_region_cci_and_capability_unknown(self):
+        # None attempts (the lib start_push gate), so the sensor is created.
+        sensors = self._push_sensors(self._setup(True, True, None))
         assert len(sensors) == 1
         assert sensors[0].entity_description.translation_key == "push_connected"
         assert sensors[0]._attr_unique_id == f"{DOMAIN}_v1_push_connected"
 
-    def test_not_created_when_push_unsupported(self):
-        assert not any(
-            e.entity_description.key == "push_connected"
-            for e in self._setup(True, False)
-        )
+    def test_created_when_capability_true(self):
+        assert len(self._push_sensors(self._setup(True, True, True))) == 1
+
+    def test_not_created_when_capability_false(self):
+        assert self._push_sensors(self._setup(True, True, False)) == []
 
     def test_not_created_when_disabled(self):
-        assert not any(
-            e.entity_description.key == "push_connected"
-            for e in self._setup(False, True)
-        )
+        assert self._push_sensors(self._setup(False, True, True)) == []
+
+    def test_not_created_when_region_not_cci(self):
+        assert self._push_sensors(self._setup(True, False, True)) == []
+
+    def test_is_on_reads_the_transport_through_the_coordinator(self):
+        coordinator = MagicMock()
+        coordinator.is_push_connected = True
+        coordinator.vehicle_manager.region = 9
+        coordinator.is_push_enabled = True
+        vehicle = MagicMock()
+        vehicle.supports.mqtt_push = True
+        coordinator.vehicle_manager.vehicles = {"v1": vehicle}
+        hass = MagicMock()
+        hass.data = {DOMAIN: {"uid": coordinator}}
+        created: list[Any] = []
+
+        async def run() -> None:
+            await binary_sensor_platform.async_setup_entry(
+                hass, MagicMock(unique_id="uid"), created.extend
+            )
+
+        asyncio.run(run())
+        sensor = self._push_sensors(created)[0]
+        sensor.coordinator = coordinator
+        assert sensor.is_on is True
 
 
 # Lifecycle: wiring methods on a shim instance, because the CI stack has
@@ -108,7 +135,7 @@ def _fake_transport(monkeypatch):
 
 
 class FakePushApi:
-    """Push-capable API double (contract shape of the reworked lib)."""
+    """Push-capable API double (the lib's push contract shape)."""
 
     def __init__(self):
         self.broker = {"mqtt_host": "broker.example", "mqtt_port": 8883}
@@ -144,7 +171,7 @@ class FakePushApi:
     def parse_push_message(self, topic, payload):  # pragma: no cover
         return None
 
-    def test_token(self, _token):  # ApiImpl base default — token assumed valid
+    def test_token(self, _token):  # ApiImpl base default: token assumed valid
         return True
 
     def force_refresh_vehicle_state(self, _token, vehicle):
@@ -155,7 +182,7 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     """Coordinator wiring methods without the HA super().__init__.
 
     Only the attributes the wiring touches are set: hass, vehicle_manager,
-    _push_enabled, _last_force_refresh.
+    _push_enabled.
     """
     from hyundai_kia_connect_api import VehicleManager
 
@@ -170,7 +197,6 @@ def _shim_coordinator(hass: MagicMock) -> HyundaiKiaConnectDataUpdateCoordinator
     vehicle = Vehicle(id="v1")
     coordinator.vehicle_manager.vehicles = {"v1": vehicle}
     coordinator._push_enabled = True
-    coordinator._last_force_refresh = 0.0
     coordinator.config_entry = MagicMock()
     coordinator.data: dict = {}
     # DataUpdateCoordinator machinery is out of scope for the shim; the
@@ -319,35 +345,45 @@ class TestCallbacks:
 
 
 class TestForceRefreshThrottle:
-    """Throttle counts from the car's last_scanned_at."""
+    """The throttle guards the push path, not the manual refresh."""
 
     def _coordinator_with_vehicle(self, last_scanned_at):
         hass = MagicMock()
         coordinator = _shim_coordinator(hass)
-        _, _ = _patch_hass(coordinator)
-        coordinator.vehicle_manager.token = Token("u", "p", valid_until=dt.datetime.max)
+        _, created = _patch_hass(coordinator)
         coordinator.vehicle_manager.vehicles["v1"].last_scanned_at = last_scanned_at
-        return coordinator
+        return coordinator, created
 
-    def test_refresh_runs_from_no_scan_and_sets_last_scanned(self):
-        coordinator = self._coordinator_with_vehicle(None)
-        vm = coordinator.vehicle_manager
-        asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        assert vm.api.calls.count("force_refresh") == 1
+    def test_push_refresh_runs_from_no_scan(self):
+        coordinator, created = self._coordinator_with_vehicle(None)
+        coordinator._schedule_push_refresh("v1")
+        assert [c.cr_code.co_name for c in created] == ["async_force_refresh_vehicle"]
 
-    def test_refresh_throttled_within_60s_of_last_scan(self):
+    def test_push_refresh_throttled_within_60s_of_last_scan(self):
         recent = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=30)
-        coordinator = self._coordinator_with_vehicle(recent)
-        vm = coordinator.vehicle_manager
-        asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        assert vm.api.calls.count("force_refresh") == 0
+        coordinator, created = self._coordinator_with_vehicle(recent)
+        coordinator._schedule_push_refresh("v1")
+        assert created == []
 
-    def test_refresh_runs_again_after_the_window(self):
+    def test_push_refresh_runs_again_after_the_window(self):
         stale = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=61)
-        coordinator = self._coordinator_with_vehicle(stale)
-        vm = coordinator.vehicle_manager
+        coordinator, created = self._coordinator_with_vehicle(stale)
+        coordinator._schedule_push_refresh("v1")
+        assert len(created) == 1
+        created[0].close()
+
+    def test_manual_refresh_is_not_throttled(self):
+        # A recent last_scanned_at does not skip the executor call.
+        recent = dt.datetime.now(dt.UTC) - dt.timedelta(seconds=30)
+        coordinator, created = self._coordinator_with_vehicle(recent)
         asyncio.run(coordinator.async_force_refresh_vehicle("v1"))
-        assert vm.api.calls.count("force_refresh") == 1
+        assert created == []  # manual refresh runs inline, not as a task
+        assert coordinator.vehicle_manager.api.calls.count("force_refresh") == 1
+
+    def test_push_refresh_skips_unknown_vehicle(self):
+        coordinator, created = self._coordinator_with_vehicle(None)
+        coordinator._schedule_push_refresh("ghost")
+        assert created == []
 
 
 @pytest.mark.parametrize("topic_type", ["Status", "Location"])
