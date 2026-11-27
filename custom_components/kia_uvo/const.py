@@ -21,6 +21,7 @@ REGION_AUSTRALIA: str = "Australia"
 REGION_INDIA: str = "India"
 REGION_NZ: str = "New Zealand"
 REGION_BRAZIL: str = "Brazil"
+REGION_JAPAN: str = "Japan"
 REGIONS = {
     1: REGION_EUROPE,
     2: REGION_CANADA,
@@ -31,6 +32,7 @@ REGIONS = {
     7: REGION_NZ,
     8: REGION_BRAZIL,
     9: REGION_EUROPE_CCI,
+    10: REGION_JAPAN,
 }
 BRAND_KIA: str = "Kia"
 BRAND_HYUNDAI: str = "Hyundai"

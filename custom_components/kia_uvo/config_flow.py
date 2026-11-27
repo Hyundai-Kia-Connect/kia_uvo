@@ -25,6 +25,7 @@ from hyundai_kia_connect_api.exceptions import AuthenticationError
 import voluptuous as vol
 
 from .const import (
+    BRAND_HYUNDAI,
     BRANDS,
     CONF_BRAND,
     CONF_ENABLE_GEOLOCATION_ENTITY,
@@ -43,6 +44,7 @@ from .const import (
     DOMAIN,
     REGION_EUROPE,
     REGION_EUROPE_CCI,
+    REGION_JAPAN,
     REGIONS,
 )
 
@@ -115,6 +117,14 @@ STEP_CREDENTIALS_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_USERNAME): str,
         vol.Required(CONF_PASSWORD): str,
         vol.Optional(CONF_PIN, default=DEFAULT_PIN): str,
+    }
+)
+
+STEP_JAPAN_CREDENTIALS_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_USERNAME): str,
+        vol.Required(CONF_PASSWORD): str,
+        vol.Required(CONF_PIN): vol.All(str, vol.Length(min=1)),
     }
 )
 
@@ -218,6 +228,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._region_data = user_input
         self._region_data[CONF_REGION] = int(self._region_data[CONF_REGION])
         self._region_data[CONF_BRAND] = int(self._region_data[CONF_BRAND])
+        if (
+            REGIONS[self._region_data[CONF_REGION]] == REGION_JAPAN
+            and BRANDS[self._region_data[CONF_BRAND]] != BRAND_HYUNDAI
+        ):
+            return self.async_show_form(
+                step_id="user",
+                data_schema=STEP_REGION_DATA_SCHEMA,
+                errors={CONF_BRAND: "unsupported_japan_brand"},
+            )
         # Unused but keeping the code since I suspect token based will be back!
         # if REGIONS[self._region_data[CONF_REGION]] == REGION_EUROPE and (
         #    BRANDS[self._region_data[CONF_BRAND]] == BRAND_KIA
@@ -226,6 +245,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         #    return await self.async_step_credentials_token()
         return await self.async_step_credentials_password()
 
+    def _credentials_schema(self) -> vol.Schema:
+        if (
+            self._region_data
+            and REGIONS[self._region_data[CONF_REGION]] == REGION_JAPAN
+        ):
+            return STEP_JAPAN_CREDENTIALS_DATA_SCHEMA
+        return STEP_CREDENTIALS_DATA_SCHEMA
+
+    def _missing_japan_pin(self, user_input: dict[str, Any]) -> bool:
+        return self._credentials_schema() is STEP_JAPAN_CREDENTIALS_DATA_SCHEMA and (
+            not isinstance(user_input.get(CONF_PIN), str)
+            or not user_input[CONF_PIN].strip()
+        )
+
     async def async_step_credentials_password(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
@@ -233,6 +266,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
+            if self._missing_japan_pin(user_input):
+                return self.async_show_form(
+                    step_id="credentials_password",
+                    data_schema=self._credentials_schema(),
+                    errors={CONF_PIN: "invalid_japan_pin"},
+                )
             assert self._region_data is not None
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
@@ -286,7 +325,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="credentials_password",
-            data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
+            data_schema=self._credentials_schema(),
             errors=errors,
         )
 
@@ -370,6 +409,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
+            if self._missing_japan_pin(user_input):
+                return self.async_show_form(
+                    step_id="credentials_token",
+                    data_schema=self._credentials_schema(),
+                    errors={CONF_PIN: "invalid_japan_pin"},
+                )
             assert self._region_data is not None
             # Combine region data with credentials
             full_config = {**self._region_data, **user_input}
@@ -412,7 +457,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="credentials_token",
-            data_schema=STEP_CREDENTIALS_DATA_SCHEMA,
+            data_schema=self._credentials_schema(),
             errors=errors,
         )
 

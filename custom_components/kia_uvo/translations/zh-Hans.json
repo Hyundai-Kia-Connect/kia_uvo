@@ -66,6 +66,8 @@
       "reconfigure_successful": "重新配置成功"
     },
     "error": {
+      "unsupported_japan_brand": "Japan currently supports Hyundai Bluelink accounts only.",
+      "invalid_japan_pin": "Enter your Bluelink PIN. Japan requires an explicit PIN for vehicle commands.",
       "invalid_auth": "连接服务器失败。请使用官方应用程序注销并重新登录，然后重试！",
       "invalid_credentials": "用户名或密码无效",
       "unknown": "未知错误",
